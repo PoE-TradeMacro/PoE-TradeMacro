@@ -3,6 +3,7 @@ The following is a list of what has been updated, starting with 1.1.0
 1.1.5.1
 ==================================================================================================
 
+
 1.1.5
 ==================================================================================================
 Added first version of advanced search for normal/magic/rare items.

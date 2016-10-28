@@ -1697,43 +1697,15 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	mods := []
 
 	If (Implicit and not Enchantment and not Corruption) {
-		temp := {}
-		StringReplace, Implicit, Implicit, `r,, All
-		StringReplace, Implicit, Implicit, `n,, All
-		temp.name_orig := Implicit
-		temp.values 	:= []
-		Pos := 0
-		While Pos := RegExMatch(Implicit, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
-			temp.values.push(value)
-		}
-
-		s			:= RegExReplace(Implicit, "i)([.0-9]+)", "#")
-		temp.name 	:= RegExReplace(s, "i)# ?to ? #", "#", isRange)		
-		temp.isVariable:= false
-		temp.type		:= "implicit"
-
+		temp := TradeFunc_NonUniqueModStringToObject(Implicit, true)		
 		mods.push(temp)
-	}
-	
+	}	
 
 	For key, val in Affixes {
 		If (!val or RegExMatch(val, "i)---") or (Enchantment or Corruption and Rarity = 1)) {
 			continue
 		}
-		temp := {}
-		StringReplace, val, val, `r,, All
-		StringReplace, val, val, `n,, All
-		temp.name_orig := val
-		temp.values 	:= []
-		Pos := 0
-		While Pos := RegExMatch(val, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
-			temp.values.push(value)
-		}
-		
-		s			:= RegExReplace(val, "i)([.0-9]+)", "#")
-		temp.name 	:= RegExReplace(s, "i)# ?to ? #", "#", isRange)	
-		temp.isVariable:= false
-		temp.type		:= "explicit"
+		temp := TradeFunc_NonUniqueModStringToObject(val, false)
 		
 		;combine implicit with explicit If they are the same mods, overwriting the implicit
 		If (mods[1].type == "implicit" and mods[1].name = temp.name) {
@@ -1745,14 +1717,14 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 			
 			tempStr  := RegExReplace(mods[1].name_orig, "i)([.0-9]+)", "#")
 			
-			Pos := 1
-			tempArr := []
+			Pos		:= 1
+			tempArr	:= []
 			While Pos := RegExMatch(temp.name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
 				tempArr.push(value)
 			}		
 			
-			Pos := 1
-			Index := 1
+			Pos		:= 1
+			Index	:= 1
 			While Pos := RegExMatch(mods[1].name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
 				tempStr := StrReplace(tempStr, "#", value + tempArr[Index],, 1)
 				Index++			
@@ -1764,16 +1736,40 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 			mods.push(temp)	
 		}
 	}
-
 	
-	tempItem := {}
-	tempItem.mods := []
-	tempItem.mods := mods
-	temp := TradeFunc_GetItemsPoeTradeMods(tempItem)
-	tempItem.mods := temp.mods
+	mods := TradeFunc_CreatePseudoMods(mods)
+	
+	tempItem		:= {}
+	tempItem.mods	:= []
+	tempItem.mods	:= mods
+	temp			:= TradeFunc_GetItemsPoeTradeMods(tempItem)
+	tempItem.mods	:= temp.mods
 	tempItem.IsUnique := false
 	
 	Return tempItem
+}
+
+TradeFunc_NonUniqueModStringToObject(string, isImplicit) {
+	temp := {}
+	StringReplace, val, string, `r,, All
+	StringReplace, val, val, `n,, All
+	temp.name_orig := val
+	temp.values 	:= []
+	Pos		:= 0
+	While Pos := RegExMatch(val, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+		temp.values.push(value)
+	}
+	
+	s			:= RegExReplace(val, "i)([.0-9]+)", "#")
+	temp.name 	:= RegExReplace(s, "i)# ?to ? #", "#", isRange)	
+	temp.isVariable:= false
+	temp.type		:= isImplicit ? "implicit" : "explicit"
+	
+	Return temp
+}
+
+TradeFunc_CreatePseudoMods(mods) {
+	
 }
 
 ; Add poetrades mod names to the items mods to use as POST parameter
