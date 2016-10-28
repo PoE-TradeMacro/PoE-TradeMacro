@@ -633,15 +633,22 @@ TradeFunc_GetLatestRelease() {
 		RegExReplace(tag, "^v", tag)
         ; works only in x.x.x format
 		RegExMatch(tag, "(\d+).(\d+).(\d+)(.*)", latestVersion)
-		RegExMatch(TradeGlobals.Get("ReleaseVersion"), "(\d+).(\d+).(\d+)(.*)", currentVersion)    
+		RegExMatch(TradeGlobals.Get("ReleaseVersion"), "(\d+).(\d+).(\d+)(.*)", currentVersion)
+		RegExMatch(html,  "i)""body"":""(.*?)""", description)
+		StringReplace, description, description1, \r\n, ~, All 
 		
 		If (latestVersion > currentVersion) {
 			Gui, UpdateNotification:Add, Text, cGreen, Update available!
 			Gui, UpdateNotification:Add, Text, , Your installed version is <%currentVersion%>.`nThe lastest version is <%latestVersion%>.
 			Gui, UpdateNotification:Add, Link, cBlue, <a href="%url%">Download it here</a>        
+			
+			Loop, Parse, description, ~
+				Gui, UpdateNotification:Add, Text, w320, % "- " A_LoopField
+			
 			Gui, UpdateNotification:Add, Button, gCloseUpdateWindow, Close
 			yPos := A_ScreenHeight / 2 + 40
 			Gui, UpdateNotification:Show, w350 Y%yPos%, Update 
+			ControlFocus, Close, Update
 			WinWaitClose, Update
 		}
 	} Catch e {
