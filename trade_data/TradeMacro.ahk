@@ -53,6 +53,10 @@ OpenWiki:
 		Send ^c
 		Sleep 250
 		TradeFunc_DoParseClipboard()
+		If (!Item.Name and TradeOpts.OpenUrlsOnEmptyItem) {
+			TradeFunc_OpenUrlInBrowser("http://pathofexile.gamepedia.com/")
+			return
+		}
 		
 		If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
 			UrlAffix := Item.Name
@@ -114,12 +118,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 {	
 	LeagueName := TradeGlobals.Get("LeagueName")
 	Global Item, ItemData, TradeOpts, mapList, uniqueMapList, Opts
-	
+
 	TradeFunc_DoParseClipboard()
 	iLvl     := Item.Level
 	
 	; cancel search If Item is empty
 	If (!Item.name) {
+		If (TradeOpts.OpenUrlsOnEmptyItem) {
+			TradeFunc_OpenUrlInBrowser("https://poe.trade")
+		}
 		return
 	}
 	
@@ -1697,43 +1704,48 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	mods := []
 
 	If (Implicit and not Enchantment and not Corruption) {
-		temp := TradeFunc_NonUniqueModStringToObject(Implicit, true)		
-		mods.push(temp)
+		temp := TradeFunc_NonUniqueModStringToObject(Implicit, true)
+		For key, val in temp {
+			mods.push(val)	
+		}		
 	}	
 
 	For key, val in Affixes {
-		If (!val or RegExMatch(val, "i)---") or (Enchantment or Corruption and Rarity = 1)) {
+		If (!val or RegExMatch(val, "i)---") or (Enchantment or Corruption) or (Implicit and Rarity = 1)) {
 			continue
 		}
+
 		temp := TradeFunc_NonUniqueModStringToObject(val, false)
-		
-		;combine implicit with explicit If they are the same mods, overwriting the implicit
-		If (mods[1].type == "implicit" and mods[1].name = temp.name) {
-			mods[1].type := "explicit"
-			
-			Loop % mods[1].values.MaxIndex() {				
-				mods[1].values[A_Index] := mods[1].values[A_Index] + temp.values[A_Index]
-			}		
-			
-			tempStr  := RegExReplace(mods[1].name_orig, "i)([.0-9]+)", "#")
-			
-			Pos		:= 1
-			tempArr	:= []
-			While Pos := RegExMatch(temp.name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
-				tempArr.push(value)
-			}		
-			
-			Pos		:= 1
-			Index	:= 1
-			While Pos := RegExMatch(mods[1].name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
-				tempStr := StrReplace(tempStr, "#", value + tempArr[Index],, 1)
-				Index++			
+		;combine mods if they have the same name and add their values
+		For tempkey, tempmod in temp {			
+			found := false
+			For key, mod in mods {	
+				If (tempmod.name = mod.name) {	
+					Loop % mod.values.MaxIndex() {
+						mod.values[A_Index] := mod.values[A_Index] + tempmod.values[A_Index]
+					}
+					
+					tempStr  := RegExReplace(mod.name_orig, "i)([.0-9]+)", "#")
+					
+					Pos		:= 1
+					tempArr	:= []
+					While Pos := RegExMatch(tempmod.name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
+						tempArr.push(value)
+					}
+					
+					Pos		:= 1
+					Index	:= 1
+					While Pos := RegExMatch(mod.name_orig, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 0)) {		
+						tempStr := StrReplace(tempStr, "#", value + tempArr[Index],, 1)
+						Index++			
+					}
+					mod.name_orig := tempStr	
+					found := true
+				}				
+			} 
+			If (tempmod.name and !found) {
+				mods.push(tempmod)	
 			}
-			mods[1].name_orig := tempStr
-			
-		}
-		Else If (temp.name) {
-			mods.push(temp)	
 		}
 	}
 	
@@ -1750,26 +1762,77 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 }
 
 TradeFunc_NonUniqueModStringToObject(string, isImplicit) {
-	temp := {}
 	StringReplace, val, string, `r,, All
 	StringReplace, val, val, `n,, All
-	temp.name_orig := val
-	temp.values 	:= []
+	values 	:= []
+	
+	; Collect all numeric values in the mod-string
 	Pos		:= 0
 	While Pos := RegExMatch(val, "i)([.0-9]+)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
-		temp.values.push(value)
+		values.push(value)
+	}
+
+	; Collect all resists/attributes that are combined in one mod
+	Matches	:= []
+	Pos		:= 0
+	While Pos := RegExMatch(val, "i) ?(Dexterity) ?| ?(Intelligence) ?| ?(Strength) ?", match, Pos + (StrLen(match) ? StrLen(match) : 1)) {
+		Matches.push(Trim(match))
 	}
 	
-	s			:= RegExReplace(val, "i)([.0-9]+)", "#")
-	temp.name 	:= RegExReplace(s, "i)# ?to ? #", "#", isRange)	
-	temp.isVariable:= false
-	temp.type		:= isImplicit ? "implicit" : "explicit"
+	; Matching "x% fire and cold resistance" etc is easier this way.
+	If (RegExMatch(val, "i)Resistance")) {
+		If (RegExMatch(val, "i)fire")) {
+			Matches.push("Fire")
+		}
+		If (RegExMatch(val, "i)cold")) {
+			Matches.push("Cold")
+		}
+		If (RegExMatch(val, "i)lightning")) {
+			Matches.push("Lightning")
+		}
+	}
 	
-	Return temp
+	; Create single mod from every collected resist/attribute
+	Loop % Matches.Length() {
+		RegExMatch(val, "i)(Resistance)", match)
+		Matches[A_Index] := match1 ? "+#% to " . Matches[A_Index] . " " . match1 : "+# to " . Matches[A_Index]		
+	}
+	
+	; Handle "all attributes"/"all resist"
+	If (RegExMatch(val, "i)all attributes|all elemental (Resistances)", match)) {
+		resist := match1 ? true : false
+		Matches[1] := resist ? "+#% to Fire Resistance"      : "+# to Strength"
+		Matches[2] := resist ? "+#% to Lightning Resistance" : "+# to Intelligence"
+		Matches[3] := resist ? "+#% to Cold Resistance"      : "+# to Dexterity"		
+	}
+	; Use original mod-string if no combination is found
+	Matches[1] := Matches.Length() > 0 ? Matches[1] : val
+
+	; 
+	arr := []
+	Loop % (Matches.Length() ? Matches.Length() : 1) {
+		temp := {}
+		temp.name_orig := Matches[A_Index]
+		Loop {			
+			temp.name_orig := RegExReplace(temp.name_orig, "#", values[A_Index], Count, 1)
+			If (!Count) {
+				break
+			}
+		}
+
+		temp.values 	:= values
+		s			:= RegExReplace(Matches[A_Index], "i)([.0-9]+)", "#")
+		temp.name 	:= RegExReplace(s, "i)# ?to ? #", "#", isRange)	
+		temp.isVariable:= false
+		temp.type		:= (isImplicit and Matches.Length() <= 1) ? "implicit" : "explicit"	
+		arr.push(temp)		
+	}	
+	
+	Return arr
 }
 
 TradeFunc_CreatePseudoMods(mods) {
-	
+	return mods
 }
 
 ; Add poetrades mod names to the items mods to use as POST parameter

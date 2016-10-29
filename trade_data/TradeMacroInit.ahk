@@ -52,6 +52,7 @@ class TradeUserOptions {
 	OpenWithDefaultWin10Fix := 0    	; If your PC asks you what programm to use to open the wiki-link, set this to 1 
 	ShowAccountName := 1            	; Show also sellers account name in the results window
 	BrowserPath :=                  	; Show also sellers account name in the results window
+	OpenUrlsOnEmptyItem := 0			; Open wiki/poe.trade also when no item was checked
 	
 	Debug := 0      				; 
 	
@@ -140,6 +141,7 @@ ReadTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.ShowUpdateNotifications := TradeFunc_ReadIniValue(TradeConfigPath, "General", "ShowUpdateNotifications", TradeOpts.ShowUpdateNotifications)
 		TradeOpts.OpenWithDefaultWin10Fix := TradeFunc_ReadIniValue(TradeConfigPath, "General", "OpenWithDefaultWin10Fix", TradeOpts.OpenWithDefaultWin10Fix)
 		TradeOpts.ShowAccountName := TradeFunc_ReadIniValue(TradeConfigPath, "General", "ShowAccountName", TradeOpts.ShowAccountName)
+		TradeOpts.OpenUrlsOnEmptyItem := TradeFunc_ReadIniValue(TradeConfigPath, "General", "OpenUrlsOnEmptyItem", TradeOpts.OpenUrlsOnEmptyItem)
 		
         ; Check If browser path is valid, delete ini-entry If not
 		BrowserPath := TradeFunc_ReadIniValue(TradeConfigPath, "General", "BrowserPath", TradeOpts.BrowserPath)
@@ -257,6 +259,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.ShowUpdateNotifications := ShowUpdateNotifications
 		TradeOpts.OpenWithDefaultWin10Fix := OpenWithDefaultWin10Fix
 		TradeOpts.ShowAccountName := ShowAccountName
+		TradeOpts.OpenUrlsOnEmptyItem := OpenUrlsOnEmptyItem
 		TradeOpts.Debug := Debug
 		
 		If (ValidBrowserPath) {
@@ -306,6 +309,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 	TradeFunc_WriteIniValue(TradeOpts.ShowUpdateNotifications, TradeConfigPath, "General", "ShowUpdateNotifications")
 	TradeFunc_WriteIniValue(TradeOpts.OpenWithDefaultWin10Fix, TradeConfigPath, "General", "OpenWithDefaultWin10Fix")
 	TradeFunc_WriteIniValue(TradeOpts.ShowAccountName, TradeConfigPath, "General", "ShowAccountName")   
+	TradeFunc_WriteIniValue(TradeOpts.OpenUrlsOnEmptyItem, TradeConfigPath, "General", "OpenUrlsOnEmptyItem")   
 	
 	If (ValidBrowserPath) {
 		TradeFunc_WriteIniValue(TradeOpts.BrowserPath, TradeConfigPath, "General", "BrowserPath")           
@@ -483,6 +487,7 @@ TradeFunc_GetLeagues(){
 }
 
 TradeFunc_GetLeaguesJSON(){
+	;UrlDownloadToFile, http://api.pathofexile.com/leagues?type=main&compact=1 , %A_ScriptDir%\temp\test.json
 	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	HttpObj.Open("GET","http://api.pathofexile.com/leagues?type=main&compact=1")
 	HttpObj.SetRequestHeader("Content-type","application/json")
