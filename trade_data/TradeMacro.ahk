@@ -1813,7 +1813,7 @@ TradeFunc_NonUniqueModStringToObject(string, isImplicit) {
 	Loop % (Matches.Length() ? Matches.Length() : 1) {
 		temp := {}
 		temp.name_orig := Matches[A_Index]
-		Loop {			
+		Loop {
 			temp.name_orig := RegExReplace(temp.name_orig, "#", values[A_Index], Count, 1)
 			If (!Count) {
 				break
@@ -2093,12 +2093,12 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	}
 	
 	TradeFunc_ResetGUI()
-	ValueRange := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRange : TradeOpts.AdvancedSearchModValueRange / 4
+	ValueRange := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRange : TradeOpts.AdvancedSearchModValueRange / 2
 	
 	Gui, SelectModsGui:Destroy    
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values: 
 	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRange "`%" 
-	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the items mods difference between their min and max value as 100`%.			
+	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the item's mods difference between their min and max value as 100`%.			
 	
 	ValueRange := ValueRange / 100 	
 	
@@ -2114,7 +2114,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	}
 	If (!advItem.mods.Length() and ChangedImplicit) {
 		modGroupBox := StrLen(ChangedImplicit.name) * 6
-	}
+	}		
 	modCount := advItem.mods.Length()
 	
 	statCount := 0
@@ -2129,10 +2129,10 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	boxRows := modCount * 3 + statCount * 3
 	
 	Gui, SelectModsGui:Add, Text, x14 y+10 w%modGroupBox%, Mods
-	Gui, SelectModsGui:Add, Text, x+10 yp+0 w80, min
-	Gui, SelectModsGui:Add, Text, x+10 yp+0 w80, current
-	Gui, SelectModsGui:Add, Text, x+10 yp+0 w80, max
-	Gui, SelectModsGui:Add, Text, x+10 yp+0 w45, Select
+	Gui, SelectModsGui:Add, Text, x+10 yp+0 w90, min
+	Gui, SelectModsGui:Add, Text, x+10 yp+0 w45, current
+	Gui, SelectModsGui:Add, Text, x+10 yp+0 w90, max
+	Gui, SelectModsGui:Add, Text, x+10 yp+0 w30, Select
 	
 	line :=
 	Loop, 500 {
@@ -2146,7 +2146,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	For i, stat in Stats.Defense {
 		If (stat.value) {			
 			xPosMin := modGroupBox + 25
-			yPosFirst := ( j = 1 ) ? 30 : 45		
+			yPosFirst := ( j = 1 ) ? 20 : 25		
 			
 			If (!stat.min or !stat.max or (stat.min = stat.max) and advItem.IsUnique) {
 				continue
@@ -2186,13 +2186,13 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 			maxLabelFirst := "(" Floor(statValueMax)
 			maxLabelSecond := ")"
 			
-			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%							 , % "(Total Q20) " stat.name
-			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w70 vTradeAdvancedStatMin%j% r1, % statValueMin
-			Gui, SelectModsGui:Add, Text, xp+5 yp+25 w65 cGreen                          , % minLabelFirst minLabelSecond
-			Gui, SelectModsGui:Add, Text, x+20 yp-22 w70 r1								 , % Floor(statValueQ20)
-			Gui, SelectModsGui:Add, Edit, x+20 yp-3 w70 vTradeAdvancedStatMax%j% r1	     , % statValueMax
-			Gui, SelectModsGui:Add, Text, xp+5 yp+25 w65 cGreen                          , % maxLabelFirst maxLabelSecond
-			Gui, SelectModsGui:Add, CheckBox, x+30 yp-20 vTradeAdvancedStatSelected%j%
+			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%							, % "(Total Q20) " stat.name
+			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedStatMin%j% r1	, % statValueMin
+			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen					, % minLabelFirst minLabelSecond
+			Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1						, % Floor(statValueQ20)
+			Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedStatMax%j% r1	, % statValueMax
+			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen					, % maxLabelFirst maxLabelSecond
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j%
 			
 			TradeAdvancedStatParam%j% := stat.name			
 			j++
@@ -2200,7 +2200,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	}	
 	
 	If (j > 1) {
-		Gui, SelectModsGui:Add, Text, x0 w700 yp+33 cc9cacd, %line% 
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line% 
 	}	
 	
 	k := 1
@@ -2208,7 +2208,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	For i, stat in Stats.Offense {
 		If (stat.value) {			
 			xPosMin := modGroupBox + 25
-			yPosFirst := ( j = 1 ) ? 20 : 45			
+			yPosFirst := ( j = 1 ) ? 20 : 25			
 			
 			If (!stat.min or !stat.max or (stat.min == stat.max) and advItem.IsUnique) {
 				continue
@@ -2243,13 +2243,13 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 			maxLabelFirst := "(" Floor(stat.max)
 			maxLabelSecond := ")"
 			
-			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%							 , % stat.name
-			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w70 vTradeAdvancedStatMin%j% r1, % statValueMin
-			Gui, SelectModsGui:Add, Text, xp+5 yp+25 w65 cGreen                          , % minLabelFirst minLabelSecond
-			Gui, SelectModsGui:Add, Text, x+20 yp-22 w70 r1								 , % Floor(stat.value)
-			Gui, SelectModsGui:Add, Edit, x+20 yp-3 w70 vTradeAdvancedStatMax%j% r1	     , % statValueMax
-			Gui, SelectModsGui:Add, Text, xp+5 yp+25 w65 cGreen                          , % maxLabelFirst maxLabelSecond
-			Gui, SelectModsGui:Add, CheckBox, x+30 yp-20 vTradeAdvancedStatSelected%j%
+			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%						  , % stat.name
+			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedStatMin%j% r1, % statValueMin
+			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen				  , % minLabelFirst minLabelSecond
+			Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1					  , % Floor(stat.value)
+			Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedStatMax%j% r1, % statValueMax
+			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen				  , % maxLabelFirst maxLabelSecond
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j%
 			
 			TradeAdvancedStatParam%j% := stat.name			
 			j++
@@ -2259,7 +2259,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	}
 	
 	If (k > 1) {
-		Gui, SelectModsGui:Add, Text, x0 w700 yp+33 cc9cacd, %line% 
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line% 
 	}	
 	
 	e := 0
@@ -2273,7 +2273,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		modValueMax := ChangedImplicit.max
 		displayName := ChangedImplicit.name
 		
-		xPosMin := xPosMin + 70 + 70 + 70 + 70
+		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 ; edit/text field widths and offsets
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  , % displayName
 		Gui, SelectModsGui:Add, CheckBox, x%xPosMin% yp+1 vTradeAdvancedSelected%e%
 		
@@ -2378,17 +2378,17 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 			modValueMax := 
 		}
 		
-		yPosFirst := ( l > 1 ) ? 45 : 20
+		yPosFirst := ( l > 1 ) ? 25 : 20
 		; increment index If the item has an enchantment
 		index := A_Index + e
 		
-		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%                                   , % displayName
-		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w70 vTradeAdvancedModMin%index% r1   , % modValueMin
-		Gui, SelectModsGui:Add, Text, xp+5 yp+25      w65 cGreen                           , % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
-		Gui, SelectModsGui:Add, Text, x+20 yp-22      w70 r1                               , % TradeUtils.ZeroTrim(modValue)
-		Gui, SelectModsGui:Add, Edit, x+20 yp-3       w70 vTradeAdvancedModMax%index% r1   , % modValueMax
-		Gui, SelectModsGui:Add, Text, xp+5 yp+25      w65 cGreen                           , % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
-		Gui, SelectModsGui:Add, CheckBox, x+30 yp-21      vTradeAdvancedSelected%index%
+		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%                                 , % displayName
+		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 , % modValueMin
+		Gui, SelectModsGui:Add, Text, x+5 yp+3        w45 cGreen                         , % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
+		Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1                             , % TradeUtils.ZeroTrim(modValue)
+		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 , % modValueMax
+		Gui, SelectModsGui:Add, Text, x+5 yp+3        w45 cGreen                         , % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
+		Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedSelected%index%
 		
 		TradeAdvancedParam%index% := advItem.mods[A_Index].param
 		l++
@@ -2397,7 +2397,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	
 	m := 1
 	If (Sockets >= 5 or Links >= 5) {
-		Gui, SelectModsGui:Add, Text, x0 w700 y+10 cc9cacd, %line% 
+		Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line% 
 		
 		If (Sockets >= 5) {
 			m++
@@ -2413,7 +2413,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	
 	Item.UsedInSearch.SearchType := "Advanced"
 	; closes this window and starts the search
-	offset := (m > 1) ? "+20" : "+50"
+	offset := (m > 1) ? "+20" : "+10"
 	Gui, SelectModsGui:Add, Button, x10 y%offset% gAdvancedPriceCheckSearch, &Search
 	
 	; open search on poe.trade instead
@@ -2424,9 +2424,9 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		Gui, SelectModsGui:Add, Text, x10 y+10 cRed, Advanced search for normal/magic/rare items is not finished.
 		Gui, SelectModsGui:Add, Link, x+5 yp+0 cBlue, <a href="https://github.com/PoE-TradeMacro/POE-TradeMacro/issues/78">See what's planned.</a>    		
 	}	
-	
-	windowWidth := modGroupBox + 80 + 10 + 10 + 80 + 80 + 10 + 60 + 20
-	windowWidth := (windowWidth > 250) ? windowWidth : 250
+
+	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 + 65
+	windowWidth := (windowWidth > 350) ? windowWidth : 350
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search
 }
 
