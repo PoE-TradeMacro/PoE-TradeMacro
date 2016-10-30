@@ -119,6 +119,7 @@ Sleep, 100
 
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
+;GoSub, ReadPoeNinjaCurrencyData
 TradeGlobals.Set("VariableUniqueData", TradeUniqueData)
 TradeGlobals.Set("ModsData", TradeModsData)
 TradeGlobals.Set("CraftingData", TradeFunc_ReadCraftingBases())
@@ -289,9 +290,13 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeFunc_AssignAllHotkeys()
 		
 		TradeOpts.AccountName := AccountName
+		tempOldLeague := TradeOpts.SearchLeague
 		TradeOpts.SearchLeague := SearchLeague
 		TradeFunc_SetLeagueIfSelectedIsInactive()        
 		TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
+		If (TradeOpts.SearchLeague != tempOldLeague) {
+			GoSub, ReadPoeNinjaCurrencyData	
+		}
 		
 		TradeOpts.GemLevel := GemLevel
 		TradeOpts.GemLevelRange := GemLevelRange

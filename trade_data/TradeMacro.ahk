@@ -2894,6 +2894,51 @@ class TradeUtils {
 	}
 	; v1.0-196c 21-Nov-2009 www.autohotkey.com/forum/topic51354.html
 	; | by Skan | 19-Nov-2009
+	
+	UriEncode(Uri, Enc = "UTF-8")
+	{
+		TradeUtils.StrPutVar(Uri, Var, Enc)
+		f := A_FormatInteger
+		SetFormat, IntegerFast, H
+		Loop
+		{
+			Code := NumGet(Var, A_Index - 1, "UChar")
+			If (!Code)
+				Break
+			If (Code >= 0x30 && Code <= 0x39 ; 0-9
+				|| Code >= 0x41 && Code <= 0x5A ; A-Z
+				|| Code >= 0x61 && Code <= 0x7A) ; a-z
+				Res .= Chr(Code)
+			Else
+				Res .= "%" . SubStr(Code + 0x100, -1)
+		}
+		SetFormat, IntegerFast, %f%
+		Return, Res
+	}
+
+	UriDecode(Uri, Enc = "UTF-8")
+	{
+		Pos := 1
+		Loop
+		{
+			Pos := RegExMatch(Uri, "i)(?:%[\da-f]{2})+", Code, Pos++)
+			If (Pos = 0)
+				Break
+			VarSetCapacity(Var, StrLen(Code) // 3, 0)
+			StringTrimLeft, Code, Code, 1
+			Loop, Parse, Code, `%
+				NumPut("0x" . A_LoopField, Var, A_Index - 1, "UChar")
+			StringReplace, Uri, Uri, `%%Code%, % StrGet(&Var, Enc), All
+		}
+		Return, Uri
+	}
+
+	StrPutVar(Str, ByRef Var, Enc = "")
+	{
+		Len := StrPut(Str, Enc) * (Enc = "UTF-16" || Enc = "CP1200" ? 2 : 1)
+		VarSetCapacity(Var, Len, 0)
+		Return, StrPut(Str, &Var, Enc)
+	}
 }
 
 CloseUpdateWindow:
@@ -2960,4 +3005,14 @@ TradeSettingsUI_ChkCorruptedOverride:
 	Else	{
 		GuiControl, Enable, Corrupted
 	}
+Return
+
+ReadPoeNinjaCurrencyData:
+	league := TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
+	url := "http://poe.ninja/api/Data/GetCurrencyOverview?league=" . league	
+	UrlDownloadToFile, %url% , %A_ScriptDir%\temp\currencyData.json
+	FileRead, JSONFile, %A_ScriptDir%/temp/currencyData.json
+	parsedJSON 	:= JSON.Load(JSONFile)	
+	global CurrencyHistoryData := parsedJSON
+	;DebugPrintArray(CurrencyHistoryData.lines[1])
 Return
