@@ -1702,16 +1702,18 @@ TradeFunc_PrepareNonUniqueItemModsOld(Affixes, Implicit, Enchantment = false, Co
 TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = false, Corruption = false, isMap = false) {
 	Affixes := StrSplit(Affixes, "`n")
 	mods := []
-
+	i := 0
+	
 	If (Implicit and not Enchantment and not Corruption) {
 		temp := TradeFunc_NonUniqueModStringToObject(Implicit, true)
 		For key, val in temp {
-			mods.push(val)	
+			mods.push(val)
+			i++
 		}		
 	}	
 
 	For key, val in Affixes {
-		If (!val or RegExMatch(val, "i)---") or (Enchantment or Corruption) or (Implicit and Rarity = 1)) {
+		If (!val or RegExMatch(val, "i)---") or (i >= 1 and ((Enchantment or Corruption) or (i <= 1 and Implicit and Rarity = 1)))) {
 			continue
 		}
 
@@ -1832,7 +1834,252 @@ TradeFunc_NonUniqueModStringToObject(string, isImplicit) {
 }
 
 TradeFunc_CreatePseudoMods(mods) {
+	tempMods := []
+	resist := 0
+	eleResist := 0
+	life := 0
+	attributes := 0
+
+	eleDmg_Percent := 0
+	eleDmg_AttacksFlatLow := 0
+	eleDmg_AttacksFlatHi := 0
+	eleDmg_AttacksPercent := 0
+	eleDmg_SpellsPercent := 0
+	eleDmg_SpellsFlatLow := 0
+	eleDmg_SpellsFlatHi := 0
+	
+	spellDmg_Percent := 0	
+	weaponEleDmg_Percent := 0
+	
+	fireDmg_Percent := 0
+	fireDmg_AttacksPercent := 0
+	fireDmg_SpellsPercent := 0
+	fireDmg_AttacksFlatLow := 0
+	fireDmg_SpellsFlatLow := 0
+	fireDmg_AttacksFlatHi := 0
+	fireDmg_SpellsFlatHi := 0
+	
+	coldDmg_Percent := 0
+	coldDmg_AttacksPercent := 0
+	coldDmg_SpellsPercent := 0
+	coldDmg_AttacksFlatLow := 0
+	coldDmg_AttacksFlatHi := 0
+	coldDmg_SpellsFlatLow := 0
+	coldDmg_SpellsFlatHi := 0
+	
+	lightningDmg_Percent := 0
+	lightningDmg_AttacksPercent := 0
+	lightningDmg_SpellsPercent := 0
+	lightningDmg_AttacksFlatLow := 0
+	lightningDmg_AttacksFlatHi := 0
+	lightningDmg_SpellsFlatLow := 0
+	lightningDmg_SpellsFlatHi := 0
+	
+	hasChaosRes := false
+	
+	For key, val in mods {
+		If (RegExMatch(val.name, "i)maximum life$")) {
+			life := life + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)to intelligence$|to dexterity$|to (strength)$", match)) {
+			attributes := attributes + val.values[1]
+			If (match1 = "strength") {
+				life := life + (Floor(val.values[1] / 2))
+			}
+		}
+		If (RegExMatch(val.name, "i)to cold resistance|to fire resistance|to lightning resistance")) {
+			resist := resist + val.values[1]
+			eleResist := eleResist + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)to Chaos Resistance")) {
+			hasChaos := true
+			resist := resist + val.values[1]
+		}
+		
+		If (RegExMatch(val.name, "i)increased (cold) damage$", element)) {
+			%element1%Dmg_Percent := %element1%Dmg_Percent + val.values[1]
+			eleDmg_Percent := eleDmg_Percent + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)increased (fire) damage$", element)) {
+			%element1%Dmg_Percent := %element1%Dmg_Percent + val.values[1]
+			eleDmg_Percent := eleDmg_Percent + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)increased (lightning) damage$", element)) {
+			%element1%Dmg_Percent := %element1%Dmg_Percent + val.values[1]
+			eleDmg_Percent := eleDmg_Percent + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)increased elemental damage$", element)) {
+			eleDmg_Percent := eleDmg_Percent + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)(cold) damage to (attacks|spells)$", element)) {
+			%element1%Dmg_%element2%FlatLow := %element1%Dmg_%element2%FlatLow + val.values[1]
+			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi + val.values[2]
+			eleDmg_%element2%FlatLow := eleDmg_%element2%FlatLow + val.values[1]			
+			eleDmg_%element2%FlatHi  := eleDmg_%element2%FlatHi  + val.values[2]
+		}
+		If (RegExMatch(val.name, "i)(fire) damage to (attacks|spells)$", element)) {
+			%element1%Dmg_%element2%FlatLow := %element1%Dmg_%element2%FlatLow + val.values[1]
+			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi + val.values[2]
+			eleDmg_%element2%FlatLow := eleDmg_%element2%FlatLow + val.values[1]			
+			eleDmg_%element2%FlatHi  := eleDmg_%element2%FlatHi  + val.values[2]
+		}
+		If (RegExMatch(val.name, "i)(lightning) damage to (attacks|spells)$", element)) {			
+			%element1%Dmg_%element2%FlatLow := %element1%Dmg_%element2%FlatLow + val.values[1]
+			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi + val.values[2]
+			eleDmg_%element2%FlatLow := eleDmg_%element2%FlatLow + val.values[1]			
+			eleDmg_%element2%FlatHi  := eleDmg_%element2%FlatHi  + val.values[2]
+		}
+		If (RegExMatch(val.name, "i)elemental damage with weapons")) {
+			weaponEleDmg_Percent := weaponEleDmg_Percent + val.values[1]
+		}
+		If (RegExMatch(val.name, "i)spell", element)) {
+			spellDmg_Percent := spellDmg_Percent + val.values[1]
+		}
+	}
+
+	
+	If (eleDmg_Percent > 0) {
+		If (weaponEleDmg_Percent) {
+			eleDmg_AttacksPercent 	   := eleDmg_Percent ? eleDmg_AttacksPercent + weaponEleDmg_Percent : 0
+			fireDmg_AttacksPercent 	   := fireDmg_Percent ? fireDmg_AttacksPercent + weaponEleDmg_Percent : 0
+			coldDmg_AttacksPercent	   := coldDmg_Percent ? coldDmg_AttacksPercent + weaponEleDmg_Percent : 0
+			lightningDmg_AttacksPercent := lightningDmg_Percent ? lightningDmg_AttacksPercent + weaponEleDmg_Percent : 0
+		}
+		If (spellDmg_Percent) {
+			fireDmg_SpellsPercent 	   := fireDmg_Percent ? fireDmg_SpellsPercent + spellDmg_Percent : 0
+			coldDmg_SpellsPercent	   := coldDmg_Percent ? coldDmg_SpellsPercent + spellDmg_Percent : 0
+			lightningDmg_SpellsPercent  := lightningDmg_Percent ? lightningDmg_SpellsPercent + spellDmg_Percent : 0
+		}
+	}
+
+	If (life > 0) {
+		temp := {}
+		temp.values := [life]
+		temp.name_orig := "+" . life . " to maximum Life"
+		temp.name 	:= "+# to maximum Life"
+		tempMods.push(temp)
+	}
+	If (resist > 0) {
+		temp := {}
+		temp.values := [resist]
+		temp.name_orig := "+" . resist . "% total Resistance"
+		temp.name 	:= "+#% total Resistance"		
+		tempMods.push(temp)
+	}
+	If (eleResist > 0) {
+		temp := {}
+		temp.values := [eleResist]
+		temp.name_orig := "+" . eleResist . "% total Elemental Resistance"
+		temp.name 	:= "+#% total Elemental Resistance"		
+		tempMods.push(temp)
+	}
+	
+	Loop, 3 {
+		elements := ["Fire", "Cold", "Lightning"]
+		element  := elements[A_Index]
+		
+		Loop,  3 {
+			types := ["", "Attacks",  "Spells"]
+			type  := types[A_Index]
+			
+			If (%element%Dmg_%type%Percent > 0) {
+				modSuffix := 				
+				If (type = "") {
+					modSuffix := " Damage"
+				}
+				If (type = "Attacks") {
+					modSuffix := " Damage with Weapons"
+					%element%Dmg_Percent := %element%Dmg_Percent + weaponEleDmg_Percent
+					eleDmg_Percent := eleDmg_Percent + weaponEleDmg_Percent
+				}
+				If (type = "Spells") {
+					modSuffix := " Spell Damage"
+					%element%Dmg_Percent := %element%Dmg_Percent + spellDmg_Percent
+					eleDmg_Percent := eleDmg_Percent + spellDmg_Percent
+				}				
+				temp := {}
+				temp.values := [%element%Dmg_Percent]
+				temp.name_orig := %element%Dmg_Percent "% increased " element . modSuffix
+				temp.name 	:= "#% increased " element . modSuffix	
+				tempMods.push(temp)
+				
+				If(!TradeFunc_CheckIfTempModExists("Elemental" . modSuffix, tempMods) and type != "Spells") {		
+					temp := {}
+					temp.values := [eleDmg_Percent]
+					temp.name_orig := eleDmg_Percent "% increased Elemental" . modSuffix
+					temp.name 	:= "#% increased Elemental" . modSuffix
+					tempMods.push(temp)	
+				}
+			}
+		}
+		Loop,  2 {
+			types := ["Attacks",  "Spells"]
+			type  := types[A_Index]
+
+			If (%element%Dmg_%type%FlatLow > 0) {
+				modSuffix := (type = "Attacks") ? " to Attacks" : " to Spells"
+				temp := {}
+				temp.values := [(%element%Dmg_%type%FlatLow + %element%Dmg_%type%FlatHi) /2]
+				temp.name_orig := "Adds " %element%Dmg_%type%FlatLow " to " %element%Dmg_%type%FlatHi " " element " Damage" modSuffix
+				temp.name 	:= "Adds # " element " Damage" modSuffix	
+				tempMods.push(temp)
+				
+				If(!TradeFunc_CheckIfTempModExists("Elemental Damage" modSuffix, tempMods)) {		
+					temp := {}
+					temp.values := [(eleDmg_%type%FlatLow + eleDmg_%type%FlatHi) / 2]
+					temp.name_orig := "Adds " eleDmg_%type%FlatLow " to " eleDmg_%type%FlatHi " Elemental Damage" modSuffix	
+					temp.name 	:= "Adds # Elemental Damage" modSuffix			
+					tempMods.push(temp)	
+				}			
+			}
+		}				
+	}
+
+	For tkey, tval in tempMods {
+		higher := true
+		; Don't show pseudo mods if their value is not higher than the normal mods value
+		For key, mod in mods {
+			name := tval.name = mod.name
+			eleDmg := RegExMatch(tval.name, "i)increased Elemental Damage$") and RegExMatch(mod.name, "i)increased (Fire|Cold|Lightning) Damage")
+			totalRes := RegExMatch(tval.name, "i)total Resistance$") and RegExMatch(mod.name, "i)Chaos Resistance$")
+			
+			If (name or eleDmg or totalRes) {
+				If (mod.values[2]) {
+					mv := (mod.values[1] + mod.values[2]) / 2
+					tv := (tval.values[1] + tval.values[2]) / 2
+					If (tv <= mv) {
+						higher := false
+					}
+				}
+				Else {
+					If (tval.values[1] <= mod.values[1]) {
+						higher := false
+					}
+				}
+			}
+		}
+
+		hasTotalRes := RegExMatch(tval.name, "i)total Resistance$")
+		If (hasTotalRes and not hasChaos) {
+			continue
+		}
+		Else If (higher) {
+			tval.isVariable:= false
+			tval.type := "pseudo"
+			mods.push(tval)	
+		}		
+	} 
+
 	return mods
+}
+
+TradeFunc_CheckIfTempModExists(needle, mods) {
+	For key, val in mods {
+		If (RegExMatch(val.name, "i)" needle "")) {
+			Return true
+		}
+	}
+	Return false
 }
 
 ; Add poetrades mod names to the items mods to use as POST parameter
@@ -2045,38 +2292,35 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 	}
 }
 
-TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
-	Loop % itemModifiers.Length()
-	{		
-		CurrValue := ""
-		CurrValues := []
-		CurrValue := GetActualValue(itemModifiers[A_Index].name_orig)
-		If (CurrValue ~= "\d+") {
-			
-			; handle value range
-			RegExMatch(CurrValue, "(\d+) ?(-|to) ?(\d+)", values)	
-			
-			If (values3) {
-				CurrValues.Push(values1)
-				CurrValues.Push(values3)
-				CurrValue := values1 " to " values3
-				ModStr := StrReplace(itemModifiers[A_Index].name_orig, CurrValue, "#")	
-			}
-			; handle single value
-			Else {
-				CurrValues.Push(CurrValue)
-				ModStr := StrReplace(itemModifiers[A_Index].name_orig, CurrValue, "#")		
-			}
-			
-			ModStr := StrReplace(ModStr, "+")
-			; replace multi spaces with a single one
-			ModStr := RegExReplace(ModStr, " +", " ")
-			poeTradeMod := RegExReplace(poeTradeMod, "# ?to ? #", "#")
+TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {		
+	CurrValue := ""
+	CurrValues := []
+	CurrValue := GetActualValue(itemModifiers.name_orig)
+	If (CurrValue ~= "\d+") {
+		
+		; handle value range
+		RegExMatch(CurrValue, "(\d+) ?(-|to) ?(\d+)", values)	
+		
+		If (values3) {
+			CurrValues.Push(values1)
+			CurrValues.Push(values3)
+			CurrValue := values1 " to " values3
+			ModStr := StrReplace(itemModifiers.name_orig, CurrValue, "#")	
+		}
+		; handle single value
+		Else {
+			CurrValues.Push(CurrValue)
+			ModStr := StrReplace(itemModifiers.name_orig, CurrValue, "#")		
+		}
+		
+		ModStr := StrReplace(ModStr, "+")
+		; replace multi spaces with a single one
+		ModStr := RegExReplace(ModStr, " +", " ")
+		poeTradeMod := RegExReplace(poeTradeMod, "# ?to ? #", "#")
 
-			IfInString, poeTradeMod, % ModStr
-			{			
-				Return CurrValues
-			}
+		IfInString, poeTradeMod, % ModStr
+		{			
+			Return CurrValues
 		}
 	}
 }
@@ -2091,7 +2335,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		ShowTooltip("Advanced search not available for this item.")
 		return
 	}
-	
+
 	TradeFunc_ResetGUI()
 	ValueRange := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRange : TradeOpts.AdvancedSearchModValueRange / 2
 	
@@ -2106,7 +2350,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		If (!advItem.mods[A_Index].isVariable and advItem.IsUnique) {
 			continue
 		}
-		tempValue := StrLen(advItem.mods[A_Index].name)
+		tempValue := StrLen(advItem.mods[A_Index].param)
 		if(modLengthMax < tempValue ) {
 			modLengthMax := tempValue
 			modGroupBox := modLengthMax * 6
@@ -2289,6 +2533,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	
 	;add mods	
 	l := 1
+	p := 1
 	Loop % advItem.mods.Length() {
 		If (!advItem.mods[A_Index].isVariable and advItem.IsUnique) {
 			continue
@@ -2327,7 +2572,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)	
 		}
 		Else {
-			modValues := TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(advItem.mods, advItem.mods[A_Index].param)	
+			modValues := TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(advItem.mods[A_Index], advItem.mods[A_Index].param)	
 		}
 		
 		If (modValues.Length() > 1) {
@@ -2382,13 +2627,27 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		; increment index If the item has an enchantment
 		index := A_Index + e
 		
-		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%                                 , % displayName
-		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 , % modValueMin
-		Gui, SelectModsGui:Add, Text, x+5 yp+3        w45 cGreen                         , % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
-		Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1                             , % TradeUtils.ZeroTrim(modValue)
-		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 , % modValueMax
-		Gui, SelectModsGui:Add, Text, x+5 yp+3        w45 cGreen                         , % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
+		isPseudo := advItem.mods[A_Index].type = "pseudo" ? true : false		
+		If (isPseudo) {
+			If (p = 1) {
+				;add line if first pseudo mod
+				Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line%
+				yPosFirst := 20
+			}						
+			p++
+			;change color if pseudo mod
+			color := "cGray"
+		}	
+
+		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%                                 %color% 	, % isPseudo ? "(pseudo) " . displayName : displayName
+		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 		, % modValueMin
+		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen                  				, % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
+		Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1                             		, % TradeUtils.ZeroTrim(modValue)
+		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 		, % modValueMax
+		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen                        		, % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
 		Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedSelected%index%
+		
+		color := "cBlack"
 		
 		TradeAdvancedParam%index% := advItem.mods[A_Index].param
 		l++
