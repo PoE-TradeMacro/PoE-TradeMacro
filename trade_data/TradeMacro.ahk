@@ -322,9 +322,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Item.UsedInSearch.Links := ItemData.Links
 		}					
 		
-		If(s.UsedInSearch) {
+		If (s.UsedInSearch) {
 			Item.UsedInSearch.Enchantment := s.UsedInSearch.Enchantment
 			Item.UsedInSearch.CorruptedMod:= s.UsedInSearch.Corruption
+		}
+		
+		If (s.useIlvl) {			
+			RequestParams.ilvl_min := s.minIlvl
+			Item.UsedInSearch.iLvl.min := true
 		}
 	}
 	
@@ -2672,10 +2677,11 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		TradeAdvancedModsCount := l
 	}
 	
-	m := 1
-	If (Sockets >= 5 or Links >= 5) {
+	m := 1	
+	;If (Sockets >= 5 or Links >= 5) {
+	If (true) {
 		Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line% 
-		
+				
 		If (Sockets >= 5) {
 			m++
 			text := "Sockets: " . Trim(Sockets)
@@ -2683,9 +2689,15 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 		}
 		If (Links >= 5) {
 			offset := (m > 1 ) ? "+15" : "15"
+			m++
 			text := "Links:  " . Trim(Links)
 			Gui, SelectModsGui:Add, CheckBox, x%offset% yp+0 vTradeAdvancedUseLinks Checked, % text
 		}
+		
+		offsetX := (m = 1)  ? "15" : "+15"
+		offsetY := (m = 1) ? "20" : "+0"
+		Gui, SelectModsGui:Add, CheckBox, x%offsetX% yp%offsetY% vTradeAdvancedSelectedILvl , % "Item Level (min)"
+		Gui, SelectModsGui:Add, Edit    , x+5 yp-3 w30 vTradeAdvancedMinILvl , % ""
 	}
 	
 	Item.UsedInSearch.SearchType := "Advanced"
@@ -2703,7 +2715,7 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	}	
 
 	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 + 65
-	windowWidth := (windowWidth > 350) ? windowWidth : 350
+	windowWidth := (windowWidth > 360) ? windowWidth : 360
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search
 }
 
@@ -2744,6 +2756,12 @@ TradeFunc_ResetGUI(){
 			break
 		}
 	}
+	newItem.mods       	:= 
+	newItem.stats      	:= 
+	newItem.useSockets	:= 
+	newItem.useLinks	:= 
+	newItem.useIlvl	:= 
+	newItem.minIlvl	:= 
 }
 
 TradeFunc_HandleGuiSubmit(){
@@ -2792,11 +2810,13 @@ TradeFunc_HandleGuiSubmit(){
 		}
 	}
 	
-	newItem.mods       := mods
-	newItem.stats      := stats
-	newItem.useSockets := TradeAdvancedUseSockets
-	newItem.useLinks   := TradeAdvancedUseLinks
-	
+	newItem.mods       	:= mods
+	newItem.stats      	:= stats
+	newItem.useSockets	:= TradeAdvancedUseSockets
+	newItem.useLinks	:= TradeAdvancedUseLinks
+	newItem.useIlvl	:= TradeAdvancedSelectedILvl
+	newItem.minIlvl	:= TradeAdvancedMinILvl
+
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)	
 	Gui, SelectModsGui:Destroy
 }

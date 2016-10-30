@@ -6,6 +6,7 @@ Added more options.
 Added pseudo mod suggestions to advanced search.
 Added update notes to update notification window.
 
+
 1.1.5
 ==================================================================================================
 Added first version of advanced search for normal/magic/rare items.
