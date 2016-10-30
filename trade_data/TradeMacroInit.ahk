@@ -88,6 +88,7 @@ class TradeUserOptions {
 	PrefillMinValue := 1            	;
 	PrefillMaxValue := 1            	;
 	CurrencySearchHave := "Chaos Orb" 	;
+	BuyoutOnly := 1				;
 	
 	Expire := 3					; cache expire min
 }
@@ -196,6 +197,7 @@ ReadTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.PrefillMinValue := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "PrefillMinValue", TradeOpts.PrefillMinValue)	
 		TradeOpts.PrefillMaxValue := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "PrefillMaxValue", TradeOpts.PrefillMaxValue)	
 		TradeOpts.CurrencySearchHave := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "CurrencySearchHave", TradeOpts.CurrencySearchHave)	
+		TradeOpts.BuyoutOnly := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "BuyoutOnly", TradeOpts.BuyoutOnly)	
 		
         ; Cache        
 		TradeOpts.Expire := TradeFunc_ReadIniValue(TradeConfigPath, "Cache", "Expire", TradeOpts.Expire)
@@ -301,6 +303,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.PrefillMinValue := PrefillMinValue
 		TradeOpts.PrefillMaxValue := PrefillMaxValue
 		TradeOpts.CurrencySearchHave := CurrencySearchHave
+		TradeOpts.BuyoutOnly := BuyoutOnly
 	}        
 	SavedTradeSettings := false
 	
@@ -350,6 +353,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 	TradeFunc_WriteIniValue(TradeOpts.PrefillMinValue, TradeConfigPath, "Search", "PrefillMinValue")
 	TradeFunc_WriteIniValue(TradeOpts.PrefillMaxValue, TradeConfigPath, "Search", "PrefillMaxValue")
 	TradeFunc_WriteIniValue(TradeOpts.CurrencySearchHave, TradeConfigPath, "Search", "CurrencySearchHave")
+	TradeFunc_WriteIniValue(TradeOpts.BuyoutOnly, TradeConfigPath, "Search", "BuyoutOnly")
 	
 	; Cache	
 	TradeFunc_WriteIniValue(TradeOpts.Expire, TradeConfigPath, "Cache", "Expire")
@@ -672,7 +676,7 @@ CreateTradeSettingsUI()
 	
     ; General 
 	
-	GuiAddGroupBox("[TradeMacro] General", "x547 y15 w260 h216")
+	GuiAddGroupBox("[TradeMacro] General", "x547 y15 w260 h246")
 	
     ; Note: window handles (hwnd) are only needed If a UI tooltip should be attached.
 	
@@ -692,6 +696,9 @@ CreateTradeSettingsUI()
 	GuiAddText("Browser Path:", "x557 yp+38 w70 h20 0x0100", "LblBrowserPath", "LblBrowserPathH")
 	AddToolTip(LblBrowserPathH, "Optional: Set the path to the browser (.exe) to open Urls with.")
 	GuiAddEdit(TradeOpts.BrowserPath, "x+10 yp-2 w150 h20", "BrowserPath", "BrowserPathH")
+	
+	GuiAddCheckbox("Enable ""Url shortcuts"" without item hover.", "x557 yp+30 w250 h30", TradeOpts.OpenUrlsOnEmptyItem, "OpenUrlsOnEmptyItem", "OpenUrlsOnEmptyItemH")
+	AddToolTip(OpenUrlsOnEmptyItemH, "This enables the ctrl+q and ctrl+w shortcuts`neven without hovering over an item.`nBe careful!")
 	
 	GuiAddCheckbox("Debug Output", "x557 yp+30 w100 h30 cRed", TradeOpts.Debug, "Debug", "DebugH")
 	AddToolTip(DebugH, "Don't use this unless you're developing!")
@@ -789,6 +796,9 @@ CreateTradeSettingsUI()
 	GuiAddDropDownList(CurrencyList, "x+10 yp-2", TradeOpts.CurrencySearchHave, "CurrencySearchHave", "CurrencySearchHaveH")
 	
 	GuiAddCheckbox("Online only", "x827 yp+22 w210 h35 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
+	
+	GuiAddCheckbox("Buyout only (Search on poe.trade)", "x827 yp+30 w210 h35 0x0100", TradeOpts.BuyoutOnly, "BuyoutOnly", "BuyoutOnlyH")
+	AddToolTip(BuyoutOnlyH, "This option only takes affect when opening the search on poe.trade.")
 	
 	GuiAddCheckbox("Remove multiple Listings from same Account", "x827 yp+28 w230 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
 	AddToolTip(RemoveMultipleListingsFromSameAccountH, "Removes multiple listings from the same account from`nyour search results (to combat market manipulators).`n`nThe removed items are also removed from the average and`nmedian price calculations.")

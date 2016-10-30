@@ -482,11 +482,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.ilvl_max := Item.Level
 		}		
 	}
-
+	
+	If (openSearchInBrowser) {
+		If (!TradeOpts.BuyoutOnly) {
+			RequestParams.buyout := ""
+		} 	
+	}
 	If (TradeOpts.Debug) {
 		console.log(RequestParams)
 		console.show()	
-	}	
+	}
 	Payload := RequestParams.ToPayload()
 	
 	ShowToolTip("Running search...")
@@ -1936,7 +1941,6 @@ TradeFunc_CreatePseudoMods(mods) {
 			spellDmg_Percent := spellDmg_Percent + val.values[1]
 		}
 	}
-
 	
 	If (eleDmg_Percent > 0) {
 		If (weaponEleDmg_Percent) {
@@ -2032,7 +2036,7 @@ TradeFunc_CreatePseudoMods(mods) {
 					tempMods.push(temp)	
 				}			
 			}
-		}				
+		}			
 	}
 
 	For tkey, tval in tempMods {
