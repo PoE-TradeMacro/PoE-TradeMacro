@@ -252,7 +252,17 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else If ((not Item.IsFourSocket and not Item.IsThreeSocket and not Item.IsSingleSocket) and (Item.IsWeapon or Item.IsArmour) and Item.Level < 35) {		
 			RequestParams.ilevel_max := 34
 			Item.UsedInSearch.iLvl.max := 34
-		}		
+		}	
+
+		; set links to max for corrupted items with 3/4 max sockets if the own item is fully linked
+		If (Item.IsCorrupted and TradeOpts.ForceMaxLinks) {
+			If (Item.MaxSockets = 4 and ItemData.Links = 4) {
+				RequestParams.link_min := 4
+			}
+			Else If (Item.MaxSockets = 3 and ItemData.Links = 3) {
+				RequestParams.link_min := 3
+			}
+		}
 	}
 	
 	; ignore mod rolls unless the AdvancedPriceCheckGui is used to search
@@ -271,7 +281,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 		Loop % s.stats.Length() {
 			If (s.stats[A_Index].selected > 0) {
-					; defense
+				; defense
 				If (InStr(s.stats[A_Index].Param, "Armour")) {
 					RequestParams.armour_min  := (s.stats[A_Index].min > 0) ? s.stats[A_Index].min : ""
 					RequestParams.armour_max  := (s.stats[A_Index].max > 0) ? s.stats[A_Index].max : ""
@@ -289,7 +299,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 					RequestParams.block_max  := (s.stats[A_Index].max > 0)  ? s.stats[A_Index].max : ""
 				}
 				
-					; offense
+				; offense
 				Else If (InStr(s.stats[A_Index].Param, "Physical")) {
 					RequestParams.pdps_min  := (s.stats[A_Index].min > 0)  ? s.stats[A_Index].min : ""
 					RequestParams.pdps_max  := (s.stats[A_Index].max > 0)  ? s.stats[A_Index].max : ""
@@ -301,12 +311,12 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}	
 		}
 		
-			; handle item sockets
+		; handle item sockets
 		If (s.UseSockets) {
 			RequestParams.sockets_min := ItemData.Sockets
 			Item.UsedInSearch.Sockets := ItemData.Sockets
 		}	
-			; handle item links
+		; handle item links
 		If (s.UseLinks) {
 			RequestParams.link_min := ItemData.Links
 			Item.UsedInSearch.Links := ItemData.Links

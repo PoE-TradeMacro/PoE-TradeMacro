@@ -89,6 +89,7 @@ class TradeUserOptions {
 	PrefillMaxValue := 1            	;
 	CurrencySearchHave := "Chaos Orb" 	;
 	BuyoutOnly := 1				;
+	ForceMaxLinks := 1				;
 	
 	Expire := 3					; cache expire min
 }
@@ -198,6 +199,7 @@ ReadTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.PrefillMaxValue := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "PrefillMaxValue", TradeOpts.PrefillMaxValue)	
 		TradeOpts.CurrencySearchHave := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "CurrencySearchHave", TradeOpts.CurrencySearchHave)	
 		TradeOpts.BuyoutOnly := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "BuyoutOnly", TradeOpts.BuyoutOnly)	
+		TradeOpts.ForceMaxLinks := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "ForceMaxLinks", TradeOpts.ForceMaxLinks)	
 		
         ; Cache        
 		TradeOpts.Expire := TradeFunc_ReadIniValue(TradeConfigPath, "Cache", "Expire", TradeOpts.Expire)
@@ -304,6 +306,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		TradeOpts.PrefillMaxValue := PrefillMaxValue
 		TradeOpts.CurrencySearchHave := CurrencySearchHave
 		TradeOpts.BuyoutOnly := BuyoutOnly
+		TradeOpts.ForceMaxLinks := ForceMaxLinks
 	}        
 	SavedTradeSettings := false
 	
@@ -354,6 +357,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 	TradeFunc_WriteIniValue(TradeOpts.PrefillMaxValue, TradeConfigPath, "Search", "PrefillMaxValue")
 	TradeFunc_WriteIniValue(TradeOpts.CurrencySearchHave, TradeConfigPath, "Search", "CurrencySearchHave")
 	TradeFunc_WriteIniValue(TradeOpts.BuyoutOnly, TradeConfigPath, "Search", "BuyoutOnly")
+	TradeFunc_WriteIniValue(TradeOpts.ForceMaxLinks, TradeConfigPath, "Search", "ForceMaxLinks")
 	
 	; Cache	
 	TradeFunc_WriteIniValue(TradeOpts.Expire, TradeConfigPath, "Cache", "Expire")
@@ -807,6 +811,9 @@ CreateTradeSettingsUI()
 	AddToolTip(PrefillMinValueH, "Automatically fill the min-values in the advanced search GUI.")
 	GuiAddCheckbox("Pre-Fill Max-Values", "x827 yp+30 w230 h40", TradeOpts.PrefillMinValue, "PrefillMaxValue", "PrefillMaxValueH")
 	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
+	
+	GuiAddCheckbox("Force max links (certain corrupted items)", "x827 yp+30 w230 h40", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
+	AddToolTip(ForceMaxLinksH, "Corrupted 3/4 max-socket unique items always use`nmax links if your item is fully linked.")
 	
 	Gui, Add, Link, x827 yp+43 w230 cBlue, <a href="https://github.com/POE-TradeMacro/POE-TradeMacro/wiki/Options">Options Wiki-Page</a>
 	

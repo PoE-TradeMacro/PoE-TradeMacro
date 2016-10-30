@@ -4,6 +4,7 @@ The following is a list of what has been updated, starting with 1.1.0
 ==================================================================================================
 Added more options.
 Added pseudo mod suggestions to advanced search.
+Added update notes to update notification window.
 
 1.1.5
 ==================================================================================================
