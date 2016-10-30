@@ -256,6 +256,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	
 	; ignore mod rolls unless the AdvancedPriceCheckGui is used to search
+	AdvancedPriceCheckItem := TradeGlobals.Get("AdvancedPriceCheckItem")
 	If (isAdvancedPriceCheckRedirect) {
 		; submitting the AdvancedPriceCheck Gui sets TradeOpts.Set("AdvancedPriceCheckItem") with the edited item (selected mods and their min/max values)
 		s := TradeGlobals.Get("AdvancedPriceCheckItem")
@@ -331,7 +332,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (!IgnoreName) {
 		RequestParams.name   := Trim(StrReplace(Name, "Superior", ""))		
 		Item.UsedInSearch.FullName := true
-	} Else If (!Item.isUnique) {
+	} Else If (!Item.isUnique and AdvancedPriceCheckItem.mods.length() <= 0) {
 		isCraftingBase         := TradeFunc_CheckIfItemIsCraftingBase(Item.TypeName)
 		hasHighestCraftingILvl := TradeFunc_CheckIfItemHasHighestCraftingLevel(Item.SubType, iLvl)
 		; xtype = Item.SubType (Helmet)
@@ -363,6 +364,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 			Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
 		}		
+	} Else {
+		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
+		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
 	}			
 	
 	; don't overwrite advancedItemPriceChecks decision to inlucde/exclude sockets/links
@@ -2345,8 +2349,8 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 	
 	Gui, SelectModsGui:Destroy    
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values: 
-	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRange "`%" 
-	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the item's mods difference between their min and max value as 100`%.			
+	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRange "`%" (lowered for non-unique items)
+	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the (unique) item's mods difference between their min and max value as 100`%.			
 	
 	ValueRange := ValueRange / 100 	
 	
@@ -2429,10 +2433,10 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 				statValueMax := 
 			}
 			
-			minLabelFirst := "(" Floor(statValueMin)
-			minLabelSecond := ")" 
-			maxLabelFirst := "(" Floor(statValueMax)
-			maxLabelSecond := ")"
+			minLabelFirst  := advItem.isUnique ? "(" Floor(statValueMin) : ""
+			minLabelSecond := advItem.isUnique ? ")" : ""
+			maxLabelFirst  := advItem.isUnique ? "(" Floor(statValueMax) : ""
+			maxLabelSecond := advItem.isUnique ? ")" : ""
 			
 			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%							, % "(Total Q20) " stat.name
 			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedStatMin%j% r1	, % statValueMin
@@ -2486,10 +2490,10 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 				statValueMax := 
 			}
 			
-			minLabelFirst := "(" Floor(stat.min)
-			minLabelSecond := ")" 
-			maxLabelFirst := "(" Floor(stat.max)
-			maxLabelSecond := ")"
+			minLabelFirst  := advItem.isUnique ? "(" Floor(stat.min) : ""
+			minLabelSecond := advItem.isUnique ? ")" : ""
+			maxLabelFirst  := advItem.isUnique ? "(" Floor(stat.max) : ""
+			maxLabelSecond := advItem.isUnique ? ")" : ""
 			
 			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%						  , % stat.name
 			Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedStatMin%j% r1, % statValueMin
@@ -2748,11 +2752,11 @@ TradeFunc_HandleGuiSubmit(){
 			mod.min      := TradeAdvancedModMin%A_Index%
 			mod.max      := TradeAdvancedModMax%A_Index%
 			; has Enchantment
-			If (RegExMatch(TradeAdvancedParam%A_Index%, "i)enchant")) {
+			If (RegExMatch(TradeAdvancedParam%A_Index%, "i)enchant") and mod.selected) {
 				newItem.UsedInSearch.Enchantment := true
 			}
 			; has Corrupted Implicit
-			Else If (TradeAdvancedIsImplicit%A_Index%) {
+			Else If (TradeAdvancedIsImplicit%A_Index% and mod.selected) {
 				newItem.UsedInSearch.CorruptedMod := true
 			}
 			
