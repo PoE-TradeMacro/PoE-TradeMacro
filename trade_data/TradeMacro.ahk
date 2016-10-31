@@ -2814,7 +2814,7 @@ TradeFunc_HandleGuiSubmit(){
 	newItem.useLinks	:= TradeAdvancedUseLinks
 	newItem.useIlvl	:= TradeAdvancedSelectedILvl
 	newItem.minIlvl	:= TradeAdvancedMinILvl
-	DebugPrintArray(newItem)
+
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)	
 	Gui, SelectModsGui:Destroy
 }
