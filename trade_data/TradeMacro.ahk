@@ -515,8 +515,19 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	
 	ShowToolTip("Running search...")
 	
-	If (Item.IsCurrency and !Item.IsEssence) {		
-		Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser)
+	If (Item.IsCurrency and !Item.IsEssence) {
+		If (!TradeOpts.AlternativeCurrencySearch) {
+			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser)	
+		}
+		Else {
+			; Update currency data if last update is older than 30min
+			last := TradeGlobals.Get("LastAltCurrencyUpdate")
+			now  := A_NowUTC
+			diff := now - last
+			If (diff > 1800) {
+				GoSub, ReadPoeNinjaCurrencyData
+			}
+		}
 	}
 	Else {
 		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)	
@@ -535,13 +546,21 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		TradeFunc_OpenUrlInBrowser(ParsedUrl1)
 	}
 	Else If (Item.isCurrency and !Item.IsEssence) {
-		ParsedData := TradeFunc_ParseCurrencyHtml(Html, Payload)
+		; Default currency search
+		If (!TradeOpts.AlternativeCurrencySearch) {
+			ParsedData := TradeFunc_ParseCurrencyHtml(Html, Payload)
+		}
+		; Alternative currency search (poeninja)
+		Else {
+			ParsedData := TradeFunc_ParseAlternativeCurrencySearch(Item.Name, Payload)
+		}
 		
-		SetClipboardContents(ParsedData)
+		;SetClipboardContents(ParsedData)
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
 	}
 	Else {
+		; Check item age
 		If (isItemAgeRequest) {
 			Item.UsedInSearch.SearchType := "Item Age Search"
 		}
@@ -553,7 +572,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 		ParsedData := TradeFunc_ParseHtml(Html, Payload, iLvl, Enchantment, isItemAgeRequest)
 		
-		SetClipboardContents(ParsedData)
+		;SetClipboardContents(ParsedData)
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
 	}    
@@ -1153,6 +1172,88 @@ TradeFunc_ParseCurrencyHtml(html, payload){
 	}
 	
 	Return, Title
+}
+
+TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
+	Global Item, ItemData, TradeOpts
+	LeagueName := TradeGlobals.Get("LeagueName")
+	shortName := Trim(RegExReplace(name,  "Orb|of",  ""))	
+	
+	Title := StrPad(Item.Name " (" LeagueName ")", 30)
+	Title .= StrPad("data provided by poe.ninja", 38, "left")
+	Title .= "`n--------------------------------------------------------------------`n"
+	
+	Title .= StrPad("" ,10) 	
+	Title .= StrPad("|| Buy (" shortName ")" ,28)
+	Title .= StrPad("|| Sell (" shortName ")",28)
+	Title .= "`n"
+	Title .= StrPad("==========||==========================||============================",40)
+	Title .= "`n"
+
+	Title .= StrPad("Days ago" ,10) 	
+	Title .= StrPad("|| Pay (Chaos)",20)
+	Title .= StrPad("|  Get",8)
+	
+	Title .= StrPad("|| Pay",9)
+	Title .= StrPad("|  Get (Chaos)",20)
+	
+	Title .= "`n"
+	Title .= StrPad("----------||------------------|-------||-------|--------------------",40)
+	Title .= "`n"
+	
+	currencyData := 
+	For key, val in CurrencyHistoryData {
+		If (val.currencyTypeName = name) {
+			currencyData := val
+			break
+		}
+	}
+	
+	buyPay := currencyData.receive.percentile10
+	buyGet := buyPay < 1 ? 1 / buyPay : 1
+	buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
+	
+	sellPay := currencyData.pay.percentile10
+	sellGet := sellPay < 1 ? 1 / sellPay : 1
+	sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
+		
+	Title .= StrPad("Currently",  10)
+	Title .= StrPad("|| " buyPay, 20)
+	Title .= StrPad("| "  buyGet, 8)
+	
+	Title .= StrPad("|| " sellPay, 9)
+	Title .= "|"
+	Title .= StrPad(sellGet, 19, "left")
+	
+	length := currencyData.payCurrencyGraphData.Length()
+	i := 0
+	Loop % currencyData.payCurrencyGraphData.Length() {
+		date := currencyData.receiveCurrencyGraphData[length - i].daysAgo
+		date := date ? date : "24h" 
+		
+		buyPay := currencyData.receiveCurrencyGraphData[length - i].value
+		buyGet := buyPay < 1 ? 1 / buyPay : 1
+		buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
+		
+		sellPay := currencyData.payCurrencyGraphData[length - i].value
+		sellGet := sellPay < 1 ? 1 / sellPay : 1
+		sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
+		
+		Title .= "`n"
+		Title .= StrPad(date, 10)
+		Title .= StrPad("|| " buyPay, 20) 
+		Title .= StrPad("| "  buyGet, 8)
+		
+		Title .= StrPad("|| " sellPay, 9)
+		Title .= "|"
+		Title .= StrPad(sellGet, 19, "left")
+		
+		If (A_Index > 10) {
+			break
+		}
+		i++
+	}
+	Return Title
 }
 
 ; Calculate average and median price of X listings
@@ -2910,6 +3011,8 @@ ReadPoeNinjaCurrencyData:
 	UrlDownloadToFile, %url% , %A_ScriptDir%\temp\currencyData.json
 	FileRead, JSONFile, %A_ScriptDir%/temp/currencyData.json
 	parsedJSON 	:= JSON.Load(JSONFile)	
-	global CurrencyHistoryData := parsedJSON
-	;DebugPrintArray(CurrencyHistoryData.lines[1])
+	global CurrencyHistoryData := parsedJSON.lines
+	
+	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
+	;DebugPrintArray(CurrencyHistoryData[1])
 Return
