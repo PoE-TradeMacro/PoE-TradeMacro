@@ -2137,6 +2137,9 @@ TradeFunc_GetItemsPoeTradeMods(_item) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["enchantments"], _item.mods[k])
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["map mods"], _item.mods[k])
+		}
+		If (StrLen(_item.mods[k]["param"]) < 1) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["prophecies"], _item.mods[k])
 		}
 	}
