@@ -1229,7 +1229,7 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	i := 0
 	Loop % currencyData.payCurrencyGraphData.Length() {
 		date := currencyData.receiveCurrencyGraphData[length - i].daysAgo
-		date := date ? date : "24h" 
+		date := date ? date : "Last day" 
 		
 		buyPay := currencyData.receiveCurrencyGraphData[length - i].value
 		buyGet := buyPay < 1 ? 1 / buyPay : 1
@@ -2416,8 +2416,8 @@ AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedI
 			}
 			
 			If (stat.Name != "Block Chance") {
-				stat.value   := Round(stat.value * 100 / (100 + Stats.Quality)) 
-				statValueQ20 := Round(stat.value * ((100 + 20) / 100))
+				stat.value   := Round(stat.value) 
+				statValueQ20 := Round(stat.value)
 			}
 			
 			; calculate values to prefill min/max fields		
