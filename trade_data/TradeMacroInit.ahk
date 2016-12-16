@@ -60,7 +60,7 @@ class TradeUserOptions {
 	OpenWikiHotKey := ^w            	; 
 	CustomInputSearch := ^i         	;     
 	OpenSearchOnPoeTrade := ^q      	;     
-	ShowItemAge := ^a               	;     
+	ShowItemAge := ^e               	;     
 	
 	PriceCheckEnabled :=1
 	AdvancedPriceCheckEnabled :=1

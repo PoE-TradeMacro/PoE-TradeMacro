@@ -1,5 +1,9 @@
 The following is a list of what has been updated, starting with 1.1.0
 
+1.3
+================================================================================================
+Changed default hotkey for "Show item age" to "ctrl + e" because "ctrl + a" is the default for "select all".
+
 1.2.11
 ================================================================================================
 Updated ItemInfo script.
