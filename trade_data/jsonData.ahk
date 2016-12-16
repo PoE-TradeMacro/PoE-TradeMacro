@@ -35,11 +35,11 @@ Try {
 		global LeaguesData := parsedJSON
 	}
 	Else	{
-		MsgBox %errorMsg%	
+		MsgBox, 16, PoE-TradeMacro - Error, %errorMsg%	
 		ExitApp
 	}
 } Catch error {
-	MsgBox %errorMsg%	
+	MsgBox, 16, PoE-TradeMacro - Error, %errorMsg%	
 	ExitApp
 }
 
