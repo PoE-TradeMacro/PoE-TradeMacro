@@ -4,6 +4,7 @@ The following is a list of what has been updated, starting with 1.1.0
 ================================================================================================
 Changed default hotkey for "Show item age" to "ctrl + e" because "ctrl + a" is the default for "select all".
 Added a separate low/high mod range modifier instead of a single value for both.
+Fixed elemental dps not being displayed on advanced search GUI.
 
 1.2.11
 ================================================================================================
