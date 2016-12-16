@@ -2494,14 +2494,16 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}
 
 	TradeFunc_ResetGUI()
-	ValueRange := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRange : TradeOpts.AdvancedSearchModValueRange / 2
+	ValueRangeMin := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMin : TradeOpts.AdvancedSearchModValueRangeMin / 2
+	ValueRangeMax := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMax : TradeOpts.AdvancedSearchModValueRangeMax / 2
 	
 	Gui, SelectModsGui:Destroy    
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values: 
-	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRange "`%" (lowered for non-unique items)
+	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRangeMin "`% / " ValueRangeMax "`%" (lowered for non-unique items)
 	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the (unique) item's mods difference between their min and max value as 100`%.			
 	
-	ValueRange := ValueRange / 100 	
+	ValueRangeMin := ValueRangeMin / 100 	
+	ValueRangeMax := ValueRangeMax / 100 	
 	
 	; calculate length of first column
 	modLengthMax := 0
@@ -2566,12 +2568,12 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			; calculate values to prefill min/max fields		
 			; assume the difference between the theoretical max and min value as 100%
 			If (advItem.IsUnique) {
-				statValueMin := Round(statValueQ20 - ((stat.max - stat.min) * valueRange))
-				statValueMax := Round(statValueQ20 + ((stat.max - stat.min) * valueRange))
+				statValueMin := Round(statValueQ20 - ((stat.max - stat.min) * valueRangeMin))
+				statValueMax := Round(statValueQ20 + ((stat.max - stat.min) * valueRangeMax))
 			}
 			Else {
-				statValueMin := Round(statValueQ20 - (statValueQ20 * valueRange))
-				statValueMax := Round(statValueQ20 + (statValueQ20 * valueRange))	
+				statValueMin := Round(statValueQ20 - (statValueQ20 * valueRangeMin))
+				statValueMax := Round(statValueQ20 + (statValueQ20 * valueRangeMax))	
 			}			
 			
 			; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
@@ -2623,12 +2625,12 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			; calculate values to prefill min/max fields		
 			; assume the difference between the theoretical max and min value as 100%
 			If (advItem.IsUnique) {
-				statValueMin := Round(stat.value - ((stat.max - stat.min) * valueRange))
-				statValueMax := Round(stat.value + ((stat.max - stat.min) * valueRange))			
+				statValueMin := Round(stat.value - ((stat.max - stat.min) * valueRangeMin))
+				statValueMax := Round(stat.value + ((stat.max - stat.min) * valueRangeMax))			
 			}
 			Else {
-				statValueMin := Round(stat.value - (stat.value * valueRange))
-				statValueMax := Round(stat.value + (stat.value * valueRange))			
+				statValueMin := Round(stat.value - (stat.value * valueRangeMin))
+				statValueMax := Round(stat.value + (stat.value * valueRangeMax))			
 			}
 			
 			; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
@@ -2752,12 +2754,12 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		; calculate values to prefill min/max fields		
 		; assume the difference between the theoretical max and min value as 100%
 		If (advItem.mods[A_Index].ranges[1]) {
-			modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRange)
-			modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRange)	
+			modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
+			modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)	
 		}
 		Else {
-			modValueMin := modValue - (modValue * valueRange)
-			modValueMax := modValue + (modValue * valueRange)
+			modValueMin := modValue - (modValue * valueRangeMin)
+			modValueMax := modValue + (modValue * valueRangeMax)
 		}		
 		; floor values only If greater than 2, in case of leech/regen mods
 		modValueMin := (modValueMin > 2) ? Floor(modValueMin) : modValueMin

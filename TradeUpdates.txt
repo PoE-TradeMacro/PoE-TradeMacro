@@ -1,8 +1,9 @@
 The following is a list of what has been updated, starting with 1.1.0
 
-1.3
+1.3.0
 ================================================================================================
 Changed default hotkey for "Show item age" to "ctrl + e" because "ctrl + a" is the default for "select all".
+Added a separate low/high mod range modifier instead of a single value for both.
 
 1.2.11
 ================================================================================================
