@@ -2887,7 +2887,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, Link, x+5 yp+0 cBlue, <a href="https://poe.trade">visit</a>    		
 
 	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 + 65
-	windowWidth := (windowWidth > 420) ? windowWidth : 420
+	windowWidth := (windowWidth > 450) ? windowWidth : 450
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search
 }
 
