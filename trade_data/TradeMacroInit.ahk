@@ -112,6 +112,8 @@ TradeGlobals.Set("GithubUser", "POE-TradeMacro")
 TradeGlobals.Set("GithubRepo", "POE-TradeMacro")
 TradeGlobals.Set("ReleaseVersion", TradeReleaseVersion)
 TradeGlobals.Set("SettingsUITitle", "PoE (Trade) Item Info Settings")
+; set this variable to skip setting the project-name to "PoE-ItemInfo"
+UseExternalProjectName := "PoE-TradeMacro"
 
 ReadTradeConfig()
 Sleep, 100
