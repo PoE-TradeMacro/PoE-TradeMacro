@@ -583,7 +583,8 @@ TradeFunc_ScriptUpdate() {
 	user := TradeGlobals.Get("GithubUser")
 	ReleaseVersion := TradeGlobals.Get("ReleaseVersion")
 	ShowUpdateNotification := TradeOpts.ShowUpdateNotifications
-	PoEScripts_Update(user, repo, ReleaseVersion, ShowUpdateNotification)
+	SplashScreenTitle := "PoE-TradeMacro"
+	PoEScripts_Update(user, repo, ReleaseVersion, ShowUpdateNotification, SplashScreenTitle)
 }
 
 ;----------------------- Trade Settings UI (added onto ItemInfos Settings UI) ---------------------------------------
@@ -883,7 +884,7 @@ TradeFunc_DownloadDataFiles() {
 
 ;----------------------- SplashScreens ---------------------------------------
 TradeFunc_StartSplashScreen() {
-	SplashTextOn, , , Initializing PoE-TradeMacro...
+	SplashTextOn, , 20, PoE-TradeMacro, Initializing script...
 }
 TradeFunc_StopSplashScreen() {
 	SplashTextOff 
