@@ -469,7 +469,7 @@ TradeFunc_AssignHotkey(Key, Label){
 		If (errorlevel = 1)
 			str := str . "`nASCII " . Key . " - 1) The Label parameter specifies a nonexistent label name."
 		Else If (errorlevel = 2)
-			str := str . "`nASCII " . Key . " - 2) The KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language."
+			str := str . "`nASCII " . Key . " - 2) The KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language. Switching to the english layout should solve this for now."
 		Else If (errorlevel = 3)
 			str := str . "`nASCII " . Key . " - 3) Unsupported prefix key. For example, using the mouse wheel as a prefix in a hotkey such as WheelDown & Enter is not supported."
 		Else If (errorlevel = 4)
