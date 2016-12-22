@@ -1029,8 +1029,9 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	If (openSearchInBrowser) {
 		HttpObj.Option(6) := False
 	}    
+	
 	HttpObj.Open("POST","http://poe.trade/search")
-	HttpObj.SetRequestHeader("Host","poe.trade")
+	HttpObj.SetRequestHeader("Host","poe.trade")	
 	HttpObj.SetRequestHeader("Connection","keep-alive")
 	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
 	HttpObj.SetRequestHeader("Cache-Control","max-age=0")
@@ -1040,6 +1041,8 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
 	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
 	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
+		
+	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
     ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")    

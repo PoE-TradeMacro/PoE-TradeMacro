@@ -145,6 +145,8 @@ If (TradeOpts.DownloadDataFiles and not TradeOpts.Debug) {
 CreateTradeSettingsUI()
 TradeFunc_StopSplashScreen()
 
+TradeFunc_ReadCookieData()
+
 ReadTradeConfig(TradeConfigPath="trade_config.ini")
 {
 	Global
@@ -891,7 +893,7 @@ TradeFunc_ReadCookieData() {
 		If (match) {
 			continue
 		}	
-		
+
 		RegExMatch(A_LoopField, "i)(.*)\s?=", key)
 		RegExMatch(A_LoopField, "i)=\s?(.*)", value)
 
