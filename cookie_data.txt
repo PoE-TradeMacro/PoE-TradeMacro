@@ -6,6 +6,6 @@
 ; example: cfclearance=aefd126b59e0332b0e2c5750427ab11418a002fb-1482386963-604800
 ; make sure the cfclearance is about as long as in the example
 
-useragent=Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36
-cfduid=d7692e1029dac3d9b856f1c04807adcaf1482386959
-cfclearance=aefd126b59e0332b0e2c5750427ab11418a002fb-1482386963-604800
+useragent=
+cfduid=
+cfclearance=
