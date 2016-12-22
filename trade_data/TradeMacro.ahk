@@ -1017,7 +1017,7 @@ TradeFunc_DoParseClipboard()
 	ParsedData := ParseItemData(CBContents)
 }
 
-TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
+TradeFunc_DoPostRequestOld(payload, openSearchInBrowser = false)
 {	
 	ComObjError(0)
 	Encoding := "utf-8"
@@ -1027,6 +1027,57 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
 		HttpObj.Option(6) := False
 	}    
 	HttpObj.Open("POST","http://poe.trade/search")
+	HttpObj.SetRequestHeader("Host","poe.trade")
+	HttpObj.SetRequestHeader("Connection","keep-alive")
+	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
+	HttpObj.SetRequestHeader("Cache-Control","max-age=0")
+	HttpObj.SetRequestHeader("Origin","http://poe.trade")
+	HttpObj.SetRequestHeader("Upgrade-Insecure-Requests","1")
+	HttpObj.SetRequestHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36")
+	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
+	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
+    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
+    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
+    ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")	
+	HttpObj.Send(payload)
+	HttpObj.WaitForResponse()
+	html := HttpObj.ResponseText
+	
+	If Encoding {
+		oADO          := ComObjCreate("adodb.stream")
+		oADO.Type     := 1
+		oADO.Mode     := 3
+		oADO.Open()
+		oADO.Write( HttpObj.ResponseBody )
+		oADO.Position := 0
+		oADO.Type     := 2
+		oADO.Charset  := Encoding
+		html := oADO.ReadText() 
+		oADO.Close()
+	}
+	
+	If A_LastError
+		MsgBox % A_LastError	
+	
+	Return, html
+}
+
+TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
+{	
+	MsgBox % payload
+	ComObjError(0)
+	Encoding := "utf-8"
+    ;Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
+	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+	
+	url := "http://poe.trade/search?" . payload
+	
+	If (openSearchInBrowser) {
+		;HttpObj.Option(6) := False
+		TradeFunc_OpenUrlInBrowser(url)
+	}    
+	HttpObj.Open("GET","http://poe.trade/search")
 	HttpObj.SetRequestHeader("Host","poe.trade")
 	HttpObj.SetRequestHeader("Connection","keep-alive")
 	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
@@ -1726,8 +1777,37 @@ class RequestParams_ {
 	ToPayload() 
 	{
 		modGroupStr := this.modGroup.ToPayload()
+		paramsString := ["league", "xtype", "xbase", "name", "dmg_min", "dmg_max", "aps_min", "aps_max" 
+			, "crit_min", "crit_max", "dps_min", "dps_max", "edps_min", "edps_max", "pdps_min"
+			, "pdps_max", "armour_min", "armour_max", "evasion_min", "evasion_max", "shield_min" 
+			, "shield_max", "block_min", "block_max", "sockets_min", "sockets_max", "link_min" 
+			, "link_max", "sockets_r", "sockets_g", "sockets_b", "sockets_w", "linked_r", "linked_g" 
+			, "linked_b", "linked_w", "rlevel_min", "rlevel_max", "rstr_min", "rstr_max", "rdex_min" 
+			, "rdex_max", "rint_min", "rint_max", "modGroupStr", "q_min", "q_max", "level_min" 
+			, "level_max", "ilvl_min", "ilvl_max", "rarity", "seller", "xthread", "identified" 
+			, "corrupted", "online", "buyout", "altart", "capquality", "buyout_min", "buyout_max" 
+			, "buyout_currency", "crafted", "enchanted"]
+		params       := [this.league, this.xtype, this.xbase, this.name, this.dmg_min, this.dmg_max, this.aps_min, this.aps_max 
+			,this.crit_min, this.crit_max, this.dps_min, this.dps_max, this.edps_min, this.edps_max, this.pdps_min 
+			,this.pdps_max, this.armour_min, this.armour_max, this.evasion_min, this.evasion_max, this.shield_min 
+			,this.shield_max, this.block_min, this.block_max, this.sockets_min, this.sockets_max, this.link_min 
+			,this.link_max, this.sockets_r, this.sockets_g, this.sockets_b, this.sockets_w, this.linked_r, this.linked_g 
+			,this.linked_b, this.linked_w, this.rlevel_min, this.rlevel_max, this.rstr_min, this.rstr_max, this.rdex_min 
+			,this.rdex_max, this.rint_min, this.rint_max, modGroupStr, this.q_min, this.q_max, this.level_min 
+			,this.level_max, this.ilvl_min, this.ilvl_max, this.rarity, this.seller, this.xthread, this.identified 
+			,this.corrupted, this.online, this.buyout, this.altart, this.capquality, this.buyout_min, this.buyout_max 
+			,this.buyout_currency, this.crafted, this.enchanted]
 		
+		p := "?"
+		Loop, % params.Length() {
+			If (StrLen(params[A_Index])) {
+				p .= "&" . paramsString[A_Index] . "=" . params[A_Index]	
+			}			
+		}
+		
+		; old method, new is still untested
 		p := "league=" this.league "&type=" this.xtype "&base=" this.xbase "&name=" this.name "&dmg_min=" this.dmg_min "&dmg_max=" this.dmg_max "&aps_min=" this.aps_min "&aps_max=" this.aps_max "&crit_min=" this.crit_min "&crit_max=" this.crit_max "&dps_min=" this.dps_min "&dps_max=" this.dps_max "&edps_min=" this.edps_min "&edps_max=" this.edps_max "&pdps_min=" this.pdps_min "&pdps_max=" this.pdps_max "&armour_min=" this.armour_min "&armour_max=" this.armour_max "&evasion_min=" this.evasion_min "&evasion_max=" this.evasion_max "&shield_min=" this.shield_min "&shield_max=" this.shield_max "&block_min=" this.block_min "&block_max=" this.block_max "&sockets_min=" this.sockets_min "&sockets_max=" this.sockets_max "&link_min=" this.link_min "&link_max=" this.link_max "&sockets_r=" this.sockets_r "&sockets_g=" this.sockets_g "&sockets_b=" this.sockets_b "&sockets_w=" this.sockets_w "&linked_r=" this.linked_r "&linked_g=" this.linked_g "&linked_b=" this.linked_b "&linked_w=" this.linked_w "&rlevel_min=" this.rlevel_min "&rlevel_max=" this.rlevel_max "&rstr_min=" this.rstr_min "&rstr_max=" this.rstr_max "&rdex_min=" this.rdex_min "&rdex_max=" this.rdex_max "&rint_min=" this.rint_min "&rint_max=" this.rint_max modGroupStr "&q_min=" this.q_min "&q_max=" this.q_max "&level_min=" this.level_min "&level_max=" this.level_max "&ilvl_min=" this.ilvl_min "&ilvl_max=" this.ilvl_max "&rarity=" this.rarity "&seller=" this.seller "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted
+		
 		Return p
 	}
 }
@@ -1749,7 +1829,13 @@ class _ParamModGroup {
 		this.group_count := this.ModArray.Length()
 		Loop % this.ModArray.Length()
 			p .= this.ModArray[A_Index].ToPayload()
-		p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count
+		
+		p .= (StrLen(this.group_type)) ? "&group_type=" this.group_type : ""
+		p .= (StrLen(this.group_min)) ? "&group_min=" this.group_min : ""
+		p .= (StrLen(this.group_max)) ? "&group_max=" this.group_max : ""
+		p .= (StrLen(this.group_count)) ? "&group_count=" this.group_count : ""
+		
+		;p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count
 		Return p
 	}
 	AddMod(paraModObj) {
@@ -1765,7 +1851,10 @@ class _ParamMod {
 	{
 		; for some reason '+' is not encoded properly, this affects mods like '+#% to all Elemental Resistances'
 		this.mod_name := StrReplace(this.mod_name, "+", "%2B")
-		p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
+		p := (StrLen(this.mod_name)) ? "&mod_name=" this.mod_name : ""
+		p .= (StrLen(this.mod_min)) ? "&mod_min=" this.mod_min : ""
+		p .= (StrLen(this.mod_max)) ? "&mod_max=" this.mod_max : ""
+		;p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
 		Return p
 	}
 }
