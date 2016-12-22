@@ -1017,8 +1017,12 @@ TradeFunc_DoParseClipboard()
 	ParsedData := ParseItemData(CBContents)
 }
 
-TradeFunc_DoPostRequestOld(payload, openSearchInBrowser = false)
-{	
+TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
+{		
+	UserAgent   := TradeGlobals.Get("UserAgent")
+	cfduid      := TradeGlobals.Get("cfduid")
+	cfClearance := TradeGlobals.Get("cfClearance")
+	
 	ComObjError(0)
 	Encoding := "utf-8"
     ;Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
@@ -1026,68 +1030,20 @@ TradeFunc_DoPostRequestOld(payload, openSearchInBrowser = false)
 	If (openSearchInBrowser) {
 		HttpObj.Option(6) := False
 	}    
+	
 	HttpObj.Open("POST","http://poe.trade/search")
-	HttpObj.SetRequestHeader("Host","poe.trade")
+	HttpObj.SetRequestHeader("Host","poe.trade")	
 	HttpObj.SetRequestHeader("Connection","keep-alive")
 	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
 	HttpObj.SetRequestHeader("Cache-Control","max-age=0")
 	HttpObj.SetRequestHeader("Origin","http://poe.trade")
-	HttpObj.SetRequestHeader("Upgrade-Insecure-Requests","1")
-	HttpObj.SetRequestHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36")
+	HttpObj.SetRequestHeader("Upgrade-Insecure-Requests","1")	
+	HttpObj.SetRequestHeader("User-Agent", UserAgent)
 	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
 	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
 	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
-    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
-    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
-    ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")	
-	HttpObj.Send(payload)
-	HttpObj.WaitForResponse()
-	html := HttpObj.ResponseText
-	
-	If Encoding {
-		oADO          := ComObjCreate("adodb.stream")
-		oADO.Type     := 1
-		oADO.Mode     := 3
-		oADO.Open()
-		oADO.Write( HttpObj.ResponseBody )
-		oADO.Position := 0
-		oADO.Type     := 2
-		oADO.Charset  := Encoding
-		html := oADO.ReadText() 
-		oADO.Close()
-	}
-	
-	If A_LastError
-		MsgBox % A_LastError	
-	
-	Return, html
-}
-
-TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
-{	
-	MsgBox % payload
-	ComObjError(0)
-	Encoding := "utf-8"
-    ;Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
-	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	
-	url := "http://poe.trade/search?" . payload
-	
-	If (openSearchInBrowser) {
-		;HttpObj.Option(6) := False
-		TradeFunc_OpenUrlInBrowser(url)
-	}    
-	HttpObj.Open("GET","http://poe.trade/search")
-	HttpObj.SetRequestHeader("Host","poe.trade")
-	HttpObj.SetRequestHeader("Connection","keep-alive")
-	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
-	HttpObj.SetRequestHeader("Cache-Control","max-age=0")
-	HttpObj.SetRequestHeader("Origin","http://poe.trade")
-	HttpObj.SetRequestHeader("Upgrade-Insecure-Requests","1")
-	HttpObj.SetRequestHeader("User-Agent","Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36")
-	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
-	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
+		
+	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
     ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")	
@@ -1117,6 +1073,10 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false)
 ; Get currency.poe.trade html
 ; Either at script start to parse the currency IDs or when searching to get currency listings
 TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init = false){
+	UserAgent   := TradeGlobals.Get("UserAgent")
+	cfduid      := TradeGlobals.Get("cfduid")
+	cfClearance := TradeGlobals.Get("cfClearance")
+	
 	ComObjError(0)
 	Encoding := "utf-8"
 	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
@@ -1134,7 +1094,9 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 		Url := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . IDs[currencyName] . "&have=" . IDs[Have]
 	}
 	
-	HttpObj.Open("GET",Url)
+	HttpObj.Open("GET",Url)	
+	HttpObj.SetRequestHeader("User-Agent", UserAgent)
+	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
 	HttpObj.Send()
 	HttpObj.WaitForResponse()
 	html := HttpObj.ResponseText
@@ -3280,4 +3242,13 @@ ReadPoeNinjaCurrencyData:
 		ChaosEquivalents[val.currencyTypeName] := val.chaosEquivalent		
 	}
 	ChaosEquivalents["Chaos Orb"] := 1
+Return
+
+
+CloseCookieWindow:
+	Gui, Cancel
+Return
+
+OpenCookieFile:
+	Run, %A_ScriptDir%\cookie_data.txt
 Return
