@@ -137,6 +137,8 @@ TradeGlobals.Set("CurrencyIDs", object := {})
 
 TradeFunc_ReadCookieData()
 ; get currency ids from currency.poe.trade
+
+TradeFunc_ReadCookieData()
 TradeFunc_DoCurrencyRequest("", false, true)
 If (TradeOpts.DownloadDataFiles and not TradeOpts.Debug) {
 	TradeFunc_DownloadDataFiles()	
