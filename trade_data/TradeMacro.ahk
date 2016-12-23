@@ -3211,5 +3211,5 @@ CloseCookieWindow:
 Return
 
 OpenCookieFile:
-	Run, %A_ScriptDir%\cookie_data.txt
+	Run, %A_ScriptDir%\temp\cookie_data.txt
 Return
