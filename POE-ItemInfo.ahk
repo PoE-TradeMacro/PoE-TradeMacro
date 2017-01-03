@@ -879,11 +879,26 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 		}
 		IfInString, LoopField, %A_Space%Map
 		{
-			Global matchList
-			BaseType = Map
-			Loop % matchList.MaxIndex()
+			IfInString, LoopField, Shaped
 			{
-				Match := matchList[A_Index]
+				Global shapedMapMatchList
+				BaseType = Map
+				Loop % shapedMapMatchList.MaxIndex()
+				{
+					Match := shapedMapMatchList[A_Index]
+					IfInString, LoopField, %Match%
+					{
+						SubType = %Match%
+						return
+					}
+				}
+			}
+			
+			Global mapMatchList
+			BaseType = Map
+			Loop % mapMatchList.MaxIndex()
+			{
+				Match := mapMatchList[A_Index]
 				IfInString, LoopField, %Match%
 				{
 					SubType = %Match%
@@ -892,13 +907,6 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			}
 
 			SubType = Unknown%A_Space%Map
-			return
-		}
-		; Dry Peninsula fix
-		IfInString, LoopField, Dry%A_Space%Peninsula
-		{
-			BaseType = Map
-			SubType = Dry%A_Space%Peninsula
 			return
 		}
 
@@ -4087,6 +4095,13 @@ ParseAffixes(ItemDataAffixes, Item)
 			{
 				ValueRange := LookupAffixData("data\AddedColdDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
+			
+			Else If (ItemSubType == "Bow")
+			{
+				; Added ele damage for bows follows 1H tiers
+				ValueRange := LookupAffixData("data\AddedColdDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
+			}
+			
 			Else
 			{
 				ValueRange := LookupAffixData("data\AddedColdDamage_2H.txt", ItemLevel, CurrValue, "", CurrTier)
@@ -4124,9 +4139,15 @@ ParseAffixes(ItemDataAffixes, Item)
 			{
 				ValueRange := LookupAffixData("data\AddedFireDamage_Quivers.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
-			
+
 			Else If (ItemGripType == "1H") ; One handed weapons
 			{
+				ValueRange := LookupAffixData("data\AddedFireDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
+			}
+			
+			Else If (ItemSubType == "Bow")
+			{
+				; Added ele damage for bows follows 1H tiers
 				ValueRange := LookupAffixData("data\AddedFireDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
 			
@@ -4167,12 +4188,18 @@ ParseAffixes(ItemDataAffixes, Item)
 			{
 				ValueRange := LookupAffixData("data\AddedLightningDamage_Quivers.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
-		
+			
 			Else If (ItemGripType == "1H") ; One handed weapons
 			{
 				ValueRange := LookupAffixData("data\AddedLightningDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
-		
+						
+			Else If (ItemSubType == "Bow")
+			{
+				; Added ele damage for bows follows 1H tiers
+				ValueRange := LookupAffixData("data\AddedLightningDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
+			}
+			
 			Else
 			{
 				ValueRange := LookupAffixData("data\AddedLightningDamage_2H.txt", ItemLevel, CurrValue, "", CurrTier)
@@ -4189,6 +4216,13 @@ ParseAffixes(ItemDataAffixes, Item)
 			{
 				ValueRange := LookupAffixData("data\AddedChaosDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
+											
+			Else If (ItemSubType == "Bow")
+			{
+				; Added ele damage for bows follows 1H tiers
+				ValueRange := LookupAffixData("data\AddedChaosDamage_1H.txt", ItemLevel, CurrValue, "", CurrTier)
+			}
+			
 			Else If (ItemGripType == "2H")
 			{
 				ValueRange := LookupAffixData("data\AddedChaosDamage_2H.txt", ItemLevel, CurrValue, "", CurrTier)
@@ -6244,7 +6278,7 @@ ItemIsMirrored(ItemDataText)
 ;
 ParseItemData(ItemDataText, ByRef RarityLevel="")
 {
-	Global Item, ItemData, AffixTotals, uniqueMapList, mapList, matchList, divinationCardList, gemQualityList
+	Global Item, ItemData, AffixTotals, uniqueMapList, mapList, mapMatchList, shapedMapMatchList, divinationCardList, gemQualityList
 
 	ItemDataPartsIndexLast =
 	ItemDataPartsIndexAffixes =
@@ -8290,12 +8324,12 @@ TogglePOEItemScript()
 	if SuspendPOEItemScript = 0
 	{
 		SuspendPOEItemScript = 1
-		ToolTip, POE ItemInfo Script is PAUSED!
+		ShowToolTip("Item parsing PAUSED")
 	}
 	else
 	{
 		SuspendPOEItemScript = 0
-		ToolTip
+		ShowToolTip("Item parsing ENABLED")
 	}
 }
 
@@ -8309,9 +8343,7 @@ F8::
 	return
 */
 
-; ############ ADD YOUR OWN MACROS HERE #############
+; ############ (user) macros #############
 #IfWinActive Path of Exile ahk_class POEWindowClass ahk_group PoEexe
-
-Pause::TogglePOEItemScript()
 
 #Include %A_ScriptDir%/AdditionalMacros.txt

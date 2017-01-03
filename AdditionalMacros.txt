@@ -1,3 +1,5 @@
+  Pause::TogglePOEItemScript()				;pause item parsing with the pause key (other macros remain). key bind enabled by default.
+
 setAfkMessage(){		
 	T1 := A_Now
 	T2 := A_NowUTC
@@ -34,3 +36,5 @@ setAfkMessage(){
 ;   F9::SendInput {Enter}/remaining{Enter}		; mobs remaining with F9
 ;   F10::SendInput {Enter}/global 820{Enter}	; join a channel with F10
 ;	F11::setAfkMessage()						; pastes afk message to your chat, just change "X" to your estimated afk time
+
+
