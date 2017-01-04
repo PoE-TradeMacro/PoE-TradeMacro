@@ -3056,6 +3056,15 @@ class TradeUtils {
 		Return Trim(in)
 	}
 	
+	
+	Arr_concatenate(p*) {
+		res := Object()
+		For each, obj in p
+			For each, value in obj
+				res.Insert(value)
+		return res
+	}
+	
 	; ------------------------------------------------------------------------------------------------------------------ ;
 	; TradeUtils.StrX Function for parsing html, see simple example usage at https://gist.github.com/thirdy/9cac93ec7fd947971721c7bdde079f94
 	; ------------------------------------------------------------------------------------------------------------------ ;
@@ -3143,7 +3152,7 @@ OverwriteSettingsWidthTimer:
 	o := Globals.Get("SettingsUIWidth")
 
 	If (o) {
-		Globals.Set("SettingsUIWidth", 1085)
+		Globals.Set("SettingsUIWidth", 543)
 		SetTimer, OverwriteSettingsWidthTimer, Off
 	}	
 Return
@@ -3152,7 +3161,7 @@ OverwriteSettingsHeightTimer:
 	o := Globals.Get("SettingsUIHeight")
 
 	If (o) {
-		;Globals.Set("SettingsUIHeight", 750)
+		Globals.Set("SettingsUIHeight", 725)
 		SetTimer, OverwriteSettingsHeightTimer, Off
 	}	
 Return
@@ -3160,15 +3169,15 @@ Return
 ChangeScriptListsTimer:
 	o := Globals.Get("ScriptList")
 	l := Globals.Get("UpdateNoteFileList")
-	m := Globals.Get("SettingsScriptList")
 
 	If (o and l and m) {
 		o.push(A_ScriptDir "\main")
 		o.push(A_ScriptDir "\PoE-TradeMacro_(Fallback)")
+		Global.Set("ScriptList", o)
 		
 		l.push([A_ScriptDir "\TradeUpdates.txt","TradeMacro"])
-		
-		m.push("PoE-TradeMacro")
+		Global.Set("UpdateNoteFileList", l)
+
 		SetTimer, ChangeScriptListsTimer, Off
 	}	
 Return
@@ -3184,7 +3193,8 @@ OverwriteSettingsNameTimer:
 		Menu, Tray, UseErrorLevel
 		Menu, Tray, Rename, % OldMenuTrayName, % NewMenuTrayName
 		If (ErrorLevel = 0) {		
-			Menu, Tray, Icon, %A_ScriptDir%\trade_data\poe-trade-bl.ico		
+			Menu, Tray, Icon, %A_ScriptDir%\trade_data\poe-trade-bl.ico	
+			Globals.Set("SettingsUITitle", TradeGlobals.Get("SettingsUITitle"))
 			SetTimer, OverwriteSettingsNameTimer, Off
 		}
 		Menu, Tray, UseErrorLevel, off			
