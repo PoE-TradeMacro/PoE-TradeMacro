@@ -19,6 +19,7 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 }
 
 Menu, Tray, Icon, %A_ScriptDir%\trade_data\poe-trade-bl.ico
+Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
 
 TradeFunc_StartSplashScreen()
 
@@ -1270,13 +1271,13 @@ TradeFunc_StopSplashScreen() {
 		MsgBox % "Debug mode enabled! Disable in settings-menu unless you're developing!"
 		Class_Console("console",0,335,600,900,,,,9)
 		console.show()
-	}    
-	
-    ; Let timer run until SettingsUIWidth is set and overwrite some options.
-	SetTimer, OverwriteSettingsWidthTimer, 500
-	SetTimer, OverwriteSettingsHeightTimer, 500
-	SetTimer, OverwriteSettingsNameTimer, 500
-	SetTimer, ChangeScriptsToCloseTimer, 500
+	}   	
+
+    ; Let timer run until ItemInfos global settings are set to overwrite them.
+	SetTimer, OverwriteSettingsWidthTimer, 250
+	SetTimer, OverwriteSettingsHeightTimer, 250
+	SetTimer, OverwriteSettingsNameTimer, 250
+	SetTimer, ChangeScriptListsTimer, 250
 	GoSub, ReadPoeNinjaCurrencyData
 }
 

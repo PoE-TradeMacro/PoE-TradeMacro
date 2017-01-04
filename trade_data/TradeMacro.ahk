@@ -3157,13 +3157,19 @@ OverwriteSettingsHeightTimer:
 	}	
 Return
 
-ChangeScriptsToCloseTimer:
+ChangeScriptListsTimer:
 	o := Globals.Get("ScriptList")
+	l := Globals.Get("UpdateNoteFileList")
+	m := Globals.Get("SettingsScriptList")
 
-	If (o) {
+	If (o and l and m) {
 		o.push(A_ScriptDir "\main")
 		o.push(A_ScriptDir "\PoE-TradeMacro_(Fallback)")
-		SetTimer, ChangeScriptsToCloseTimer, Off
+		
+		l.push([A_ScriptDir "\TradeUpdates.txt","TradeMacro"])
+		
+		m.push("PoE-TradeMacro")
+		SetTimer, ChangeScriptListsTimer, Off
 	}	
 Return
 
@@ -3181,9 +3187,7 @@ OverwriteSettingsNameTimer:
 			Menu, Tray, Icon, %A_ScriptDir%\trade_data\poe-trade-bl.ico		
 			SetTimer, OverwriteSettingsNameTimer, Off
 		}
-		Menu, Tray, UseErrorLevel, off		
-		
-		Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
+		Menu, Tray, UseErrorLevel, off			
 	}	
 Return
 

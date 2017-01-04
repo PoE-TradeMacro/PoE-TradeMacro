@@ -181,6 +181,8 @@ Globals.Set("SettingsUITitle", "PoE Item Info Settings")
 Globals.Set("GithubRepo", "POE-ItemInfo")
 Globals.Set("GithubUser", "aRTy42")
 Globals.Set("ScriptList", [A_ScriptDir "\POE-ItemInfo"])
+Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\updates.txt","ItemInfo"]])
+Globals.Set("SettingsScriptList", ["POE-ItemInfo"])
 
 ; Set ProjectName to create user settings folder in A_MyDocuments.
 ; Don't set variable "UseExternalProjectName" in this script.
@@ -583,6 +585,7 @@ Menu, Tray, Tip, Path of Exile Item Info %RelVer%
 Menu, Tray, NoStandard
 Menu, Tray, Add, About..., MenuTray_About
 Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE Item Info Settings"), ShowSettingsUI
+Menu, Tray, Add, Update Notes, ShowUpdateNotes
 Menu, Tray, Add ; Separator
 Menu, Tray, Add, Edit, :TextFiles
 Menu, Tray, Add ; Separator
@@ -7697,6 +7700,9 @@ ShowUnhandledCaseDialog()
 CreateSettingsUI()
 {
 	Global
+	
+	Scripts := Globals.Get("SettingsScriptList")
+	
 	; General
 
 	GuiAddGroupBox("General", "x7 y15 w260 h90")
@@ -7794,6 +7800,10 @@ CreateSettingsUI()
 	GuiAddButton("&Defaults", "x287 y640 w80 h23", "SettingsUI_BtnDefaults")
 	GuiAddButton("&OK", "Default x372 y640 w75 h23", "SettingsUI_BtnOK")
 	GuiAddButton("&Cancel", "x452 y640 w80 h23", "SettingsUI_BtnCancel")
+	
+	If (Scripts.Length() > 1) {
+		Gui, Tab
+	}
 }
 
 UpdateSettingsUI()
@@ -7916,6 +7926,42 @@ ShowSettingsUI()
 	SettingsUIHeight := Globals.Get("SettingsUIHeight", 710)
 	SettingsUITitle := Globals.Get("SettingsUITitle", "PoE Item Info Settings")
 	Gui, Show, w%SettingsUIWidth% h%SettingsUIHeight%, %SettingsUITitle%
+}
+
+ShowUpdateNotes()
+{
+	; remove POE-Item-Info tooltip if still visible
+	SetTimer, ToolTipTimer, Off
+	ToolTip
+	Gui, UpdateNotes:Destroy
+	Fonts.SetUIFont(9)
+
+	Files := Globals.Get("UpdateNoteFileList")
+	
+	TabNames := ""
+	Loop, % Files.Length() {
+		name := Files[A_Index][2]
+		TabNames .= name "|"
+	}
+	
+	StringTrimRight, TabNames, TabNames, 1
+	PreSelect := Files.Length()
+	Gui, UpdateNotes:Add, Tab3, Choose%PreSelect%, %TabNames%
+	
+	Loop, % Files.Length() {
+		file := Files[A_Index][1]
+		FileRead, notes, %file%
+		Gui, UpdateNotes:Add, Edit, r50 ReadOnly w700, %notes%		
+		
+		NextTab := A_Index + 1
+		Gui, UpdateNotes:Tab, %NextTab%
+	}
+	Gui, UpdateNotes:Tab	
+	
+	SettingsUIWidth := 745
+	SettingsUIHeight := 710
+	SettingsUITitle := "Update Notes"
+	Gui, UpdateNotes:Show, w%SettingsUIWidth% h%SettingsUIHeight%, %SettingsUITitle%
 }
 
 IniRead(ConfigPath, Section_, Key, Default_)
@@ -8134,6 +8180,10 @@ OnClipBoardChange:
 			ParseClipBoardChanges()
 		}
 	}
+	return
+	
+ShowUpdateNotes:
+	ShowUpdateNotes()
 	return
 
 ShowSettingsUI:
