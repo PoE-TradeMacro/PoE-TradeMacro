@@ -3182,8 +3182,16 @@ OverwriteSettingsNameTimer:
 			SetTimer, OverwriteSettingsNameTimer, Off
 		}
 		Menu, Tray, UseErrorLevel, off		
+		
+		Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
 	}	
 Return
+
+OpenGithubWikiFromMenu:
+	repo := TradeGlobals.Get("GithubRepo")
+	user := TradeGlobals.Get("GithubUser")
+	TradeFunc_OpenUrlInBrowser("https://github.com/" user "/" repo "/wiki")
+return
 
 TradeSettingsUI_BtnOK:
 	Global TradeOpts
