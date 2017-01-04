@@ -3157,6 +3157,16 @@ OverwriteSettingsHeightTimer:
 	}	
 Return
 
+ChangeScriptsToCloseTimer:
+	o := Globals.Get("ScriptList")
+
+	If (o) {
+		o.push(A_ScriptDir "\main")
+		o.push(A_ScriptDir "\PoE-TradeMacro_(Fallback)")
+		SetTimer, ChangeScriptsToCloseTimer, Off
+	}	
+Return
+
 OverwriteSettingsNameTimer:
 	o := Globals.Get("SettingsUITitle")
 

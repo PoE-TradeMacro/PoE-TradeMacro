@@ -1276,6 +1276,7 @@ TradeFunc_StopSplashScreen() {
 	SetTimer, OverwriteSettingsWidthTimer, 500
 	SetTimer, OverwriteSettingsHeightTimer, 500
 	SetTimer, OverwriteSettingsNameTimer, 500
+	SetTimer, ChangeScriptsToCloseTimer, 500
 	GoSub, ReadPoeNinjaCurrencyData
 }
 
