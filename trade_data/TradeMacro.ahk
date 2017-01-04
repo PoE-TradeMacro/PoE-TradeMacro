@@ -3152,7 +3152,7 @@ OverwriteSettingsHeightTimer:
 	o := Globals.Get("SettingsUIHeight")
 
 	If (o) {
-		Globals.Set("SettingsUIHeight", 750)
+		;Globals.Set("SettingsUIHeight", 750)
 		SetTimer, OverwriteSettingsHeightTimer, Off
 	}	
 Return
