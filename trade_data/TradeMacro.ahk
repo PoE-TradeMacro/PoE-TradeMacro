@@ -2730,6 +2730,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		TradeAdvancedParam%e%  		:= ChangedImplicit.param
 		TradeAdvancedIsImplicit%e%  := true
 	}
+	TradeAdvancedImplicitCount := e
 	
 	If (ChangedImplicit) {
 		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line% 
@@ -2738,6 +2739,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	;add mods	
 	l := 1
 	p := 1
+	TradeAdvancedNormalModCount := 0
 	ModNotFound := false
 	Loop % advItem.mods.Length() {
 		If (!advItem.mods[A_Index].isVariable and advItem.IsUnique) {
@@ -2846,11 +2848,14 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			p++
 			;change color if pseudo mod
 			color := "cGray"
-		}	
+		}
+		Else {
+			TradeAdvancedNormalModCount++
+		}
 		
 		state := modValue ? 0 : 1	
 		
-		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color%									, % isPseudo ? "(pseudo) " . displayName : displayName
+		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color% vTradeAdvancedModName%index%			, % isPseudo ? "(pseudo) " . displayName : displayName
 		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 Disabled%state% 	, % modValueMin
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen                  		 				, % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
 		Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1     		                         		, % TradeUtils.ZeroTrim(modValue)
@@ -2904,19 +2909,45 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	
 	; open search on poe.trade instead
 	Gui, SelectModsGui:Add, Button, x+10 yp+0 gAdvancedOpenSearchOnPoeTrade, Op&en on poe.trade
-	Gui, SelectModsGui:Add, Text, x+20 yp+5 cGray, (Pro-Tip: Use Alt + S/E to submit a button)
+	
+	; add some widths and margins to align the checkox with the others on the right side
+	RightPos := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10
+	RightPosText := RightPos - 100
+	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+5, Check normal mods
+	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
 	
 	If (ModNotFound) {
-		Gui, SelectModsGui:Add, Picture, x10 y+12, %A_ScriptDir%\trade_data\error.png
+		Gui, SelectModsGui:Add, Picture, x10 y+16, %A_ScriptDir%\trade_data\error.png
 		Gui, SelectModsGui:Add, Text, x+10 yp+2 cRed,One or more mods couldn't be found on poe.trade
 	}
-	Gui, SelectModsGui:Add, Text, x10 y+10 cGreen, Please support poe.trade by visiting without adblocker
-	Gui, SelectModsGui:Add, Link, x+5 yp+0 cBlue, <a href="https://poe.trade">visit</a>    		
+	Gui, SelectModsGui:Add, Text, x10 y+14 cGreen, Please support poe.trade by disabling adblock
+	Gui, SelectModsGui:Add, Link, x+5 yp+0 cBlue, <a href="https://poe.trade">visit</a>    
+	Gui, SelectModsGui:Add, Text, x+10 yp+0 cGray, (Use Alt + S/E to submit a button)
 
 	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 + 65
-	windowWidth := (windowWidth > 500) ? windowWidth : 500
+	windowWidth := (windowWidth > 510) ? windowWidth : 510
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search
 }
+
+AdvancedCheckAllMods:
+	ImplicitCount := TradeAdvancedIsImplicit1 ? 1 : 0
+	ImplicitCount := TradeAdvancedImplicitCount
+	EmptySelect := 0
+	GuiControlGet, IsChecked, SelectModsGui:, TradeAdvancedSelectedCheckAllMods
+	Loop, 20 {
+		If ((A_Index) > (TradeAdvancedNormalModCount + ImplicitCount + EmptySelect) or (ImplicitCount = A_Index)) {
+			continue
+		}
+		Else {
+			state := IsChecked ? 1 : 0
+			GuiControl, SelectModsGui:, TradeAdvancedSelected%A_Index%, %state%	
+			GuiControlGet, TempModName, SelectModsGui:, TradeAdvancedModName%A_Index%
+			If (StrLen(TempModName) < 1) {
+				EmptySelect++
+			}
+		}
+	}
+Return
 
 AdvancedPriceCheckSearch:	
 	TradeFunc_HandleGuiSubmit()
@@ -2936,6 +2967,7 @@ TradeFunc_ResetGUI(){
 			TradeAdvancedSelected%A_Index%:=
 			TradeAdvancedModMin%A_Index%	:=
 			TradeAdvancedModMax%A_Index%	:=
+			TradeAdvancedModName%A_Index%	:=
 		}
 		Else If (A_Index >= 20){
 			TradeAdvancedStatCount :=
@@ -2961,6 +2993,9 @@ TradeFunc_ResetGUI(){
 	TradeAdvancedSelectedILvl	:=
 	TradeAdvancedMinILvl		:=
 	TradeAdvancedSelectedItemBase	:=
+	TradeAdvancedSelectedCheckAllMods	:=
+	TradeAdvancedImplicitCount	:=
+	TradeAdvancedNormalModCount	:=
 }
 
 TradeFunc_HandleGuiSubmit(){
