@@ -188,7 +188,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	If (!Item.IsUnique) {		
-		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
+		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)	
+		preparedItem.maxSockets := Item.maxSockets
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
 		
@@ -227,6 +228,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			
 			preparedItem :=
 			preparedItem := TradeFunc_GetItemsPoeTradeUniqueMods(uniqueWithVariableMods)	
+			preparedItem.maxSockets := Item.maxSockets
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
 			
@@ -2863,7 +2865,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen 			                       		, % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
 		checkEnabled := ErrorMsg ? 0 : 1
 		If (checkEnabled) {
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedSelected%index%	
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 vTradeAdvancedSelected%index%	
 		}
 		Else {
 			GUI, SelectModsGui:Add, Picture, x+10 yp+1 hwndErrorPic 0x0100, %A_ScriptDir%\trade_data\error.png
@@ -2877,30 +2879,42 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}
 	
 	m := 1	
-	;If (Sockets >= 5 or Links >= 5) {
-	If (true) {
-		If (advItem.mods.Length()) {
-			Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line% 	
-		}		
-				
-		If (Sockets >= 5) {
-			m++
-			text := "Sockets: " . Trim(Sockets)
-			Gui, SelectModsGui:Add, CheckBox, x15 y+10 vTradeAdvancedUseSockets     , % text
-		}
-		If (Links >= 5) {
-			offset := (m > 1 ) ? "+15" : "15"
-			m++
-			text := "Links:  " . Trim(Links)
-			Gui, SelectModsGui:Add, CheckBox, x%offset% yp+0 vTradeAdvancedUseLinks Checked, % text
-		}
-		
-		offsetX := (m = 1)  ? "15" : "+15"
-		offsetY := (m = 1) ? "20" : "+0"
-		Gui, SelectModsGui:Add, CheckBox, x%offsetX% yp%offsetY% vTradeAdvancedSelectedILvl , % "Item Level (min)"
-		Gui, SelectModsGui:Add, Edit    , x+5 yp-3 w30 vTradeAdvancedMinILvl , % ""
-		Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase , % "Include Item Base"		
+
+	; Links and Sockets
+	If (advItem.mods.Length()) {
+		Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line% 	
+	}		
+			
+	If (Sockets >= 5) {
+		m++
+		text := "Sockets: " . Trim(Sockets)
+		Gui, SelectModsGui:Add, CheckBox, x15 y+10 vTradeAdvancedUseSockets     , % text
 	}
+	Else If (Sockets <= 4 and advItem.maxSockets > 4) {
+		m++
+		text := "Sockets (max): 4"
+		Gui, SelectModsGui:Add, CheckBox, x15 y+10 vTradeAdvancedUseSocketsMaxFour, % text
+	}
+	
+	If (Links >= 5) {
+		offset := (m > 1 ) ? "+15" : "15"
+		m++
+		text := "Links:  " . Trim(Links)
+		Gui, SelectModsGui:Add, CheckBox, x%offset% yp+0 vTradeAdvancedUseLinks Checked, % text
+	}
+	Else If (Links <= 4 and advItem.maxSockets > 4) {
+		offset := (m > 1 ) ? "+15" : "15"
+		m++
+		text := "Links (max): 4"
+		Gui, SelectModsGui:Add, CheckBox, x%offset% yp+0 vTradeAdvancedUseLinksMaxFour Checked, % text
+	}
+	
+	offsetX := (m = 1)  ? "15" : "+15"
+	offsetY := (m = 1) ? "20" : "+0"
+	Gui, SelectModsGui:Add, CheckBox, x%offsetX% yp%offsetY% vTradeAdvancedSelectedILvl , % "Item Level (min)"
+	Gui, SelectModsGui:Add, Edit    , x+5 yp-3 w30 vTradeAdvancedMinILvl , % ""
+	Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase , % "Include Item Base"		
+	
 	
 	Item.UsedInSearch.SearchType := "Advanced"
 	; closes this window and starts the search
