@@ -472,6 +472,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	; handle gems
 	If (Item.IsGem) {
 		RequestParams.xtype := Item.BaseType
+		RequestParams.xbase := Trim(RegExReplace(Item.Name, "i)support|superior", ""))
+		RequestParams.name := ""
 		If (TradeOpts.GemQualityRange > 0) {
 			RequestParams.q_min := Item.Quality - TradeOpts.GemQualityRange
 			RequestParams.q_max := Item.Quality + TradeOpts.GemQualityRange
@@ -2929,7 +2931,7 @@ return
 TradeFunc_ResetGUI(){
 	Global 
 	Loop {
-		If (TradeAdvancedModMin%A_Index%) {
+		If (TradeAdvancedModMin%A_Index% or TradeAdvancedParam%A_Index%) {
 			TradeAdvancedParam%A_Index%	:=
 			TradeAdvancedSelected%A_Index%:=
 			TradeAdvancedModMin%A_Index%	:=
@@ -2942,7 +2944,7 @@ TradeFunc_ResetGUI(){
 	}
 	
 	Loop {
-		If (TradeAdvancedStatMin%A_Index%) {
+		If (TradeAdvancedStatMin%A_Index% or TradeAdvancedStatParam%A_Index%) {
 			TradeAdvancedStatParam%A_Index%	:=
 			TradeAdvancedStatSelected%A_Index%	:=
 			TradeAdvancedStatMin%A_Index%		:=
