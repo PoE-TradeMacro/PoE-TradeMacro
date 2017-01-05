@@ -3217,6 +3217,19 @@ OverwriteSettingsHeightTimer:
 	}	
 Return
 
+OverwriteAboutWindowSizesTimer:
+	o := Globals.Get("AboutWindowHeight")
+	l := Globals.Get("AboutWindowWidth")
+
+	If (o and l) {
+		Globals.Set("AboutWindowHeight", 400)
+		Globals.Set("AboutWindowWidth", 880)
+		TradeFunc_CreateTradeAboutWindow()
+		SetTimer, OverwriteAboutWindowSizesTimer, Off
+	}
+
+Return
+
 ChangeScriptListsTimer:
 	o := Globals.Get("ScriptList")
 	l := Globals.Get("UpdateNoteFileList")
@@ -3322,4 +3335,14 @@ DeleteCookies:
 	TradeFunc_ClearWebHistory()
 	Run, Run_only_This.ahk
 	ExitApp
+Return
+
+TradeAboutDlg_GitHub:
+	repo := TradeGlobals.Get("GithubRepo")
+	user := TradeGlobals.Get("GithubUser")
+	TradeFunc_OpenUrlInBrowser("https://github.com/" user "/" repo)
+Return
+
+TradeVisitForumsThread:
+	TradeFunc_OpenUrlInBrowser("https://www.pathofexile.com/forum/view-thread/1757730")
 Return

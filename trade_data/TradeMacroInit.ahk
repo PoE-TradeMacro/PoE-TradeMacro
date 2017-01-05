@@ -857,6 +857,52 @@ UpdateTradeSettingsUI()
 	GuiControl,, RemoveMultipleListingsFromSameAccount, % TradeOpts.RemoveMultipleListingsFromSameAccount
 }
 
+TradeFunc_CreateTradeAboutWindow() {
+	IfNotEqual, FirstTimeA, No
+	{
+		Authors := TradeFunc_GetContributors(0)
+		RelVer := TradeGlobals.get("ReleaseVersion")
+		Gui, About:Font, S10 CA03410,verdana
+	
+		Gui, About:Add, Text, x705 y27 w170 h20 Center, Release %RelVer%
+		Gui, About:Add, Picture, 0x1000 x462 y16 w230 h180, %A_ScriptDir%\trade_data\splash.png
+		Gui, About:Font, Underline C3571AC,verdana
+		Gui, About:Add, Text, x705 y57 w170 h20 gTradeVisitForumsThread Center, PoE forums thread
+		Gui, About:Add, Text, x705 y87 w170 h20 gTradeAboutDlg_GitHub Center, PoE-TradeMacro GitHub
+		Gui, About:Add, Text, x705 y117 w170 h20 gOpenGithubWikiFromMenu Center, PoE-TradeMacro Wiki/FAQ
+		Gui, About:Font, S7 CDefault normal, Verdana
+		Gui, About:Add, Text, x461 y207 w410 h90,
+		(LTrim
+		This builds on top of PoE-ItemInfo which provides very useful item information on ctrl+c. 
+		With TradeMacro, price checking is added via ctrl+d, ctrl+alt+d or ctrl+i. 
+		You can also open the items wiki page via ctrl+w or open the item search on poe.trade instead via ctrl+q.
+		
+		(c) %A_YYYY% Eruyome and contributors:
+		)
+		Gui, About:Add, Text, x461 y297 w270 h80, %Authors%
+	}
+}
+
+TradeFunc_GetContributors(AuthorsPerLine=0)
+{
+	IfNotExist, %A_ScriptDir%\TradeAUTHORS.txt
+	{
+		return "`r`n AUTHORS.txt missing `r`n"
+	}
+	Authors := "`r`n"
+	i := 0
+	Loop, Read, %A_ScriptDir%\TradeAUTHORS.txt, `r, `n
+	{
+		Authors := Authors . A_LoopReadLine . " "
+		i += 1
+		if (AuthorsPerLine != 0 and mod(i, AuthorsPerLine) == 0) ; every four authors
+		{
+			Authors := Authors . "`r`n"
+		}
+	}
+	return Authors
+}
+
 TradeFunc_ReadCraftingBases(){
 	bases := []
 	Loop, Read, %A_ScriptDir%\trade_data\crafting_bases.txt
@@ -1291,8 +1337,8 @@ TradeFunc_StopSplashScreen() {
     ; Let timer run until ItemInfos global settings are set to overwrite them.
 	SetTimer, OverwriteSettingsWidthTimer, 250
 	SetTimer, OverwriteSettingsHeightTimer, 250
+	SetTimer, OverwriteAboutWindowSizesTimer, 250
 	SetTimer, OverwriteSettingsNameTimer, 250
 	SetTimer, ChangeScriptListsTimer, 250
-	;SetTimer, CreateTradeSettingsUITimer, 250
 	GoSub, ReadPoeNinjaCurrencyData
 }
