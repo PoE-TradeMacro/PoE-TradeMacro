@@ -2085,7 +2085,7 @@ TradeFunc_CreatePseudoMods(mods) {
 		If (RegExMatch(val.name, "i)elemental damage with weapons")) {
 			weaponEleDmg_Percent := weaponEleDmg_Percent + val.values[1]
 		}
-		If (RegExMatch(val.name, "i)spell", element)) {
+		If (RegExMatch(val.name, "i)spell", element) and RegExMatch(val.name, "i)damage", element) and not RegExMatch(val.name, "i)chance|multiplier", element)) {
 			spellDmg_Percent := spellDmg_Percent + val.values[1]
 		}
 	}
