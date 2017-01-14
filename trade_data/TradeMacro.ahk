@@ -63,7 +63,7 @@ OpenWiki:
 			UrlAffix := Item.Name
 		} Else If (Item.IsFlask or Item.IsMap) {
 			UrlAffix := Item.SubType
-		} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key")) {
+		} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
 			UrlAffix := Item.Name
 		} Else {
 			UrlAffix := Item.BaseType
@@ -92,6 +92,9 @@ CustomInputSearch:
 			RequestParams.name   := ItemName
 			RequestParams.league := LeagueName
 			Item.Name := ItemName
+			
+			RequestParams.corrupted := "x"
+			Item.UsedInSearch.Corruption := "Either"
 			
 			ShowToolTip("Running search...")
 			
@@ -430,7 +433,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 	
-	; don't overwrite advancedItemPriceChecks decision to inlucde/exclude sockets/links
+	; don't overwrite advancedItemPriceChecks decision to include/exclude sockets/links
 	If (not isAdvancedPriceCheckRedirect) {
 		; handle item sockets
 		; maybe don't use this for unique-items as default
@@ -490,7 +493,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	; handle gems
 	If (Item.IsGem) {
 		RequestParams.xtype := Item.BaseType
-		RequestParams.xbase := Trim(RegExReplace(Item.Name, "i)support|superior", ""))
+		RequestParams.xbase := TradeFunc_CompareGemNames(Trim(RegExReplace(Item.Name, "i)support|superior", "")))
+		
 		RequestParams.name := ""
 		If (TradeOpts.GemQualityRange > 0) {
 			RequestParams.q_min := Item.Quality - TradeOpts.GemQualityRange
@@ -951,6 +955,23 @@ TradeFunc_CalculateEleDps(fireLo, fireHi, coldLo, coldHi, lightLo, lightHi, aps)
 	dps := ((fireLo + fireHi + coldLo + coldHi + lightLo + lightHi) / 2) * aps
 	
 	return dps
+}
+
+TradeFunc_CompareGemNames(name) {
+	poeTradeNames := TradeGlobals.Get("GemNameList")
+	
+	If(poeTradeNames.Length() < 1) {
+		return name
+	}
+	Else {
+		Loop, % poeTradeNames.Length() {
+			stack := Trim(RegExReplace(poeTradeNames[A_Index], "i)support", ""))
+			If (stack = name) {
+				return poeTradeNames[A_Index]
+			}
+		}
+		return name
+	}
 }
 
 TradeFunc_GetUniqueStats(name){
