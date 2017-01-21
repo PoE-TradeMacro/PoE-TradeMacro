@@ -983,6 +983,8 @@ TradeFunc_ParseGemNames() {
 		gemList[A_Index] := Trim(gemList[A_Index])
 	}
 	
+	gems := 
+	FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt
 	TradeGlobals.Set("GemNameList", gemList)	
 }
 
