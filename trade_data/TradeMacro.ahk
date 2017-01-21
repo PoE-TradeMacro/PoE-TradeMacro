@@ -3348,12 +3348,12 @@ Return
 
 ReadPoeNinjaCurrencyData:
 	league := TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
-	url := "http://poe.ninja/api/Data/GetCurrencyOverview?league=" . league	
+	url := "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league	
 	UrlDownloadToFile, %url% , %A_ScriptDir%\temp\currencyData.json
 	FileRead, JSONFile, %A_ScriptDir%/temp/currencyData.json
 	parsedJSON 	:= JSON.Load(JSONFile)	
 	global CurrencyHistoryData := parsedJSON.lines
-	
+
 	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
 	
 	global ChaosEquivalents := {}
