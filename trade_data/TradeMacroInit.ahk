@@ -63,10 +63,12 @@ class TradeUserOptions {
 	OpenWikiHotKey := ^w            	; 
 	CustomInputSearch := ^i         	;     
 	OpenSearchOnPoeTrade := ^q      	;     
-	ShowItemAge := ^e               	;     
+	ShowItemAge := ^e               	;
+	AdvancedOpenSearchOnPoeTradeCheckHotKey := ^!q ;
 	
 	PriceCheckEnabled :=1
 	AdvancedPriceCheckEnabled :=1
+	AdvancedOpenSearchOnPoeTradeCheckEnabled :=1
 	OpenWikiEnabled :=1
 	CustomInputSearchEnabled :=1
 	OpenSearchOnPoeTradeEnabled :=1
@@ -186,6 +188,7 @@ ReadTradeConfig(TradeConfigPath="trade_config.ini")
         ; Hotkeys        
 		TradeOpts.PriceCheckHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "PriceCheckHotKey", TradeOpts.PriceCheckHotKey)
 		TradeOpts.AdvancedPriceCheckHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "AdvancedPriceCheckHotKey", TradeOpts.AdvancedPriceCheckHotKey)
+		TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "AdvancedOpenSearchOnPoeTradeCheckHotKey", TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey)
 		TradeOpts.OpenWikiHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "OpenWiki", TradeOpts.OpenWikiHotKey)
 		TradeOpts.CustomInputSearchHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "CustomInputSearchHotKey", TradeOpts.CustomInputSearchHotKey)
 		TradeOpts.OpenSearchOnPoeTradeHotKey := TradeFunc_ReadIniValue(TradeConfigPath, "Hotkeys", "OpenSearchOnPoeTradeHotKey", TradeOpts.OpenSearchOnPoeTradeHotKey)
@@ -193,7 +196,8 @@ ReadTradeConfig(TradeConfigPath="trade_config.ini")
 		
 		TradeOpts.PriceCheckEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "PriceCheckEnabled", TradeOpts.PriceCheckEnabled)        
 		TradeOpts.AdvancedPriceCheckEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "AdvancedPriceCheckEnabled", TradeOpts.AdvancedPriceCheckEnabled)        
-		TradeOpts.OpenWikiEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "OpenWikiEnabled", TradeOpts.OpenWikiEnabled)        
+		TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "AdvancedOpenSearchOnPoeTradeCheckEnabled", TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled)
+		TradeOpts.OpenWikiEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "OpenWikiEnabled", TradeOpts.OpenWikiEnabled)
 		TradeOpts.CustomInputSearchEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "CustomInputSearchEnabled", TradeOpts.CustomInputSearchEnabled)        
 		TradeOpts.OpenSearchOnPoeTradeEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "OpenSearchOnPoeTradeEnabled", TradeOpts.OpenSearchOnPoeTradeEnabled)        
 		TradeOpts.ShowItemAgeEnabled := TradeFunc_ReadIniValue(TradeConfigPath, "HotkeyStates", "ShowItemAgeEnabled", TradeOpts.ShowItemAgeEnabled)        
@@ -255,6 +259,13 @@ TradeFunc_AssignAllHotkeys() {
 		key := TradeOpts.AdvancedPriceCheckEnabled
 		Hotkey, %key% , off, UseErrorLevel 
 	}
+	If (TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled) {
+		TradeFunc_AssignHotkey(TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey, "AdvancedOpenSearchOnPoeTrade")
+	}
+	Else {
+		key := TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled
+		Hotkey, %key% , off, UseErrorLevel
+	}
 	If (TradeOpts.OpenWikiEnabled) {
 		TradeFunc_AssignHotkey(TradeOpts.OpenWikiHotKey, "OpenWiki")
 	}
@@ -312,6 +323,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		
 		TradeOpts.PriceCheckHotKey := PriceCheckHotKey
 		TradeOpts.AdvancedPriceCheckHotKey := AdvancedPriceCheckHotKey
+		TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey := AdvancedOpenSearchOnPoeTradeCheckHotKey
 		TradeOpts.OpenWikiHotKey := OpenWikiHotKey
 		TradeOpts.CustomInputSearchHotKey := CustomInputSearchHotKey
 		TradeOpts.OpenSearchOnPoeTradeHotKey := OpenSearchOnPoeTradeHotKey
@@ -319,6 +331,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 		
 		TradeOpts.PriceCheckEnabled := PriceCheckEnabled
 		TradeOpts.AdvancedPriceCheckEnabled := AdvancedPriceCheckEnabled
+		TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled := AdvancedOpenSearchOnPoeTradeCheckEnabled
 		TradeOpts.OpenWikiEnabled := OpenWikiEnabled
 		TradeOpts.CustomInputSearchEnabled := CustomInputSearchEnabled
 		TradeOpts.OpenSearchOnPoeTradeEnabled := OpenSearchOnPoeTradeEnabled
@@ -386,6 +399,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 	; Hotkeys	
 	TradeFunc_WriteIniValue(TradeOpts.PriceCheckHotKey, TradeConfigPath, "Hotkeys", "PriceCheckHotKey")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedPriceCheckHotKey, TradeConfigPath, "Hotkeys", "AdvancedPriceCheckHotKey")
+	TradeFunc_WriteIniValue(TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey, TradeConfigPath, "Hotkeys", "AdvancedOpenSearchOnPoeTradeCheckHotKey")
 	TradeFunc_WriteIniValue(TradeOpts.OpenWikiHotKey, TradeConfigPath, "Hotkeys", "OpenWikiHotKey")
 	TradeFunc_WriteIniValue(TradeOpts.CustomInputSearchHotKey, TradeConfigPath, "Hotkeys", "CustomInputSearchHotKey")
 	TradeFunc_WriteIniValue(TradeOpts.OpenSearchOnPoeTradeHotKey, TradeConfigPath, "Hotkeys", "OpenSearchOnPoeTradeHotKey")
@@ -393,6 +407,7 @@ WriteTradeConfig(TradeConfigPath="trade_config.ini")
 	
 	TradeFunc_WriteIniValue(TradeOpts.PriceCheckEnabled, TradeConfigPath, "HotkeyStates", "PriceCheckEnabled")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedPriceCheckEnabled, TradeConfigPath, "HotkeyStates", "AdvancedPriceCheckEnabled")
+	TradeFunc_WriteIniValue(TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled, TradeConfigPath, "HotkeyStates", "AdvancedOpenSearchOnPoeTradeCheckEnabled")
 	TradeFunc_WriteIniValue(TradeOpts.OpenWikiEnabled, TradeConfigPath, "HotkeyStates", "OpenWikiEnabled")
 	TradeFunc_WriteIniValue(TradeOpts.CustomInputSearchEnabled, TradeConfigPath, "HotkeyStates", "CustomInputSearchEnabled")
 	TradeFunc_WriteIniValue(TradeOpts.OpenSearchOnPoeTradeEnabled, TradeConfigPath, "HotkeyStates", "OpenSearchOnPoeTradeEnabled")
@@ -688,6 +703,13 @@ CreateTradeSettingsUI()
 	AddToolTip(AdvancedPriceCheckHotKeyH, "Default: ctrl + alt + d")
 	GuiAddCheckbox("", "x+5 yp-6 w30 h30", TradeOpts.AdvancedPriceCheckEnabled, "AdvancedPriceCheckEnabled", "AdvancedPriceCheckEnabledH")
 	AddToolTip(AdvancedPriceCheckEnabledH, "Enable Hotkey.")
+
+	GuiAddText("Open advanced Search on poe.trade:", "x557 yp+38 w160 h40 0x0100", "LblAdvancedOpenSearchOnPoeTradeCheckHotKey", "LblAdvancedOpenSearchOnPoeTradeCheckHotKeyH")
+	AddToolTip(AdvancedOpenSearchOnPoeTradeCheckHotKeyH, "Open your previous advanced search on poe.trade")
+	GuiAddEdit(TradeOpts.AdvancedOpenSearchOnPoeTradeCheckHotKey, "x+10 yp-2 w50 h20", "AdvancedOpenSearchOnPoeTradeCheckHotKey", "AdvancedOpenSearchOnPoeTradeCheckHotKeyH")
+	AddToolTip(AdvancedOpenSearchOnPoeTradeCheckHotKeyH, "Default: ctrl + alt + a")
+	GuiAddCheckbox("", "x+5 yp-6 w30 h30", TradeOpts.AdvancedOpenSearchOnPoeTradeCheckEnabled, "AdvancedOpenSearchOnPoeTradeCheckEnabled", "AdvancedOpenSearchOnPoeTradeCheckEnabledH")
+	AddToolTip(AdvancedOpenSearchOnPoeTradeCheckEnabledH, "Enable Hotkey.")
 	
 	GuiAddText("Custom Input Search:", "x17 yp+38 w160 h20 0x0100", "LblCustomInputSearchHotkey", "LblCustomInputSearchHotkeyH")
 	AddToolTip(LblCustomInputSearchHotkeyH, "Custom text input search.")
