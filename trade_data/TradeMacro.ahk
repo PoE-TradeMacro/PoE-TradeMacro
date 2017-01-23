@@ -578,8 +578,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			; Update currency data if last update is older than 30min
 			last := TradeGlobals.Get("LastAltCurrencyUpdate")
-			now  := A_NowUTC
-			diff := now - last
+			diff  := A_NowUTC
+			EnvSub, diff, %last%, Seconds
 			If (diff > 1800) {
 				GoSub, ReadPoeNinjaCurrencyData
 			}
