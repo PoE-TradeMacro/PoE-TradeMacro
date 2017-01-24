@@ -1145,6 +1145,7 @@ TradeFunc_ReadCookieData() {
 		; something went wrong while reading the cookies
 		Else {
 			Gui, CookieWindow:Add, Text, cRed, Reading Cookie data failed!
+			Gui, CookieWindow:Add, Text, cRed, This can be a false positive. Poe.trade doesn't always use CloudFlare protection`n but the test to check this can fail if the request takes too long.`nPlease try again.
 			If (CookieFileNotFound) {
 				Gui, CookieWindow:Add, Text, , - File <ScriptDirectory\temp\cookie_data.txt> could not be found.
 			}
