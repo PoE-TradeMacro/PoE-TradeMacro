@@ -970,22 +970,19 @@ TradeFunc_CheckBrowserPath(path, showMsg){
 	}
 }
 
-; parse poe.trades gem names from the search forms "base" field
-TradeFunc_ParseGemNames() {
-	FileRead, gems, %A_ScriptDir%\temp\poe_trade_gem_names.txt
+; parse poe.trades gem names and other item types from the search form
+TradeFunc_ParseSearchFormOptions() {
+	FileRead, types, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 	
-	RegExMatch(gems, "i)(var)?\s*items_types\s*=\s*{.*}", match)
-	RegExMatch(match, "iU)Gem""\s*:\s*\[(.*)\]", match)
-	StringReplace, match, match1, ", , 1
-	gemList := StrSplit(match, ",")
-	
-	Loop, % gemList.Length() {
-		gemList[A_Index] := Trim(gemList[A_Index])
-	}
-	
-	gems := 
-	FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt
-	TradeGlobals.Set("GemNameList", gemList)	
+	RegExMatch(types, "i)(var)?\s*(items_types\s*=\s*{.*})", match)
+	itemTypes := RegExReplace(match2, "i)items_types\s*=", "{""items_types"" :")
+	itemTypes .= "}"	
+	parsedJSON := JSON.Load(itemTypes)
+
+	TradeGlobals.Set("ItemTypeList", parsedJSON.items_types)
+	TradeGlobals.Set("GemNameList", parsedJSON.items_types.gem)
+	itemTypes := 
+	FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 }
 
 TradeFunc_DownloadDataFiles() {
@@ -1288,9 +1285,9 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	
 	RegExMatch(html, "i)Path of Exile", match)
 	If (match) {
-		FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt
-		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_gem_names.txt, utf-8	
-		TradeFunc_ParseGemNames()		
+		FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
+		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_search_form_options.txt, utf-8	
+		TradeFunc_ParseSearchFormOptions()		
 		Return 1
 	}
 	Else {
