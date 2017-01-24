@@ -19,8 +19,7 @@
 ;   - show affix ranges for uniques
 ;   - show map info (thank you, Kislorod and Necrolis)
 ;   - show max socket info (thank you, Necrolis)
-;   - has the ability to convert currency items to chaos orbs (you can adjust the rates by editing
-;     <datadir>\CurrencyRates.txt)
+;   - has the ability to convert currency items to chaos orbs
 ;   - adds a system tray icon and proper system tray description tooltip
 ;
 ; All of these features are user-adjustable by using a "database" of text files which come
@@ -91,15 +90,7 @@
 ;      to be addressed for 2.0 or not /shrug.  I have passed on the request to GGG to perhaps mark up their affixes so they are decipherable.
 ;    - Divination card info would be great such as a) what you can possibly get for the collection, b) where that card drops, and c) what supporter
 ;      created it (if known).
-;    - Jewel support for min/max rolls and what is a suffix and what is a prefix so you know what you may be able to exalt.  9/15/2015 - I just noticed that
-;      GGG added jewel affixes, both prefix and suffix, for jewels to their item database.
-;    - Legacy item alert on the item would be useful for those players that take breaks and come back without reading all the patch notes and/or
-;      not recognizing some item may have changed or not.  This alert can be placed along the bottom with 'quality, valuable, mirrored, etc.'
-;      I imagine that this would not be hard to do, but would require a lot of small detail work.  Because all uniques are nerfed/buffed in
-;      specific ways, there is no 'quick' and easy way to do this.  There would have to be a specific check for each specific unique item looking
-;      at the particular change(s) and compare it to the existing known unique setup vs the legacy setup.  I would be willing to do all the small
-;      detail work required for each unique if someone would write the code required for this to work and how this would work with the current uniques.txt
-;      list.  This is obviously less valuable of an addition to the PoE-Item-Info script than general upgrades/div cards/jewel support.
+;    - Legacy item alert on the item would be useful for those players that take breaks and come back without reading all the patch notes and/or not recognizing some item may have changed or not.
 ;
 ; Notes:
 ;
@@ -238,7 +229,7 @@ class UserOptions {
 									; If this option is set to 0, the tiers will always display relative to the full
 									; range of tiers available, ignoring the item level.
 
-	ShowCurrencyValueInChaos := 0   ; Convert the value of currency items into chaos orbs.
+	ShowCurrencyValueInChaos := 1   ; Convert the value of currency items into chaos orbs.
 									; This is based on the rates defined in <datadir>\CurrencyRates.txt
 									; You should edit this file with the current currency rates.
 
@@ -468,42 +459,55 @@ class ItemData_ {
 ItemData := new ItemData_()
 
 class Item {
-	Name := ""
-	TypeName := ""
-	Quality := ""
-	BaseLevel := ""
-	RarityLevel := ""
-	BaseType := ""
-	SubType := ""
-	GripType := ""
-	Level := ""
-	MapLevel := ""
-	MaxSockets := ""
-	IsUnidentified := ""
-	IsCorrupted := ""
-	IsGem := ""
-	IsCurrency := ""
-	IsUnique := ""
-	IsRare := ""
-	IsBow := ""
-	IsFlask := ""
-	IsBelt := ""
-	IsRing := ""
-	IsUnsetRing := ""
-	IsAmulet := ""
-	IsTalisman := ""
-	IsJewel := ""
-	IsDivinationCard := ""
-	IsSingleSocket := ""
-	IsFourSocket := ""
-	IsThreeSocket := ""
-	IsQuiver := ""
-	IsWeapon := ""
-	IsMap := ""
-	IsMirrored := ""
-	HasEffect := ""
+	; Initialize all the Item object attributes to default values
+	Init()
+	{
+		This.Name := ""
+		This.TypeName := ""
+		This.Quality := ""
+		This.BaseLevel := ""
+		This.RarityLevel := ""
+		This.BaseType := ""
+		This.GripType := ""
+		This.Level := ""
+		This.MapLevel := ""
+		This.MaxSockets := ""
+		This.SubType := ""
+		This.Implicit := ""
+		
+		This.HasImplicit := False
+		This.HasEffect := False
+		This.IsWeapon := False
+		This.IsArmour := False
+		This.IsQuiver := False
+		This.IsFlask := False
+		This.IsGem := False
+		This.IsCurrency := False
+		This.IsUnidentified := False
+		This.IsBelt := False
+		This.IsRing := False
+		This.IsUnsetRing := False
+		This.IsBow := False
+		This.IsAmulet := False
+		This.IsSingleSocket := False
+		This.IsFourSocket := False
+		This.IsThreeSocket := False
+		This.IsMap := False
+		This.IsTalisman := False
+		This.IsJewel := False
+		This.IsDivinationCard := False
+		This.IsUnique := False
+		This.IsRare := False
+		This.IsCorrupted := False
+		This.IsMirrored := False
+		This.IsMapFragment := False
+		This.IsEssence := False
+		
+		This.DamageDetails := {}
+	}
 }
 Item := new Item()
+Item.Init()
 
 class AffixTotals_ {
 
@@ -1066,6 +1070,10 @@ GetClipboardContents(DropNewlines=False)
 SetClipboardContents(String)
 {
 	Clipboard := String
+	; Temp, I used this for debugging and considering adding it to UserOptions
+	; 
+	; append the result for easier comparison and debugging
+	; Clipboard = %Clipboard%`n*******************************************`n`n%String%
 }
 
 ; Splits StrInput on StrDelimiter. Returns an object that has a 'length' field
@@ -1770,90 +1778,99 @@ AssembleAffixDetails()
 	Loop, %NumAffixLines%
 	{
 		CurLine := AffixLines[A_Index]
-		ProcessedLine =
-		Loop, %AffixLineParts0%
+		; Any empty line is considered as an Unprocessed Mod
+		if CurLine
 		{
-			AffixLineParts%A_Index% =
-		}
-		StringSplit, AffixLineParts, CurLine, |
-		AffixLine := AffixLineParts1
-		ValueRange := AffixLineParts2
-		AffixType := AffixLineParts3
-		AffixTier := AffixLineParts4
-
-		Delim := Opts.AffixDetailDelimiter
-		Ellipsis := Opts.AffixDetailEllipsis
-
-		If (Opts.ValueRangeFieldWidth > 0)
-		{
-			ValueRange := StrPad(ValueRange, Opts.ValueRangeFieldWidth, "left")
-		}
-		If (Opts.MirrorAffixLines == 1)
-		{
-			If (Opts.MirrorLineFieldWidth > 0)
+			ProcessedLine =
+			Loop, %AffixLineParts0%
 			{
-				If ( Not Item.IsUnique )
-				{
-					If(StrLen(AffixLine) > Opts.MirrorLineFieldWidth)
-					{
-						AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, Opts.MirrorLineFieldWidth)) . Ellipsis
-					}
-					AffixLine := StrPad(AffixLine, Opts.MirrorLineFieldWidth + StrLen(Ellipsis))
-				}
-				Else
-				{
-					If(StrLen(AffixLine) > Opts.MirrorLineFieldWidth + 10)
-					{
-						AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, Opts.MirrorLineFieldWidth + 10)) . Ellipsis
-					}
-					AffixLine := StrPad(AffixLine, Opts.MirrorLineFieldWidth + 10 + StrLen(Ellipsis))
-				}
+				AffixLineParts%A_Index% =
 			}
-			ProcessedLine := AffixLine . Delim
-		}
-		IfInString, ValueRange, *
-		{
-			ValueRangeString := StrPad(ValueRange, (Opts.ValueRangeFieldWidth * 2) + (StrLen(Opts.AffixDetailDelimiter)))
-		}
-		Else
-		{
-			ValueRangeString := ValueRange
-		}
-		ProcessedLine := ProcessedLine . ValueRangeString . Delim
-		If (Opts.ShowAffixBracketTier == 1 and Not (ItemDataRarity == "Unique") and Not StrLen(AffixTier) = 0)
-		{
-			If (InStr(ValueRange, "*") and Opts.ShowAffixBracketTier)
-			{
-				TierString := "   "
-				AdditionalPadding := ""
-				If (Opts.ShowAffixLevel or Opts.ShowAffixBracketTotalTier)
-				{
-					TierString := ""
-				}
-				If (Opts.ShowAffixLevel)
-				{
-					AdditionalPadding := AdditionalPadding . StrMult(" ", Opts.ValueRangeFieldWidth)
-				}
-				If (Opts.ShowAffixBracketTierTotal)
-				{
-					AdditionalPadding := AdditionalPadding . StrMult(" ", Opts.ValueRangeFieldWidth)
+			StringSplit, AffixLineParts, CurLine, |
+			AffixLine := AffixLineParts1
+			ValueRange := AffixLineParts2
+			AffixType := AffixLineParts3
+			AffixTier := AffixLineParts4
 
+			Delim := Opts.AffixDetailDelimiter
+			Ellipsis := Opts.AffixDetailEllipsis
+
+			If (Opts.ValueRangeFieldWidth > 0)
+			{
+				ValueRange := StrPad(ValueRange, Opts.ValueRangeFieldWidth, "left")
+			}
+			If (Opts.MirrorAffixLines == 1)
+			{
+				If (Opts.MirrorLineFieldWidth > 0)
+				{
+					If ( Not Item.IsUnique )
+					{
+						If(StrLen(AffixLine) > Opts.MirrorLineFieldWidth)
+						{
+							AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, Opts.MirrorLineFieldWidth)) . Ellipsis
+						}
+						AffixLine := StrPad(AffixLine, Opts.MirrorLineFieldWidth + StrLen(Ellipsis))
+					}
+					Else
+					{
+						If(StrLen(AffixLine) > Opts.MirrorLineFieldWidth + 10)
+						{
+							AffixLine := StrTrimSpaceRight(SubStr(AffixLine, 1, Opts.MirrorLineFieldWidth + 10)) . Ellipsis
+						}
+						AffixLine := StrPad(AffixLine, Opts.MirrorLineFieldWidth + 10 + StrLen(Ellipsis))
+					}
 				}
-				TierString := TierString . AdditionalPadding
+				ProcessedLine := AffixLine . Delim
+			}
+			IfInString, ValueRange, *
+			{
+				ValueRangeString := StrPad(ValueRange, (Opts.ValueRangeFieldWidth * 2) + (StrLen(Opts.AffixDetailDelimiter)))
 			}
 			Else
 			{
-				AddedWidth := 0
-				If (Opts.ShowAffixBracketTierTotal)
-				{
-					AddedWidth += 2
-
-				}
-				TierString := StrPad("T" . AffixTier, 3+AddedWidth, "left")
+				ValueRangeString := ValueRange
 			}
-			ProcessedLine := ProcessedLine . TierString . Delim
+			ProcessedLine := ProcessedLine . ValueRangeString . Delim
+			If (Opts.ShowAffixBracketTier == 1 and Not (ItemDataRarity == "Unique") and Not StrLen(AffixTier) = 0)
+			{
+				If (InStr(ValueRange, "*") and Opts.ShowAffixBracketTier)
+				{
+					TierString := "   "
+					AdditionalPadding := ""
+					If (Opts.ShowAffixLevel or Opts.ShowAffixBracketTotalTier)
+					{
+						TierString := ""
+					}
+					If (Opts.ShowAffixLevel)
+					{
+						AdditionalPadding := AdditionalPadding . StrMult(" ", Opts.ValueRangeFieldWidth)
+					}
+					If (Opts.ShowAffixBracketTierTotal)
+					{
+						AdditionalPadding := AdditionalPadding . StrMult(" ", Opts.ValueRangeFieldWidth)
+
+					}
+					TierString := TierString . AdditionalPadding
+				}
+				Else
+				{
+					AddedWidth := 0
+					If (Opts.ShowAffixBracketTierTotal)
+					{
+						AddedWidth += 2
+
+					}
+					TierString := StrPad("T" . AffixTier, 3+AddedWidth, "left")
+				}
+				ProcessedLine := ProcessedLine . TierString . Delim
+			}
+			ProcessedLine := ProcessedLine . AffixType . Delim
 		}
-		ProcessedLine := ProcessedLine . AffixType . Delim
+		else
+		{
+			ProcessedLine := "   Unprocessed Essence Mod or unknown Mod"
+		}
+		
 		Result := Result . "`n" . ProcessedLine
 	}
 	return Result
@@ -1995,7 +2012,7 @@ AdjustValueForQuality(Value, ItemQuality, Direction="up")
 ; down from quality increase (to get the original value back)
 AdjustRangeForQuality(ValueRange, ItemQuality, Direction="up")
 {
-	If (ItemQuality = 0)
+	If (ItemQuality == 0)
 	{
 		return ValueRange
 	}
@@ -6053,8 +6070,6 @@ ParseSockets(ItemDataText)
 	return SocketsCount
 }
 
-; TODO: find a way to poll this date from the web!
-
 ; Converts a currency stack to Chaos by looking up the
 ; conversion ratio from CurrencyRates.txt or downloaded ratios from poe.ninja
 ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
@@ -6084,20 +6099,21 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 	
 	; Update currency rates from poe.ninja
 	last := Globals.Get("LastCurrencyUpdate")
-	now  := A_NowUTC
-	diff := now - last
-	If (diff > 1800 or !last) {
+	diff  := A_NowUTC
+	EnvSub, diff, %last%, Minutes
+	If (diff > 180 or !last) {
+		; no data or older than 3 hours
 		GoSub, FetchCurrencyData
 	}
 	
 	; Use downloaded currency rates if they exist, otherwise use hardcoded fallback 
 	fallback   := A_ScriptDir . "\data\CurrencyRates.txt"
-	ninjaRates := [A_ScriptDir . "\temp\CurrencyRates_Standard.txt", A_ScriptDir . "\temp\CurrencyRates_Hardcore.txt", A_ScriptDir . "\temp\CurrencyRates_tmpstandard.txt", A_ScriptDir . "\temp\CurrencyRates_tmphardcore.txt"]
+	ninjaRates := [A_ScriptDir . "\temp\CurrencyRates_tmpstandard.txt", A_ScriptDir . "\temp\CurrencyRates_tmphardcore.txt", A_ScriptDir . "\temp\CurrencyRates_Standard.txt", A_ScriptDir . "\temp\CurrencyRates_Hardcore.txt"]
 	result := []
 	
 	Loop, % ninjaRates.Length() 
 	{
-		dataSource := "Currency rates powered by poe.ninja`n"
+		dataSource := "Currency rates powered by poe.ninja`n`n"
 		If (FileExist(ninjaRates[A_Index])) 
 		{
 			ValueInChaos := 0
@@ -6123,7 +6139,7 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 			}
 			
 			If (ValueInChaos) {
-				tmp := [leagueName, ValueInChaos]
+				tmp := [leagueName, ValueInChaos, ChaosRatio]
 				result.push(tmp)
 			}
 		}
@@ -6132,7 +6148,7 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 	; fallback - condition : no results found so far
 	If (!result.Length()) {
 		ValueInChaos := 0
-		dataSource := "Fallback <\data\CurrencyRates.txt>`n"
+		dataSource := "Fallback <\data\CurrencyRates.txt>`n`n"
 		leagueName := "Hardcoded rates: "
 
 		Loop, Read, %fallback%
@@ -6151,8 +6167,9 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 				ValueInChaos := (ChaosMult * StackSize)
 			}
 		}
+		
 		If (ValueInChaos) {
-			tmp := [leagueName, ValueInChaos]
+			tmp := [leagueName, ValueInChaos, ChaosRatio]
 			result.push(tmp)
 		}
 	}
@@ -6368,35 +6385,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	RarityLevel =
 	TempResult =
 
-	Item.DamageDetails := {}
-	Item.IsWeapon := False
-	Item.IsArmour := False
-	Item.IsQuiver := False
-	Item.IsFlask := False
-	Item.IsGem := False
-	Item.IsCurrency := False
-	Item.IsUnidentified := False
-	Item.IsBelt := False
-	Item.IsRing := False
-	Item.IsUnsetRing := False
-	Item.IsBow := False
-	Item.IsAmulet := False
-	Item.IsSingleSocket := False
-	Item.IsFourSocket := False
-	Item.IsThreeSocket := False
-	Item.IsMap := False
-	Item.IsTalisman := False
-	Item.IsJewel := False
-	Item.IsDivinationCard := False
-	Item.IsUnique := False
-	Item.IsRare := False
-	Item.IsCorrupted := False
-	Item.IsMirrored := False
-	Item.HasEffect := False
-	Item.HasImplicit := False
-	Item.IsMapFragment := False
-	Item.IsEssence := False
-	Item.SubType := ""
+	Item.Init()
 
 	ResetAffixDetailVars()
 
@@ -6504,7 +6493,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 				CurrencyDetails := "`n" . dataSource
 				Loop, % ValueInChaos.Length() 
 				{
-					CurrencyDetails .= ValueInChaos[A_Index][1] . "" . ValueInChaos[A_Index][2] . " Chaos`n"
+					CurrencyDetails .= ValueInChaos[A_Index][1] . "" . ValueInChaos[A_Index][2] . " Chaos (" . ValueInChaos[A_Index][3] . "c)`n"
 				}
 			}
 		}
@@ -8283,20 +8272,6 @@ SettingsUI_BtnDefaults:
 	ShowSettingsUI()
 	return
 
-SettingsUI_ChkShowGemEvaluation:
-	GuiControlGet, IsChecked,, ShowGemEvaluation
-	If (Not IsChecked)
-	{
-		GuiControl, Disable, LblGemQualityThreshold
-		GuiControl, Disable, GemQualityValueThreshold
-	}
-	Else
-	{
-		GuiControl, Enable, LblGemQualityThreshold
-		GuiControl, Enable, GemQualityValueThreshold
-	}
-	return
-
 SettingsUI_ChkShowAffixDetails:
 	GuiControlGet, IsChecked,, ShowAffixDetails
 	If (Not IsChecked)
@@ -8498,10 +8473,10 @@ FetchCurrencyData:
 		FileDelete, %ratesJSONFile% 
 		
 		If (league == "tmpstandard" or league == "tmphardcore" ) {
-			comment := InStr(league, "standard") ? ";Standard Challenge League`n" : ";Hardcore Challenge League`n"
+			comment := InStr(league, "standard") ? ";Challenge Standard`n" : ";Challenge Hardcore`n"
 		}
 		Else {
-			comment := ";" . league . " League`n"
+			comment := ";Permanent " . league . "`n"
 		}
 		FileAppend, %comment%, %ratesFile%
 		
