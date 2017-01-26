@@ -177,7 +177,7 @@ Globals.Set("SettingsUITitle", "PoE Item Info Settings")
 Globals.Set("GithubRepo", "POE-ItemInfo")
 Globals.Set("GithubUser", "aRTy42")
 Globals.Set("ScriptList", [A_ScriptDir "\POE-ItemInfo"])
-Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\updates.txt","ItemInfo"]])
+Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\resources\updates.txt","ItemInfo"]])
 
 ; Set ProjectName to create user settings folder in A_MyDocuments.
 ; Don't set variable "UseExternalProjectName" in this script.
@@ -571,7 +571,7 @@ IfNotExist, %A_ScriptDir%\config.ini
 ; Windows system tray icon
 ; possible values: poe.ico, poe-bw.ico, poe-web.ico, info.ico
 ; set before creating the settings UI so it gets used for the settigns dialog as well
-Menu, Tray, Icon, %A_ScriptDir%\resources\poe-bw.ico
+Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-bw.ico
 
 ReadConfig()
 Sleep, 100

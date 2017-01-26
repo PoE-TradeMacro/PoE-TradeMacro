@@ -888,13 +888,13 @@ TradeFunc_CreateTradeAboutWindow() {
 
 TradeFunc_GetContributors(AuthorsPerLine=0)
 {
-	IfNotExist, %A_ScriptDir%\AUTHORS_Trade.txt
+	IfNotExist, %A_ScriptDir%\resources\AUTHORS_Trade.txt
 	{
 		return "`r`n AUTHORS.txt missing `r`n"
 	}
 	Authors := "`r`n"
 	i := 0
-	Loop, Read, %A_ScriptDir%\AUTHORS_Trade.txt, `r, `n
+	Loop, Read, %A_ScriptDir%\resources\AUTHORS_Trade.txt, `r, `n
 	{
 		Authors := Authors . A_LoopReadLine . " "
 		i += 1
