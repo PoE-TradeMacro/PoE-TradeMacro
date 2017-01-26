@@ -3319,7 +3319,7 @@ ChangeScriptListsTimer:
 	l := Globals.Get("UpdateNoteFileList")
 
 	If (o and l.Length()) {
-		o.push(A_ScriptDir "\main")
+		o.push(A_ScriptDir "\TradeMacroMain")
 		o.push(A_ScriptDir "\PoE-TradeMacro_(Fallback)")
 		Global.Set("ScriptList", o)
 		
