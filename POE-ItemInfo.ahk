@@ -458,7 +458,7 @@ class ItemData_ {
 }
 ItemData := new ItemData_()
 
-class Item {
+class Item_ {
 	; Initialize all the Item object attributes to default values
 	Init()
 	{
@@ -504,7 +504,7 @@ class Item {
 		This.IsEssence := False
 	}
 }
-Item := new Item()
+Global Item := new Item_
 Item.Init()
 
 class AffixTotals_ {
@@ -6357,7 +6357,7 @@ ItemIsMirrored(ItemDataText)
 ;
 ParseItemData(ItemDataText, ByRef RarityLevel="")
 {
-	Global Item, ItemData, AffixTotals, uniqueMapList, mapList, mapMatchList, shapedMapMatchList, divinationCardList, gemQualityList
+	Global ItemData, AffixTotals, uniqueMapList, mapList, mapMatchList, shapedMapMatchList, divinationCardList, gemQualityList
 
 	ItemDataPartsIndexLast =
 	ItemDataPartsIndexAffixes =
