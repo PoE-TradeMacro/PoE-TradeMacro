@@ -604,9 +604,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
 	}    
-	
-	; reset ItemData after search
-	ItemData := {}
+
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
 
