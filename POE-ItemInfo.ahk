@@ -6933,6 +6933,11 @@ ModStringToObject(string, isImplicit) {
 		values.push(value)
 	}
 
+	
+	; ### TBD : I couldn't find any combined attributes mod within the list on the wiki ... is that even possbile ??
+	;			I removed it until confirmed
+	
+	; ### TODO: IMPORTANT - this catches '+x to level of socketed Strength gems' and changes it to '+x Strength'
 	; Collect all resists/attributes that are combined in one mod
 	Matches := []
 	Pos := 0
@@ -6982,17 +6987,6 @@ ModStringToObject(string, isImplicit) {
 			sign := "-"
 		}		
 		Matches[A_Index] := match1 ? sign . "#% to " . Matches[A_Index] . " " . match1 : sign . "#" . type . "" . Matches[A_Index]
-	}
-	
-	; ### This should be done later, its not this function() task
-	; ### I removed all Resist part since its handled in CreatePseudoMods()
-	; ### TODO: Clean this code
-	; Handle "all attributes"/"all resist"
-	If (RegExMatch(val, "i)all attributes", match)) {
-		resist := match1 ? true : false
-		Matches[1] := resist ? "+#% to Fire Resistance" : "+# to Strength"
-		Matches[2] := resist ? "+#% to Lightning Resistance" : "+# to Intelligence"
-		Matches[3] := resist ? "+#% to Cold Resistance" : "+# to Dexterity"
 	}
 
 	; Use original mod-string if no combination is found
@@ -7193,17 +7187,23 @@ CreatePseudoMods(mods) {
 */
 
 	; ### Attributes
+	; flat attributes
 	If (allAttributesFlat) {
 		strengthFlat := strengthFlat + allAttributesFlat
 		dexterityFlat := dexterityFlat + allAttributesFlat
 		intelligenceFlat := intelligenceFlat + allAttributesFlat
 	}
-	
-	; ### TODO: Calculate Flat Attributes with % Attributes
-
+	; add percent attributes to the flat values
 	if ( strengthFlat AND strengthPercent ) {
 		strengthFlat := strengthFlat + Floor(strengthFlat * (strengthPercent/100))
+	}
+	if ( dexterityFlat AND dexterityPercent ) {
+		dexterityFlat := dexterityFlat + Floor(dexterityFlat * (dexterityPercent/100))
 	}	
+	if ( intelligenceFlat AND intelligencePercent ) {
+		intelligenceFlat := intelligenceFlat + Floor(intelligenceFlat * (intelligencePercent/100))
+	}
+	totalAttribute := strengthFlat + dexterityFlat + intelligenceFlat
 	
 	; ### TODO: Here we should spread attributes to their coresponding stats they give
 
@@ -7257,7 +7257,7 @@ CreatePseudoMods(mods) {
 ; ########################################################################
 */
 
-	; i'll deal with max life later ( problem is to trace back parent strenght attribute since the value was divided ... )
+	; ### Generate Basic Stats pseudos
 	If (life > 0) {
 		temp := {}
 		temp.values := [life]
@@ -7268,8 +7268,30 @@ CreatePseudoMods(mods) {
 		tempMods.push(temp)
 	}
 	
+	; ### Generate Attributes pseudos
+	For i, attribute in ["Strength", "Dexterity", "Intelligence"] {
+		if ( %attribute%Flat > 0 ) {
+			temp := {}
+			temp.values := [%attribute%Flat]
+			temp.name_orig := "+" .  %attribute%Flat . " to " .  attribute
+			temp.name     := "+# to " . attribute
+			temp.simplifiedName := "xTo" attribute
+			temp.possibleParentSimplifiedNames := ["xTo" attribute, "xToAllAttributes"]
+			tempMods.push(temp)
+		}
+	}
+	; Note that totalAttribute is a calculated value with no possible child pseudo mods, so it has no simplifiedName
+	If (totalAttribute > 0) {
+		temp := {}
+		temp.values := [totalAttribute]
+		temp.name_orig := "+" . totalAttribute . " total Attributes"
+		temp.name     := "+#% total Attributes"
+		temp.possibleParentSimplifiedNames := ["xToStrength", "xToDexterity", "xToIntelligence"]
+		tempMods.push(temp)
+	}
+	
 	; ### Generate Resists pseudos
-	; ### TBD: no need to add chaos and all resist mods to pseudos since they cant get higher than their parent value anyway
+	; ### TBD: no need to add chaos and all resist mods to pseudos since they cant get higher than their parent value anyway ???
 	For i, element in ["Fire", "Cold", "Lightning"] {
 		if( %element%Resist > 0) {
 			temp := {}
