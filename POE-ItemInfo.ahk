@@ -7251,7 +7251,7 @@ CreatePseudoMods(mods) {
 		temp.values := [totalResist]
 		temp.name_orig := "+" . totalResist . "% total Resistance"
 		temp.name     := "+#% total Resistance"
-		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
+		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances", "xToChaosResistance"]
 		tempMods.push(temp)
 	}
 
