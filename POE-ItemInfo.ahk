@@ -7047,6 +7047,16 @@ CreatePseudoMods(mods) {
 	; and this one is never used ??
 	attackDmg_Percent := 0
 	
+	; Attributes
+	strengthFlat := 0
+	dexterityFlat := 0
+	intelligenceFlat := 0
+	allAttributesFlat := 0
+	strengthPercent := 0
+	dexterityPercent := 0
+	intelligencePercent := 0
+	allAttributesPercent := 0
+	
 	; Resistances
 	coldResist := 0
 	fireResist := 0
@@ -7058,10 +7068,10 @@ CreatePseudoMods(mods) {
 	; Damages
 	; TODO : these could easily be initialized thru a loop
 	elementalDmg_Percent := 0
-	elementalDmg_AttacksFlatLow := 0
-	elementalDmg_AttacksFlatHi := 0
 	elementalDmg_AttacksPercent := 0
 	elementalDmg_SpellsPercent := 0
+	elementalDmg_AttacksFlatLow := 0
+	elementalDmg_AttacksFlatHi := 0		
 	elementalDmg_SpellsFlatLow := 0
 	elementalDmg_SpellsFlatHi := 0
 	elementalDmg_FlatLow := 0
@@ -7071,8 +7081,8 @@ CreatePseudoMods(mods) {
 	fireDmg_AttacksPercent := 0
 	fireDmg_SpellsPercent := 0
 	fireDmg_AttacksFlatLow := 0
-	fireDmg_SpellsFlatLow := 0
 	fireDmg_AttacksFlatHi := 0
+	fireDmg_SpellsFlatLow := 0
 	fireDmg_SpellsFlatHi := 0
 	fireDmg_FlatLow := 0
 	fireDmg_FlatHi := 0
@@ -7104,44 +7114,41 @@ CreatePseudoMods(mods) {
 ; ########################################################################
 */
 
+	; Note that at this point combined mods/attributes have already been separated into two mods
+	; like '+ x % to fire and lightning resist' would be '+ x % to fire resist' AND '+ x % to lightning resist' as 2 different mods
 	For key, mod in mods {
 		
 		; ### Life
-		; 	- i dont think this need changes ill look into it later
 		If (RegExMatch(mod.name, "i)([.0-9]+) to maximum life$")) {
 			life := life + mod.values[1]
 			mod.simplifiedName := "xToMaximumLife"
 		}
 		; ### Attributes
-		; TODO ; manage other attributes
-		else if (RegExMatch(mod.name, "i)to intelligence$|to dexterity$|to (strength)$", match)) {
-			attributes := attributes + mod.values[1]
-			If (match1 = "strength") {
-				life := life + (Floor(mod.values[1] / 2))
-				mod.simplifiedName := "xToStrength"
-			}
+		; all attributes
+		else if (RegExMatch(mod.name, "i)to All Attributes$")) {
+			allAttributesFlat := allAttributesFlat + mod.values[1]
+			mod.simplifiedName := "xToAllAttributes"
+		}
+		; flat attributes
+		else if (RegExMatch(mod.name, "i)to (Intelligence|Dexterity|Strength)$", attribute)) {
+			%attribute1%Flat := %attribute1%Flat + mod.values[1]
+			mod.simplifiedName := "xTo" . attribute1
+		}
+		; percent attributes
+		else if (RegExMatch(mod.name, "i)increased (Intelligence|Dexterity|Strength)$", attribute)) {
+			%attribute1%Percent := %attribute1%Percent + mod.values[1]
+			mod.simplifiedName := "xIncreased" . attribute1 . "Percentage"
 		}
 		; ### Resistances
-		; TODO : could combine most 'to _____ Resistance' regex into a single one
+		; % to all resistances ( carefull about 'max all resistances' )
 		else if (RegExMatch(mod.name, "i)to all Elemental Resistances$")) {
 			elementalResist := elementalResist + mod.values[1]
 			mod.simplifiedName := "xToAllElementalResistances"
 		}
-		else if (RegExMatch(mod.name, "i)to Cold Resistance$")) {
-			coldResist := coldResist + mod.values[1]
-			mod.simplifiedName := "xToColdResistance"
-		}
-		else if (RegExMatch(mod.name, "i)to Fire Resistance$")) {
-			fireResist := fireResist + mod.values[1]
-			mod.simplifiedName := "xToFireResistance"
-		}
-		else if (RegExMatch(mod.name, "i)to Lightning Resistance$")) {
-			lightningResist := lightningResist + mod.values[1]
-			mod.simplifiedName := "xToLightningResistance"
-		}
-		else if (RegExMatch(mod.name, "i)to Chaos Resistance$")) {
-			chaosResist := chaosResist + mod.values[1]
-			mod.simplifiedName := "xToChaosResistance"
+		; % to base resistances
+		else if (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning|Chaos) Resistance$", resistType)) {
+			%resistType1%Resist := %resistType1%Resist + mod.values[1]
+			mod.simplifiedName := "xTo" resistType1 "Resistance"
 		}
 		; ### Percent damages
 		; % increased Elemental damage - global
@@ -7170,6 +7177,7 @@ CreatePseudoMods(mods) {
 		; this would catch any * Spell * Damage * ( we might need to be more precise here )
 		else if (RegExMatch(mod.name, "i)spell") and RegExMatch(mod.name, "i)damage") and not RegExMatch(mod.name, "i)chance|multiplier")) {
 			spellDmg_Percent := spellDmg_Percent + mod.values[1]
+			mod.simplifiedName := "xIncreasedSpellDamage" 
 		}
 	}
 	
@@ -7182,6 +7190,25 @@ CreatePseudoMods(mods) {
 ; ### 			those values should be affected by other +% Elemental damage at this point
 ; ########################################################################
 */
+
+	; ### Attributes
+	If (allAttributesFlat) {
+		strengthFlat := strengthFlat + allAttributesFlat
+		dexterityFlat := dexterityFlat + allAttributesFlat
+		intelligenceFlat := intelligenceFlat + allAttributesFlat
+	}
+	
+	; ### TODO: Calculate Flat Attributes with % Attributes
+
+	if ( strengthFlat AND strengthPercent ) {
+		strengthFlat := Floor(strengthFlat * (strengthPercent/100))
+	}	
+	
+	; ### TODO: Here we should spread attributes to their coresponding stats they give
+
+	if ( strengthFlat ) {
+		life := life + Floor(strengthFlat/2)
+	}
 
 	; ### Elemental damage
 	; ### - spreads Elemental damage with weapon to each 'element' damage with weapon
@@ -7242,7 +7269,7 @@ CreatePseudoMods(mods) {
 			temp.values := [%element%Resist]
 			temp.name_orig := "+" %element%Resist "% total " element " Resistance"
 			temp.name     := "+#% total " element " Resistance"
-			temp.possibleParentSimplifiedNames := ["xTo" . element "Resistance", "xToAllElementalResistances"]
+			temp.possibleParentSimplifiedNames := ["xTo" element "Resistance", "xToAllElementalResistances"]
 			tempMods.push(temp)
 		}
 	}
@@ -7256,12 +7283,22 @@ CreatePseudoMods(mods) {
 	}
 
 	; ### Generate Damages pseudos
+	; spell damage global
+	if (spellDmg_Percent) {
+		temp := {}
+		temp.values := [spellDmg_Percent]
+		temp.name_orig := "+" . spellDmg_Percent . "% increased Spell Damage"
+		temp.name     := "+#% increased Spell Damage"
+		temp.possibleParentSimplifiedNames := ["xIncreasedSpellDamage"]
+		tempMods.push(temp)
+	}
+	; other damages
 	percentDamageModSuffixes := [" Damage", " Damage with Weapons", " Spell Damage"]
 	For i, element in ["Fire", "Cold", "Lightning", "Elemental"]
 	{	
 		For j, dmgType in ["", "Attacks",  "Spells"]
 		{			
-			; ### Percentage damage
+			; ### Percentage damages
 			If (%element%Dmg_%dmgType%Percent > 0) {
 				modSuffix := percentDamageModSuffixes[j]
 				temp := {}
@@ -7270,9 +7307,10 @@ CreatePseudoMods(mods) {
 				temp.name     := "#% increased " element . modSuffix
 				temp.possibleParentSimplifiedNames := ["xIncreased" element "Damage" dmgType]
 				( element != "Elemental" ) ? temp.possibleParentSimplifiedNames.push("xIncreasedElementalDamage" dmgType) : False
+				( dmgType == "Spells" ) ? temp.possibleParentSimplifiedNames.push("xIncreasedSpellDamage" dmgType) : False
 				tempMods.push(temp)
 			}
-			; ### Flat damage
+			; ### Flat damages
 			If (%element%Dmg_%dmgType%FlatLow > 0) {
 				; TODO : Unhandled case for flat damage from weapon only
 				modSuffix := (dmgType == "Attacks") ? " to Attacks" : " to Spells"
@@ -7299,6 +7337,7 @@ CreatePseudoMods(mods) {
 	For tempModKey, tempMod in tempMods {
 		higher := true
 		For modKey, mod in mods {
+			; check if its a parent mod
 			isParentMod := false
 			For i, simplifiedName in tempMod.possibleParentSimplifiedNames {
 				if (mod.simplifiedName == simplifiedName) {
@@ -7322,6 +7361,7 @@ CreatePseudoMods(mods) {
 				}
 			}
 		}
+		; add the tempMod to pseudos if it has greater values, or no parent
 		if (higher){
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
