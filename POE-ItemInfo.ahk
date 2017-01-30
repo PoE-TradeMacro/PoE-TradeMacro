@@ -6895,6 +6895,7 @@ GetNegativeAffixOffset(Item)
 	return NegativeAffixOffset
 }
 
+; ### TODO: Fix issue for white items, currently receiving duplicate infos (affixes and implicit containing the same line)
 ; Prepare item affixes to create pseudo mods, taken from PoE-TradeMacro
 PreparePseudoModCreation(Affixes, Implicit, Rarity, isMap = false) {
 	mods := []
@@ -6940,9 +6941,12 @@ ModStringToObject(string, isImplicit) {
 	; ### TODO: IMPORTANT - this catches '+x to level of socketed Strength gems' and changes it to '+x Strength'
 	; Collect all resists/attributes that are combined in one mod
 	Matches := []
-	Pos := 0
-	While Pos := RegExMatch(val, "i) ?(Dexterity) ?| ?(Intelligence) ?| ?(Strength) ?", match, Pos + (StrLen(match) ? StrLen(match) : 1)) {
-		Matches.push(Trim(match))
+	
+	If (RegexMatch(val, "i)to (Strength|Dexterity|Intelligence) and (Strength|Dexterity|Intelligence)$", attribute)) {
+		if ( attribute1 AND attribute2 ) {
+			Matches.push(attribute1)
+			Matches.push(attribute2)
+		}
 	}
 	
 	type := ""
