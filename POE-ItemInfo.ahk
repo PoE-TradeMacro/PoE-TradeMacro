@@ -7421,6 +7421,15 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		tempMods.push(temp)
 	}
 	; Note that total resistances are calculated values with no possible child mods, so they have no simplifiedName
+	If (totalElementalResistance > 0 ) {
+		temp := {}
+		temp.values := [totalElementalResistance]
+		temp.name_orig := "+" . totalElementalResistance . "% total Elemental Resistance"
+		temp.name     := "+#% total Elemental Resistance"
+		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
+		tempMods.push(temp)
+	}
+	; without chaos resist, this would have the same value as totalElementalResistance
 	If ((totalResistance > 0) AND (chaosResist > 0)) {
 		temp := {}
 		temp.values := [totalResistance]
@@ -7429,14 +7438,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances", "xToChaosResistance"]
 		tempMods.push(temp)
 	}
-	else if (totalElementalResistance > 0 ) {
-		temp := {}
-		temp.values := [totalElementalResistance]
-		temp.name_orig := "+" . totalElementalResistance . "% total Elemental Resistance"
-		temp.name     := "+#% total Elemental Resistance"
-		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
-		tempMods.push(temp)
-	}
+	
 
 	; ### Generate Damages pseudos
 	; spell damage global
@@ -7487,17 +7489,63 @@ CreatePseudoMods(mods, returnAllMods := False) {
 
 /* BREAKPOINT
 ; ########################################################################
-; ###	Remove unwanted pseudos
-; ###	Only keep pseudos with values higher than all/any of their parent mod
-; ###	TODO : IMPORTANT: compare pseudos with pseudos to remove unwanted ones
+; ###	Filter/Remove unwanted pseudos
+; ###	Only keep pseudos with values higher than other related mods
+; ###	TODO:	Improve/Simplify this part, so far I just copy/pasted code and doing ALMOST the same thing in each loop
 ; ###			We could exit inner loop as soon as higher is set to false, I'll check the docs later
 ; ########################################################################
  */
 
-		
-	; ### TODO: this part could be improved/simplified but it works ... for now
-	tempPseudoMods := []
+	; This 1st pass is for TradeMacro 
+	; remove pseudos that are shadowed by an original mod ONLY if they have the same name
+	; inherited values not taken into account for this 1st pass
+	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' ) BUT don't have same name
+	
+	allPseudoMods := []
 	For i, tempMod in tempMods {
+		higher := true
+		For j, mod in mods {
+			; check for mods with same name
+			if ( tempMod.simplifiedName == mod.simplifiedName ) {
+				; check if its a flat damage mod
+				If (mod.values[2]) {
+					mv := (mod.values[1] + mod.values[2]) / 2
+					tv := (tempMod.values[1] + tempMod.values[2]) / 2
+					If (tv <= mv) {
+						higher := false
+					}
+				}
+				Else {
+					If (tempMod.values[1] <= mod.values[1]) {
+						higher := false
+					}
+				}
+			}
+		}
+		; add the tempMod to pseudos if it has greater values, or no parent
+		if (higher){
+			tempMod.isVariable:= false
+			tempMod.type := "pseudo"
+			allPseudoMods.push(tempMod)
+		}
+	}
+	
+	; ### This is mostly for TradeMacro
+	; returns all original mods and all the pseudo mods if requested
+	if(returnAllMods) {
+		returnedMods := mods
+		For i, mod in allPseudoMods {
+			returnedMods.push(mod)
+		}
+		return returnedMods
+	}
+ 
+	; 2nd pass
+	; now we remove pseudos that are shadowed by an original mod they inherited from
+	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' )
+ 
+	tempPseudoMods := []
+	For i, tempMod in allPseudoMods {
 		higher := true
 		For j, mod in mods {
 			; check if its a parent mod
@@ -7532,6 +7580,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		}
 	}
 	
+	; 3rd Pass
 	; same logic as above but compare pseudo with other pseudos
 	; remove pseudos that are shadowed by another pseudo
 	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' )
@@ -7575,20 +7624,8 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			pseudoMods.push(tempPseudoA)
 		}
 	}
-	
-	; ### This is mostly for TradeMacro
-	; either returns all the mods or only the pseudos
-	if(returnAllMods) {
-		returnedMods := mods
-		For i, mod in pseudoMods {
-			returnedMods.push(mod)
-		}
-	}
-	else {
-		returnedMods := pseudoMods
-	}
 
-	return returnedMods
+	return pseudoMods
 }
 
 ; ### 4GForce - 01/29/2017 - https://github.com/PoE-TradeMacro/POE-TradeMacro/issues/224
