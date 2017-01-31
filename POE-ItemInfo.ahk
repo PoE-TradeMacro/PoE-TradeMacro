@@ -6898,6 +6898,9 @@ GetNegativeAffixOffset(Item)
 ; ### TODO: Fix issue for white items, currently receiving duplicate infos (affixes and implicit containing the same line)
 ; Prepare item affixes to create pseudo mods, taken from PoE-TradeMacro
 PreparePseudoModCreation(Affixes, Implicit, Rarity, isMap = false) {
+
+	; ### TODO: remove blank lines ( rare cases, maybe from crafted mods )
+
 	mods := []
 	; ### Append Implicit if any
 	If (Implicit) {
@@ -6934,11 +6937,6 @@ ModStringToObject(string, isImplicit) {
 		values.push(value)
 	}
 
-	
-	; ### TBD : I couldn't find any combined attributes mod within the list on the wiki ... is that even possbile ??
-	;			I removed it until confirmed
-	
-	; ### TODO: IMPORTANT - this catches '+x to level of socketed Strength gems' and changes it to '+x Strength'
 	; Collect all resists/attributes that are combined in one mod
 	Matches := []
 	
@@ -7037,8 +7035,16 @@ ModStringToObject(string, isImplicit) {
 ; #######################################################################################################################
 CreatePseudoMods(mods, returnAllMods := False) {
 	tempMods := []
-	life := 0
-	attributes := 0
+	lifeFlat := 0
+	manaFlat := 0
+	energyShieldFlat := 0
+	energyShieldPercent := 0
+	
+	rarityItemsFoundPercent := 0
+	
+	globalCritChancePercent := 0
+	globalCritMultiplierPercent := 0
+	critChanceForSpellsPercent := 0
 
 	; TBD : theese 2 variables should probly have the same format as the others
 	spellDmg_Percent := 0
@@ -7061,7 +7067,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	fireResist := 0
 	lightningResist := 0
 	chaosResist := 0
-	elementalResist := 0
+	toAllElementalResist := 0
 
 	; Damages
 	; TODO : these could easily be initialized thru a loop
@@ -7116,10 +7122,40 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; like '+ x % to fire and lightning resist' would be '+ x % to fire resist' AND '+ x % to lightning resist' as 2 different mods
 	For key, mod in mods {
 		
-		; ### Life
-		If (RegExMatch(mod.name, "i)([.0-9]+) to maximum life$")) {
-			life := life + mod.values[1]
-			mod.simplifiedName := "xToMaximumLife"
+		; ### Base stats
+		; life and mana
+		If (RegExMatch(mod.name, "i)to maximum (Life|Mana)$", stat)) {
+			%stat1%Flat := %stat1%Flat + mod.values[1]
+			mod.simplifiedName := "xToMaximum" stat1
+		}
+		; flat energy shield
+		else if (RegExMatch(mod.name, "i)to maximum Energy Shield$")) {
+			energyShieldFlat := energyShieldFlat + mod.values[1]
+			mod.simplifiedName := "xToMaximumEnergyShield"
+		}
+		; percent energy shield
+		else if (RegExMatch(mod.name, "i)increased maximum Energy Shield$")) {
+			energyShieldPercent := energyShieldPercent + mod.values[1]
+			mod.simplifiedName := "xIncreasedMaximumEnergyShield"
+		}
+		; ### Items found
+		; rarity
+		else if (RegExMatch(mod.name, "i)increased Rarity of items found$")) {
+			rarityItemsFoundPercent := rarityItemsFoundPercent + mod.values[1]
+			mod.simplifiedName := "xIncreasedRarityOfItemsFound"
+		}
+		; ### Crits
+		else if (RegExMatch(mod.name, "i)increased Global Critical Strike Chance$")) {
+			globalCritChancePercent := globalCritChancePercent + mod.values[1]
+			mod.simplifiedName := "xIncreasedGlobalCriticalChance"
+		}
+		else if (RegExMatch(mod.name, "i)to Global Critical Strike Multiplier$")) {
+			globalCritMultiplierPercent := globalCritMultiplierPercent + mod.values[1]
+			mod.simplifiedName := "xIncreasedGlobalCriticalMultiplier"
+		}
+		else if (RegExMatch(mod.name, "i)increased Critical Strike Chance for Spells$")) {
+			critChanceForSpellsPercent := critChanceForSpellsPercent + mod.values[1]
+			mod.simplifiedName := "xIncreasedCriticalSpells"
 		}
 		; ### Attributes
 		; all attributes
@@ -7140,7 +7176,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		; ### Resistances
 		; % to all resistances ( carefull about 'max all resistances' )
 		else if (RegExMatch(mod.name, "i)to all Elemental Resistances$")) {
-			elementalResist := elementalResist + mod.values[1]
+			toAllElementalResist := toAllElementalResist + mod.values[1]
 			mod.simplifiedName := "xToAllElementalResistances"
 		}
 		; % to base resistances
@@ -7207,12 +7243,14 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	if ( intelligenceFlat AND intelligencePercent ) {
 		intelligenceFlat := intelligenceFlat + Floor(intelligenceFlat * (intelligencePercent/100))
 	}
-	totalAttribute := strengthFlat + dexterityFlat + intelligenceFlat
 	
 	; ### TODO: Here we should spread attributes to their coresponding stats they give
 
 	if ( strengthFlat ) {
-		life := life + Floor(strengthFlat/2)
+		lifeFlat := lifeFlat + Floor(strengthFlat/2)
+	}
+	if ( intelligenceFlat ) {
+		manaFlat := manaFlat + Floor(intelligenceFlat/2)
 	}
 
 	; ###  Elemental Damage - Global %
@@ -7244,14 +7282,15 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		
 	; ### Elemental Resistances
 	; ### - spreads % to all Elemental Resistances to the base resist
-	; ### - also calculates the totalResist
-	totalResist := chaosResist
-	If(elementalResist) {
+	; ### - also calculates the totalElementalResistance and totalResistance
+	totalElementalResistance := 0
+	If(toAllElementalResist) {
 		For i, element in ["Fire", "Cold", "Lightning"] {
-				%element%Resist := %element%Resist + elementalResist
-				totalResist := totalResist + %element%Resist
+				%element%Resist := %element%Resist + toAllElementalResist
+				totalElementalResistance := totalElementalResistance + %element%Resist
 		}
 	}
+	totalResistance := totalElementalResistance + chaosResist
 	
 /* BREAKPOINT
 ; ########################################################################
@@ -7262,16 +7301,80 @@ CreatePseudoMods(mods, returnAllMods := False) {
 */
 
 	; ### Generate Basic Stats pseudos
-	If (life > 0) {
+	If (lifeFlat > 0) {
 		temp := {}
-		temp.values := [life]
-		temp.name_orig := "+" . life . " to maximum Life"
+		temp.values := [lifeFlat]
+		temp.name_orig := "+" . lifeFlat . " to maximum Life"
 		temp.name     := "+# to maximum Life"
 		temp.simplifiedName := "xToMaximumLife"
 		temp.possibleParentSimplifiedNames := ["xToMaximumLife"]
 		tempMods.push(temp)
 	}
-	
+	If (manaFlat > 0) {
+		temp := {}
+		temp.values := [manaFlat]
+		temp.name_orig := "+" . manaFlat . " to maximum Mana"
+		temp.name     := "+# to maximum Mana"
+		temp.simplifiedName := "xToMaximumMana"
+		temp.possibleParentSimplifiedNames := ["xToMaximumMana"]
+		tempMods.push(temp)
+	}
+	If (energyShieldFlat > 0) {
+		temp := {}
+		temp.values := [energyShieldFlat]
+		temp.name_orig := "+" . energyShieldFlat . " to maximum Energy Shield"
+		temp.name     := "+# to maximum Energy Shield"
+		temp.simplifiedName := "xToMaximumEnergyShield"
+		temp.possibleParentSimplifiedNames := ["xToMaximumEnergyShield"]
+		tempMods.push(temp)
+	}
+	If (energyShieldPercent > 0) {
+		temp := {}
+		temp.values := [energyShieldPercent]
+		temp.name_orig := energyShieldPercent . "% increased maximum Energy Shield"
+		temp.name     := "#% increased maximum Energy Shield"
+		temp.simplifiedName := "xIncreasedMaximumEnergyShield"
+		temp.possibleParentSimplifiedNames := ["xIncreasedMaximumEnergyShield"]
+		tempMods.push(temp)
+	}
+	; ### Generate rarity item found pseudo
+	If (rarityItemsFoundPercent > 0) {
+		temp := {}
+		temp.values := [rarityItemsFoundPercent]
+		temp.name_orig := rarityItemsFoundPercent . "% increased Rarity of items found"
+		temp.name     := "#% increased Rarity of items found"
+		temp.simplifiedName := "xIncreasedRarityOfItemsFound"
+		temp.possibleParentSimplifiedNames := ["xIncreasedRarityOfItemsFound"]
+		tempMods.push(temp)
+	}
+	; ### Generate crit pseudos	
+	If (globalCritChancePercent > 0) {
+		temp := {}
+		temp.values := [globalCritChancePercent]
+		temp.name_orig := globalCritChancePercent . "% increased Global Critical Strike Chance"
+		temp.name     := "#% increased Global Critical Strike Chance"
+		temp.simplifiedName := "xIncreasedGlobalCriticalChance"
+		temp.possibleParentSimplifiedNames := ["xIncreasedGlobalCriticalChance"]
+		tempMods.push(temp)
+	}
+	If (globalCritMultiplierPercent > 0) {
+		temp := {}
+		temp.values := [globalCritMultiplierPercent]
+		temp.name_orig := "+" . globalCritMultiplierPercent . "% to Global Critical Strike Multiplier"
+		temp.name     := "+#% to Global Critical Strike Multiplier"
+		temp.simplifiedName := "xIncreasedGlobalCriticalMultiplier"
+		temp.possibleParentSimplifiedNames := ["xIncreasedGlobalCriticalMultiplier"]
+		tempMods.push(temp)
+	}
+	If (critChanceForSpellsPercent > 0) {
+		temp := {}
+		temp.values := [critChanceForSpellsPercent]
+		temp.name_orig := critChanceForSpellsPercent . "% increased Critical Strike Chance for Spells"
+		temp.name     := "#% increased Critical Strike Chance for Spells"
+		temp.simplifiedName := "xIncreasedCriticalSpells"
+		temp.possibleParentSimplifiedNames := ["xIncreasedCriticalSpells"]
+		tempMods.push(temp)
+	}
 	; ### Generate Attributes pseudos
 	For i, attribute in ["Strength", "Dexterity", "Intelligence"] {
 		if ( %attribute%Flat > 0 ) {
@@ -7284,13 +7387,14 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			tempMods.push(temp)
 		}
 	}
-	; Note that totalAttribute is a calculated value with no possible child pseudo mods, so it has no simplifiedName
-	If (totalAttribute > 0) {
+	; cumulative all attributes mods
+	If (allAttributesFlat > 0) {
 		temp := {}
-		temp.values := [totalAttribute]
-		temp.name_orig := "+" . totalAttribute . " total Attributes"
-		temp.name     := "+#% total Attributes"
-		temp.possibleParentSimplifiedNames := ["xToStrength", "xToDexterity", "xToIntelligence"]
+		temp.values := [allAttributesFlat]
+		temp.name_orig := "+" . allAttributesFlat . " to all Attributes"
+		temp.name     := "+#% to all Attributes"
+		temp.simplifiedName := "xToAllAttributes"
+		temp.possibleParentSimplifiedNames := ["xToAllAttributes"]
 		tempMods.push(temp)
 	}
 	
@@ -7307,13 +7411,30 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			tempMods.push(temp)
 		}
 	}
-	; Note that totalResist is a calculated value with no possible child pseudo mods, so it has no simplifiedName
-	If (totalResist > 0) {
+	If (toAllElementalResist > 0) {
 		temp := {}
-		temp.values := [totalResist]
-		temp.name_orig := "+" . totalResist . "% total Resistance"
+		temp.values := [toAllElementalResist]
+		temp.name_orig := "+" . toAllElementalResist . "% to all Elemental Resistances"
+		temp.name     := "+#% to all Elemental Resistances"
+		temp.simplifiedName := "xToAllElementalResistances"
+		temp.possibleParentSimplifiedNames := ["xToAllElementalResistances"]
+		tempMods.push(temp)
+	}
+	; Note that total resistances are calculated values with no possible child mods, so they have no simplifiedName
+	If ((totalResistance > 0) AND (chaosResist > 0)) {
+		temp := {}
+		temp.values := [totalResistance]
+		temp.name_orig := "+" . totalResistance . "% total Resistance"
 		temp.name     := "+#% total Resistance"
 		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances", "xToChaosResistance"]
+		tempMods.push(temp)
+	}
+	else if (totalElementalResistance > 0 ) {
+		temp := {}
+		temp.values := [totalElementalResistance]
+		temp.name_orig := "+" . totalElementalResistance . "% total Elemental Resistance"
+		temp.name     := "+#% total Elemental Resistance"
+		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
 		tempMods.push(temp)
 	}
 
