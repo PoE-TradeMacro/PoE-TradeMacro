@@ -7035,7 +7035,7 @@ ModStringToObject(string, isImplicit) {
 ; ###			- Build a structure for the possible mods ? 
 ; ###					something like: { simplifiedName: "xToFireResistance", regex: "i)to Fire Resistance", displayFormat: "+#% to Fire Resistance" }
 ; #######################################################################################################################
-CreatePseudoMods(mods) {
+CreatePseudoMods(mods, returnAllMods := False) {
 	tempMods := []
 	life := 0
 	attributes := 0
@@ -7300,8 +7300,8 @@ CreatePseudoMods(mods) {
 		if( %element%Resist > 0) {
 			temp := {}
 			temp.values := [%element%Resist]
-			temp.name_orig := "+" %element%Resist "% total " element " Resistance"
-			temp.name     := "+#% total " element " Resistance"
+			temp.name_orig := "+" %element%Resist "% to " element " Resistance"
+			temp.name     := "+#% to " element " Resistance"
 			temp.simplifiedName := "xTo" element "Resistance"
 			temp.possibleParentSimplifiedNames := ["xTo" element "Resistance", "xToAllElementalResistances"]
 			tempMods.push(temp)
@@ -7454,8 +7454,20 @@ CreatePseudoMods(mods) {
 			pseudoMods.push(tempPseudoA)
 		}
 	}
+	
+	; ### This is mostly for TradeMacro
+	; either returns all the mods or only the pseudos
+	if(returnAllMods) {
+		returnedMods := mods
+		For i, mod in pseudoMods {
+			returnedMods.push(mod)
+		}
+	}
+	else {
+		returnedMods := pseudoMods
+	}
 
-	return pseudoMods
+	return returnedMods
 }
 
 ; ### 4GForce - 01/29/2017 - https://github.com/PoE-TradeMacro/POE-TradeMacro/issues/224
