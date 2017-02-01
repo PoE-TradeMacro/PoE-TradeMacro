@@ -1834,7 +1834,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	i := 0
 	
 	If (Implicit and not Enchantment and not Corruption) {
-		temp := TradeFunc_NonUniqueModStringToObject(Implicit, true)
+		temp := ModStringToObject(Implicit, true)
 		For key, val in temp {
 			mods.push(val)
 			i++
@@ -1852,7 +1852,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 			continue
 		}
 
-		temp := TradeFunc_NonUniqueModStringToObject(val, false)
+		temp := ModStringToObject(val, false)
 		;combine mods if they have the same name and add their values
 		For tempkey, tempmod in temp {			
 			found := false
@@ -1901,7 +1901,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 		}
 	}
 	
-	mods := TradeFunc_CreatePseudoMods(mods)
+	mods := CreatePseudoMods(mods, True)
 	
 	tempItem		:= {}
 	tempItem.mods	:= []
