@@ -1287,7 +1287,8 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		}
 	}
 	
-	RegExMatch(html, "i)Path of Exile", match)
+	; pathofexile.com link in page footer (forum thread)
+	RegExMatch(html, "i)pathofexile", match)
 	If (match) {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_search_form_options.txt, utf-8	
