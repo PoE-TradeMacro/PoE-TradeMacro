@@ -7033,6 +7033,10 @@ ModStringToObject(string, isImplicit) {
 ; ###			- Build a structure for the possible mods ? 
 ; ###					something like: { simplifiedName: "xToFireResistance", regex: "i)to Fire Resistance", displayFormat: "+#% to Fire Resistance" }
 ; #######################################################################################################################
+; ### Notes from Eru:
+; ### - Taking int and dex into account is ok to calculate % increased ES/added Accuracy Rating, but won't work for TradeMacro, could be display for ItemInfo though
+; ### - 
+
 CreatePseudoMods(mods, returnAllMods := False) {
 	tempMods := []
 	lifeFlat := 0
@@ -7225,13 +7229,17 @@ CreatePseudoMods(mods, returnAllMods := False) {
 ; ### 			those values should be affected by other +% Elemental damage at this point
 ; ########################################################################
 */
+; ### Eruyome: Flat elemental damage values should never be affected by % increased elemental damage mods.
+; ###		Flat values on items in general should never be multiplied with global modifiers.
+; ###		If there's any need to have this then let's only implement it as an option that you can toggle and only show it on the ItemInfo tooltip, not TradeMacro.
+
 
 	; ### Attributes
 	; flat attributes
 	If (allAttributesFlat) {
-		strengthFlat := strengthFlat + allAttributesFlat
-		dexterityFlat := dexterityFlat + allAttributesFlat
-		intelligenceFlat := intelligenceFlat + allAttributesFlat
+		strengthFlat		:= strengthFlat + allAttributesFlat
+		dexterityFlat		:= dexterityFlat + allAttributesFlat
+		intelligenceFlat 	:= intelligenceFlat + allAttributesFlat
 	}
 	; add percent attributes to the flat values
 	if ( strengthFlat AND strengthPercent ) {
@@ -7245,7 +7253,6 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	}
 	
 	; ### TODO: Here we should spread attributes to their coresponding stats they give
-
 	if ( strengthFlat ) {
 		lifeFlat := lifeFlat + Floor(strengthFlat/2)
 	}
@@ -7255,28 +7262,30 @@ CreatePseudoMods(mods, returnAllMods := False) {
 
 	; ###  Elemental Damage - Global %
 	; ###  - I don't think this mod can be found on items, but lets spreads it to the base elements in case it does
-	fireDmg_Percent := fireDmg_Percent + elementalDmg_Percent
-	coldDmg_Percent := coldDmg_Percent + elementalDmg_Percent
-	lightningDmg_Percent := lightningDmg_Percent + elementalDmg_Percent
+	; ### Eruyome: Of course it exists, just only as an implicit mod (unless there are uniques that have it)
+	fireDmg_Percent	:= fireDmg_Percent + elementalDmg_Percent
+	coldDmg_Percent	:= coldDmg_Percent + elementalDmg_Percent
+	lightningDmg_Percent:= lightningDmg_Percent + elementalDmg_Percent
 	
 	; ### Elemental damage - Weapons %
 	; ### - spreads Elemental damage with weapon to each 'element' damage with weapon and adds related % increased 'element' damage
-	fireDmg_AttacksPercent      := fireDmg_AttacksPercent + elementalDmg_AttacksPercent + fireDmg_Percent
+	fireDmg_AttacksPercent      	:= fireDmg_AttacksPercent + elementalDmg_AttacksPercent + fireDmg_Percent
 	coldDmg_AttacksPercent		:= coldDmg_AttacksPercent + elementalDmg_AttacksPercent + coldDmg_Percent
 	lightningDmg_AttacksPercent	:= lightningDmg_AttacksPercent + elementalDmg_AttacksPercent + lightningDmg_Percent
 	
 	; ### Elemental damage - Spells %
 	; ### - spreads % spell damage to each % 'element' spell damage and adds related % increased 'element' damage
-	fireDmg_SpellsPercent := fireDmg_SpellsPercent + spellDmg_Percent + fireDmg_Percent
-	coldDmg_SpellsPercent := coldDmg_SpellsPercent + spellDmg_Percent + coldDmg_Percent
+	fireDmg_SpellsPercent 		:= fireDmg_SpellsPercent + spellDmg_Percent + fireDmg_Percent
+	coldDmg_SpellsPercent 		:= coldDmg_SpellsPercent + spellDmg_Percent + coldDmg_Percent
 	lightningDmg_SpellsPercent	:= lightningDmg_SpellsPercent + spellDmg_Percent + lightningDmg_Percent
 
 	; ### TODO: Here we should apply % damage to flat damages
 	; TBD: should probly also combine general elemental flat dmg 
 	; TODO: could be done in a loop for all dmg types
+	; ### Eruyome: Again, don't multiply flat values with global increased multipliers unless its only used for ItemInfo as a toggle option
 	if ( lightningDmg_Percent AND lightningDmg_FlatLow ) {
-		lightningDmg_FlatLow := lightningDmg_FlatLow + Floor(lightningDmg_FlatLow * (lightningDmg_Percent/100))
-		lightningDmg_FlatHi := lightningDmg_FlatHi + Floor(lightningDmg_FlatHi * (lightningDmg_Percent/100))
+		lightningDmg_FlatLow	:= lightningDmg_FlatLow + Floor(lightningDmg_FlatLow * (lightningDmg_Percent/100))
+		lightningDmg_FlatHi		:= lightningDmg_FlatHi + Floor(lightningDmg_FlatHi * (lightningDmg_Percent/100))
 	}
 
 		
