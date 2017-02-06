@@ -3554,6 +3554,9 @@ TradeFunc_ChangeLeague() {
 		TradeOpts.SearchLeague := "standard"
 	}
 	
+	; Call Submit for the settings UI, otherwise we can't set the new league if the UI was last closed via close button or "x"
+	Gui, Submit
+	
 	TradeFunc_SetLeagueIfSelectedIsInactive()        
 	TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
 	TradeFunc_WriteIniValue(TradeOpts.SearchLeague, "config_trade.ini", "Search", "SearchLeague")
