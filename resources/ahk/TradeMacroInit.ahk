@@ -803,11 +803,7 @@ CreateTradeSettingsUI()
 	
 	GoSub, TradeSettingsUI_ChkCorruptedOverride
 	
-	CurrencyList := ""
-	CurrencyTemp := TradeGlobals.Get("CurrencyIDs")	
-	For currName, currID in CurrencyTemp {   
-		CurrencyList .= "|" . currName
-	}
+	CurrencyList := TradeFunc_GetDelimitedCurrencyListString()
 	GuiAddText("Currency Search:", "x287 yp+30 w100 h20 0x0100", "LblCurrencySearchHave", "LblCurrencySearchHaveH")
 	AddToolTip(LblCurrencySearchHaveH, "This settings sets the currency that you`nwant to use as ""have"" for the currency search.")
 	GuiAddDropDownList(CurrencyList, "x+10 yp-2", TradeOpts.CurrencySearchHave, "CurrencySearchHave", "CurrencySearchHaveH")
@@ -853,6 +849,15 @@ CreateTradeSettingsUI()
 	GuiAddText("", "x10 y10 w250 h10")
 }
 
+TradeFunc_GetDelimitedCurrencyListString() {
+	CurrencyList := ""
+	CurrencyTemp := TradeGlobals.Get("CurrencyIDs")	
+	For currName, currID in CurrencyTemp {   
+		CurrencyList .= "|" . currName
+	}
+	Return CurrencyList
+}
+
 UpdateTradeSettingsUI()
 {    
 	Global
@@ -867,6 +872,7 @@ UpdateTradeSettingsUI()
 	GuiControl,, DownloadDataFiles, % TradeOpts.DownloadDataFiles
 	GuiControl,, DeleteCookies, % TradeOpts.DeleteCookies
 	GuiControl,, CookieSelect, % TradeOpts.CookieSelect
+	GuiUpdateDropdownList("All|poe.trade", TradeOpts.CookieSelect, CookieSelect)	
 	GuiControl,, Debug, % TradeOpts.Debug
 	
 	GuiControl,, PriceCheckHotKey, % TradeOpts.PriceCheckHotKey
@@ -885,14 +891,14 @@ UpdateTradeSettingsUI()
 	GuiControl,, ShowItemAgeEnabled, % TradeOpts.ShowItemAgeEnabled
 	GuiControl,, ChangeLeagueEnabled, % TradeOpts.ChangeLeagueEnabled
 	
-	;GuiControl,, SearchLeague, % TradeOpts.SearchLeague
 	GuiUpdateDropdownList("tmpstandard|tmphardcore|standard|hardcore", TradeOpts.SearchLeague, SearchLeague)	
 	GuiControl,, AccountName, % TradeOpts.AccountName
 	GuiControl,, GemLevel, % TradeOpts.GemLevel
 	GuiControl,, GemQualityRange, % TradeOpts.GemQualityRange
 	GuiControl,, AdvancedSearchModValueRangeMin, % TradeOpts.AdvancedSearchModValueRangeMin
 	GuiControl,, AdvancedSearchModValueRangeMax, % TradeOpts.AdvancedSearchModValueRangeMax
-	GuiControl,, CurrencySearchHave, % TradeOpts.CurrencySearchHave
+	CurrencyList := TradeFunc_GetDelimitedCurrencyListString()
+	GuiUpdateDropdownList(CurrencyList, TradeOpts.CurrencySearchHave, CurrencySearchHave)
 	GuiControl,, Corrupted, % TradeOpts.Corrupted
 	GuiControl,, OnlineOnly, % TradeOpts.OnlineOnly
 	GuiControl,, PrefillMinValue, % TradeOpts.PrefillMinValue
