@@ -885,7 +885,8 @@ UpdateTradeSettingsUI()
 	GuiControl,, ShowItemAgeEnabled, % TradeOpts.ShowItemAgeEnabled
 	GuiControl,, ChangeLeagueEnabled, % TradeOpts.ChangeLeagueEnabled
 	
-	GuiControl,, SearchLeague, % TradeOpts.SearchLeague
+	;GuiControl,, SearchLeague, % TradeOpts.SearchLeague
+	GuiUpdateDropdownList("tmpstandard|tmphardcore|standard|hardcore", TradeOpts.SearchLeague, SearchLeague)	
 	GuiControl,, AccountName, % TradeOpts.AccountName
 	GuiControl,, GemLevel, % TradeOpts.GemLevel
 	GuiControl,, GemQualityRange, % TradeOpts.GemQualityRange

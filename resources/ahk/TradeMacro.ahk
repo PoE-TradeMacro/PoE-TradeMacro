@@ -3557,7 +3557,7 @@ TradeFunc_ChangeLeague() {
 	TradeFunc_SetLeagueIfSelectedIsInactive()        
 	TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
 	TradeFunc_WriteIniValue(TradeOpts.SearchLeague, "config_trade.ini", "Search", "SearchLeague")
-	GuiControl,, SearchLeague, % TradeOpts.SearchLeague
+	GuiUpdateDropdownList("standard|hardcore|tmpstandard|tmphardcore", TradeOpts.SearchLeague, SearchLeague)	
 	
 	; Get currency data only if league was changed while alternate search is active or alternate search was changed from disabled to enabled
 	If (TradeOpts.AlternativeCurrencySearch) {

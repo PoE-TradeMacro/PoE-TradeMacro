@@ -7637,11 +7637,26 @@ GuiAddDropDownList(Contents, PositionInfo, Selected="", AssocVar="", AssocHwnd="
 	Loop % ListItems.MaxIndex() {
 		Contents .= Trim(ListItems[A_Index]) . "|"
 		; add second | to mark pre-select list item
-		if (Trim(ListItems[A_Index]) == Selected) {
+		If (Trim(ListItems[A_Index]) == Selected) {
 			Contents .= "|"
 		}
 	}
 	GuiAdd("DropDownList", Contents, PositionInfo, AssocVar, AssocHwnd, AssocLabel, Options, GuiName)
+}
+
+GuiUpdateDropdownList(Contents, Selected="", AssocVar="", Options="", GuiName="") {
+	; usage : add list items as a | delimited string, for example = "item1|item2|item3"
+	ListItems := StrSplit(Contents, "|")
+	; prepend the list with a pipe to re-create the list instead of adding to it
+	Contents := "|"
+	Loop % ListItems.MaxIndex() {
+		Contents .= Trim(ListItems[A_Index]) . "|"
+		; add second | to mark pre-select list item
+		If (Trim(ListItems[A_Index]) == Selected) {
+			Contents .= "|"
+		}
+	}	
+	GuiControl, Choose, GuiName:%AssocVar% , %Contents%  
 }
 
 AddToolTip(con, text, Modify=0){
