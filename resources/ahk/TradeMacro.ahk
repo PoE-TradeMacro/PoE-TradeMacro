@@ -1909,7 +1909,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	temp			:= TradeFunc_GetItemsPoeTradeMods(tempItem, isMap)
 	tempItem.mods	:= temp.mods
 	tempItem.IsUnique := false
-	debugprintarray(tempItem)
+	
 	Return tempItem
 }
 
