@@ -1902,14 +1902,14 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	}
 	
 	mods := CreatePseudoMods(mods, True)
-	
+
 	tempItem		:= {}
 	tempItem.mods	:= []
 	tempItem.mods	:= mods
 	temp			:= TradeFunc_GetItemsPoeTradeMods(tempItem, isMap)
 	tempItem.mods	:= temp.mods
 	tempItem.IsUnique := false
-	
+	debugprintarray(tempItem)
 	Return tempItem
 }
 
@@ -2822,7 +2822,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	TradeAdvancedNormalModCount := 0
 	ModNotFound := false
 	Loop % advItem.mods.Length() {
-		If (!advItem.mods[A_Index].isVariable and advItem.IsUnique) {
+		hidePseudo := advItem.mods[A_Index].hideForTradeMacro ? true : false
+		If ((!advItem.mods[A_Index].isVariable and advItem.IsUnique) or hidePseudo) {
 			continue
 		}
 		xPosMin := modGroupBox + 25			
@@ -2918,7 +2919,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		; increment index If the item has an enchantment
 		index := A_Index + e
 		
-		isPseudo := advItem.mods[A_Index].type = "pseudo" ? true : false		
+		isPseudo := advItem.mods[A_Index].type = "pseudo" ? true : false	
 		If (isPseudo) {
 			If (p = 1) {
 				;add line if first pseudo mod
@@ -2962,7 +2963,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.mods.Length()) {
 		Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line% 	
 	}		
-			
+		
 	If (Sockets >= 5) {
 		m++
 		text := "Sockets: " . Trim(Sockets)
