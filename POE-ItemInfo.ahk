@@ -83,7 +83,7 @@
 ;   - de-globalize the script (almost done)
 ;   - refactor ParseAffixes into ParseAffixesSimple and ParseAffixesComplex (low priority)
 ;
-; Slinkston edit for Todo for 2.0 additions for hazydoc or someone else knowledgable in coding:
+; Slinkston edit for Todo for 2.0 additions for hazydoc or someone Else knowledgable in coding:
 ;    - FYI: All of the stuff I have edited has been marked with ; Slinkston edit.  Some may need to be cleaned up or redone if
 ;      they are done improperly/sloppy.  I have tested all changes with stuff in my stash and with friends, but not every single possibility.
 ;    - Accuracy is a nightmare.  Anyhow, "of the Assassin - 321 to 360 Accuracy (80) (Bow and Wand)" needs
@@ -198,7 +198,7 @@ class UserOptions {
 
 	OnlyActiveIfPOEIsFront := 1     ; Set to 1 to make it so the script does nothing if Path of Exile window isn't the frontmost.
 									; If 0, the script also works if PoE isn't frontmost. This is handy for have the script parse
-									; textual item representations appearing somewhere else, like in the forums or text files.
+									; textual item representations appearing somewhere Else, like in the forums or text files.
 
 	PutResultsOnClipboard := 0      ; Put result text on clipboard (overwriting the textual representation the game put there to begin with)
 
@@ -632,7 +632,7 @@ OpenCreateDataTextFile(Filename)
 	Else
 	{
 		File := FileOpen(Filepath, "w")
-		if !IsObject(File)
+		IF !IsObject(File)
 		{
 			MsgBox, 16, Error, File not found and can't write new file.
 			return
@@ -705,7 +705,7 @@ CheckBaseLevel(ItemTypeName)
 	Loop %ItemListArray% {
 		element := Array%A_Index%1
 
-		if (InStr(ItemTypeName, element) != 0 && StrLen(element) > ResultLength)
+		IF (InStr(ItemTypeName, element) != 0 && StrLen(element) > ResultLength)
 		{
 			ResultIndex := A_Index
 			ResultLength := StrLen(element)
@@ -713,7 +713,7 @@ CheckBaseLevel(ItemTypeName)
 	}
 
 	BaseLevel := ""
-	if (ResultIndex > 0) {
+	IF (ResultIndex > 0) {
 		BaseLevel := Array%ResultIndex%2
 	}
 	return BaseLevel
@@ -1030,7 +1030,7 @@ GetClipboardContents(DropNewlines=False)
 			{
 				Result := Result . A_LoopField
 			}
-			else
+			Else
 			{
 				Result := Result . "`r`n" . A_LoopField  ; and then adding those before adding lines. This makes sure there are no trailing `n or `r.
 				;Result := Result . A_LoopField . "`r`n"  ; the original line, left in for clarity.
@@ -1768,7 +1768,7 @@ AssembleAffixDetails()
 	{
 		CurLine := AffixLines[A_Index]
 		; Any empty line is considered as an Unprocessed Mod
-		if CurLine
+		IF CurLine
 		{
 			ProcessedLine =
 			Loop, %AffixLineParts0%
@@ -1855,7 +1855,7 @@ AssembleAffixDetails()
 			}
 			ProcessedLine := ProcessedLine . AffixType . Delim
 		}
-		else
+		Else
 		{
 			ProcessedLine := "   Unprocessed Essence Mod or unknown Mod"
 		}
@@ -1918,7 +1918,7 @@ AssembleDarkShrineInfo()
 		{
 			; This loop retrieves each line from the file, one at a time.
 			StringSplit, DsEffect, A_LoopReadLine, |,
-			if (DsAffix = DsEffect1) {
+			IF (DsAffix = DsEffect1) {
 				If ((Item.IsRing or Item.IsAmulet or Item.IsBelt or Item.IsJewel) and (DsAffix = "+# to Evasion Rating" or DsAffix = "#% Increased Evasion Rating")) {
 					; Evasion rating on jewelry and jewels has a different effect than Evasion rating on other rares
 					Result := Result . "`n  - Always watch your back (jewelry only)`n  -- Three rare monsters spawn around the darkshrine"
@@ -3263,7 +3263,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				ValueRange := LookupAffixData("data\CastSpeedRings.txt", ItemLevel, CurrValue, "", CurrTier)
 			} Else {
 				; Shields can receive a cast speed master mod.
-				; Leaving this as non shield specific if the master mod ever applicable on something else
+				; Leaving this as non shield specific if the master mod ever applicable on something Else
 				ValueRange := LookupAffixData("data\CastSpeedCraft.txt", ItemLevel, CurrValue, "", CurrTier)
 			}
 			NumSuffixes += 1
@@ -3830,7 +3830,7 @@ ParseAffixes(ItemDataAffixes, Item)
 		}
 		IfInString, A_LoopField, to Evasion Rating
 		{
-			; Slinkston edit. I am not sure if using 'else if' statements are the best way here, but it seems to work.
+			; Slinkston edit. I am not sure if using 'Else If' statements are the best way here, but it seems to work.
 			; AR, EV, and ES items are all correct for Armour, Shields, Helmets, Boots, Gloves, and different jewelry.
 			; to Evasion Rating has Ring, but does not have Belt or Amulet.
 			If (ItemSubType == "Ring")
@@ -5812,14 +5812,14 @@ AssembleDamageDetails(FullItemData)
 			ParseAddedDamage(A_LoopField, "Lightning", MainHLighLo, MainHLighHi)
 			ParseAddedDamage(A_LoopField, "Chaos", MainHChaoLo, MainHChaoHi)
 		}
-		else IfInString, A_LoopField, in Off Hand
+		Else IfInString, A_LoopField, in Off Hand
 		{
 			ParseAddedDamage(A_LoopField, "Fire", OffHFireLo, OffHFireHi)
 			ParseAddedDamage(A_LoopField, "Cold", OffHColdLo, OffHColdHi)
 			ParseAddedDamage(A_LoopField, "Lightning", OffHLighLo, OffHLighHi)
 			ParseAddedDamage(A_LoopField, "Chaos", OffHChaoLo, OffHChaoHi)
 		}
-		else
+		Else
 		{
 			ParseAddedDamage(A_LoopField, "Fire", FireLo, FireHi)
 			ParseAddedDamage(A_LoopField, "Cold", ColdLo, ColdHi)
@@ -5851,19 +5851,19 @@ AssembleDamageDetails(FullItemData)
 		TotalMainHChaosDps := MainHChaosDps + ChaosDps
 		TotalOffHChaosDps := OffHChaosDps + ChaosDps
 	}
-	else twoColDisplay := false
+	Else twoColDisplay := false
 
 	If ( MainHEleDps > 0 or OffHEleDps > 0 )
 	{
 		Result = %Result%`nElem DPS:   %TotalMainHEleDps% MainH | %TotalOffHEleDps% OffH
 	}
-	else Result = %Result%`nElem DPS:   %EleDps%
+	Else Result = %Result%`nElem DPS:   %EleDps%
 
 	If ( MainHChaosDps > 0 or OffHChaosDps > 0 )
 	{
 		Result = %Result%`nChaos DPS:  %TotalMainHChaosDps% MainH | %TotalOffHChaosDps% OffH
 	}
-	else Result = %Result%`nChaos DPS:  %ChaosDps%
+	Else Result = %Result%`nChaos DPS:  %ChaosDps%
 
 	If ( twoColDisplay )
 	{
@@ -5871,7 +5871,7 @@ AssembleDamageDetails(FullItemData)
 		TotalOffHDps := PhysDps + TotalOffHEleDps + TotalOffHChaosDps
 		Result = %Result%`nTotal DPS:  %TotalMainHDps% MainH | %TotalOffHDps% OffH
 	}
-	else
+	Else
 	{
 		TotalDps := PhysDps + EleDps + ChaosDps
 		Result = %Result%`nTotal DPS:  %TotalDps%
@@ -5889,7 +5889,7 @@ AssembleDamageDetails(FullItemData)
 			Q20OffHDps := Q20Dps + TotalOffHEleDps + TotalOffHChaosDps
 			Result = %Result%`nQ20 DPS:    %Q20MainHDps% MainH | %Q20OffHDps% OffH
 		}
-		else
+		Else
 		{
 			Q20Dps := Q20Dps + EleDps + ChaosDps
 			Result = %Result%`nQ20 DPS:    %Q20Dps%
@@ -6632,7 +6632,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			{
 				Item.BaseLevel := CheckBaseLevel(Item.Name)
 			}
-			else if (Item.IsUnidentified)
+			Else If (Item.IsUnidentified)
 			{
 				Item.BaseLevel := CheckBaseLevel(Item.Name)
 			}
@@ -6941,7 +6941,7 @@ ModStringToObject(string, isImplicit) {
 	Matches := []
 	
 	If (RegexMatch(val, "i)to (Strength|Dexterity|Intelligence) and (Strength|Dexterity|Intelligence)$", attribute)) {
-		if ( attribute1 AND attribute2 ) {
+		IF ( attribute1 AND attribute2 ) {
 			Matches.push(attribute1)
 			Matches.push(attribute2)
 		}
@@ -7133,88 +7133,88 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			mod.simplifiedName := "xToMaximum" stat1
 		}
 		; flat energy shield
-		else if (RegExMatch(mod.name, "i)to maximum Energy Shield$")) {
+		Else If (RegExMatch(mod.name, "i)to maximum Energy Shield$")) {
 			energyShieldFlat := energyShieldFlat + mod.values[1]
 			mod.simplifiedName := "xToMaximumEnergyShield"
 		}
 		; percent energy shield
-		else if (RegExMatch(mod.name, "i)increased maximum Energy Shield$")) {
+		Else If (RegExMatch(mod.name, "i)increased maximum Energy Shield$")) {
 			energyShieldPercent := energyShieldPercent + mod.values[1]
 			mod.simplifiedName := "xIncreasedMaximumEnergyShield"
 		}
 		; ### Items found
 		; rarity
-		else if (RegExMatch(mod.name, "i)increased Rarity of items found$")) {
+		Else If (RegExMatch(mod.name, "i)increased Rarity of items found$")) {
 			rarityItemsFoundPercent := rarityItemsFoundPercent + mod.values[1]
 			mod.simplifiedName := "xIncreasedRarityOfItemsFound"
 		}
 		; ### Crits
-		else if (RegExMatch(mod.name, "i)increased Global Critical Strike Chance$")) {
+		Else If (RegExMatch(mod.name, "i)increased Global Critical Strike Chance$")) {
 			globalCritChancePercent := globalCritChancePercent + mod.values[1]
 			mod.simplifiedName := "xIncreasedGlobalCriticalChance"
 		}
-		else if (RegExMatch(mod.name, "i)to Global Critical Strike Multiplier$")) {
+		Else If (RegExMatch(mod.name, "i)to Global Critical Strike Multiplier$")) {
 			globalCritMultiplierPercent := globalCritMultiplierPercent + mod.values[1]
 			mod.simplifiedName := "xIncreasedGlobalCriticalMultiplier"
 		}
-		else if (RegExMatch(mod.name, "i)increased Critical Strike Chance for Spells$")) {
+		Else If (RegExMatch(mod.name, "i)increased Critical Strike Chance for Spells$")) {
 			critChanceForSpellsPercent := critChanceForSpellsPercent + mod.values[1]
 			mod.simplifiedName := "xIncreasedCriticalSpells"
 		}
 		; ### Attributes
 		; all attributes
-		else if (RegExMatch(mod.name, "i)to All Attributes$")) {
+		Else If (RegExMatch(mod.name, "i)to All Attributes$")) {
 			allAttributesFlat := allAttributesFlat + mod.values[1]
 			mod.simplifiedName := "xToAllAttributes"
 		}
 		; flat attributes
-		else if (RegExMatch(mod.name, "i)to (Intelligence|Dexterity|Strength)$", attribute)) {
+		Else If (RegExMatch(mod.name, "i)to (Intelligence|Dexterity|Strength)$", attribute)) {
 			%attribute1%Flat := %attribute1%Flat + mod.values[1]
 			mod.simplifiedName := "xTo" . attribute1
 		}
 		; percent attributes
-		else if (RegExMatch(mod.name, "i)increased (Intelligence|Dexterity|Strength)$", attribute)) {
+		Else If (RegExMatch(mod.name, "i)increased (Intelligence|Dexterity|Strength)$", attribute)) {
 			%attribute1%Percent := %attribute1%Percent + mod.values[1]
 			mod.simplifiedName := "xIncreased" . attribute1 . "Percentage"
 		}
 		; ### Resistances
 		; % to all resistances ( carefull about 'max all resistances' )
-		else if (RegExMatch(mod.name, "i)to all Elemental Resistances$")) {
+		Else If (RegExMatch(mod.name, "i)to all Elemental Resistances$")) {
 			toAllElementalResist := toAllElementalResist + mod.values[1]
 			mod.simplifiedName := "xToAllElementalResistances"
 		}
 		; % to base resistances
-		else if (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning|Chaos) Resistance$", resistType)) {
+		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning|Chaos) Resistance$", resistType)) {
 			%resistType1%Resist := %resistType1%Resist + mod.values[1]
 			mod.simplifiedName := "xTo" resistType1 "Resistance"
 		}
 		; ### Percent damages
 		; % increased Elemental damage - global
-		else if (RegExMatch(mod.name, "i)increased (Cold|Fire|Lightning|Elemental) damage$", element)) {
+		Else If (RegExMatch(mod.name, "i)increased (Cold|Fire|Lightning|Elemental) damage$", element)) {
 			%element1%Dmg_Percent := %element1%Dmg_Percent + mod.values[1]
 			mod.simplifiedName := "xIncreased" element1 "Damage"
 		}
 		; % Elemental damage with weapons
-		else if (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) damage with weapons", element)) {
+		Else If (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) damage with weapons", element)) {
 			%element1%Dmg_AttacksPercent := %element1%Dmg_AttacksPercent + mod.values[1]
 			mod.simplifiedName := "xIncreased" element1 "DamageAttacks"
 		}
 		; ### Flat Damages
 		; Flat 'element' damage - weapons only ( I think )
 		; TODO: this regex should be more precise like 'Adds # to # (Cold|Fire|Lightning|Elemental) Damage'
-		else if (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) Damage$", element)) {
+		Else If (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) Damage$", element)) {
 			%element1%Dmg_FlatLow := %element1%Dmg_FlatLow + mod.values[1]
 			%element1%Dmg_FlatHi  := %element1%Dmg_FlatHi + mod.values[2]
 			mod.simplifiedName := "xFlat" element1 "Damage"
 		}
 		; Flat 'element' damage - various sources
-		else if (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) damage to (Attacks|Spells)$", element)) {
+		Else If (RegExMatch(mod.name, "i)(Cold|Fire|Lightning|Elemental) damage to (Attacks|Spells)$", element)) {
 			%element1%Dmg_%element2%FlatLow := %element1%Dmg_%element2%FlatLow + mod.values[1]
 			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi + mod.values[2]
 			mod.simplifiedName := "xFlat" element1 "Damage" element2
 		}
 		; this would catch any * Spell * Damage * ( we might need to be more precise here )
-		else if (RegExMatch(mod.name, "i)spell") and RegExMatch(mod.name, "i)damage") and not RegExMatch(mod.name, "i)chance|multiplier")) {
+		Else If (RegExMatch(mod.name, "i)spell") and RegExMatch(mod.name, "i)damage") and not RegExMatch(mod.name, "i)chance|multiplier")) {
 			spellDmg_Percent := spellDmg_Percent + mod.values[1]
 			mod.simplifiedName := "xIncreasedSpellDamage" 
 		}
@@ -7242,21 +7242,21 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		intelligenceFlat 	:= intelligenceFlat + allAttributesFlat
 	}
 	; add percent attributes to the flat values
-	if ( strengthFlat AND strengthPercent ) {
+	If ( strengthFlat AND strengthPercent ) {
 		strengthFlat := strengthFlat + Floor(strengthFlat * (strengthPercent/100))
 	}
-	if ( dexterityFlat AND dexterityPercent ) {
+	If ( dexterityFlat AND dexterityPercent ) {
 		dexterityFlat := dexterityFlat + Floor(dexterityFlat * (dexterityPercent/100))
 	}	
-	if ( intelligenceFlat AND intelligencePercent ) {
+	If ( intelligenceFlat AND intelligencePercent ) {
 		intelligenceFlat := intelligenceFlat + Floor(intelligenceFlat * (intelligencePercent/100))
 	}
 	
 	; ### TODO: Here we should spread attributes to their coresponding stats they give
-	if ( strengthFlat ) {
+	If ( strengthFlat ) {
 		lifeFlat := lifeFlat + Floor(strengthFlat/2)
 	}
-	if ( intelligenceFlat ) {
+	If ( intelligenceFlat ) {
 		manaFlat := manaFlat + Floor(intelligenceFlat/2)
 	}
 
@@ -7283,7 +7283,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; TBD: should probly also combine general elemental flat dmg 
 	; TODO: could be done in a loop for all dmg types
 	; ### Eruyome: Again, don't multiply flat values with global increased multipliers unless its only used for ItemInfo as a toggle option
-	if ( lightningDmg_Percent AND lightningDmg_FlatLow ) {
+	If ( lightningDmg_Percent AND lightningDmg_FlatLow ) {
 		lightningDmg_FlatLow	:= lightningDmg_FlatLow + Floor(lightningDmg_FlatLow * (lightningDmg_Percent/100))
 		lightningDmg_FlatHi		:= lightningDmg_FlatHi + Floor(lightningDmg_FlatHi * (lightningDmg_Percent/100))
 	}
@@ -7293,7 +7293,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; ### - spreads % to all Elemental Resistances to the base resist
 	; ### - also calculates the totalElementalResistance and totalResistance
 	totalElementalResistance := 0
-	If(toAllElementalResist) {
+	If (toAllElementalResist) {
 		For i, element in ["Fire", "Cold", "Lightning"] {
 				%element%Resist := %element%Resist + toAllElementalResist
 				totalElementalResistance := totalElementalResistance + %element%Resist
@@ -7386,7 +7386,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	}
 	; ### Generate Attributes pseudos
 	For i, attribute in ["Strength", "Dexterity", "Intelligence"] {
-		if ( %attribute%Flat > 0 ) {
+		If ( %attribute%Flat > 0 ) {
 			temp := {}
 			temp.values := [%attribute%Flat]
 			temp.name_orig := "+" .  %attribute%Flat . " to " .  attribute
@@ -7451,7 +7451,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 
 	; ### Generate Damages pseudos
 	; spell damage global
-	if (spellDmg_Percent > 0) {
+	If (spellDmg_Percent > 0) {
 		temp := {}
 		temp.values := [spellDmg_Percent]
 		temp.name_orig := "+" . spellDmg_Percent . "% increased Spell Damage"
@@ -7515,7 +7515,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		higher := true
 		For j, mod in mods {
 			; check for mods with same name
-			if ( tempMod.simplifiedName == mod.simplifiedName ) {
+			If ( tempMod.simplifiedName == mod.simplifiedName ) {
 				; check if its a flat damage mod
 				If (mod.values[2]) {
 					mv := (mod.values[1] + mod.values[2]) / 2
@@ -7532,7 +7532,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		if (higher){
+		If (higher){
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			allPseudoMods.push(tempMod)
@@ -7541,12 +7541,12 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	
 	; ### This is mostly for TradeMacro
 	; returns all original mods and all the pseudo mods if requested
-	if(returnAllMods) {
+	If (returnAllMods) {
 		returnedMods := mods
 		For i, mod in allPseudoMods {
 			returnedMods.push(mod)
 		}
-		return returnedMods
+		Return returnedMods
 	}
  
 	; 2nd pass
@@ -7560,12 +7560,12 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			; check if its a parent mod
 			isParentMod := false
 			For k, simplifiedName in tempMod.possibleParentSimplifiedNames {
-				if (mod.simplifiedName == simplifiedName) {
+				If (mod.simplifiedName == simplifiedName) {
 						isParentMod := true
 						; TODO: match found we could exit loop here
 				}
 			}
-			if ( isParentMod ) {
+			If ( isParentMod ) {
 				; check if its a flat damage mod
 				If (mod.values[2]) {
 					mv := (mod.values[1] + mod.values[2]) / 2
@@ -7582,7 +7582,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		if (higher){
+		If (higher){
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			tempPseudoMods.push(tempMod)
@@ -7609,7 +7609,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 							; TODO: match found we could exit loop here
 					}
 				}
-				if ( isParentMod ) {
+				If ( isParentMod ) {
 					; check if its a flat damage mod
 					If (tempPseudoB.values[2]) {
 						mv := (tempPseudoB.values[1] + tempPseudoB.values[2]) / 2
@@ -7627,7 +7627,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		if (higher){
+		If (higher){
 			tempPseudoA.isVariable:= false
 			tempPseudoA.type := "pseudo"
 			pseudoMods.push(tempPseudoA)
@@ -8769,7 +8769,7 @@ GetContributors(AuthorsPerLine=0)
 	{
 		Authors := Authors . A_LoopReadLine . " "
 		i += 1
-		if (AuthorsPerLine != 0 and mod(i, AuthorsPerLine) == 0) ; every four authors
+		IF (AuthorsPerLine != 0 and mod(i, AuthorsPerLine) == 0) ; every four authors
 		{
 			Authors := Authors . "`r`n"
 		}
@@ -8818,7 +8818,7 @@ ToolTipTimer:
 
 OnClipBoardChange:
 	Global Opts
-	if SuspendPOEItemScript = 0
+	IF SuspendPOEItemScript = 0
 	{
 		If (Opts.OnlyActiveIfPOEIsFront)
 		{
@@ -9118,12 +9118,12 @@ ZeroTrim(number) {
 
 TogglePOEItemScript()
 {
-	if SuspendPOEItemScript = 0
+	IF SuspendPOEItemScript = 0
 	{
 		SuspendPOEItemScript = 1
 		ShowToolTip("Item parsing PAUSED")
 	}
-	else
+	Else
 	{
 		SuspendPOEItemScript = 0
 		ShowToolTip("Item parsing ENABLED")
