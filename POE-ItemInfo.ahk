@@ -6899,7 +6899,6 @@ GetNegativeAffixOffset(Item)
 ; Prepare item affixes to create pseudo mods, taken from PoE-TradeMacro
 ; Moved from TradeMacro to ItemInfo to avoid duplicate code, please be careful with any changes
 PreparePseudoModCreation(Affixes, Implicit, Rarity, isMap = false) {
-
 	; ### TODO: remove blank lines ( rare cases, maybe from crafted mods )
 
 	mods := []
