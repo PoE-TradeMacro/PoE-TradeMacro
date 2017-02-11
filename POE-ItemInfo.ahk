@@ -457,46 +457,46 @@ class Item_ {
 	; Initialize all the Item object attributes to default values
 	Init()
 	{
-		This.Name := ""
-		This.TypeName := ""
-		This.Quality := ""
-		This.BaseLevel := ""
-		This.RarityLevel := ""
-		This.BaseType := ""
-		This.GripType := ""
-		This.Level := ""
-		This.MapLevel := ""
-		This.MaxSockets := ""
-		This.SubType := ""
-		This.Implicit := ""
+		This.Name			:= ""
+		This.TypeName 		:= ""
+		This.Quality 		:= ""
+		This.BaseLevel		:= ""
+		This.RarityLevel 	:= ""
+		This.BaseType 		:= ""
+		This.GripType 		:= ""
+		This.Level		:= ""
+		This.MapLevel 		:= ""
+		This.MaxSockets 	:= ""
+		This.SubType 		:= ""
+		This.Implicit 		:= ""
 		
-		This.HasImplicit := False
-		This.HasEffect := False
-		This.IsWeapon := False
-		This.IsArmour := False
-		This.IsQuiver := False
-		This.IsFlask := False
-		This.IsGem := False
-		This.IsCurrency := False
+		This.HasImplicit 	:= False
+		This.HasEffect		:= False
+		This.IsWeapon 		:= False
+		This.IsArmour 		:= False
+		This.IsQuiver 		:= False
+		This.IsFlask 		:= False
+		This.IsGem		:= False
+		This.IsCurrency 	:= False
 		This.IsUnidentified := False
-		This.IsBelt := False
-		This.IsRing := False
-		This.IsUnsetRing := False
-		This.IsBow := False
-		This.IsAmulet := False
+		This.IsBelt 		:= False
+		This.IsRing 		:= False
+		This.IsUnsetRing 	:= False
+		This.IsBow		:= False
+		This.IsAmulet 		:= False
 		This.IsSingleSocket := False
-		This.IsFourSocket := False
-		This.IsThreeSocket := False
-		This.IsMap := False
-		This.IsTalisman := False
-		This.IsJewel := False
+		This.IsFourSocket 	:= False
+		This.IsThreeSocket 	:= False
+		This.IsMap		:= False
+		This.IsTalisman 	:= False
+		This.IsJewel 		:= False
 		This.IsDivinationCard := False
-		This.IsUnique := False
-		This.IsRare := False
-		This.IsCorrupted := False
-		This.IsMirrored := False
-		This.IsMapFragment := False
-		This.IsEssence := False
+		This.IsUnique 		:= False
+		This.IsRare 		:= False
+		This.IsCorrupted 	:= False
+		This.IsMirrored 	:= False
+		This.IsMapFragment 	:= False
+		This.IsEssence		:= False
 	}
 }
 Global Item := new Item_
@@ -6558,7 +6558,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	ItemData.IndexAffixes := ItemDataIndexAffixes
 
 	; Retrieve items implicit mod if it has one
-	If (Item.IsWeapon or Item.IsArmour or Item.IsRing or Item.IsBelt or Item.IsAmulet) {
+	If (Item.IsWeapon or Item.IsArmour or Item.IsRing or Item.IsBelt or Item.IsAmulet or Item.IsJewel) {
 		; Magic and higher rarity
 		If (RarityLevel > 1) {
 			ItemDataIndexImplicit := ItemData.IndexLast - GetNegativeAffixOffset(Item) - 1
