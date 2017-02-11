@@ -1,5 +1,4 @@
 ﻿#Include, %A_ScriptDir%\lib\JSON.ahk
-#Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
 
 PoEScripts_Update(user, repo, ReleaseVersion, ShowUpdateNotification, SplashScreenTitle = "") {
 	GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, SplashScreenTitle)
