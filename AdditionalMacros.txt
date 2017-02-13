@@ -1,7 +1,7 @@
   Pause::TogglePOEItemScript()				;pause item parsing with the pause key (other macros remain). key bind enabled by default.
 ;  ^Escape::CloseScripts()					;Ctrl+Esc closes all running scripts specified by (and including) ItemInfo or TradeMacro.
   
-
+;	^*v::SendInput {Click}{Enter}/destroy{Enter} ; Ctrl+Shift+v Allows fast delete of items no need to drop of ground or vendor
 ;   F5::SendInput {Enter}/hideout{Enter}		; go to hideout with F5
 ;   ^WheelUp::SendInput {Left}					; Ctrl+mouse wheel up toggles stash tabs left
 ;   ^WheelDown::SendInput {Right}				; Ctrl+mouse wheel down toggles stash tabs right	
