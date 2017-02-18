@@ -123,6 +123,7 @@ globalUpdateInfo.user := TradeGlobals.Get("GithubUser")
 globalUpdateInfo.releaseVersion 	:= TradeGlobals.Get("ReleaseVersion")
 globalUpdateInfo.skipSelection 	:= 0
 globalUpdateInfo.skipBackup 		:= 0
+globalUpdateInfo.skipUpdateCheck 	:= 0
 
 TradeGlobals.Set("SettingsScriptList", ["TradeMacro", "ItemInfo"])
 TradeGlobals.Set("SettingsUITitle", "PoE (Trade) Item Info Settings")
@@ -966,6 +967,7 @@ UpdateTradeSettingsUI()
 TradeFunc_SyncUpdateSettings(){
 	globalUpdateInfo.skipSelection 	:= TradeOpts.UpdateSkipSelection
 	globalUpdateInfo.skipBackup 		:= TradeOpts.UpdateSkipBackup
+	globalUpdateInfo.skipUpdateCheck 	:= TradeOpts.ShowUpdateNotification
 }
 
 TradeFunc_CreateTradeAboutWindow() {
