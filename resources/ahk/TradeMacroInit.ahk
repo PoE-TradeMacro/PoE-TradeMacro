@@ -1,5 +1,8 @@
 ﻿; TradeMacro Add-on to POE-ItemInfo
 ; IGN: Eruyome, ManicCompression
+#SingleInstance force
+#NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
+#Persistent ; Stay open in background
 
 SetWorkingDir, %A_ScriptDir%
 ;https://autohotkey.com/boards/viewtopic.php?f=6&t=53
