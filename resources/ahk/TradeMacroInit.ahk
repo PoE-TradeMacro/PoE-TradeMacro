@@ -2,7 +2,6 @@
 ; IGN: Eruyome, ManicCompression
 
 SetWorkingDir, %A_ScriptDir%
-FileRemoveDir, %A_ScriptDir%\temp, 1
 ;https://autohotkey.com/boards/viewtopic.php?f=6&t=53
 #Include, %A_ScriptDir%\lib\JSON.ahk
 ; Console https://autohotkey.com/boards/viewtopic.php?f=6&t=2116
@@ -41,8 +40,6 @@ class TradeGlobals {
 	}
 }
 
-global TradeTempDir := A_ScriptDir . "\temp"
-global TradeDataDir := A_ScriptDir . "\data_trade"
 global SettingsWindowWidth := 845 
 global SavedTradeSettings := false
 
@@ -131,6 +128,16 @@ argumentProjectName		= %1%
 argumentUserDirectory	= %2%
 argumentIsDevVersion	= %3%
 argumentOverwrittenFiles = %4%
+
+; when using the fallback exe we're missing the parameters passed by the merge script
+If (!StrLen(argumentProjectName) > 0) {
+	argumentProjectName		:= "PoE-TradeMacro"
+	FilesToCopyToUserFolder	:= ["\resources\config\default_config_trade.ini", "\resources\config\default_config.ini", "\resources\ahk\default_AdditionalMacros.txt"]
+	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
+	argumentIsDevVersion	:= PoEScripts_isDevelopmentVersion()
+	argumentUserDirectory	:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
+}
+
 TradeGlobals.Set("ProjectName", argumentProjectName)
 global userDirectory		:= argumentUserDirectory
 global isDevVersion			:= argumentIsDevVersion
