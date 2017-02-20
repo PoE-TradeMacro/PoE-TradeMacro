@@ -30,25 +30,6 @@ HttpObj.SetRequestHeader("Content-type","application/html")
 HttpObj.Send("")
 HttpObj.WaitForResponse()
 
-; Test without catching errors
-If Encoding {
-	oADO          := ComObjCreate("adodb.stream")
-	oADO.Type     := 1
-	oADO.Mode     := 3
-	oADO.Open()
-	oADO.Write(HttpObj.ResponseBody)
-	oADO.Position := 0
-	oADO.Type     := 2
-	oADO.Charset  := Encoding
-	html := oADO.ReadText()
-	oADO.Close()
-}
-
-If (StrLen(html) > 0) {
-	console.log("First test downloading to variable using WinHTTP adodb.stream successful.")	
-} Else {
-	console.log("First test downloading to variable using WinHTTP adodb.stream returned empty string.")
-}
 
 ; Test with catching errors
 Try {				
@@ -65,10 +46,30 @@ Try {
 		oADO.Close()
 	}
 	If (StrLen(html) > 0) {
-		console.log("Second test downloading to variable using WinHTTP adodb.stream successful.")	
+		console.log("First test downloading to variable using WinHTTP adodb.stream successful.")	
 	} Else {
-		console.log("Second test downloading to variable using WinHTTP adodb.stream returned empty string.")
+		console.log("First test downloading to variable using WinHTTP adodb.stream returned empty string.")
 	}
 } Catch e {
 	console.log("Exception thrown!`n`nwhat: " e.what "`nfile: " e.file	"`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra)
+}
+
+; Test without catching errors
+If Encoding {
+	oADO          := ComObjCreate("adodb.stream")
+	oADO.Type     := 1
+	oADO.Mode     := 3
+	oADO.Open()
+	oADO.Write(HttpObj.ResponseBody)
+	oADO.Position := 0
+	oADO.Type     := 2
+	oADO.Charset  := Encoding
+	html := oADO.ReadText()
+	oADO.Close()
+}
+
+If (StrLen(html) > 0) {
+	console.log("Second test downloading to variable using WinHTTP adodb.stream successful.")	
+} Else {
+	console.log("Second test downloading to variable using WinHTTP adodb.stream returned empty string.")
 }
