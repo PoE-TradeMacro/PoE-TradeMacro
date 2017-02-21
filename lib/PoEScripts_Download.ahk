@@ -23,7 +23,7 @@
 		; Use fallback download if WinHttpRequest fails
 		If ((StrLen(html) < 1 or not html or e.what) and useFallback) {
 			DownloadFallback(url, html, e)
-		} Else If ((StrLen(html) < 1 or not html or e.what)) {		
+		} Else If ((StrLen(html) < 1 or not html or e.what)) {
 			ThrowError(e)
 		}
 	}

@@ -29,7 +29,7 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 	
 	Try  {
 		html := PoEScripts_Download(url, ioData := postData, ioHdr := reqHeaders, options, true, true)
-		
+
 		parsedJSON := JSON.Load(html)
 		LatestRelease := {}
 		LastXReleases := []
@@ -60,9 +60,9 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 		downloadFile 		:= UrlParts[UrlParts.MaxIndex()] . ".zip"
 		downloadURL_zip 	:= "https://github.com/" . user . "/" . repo . "/archive/" . downloadFile
 		downloadURL_asset 	:= ""
-		If (LatestRelease.assets.Length()) {
+		If (LatestRelease.assets.MaxIndex()) {
 			For key, val in LatestRelease.assets {
-				If (val.content_type = "application/zip") {
+				If (InStr(val.content_type, "zip")) {
 					downloadURL_asset := val.browser_download_url
 				}
 			}
@@ -340,7 +340,7 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup) 
 		
 		savePath := "" ; ByRef
 		If (DownloadRelease(url, project, savePath)) {
-			folderName := ExtractRelease(savePath, project)
+			folderName := ExtractRelease(savePath, project)			
 			If (StrLen(folderName)) {
 				; successfully downloaded and extracted release.zip to %A_Temp%\%Project%\ext
 				; copy script to %A_Temp%\%Project%
@@ -483,7 +483,6 @@ DownloadRelease(url, project, ByRef savePath) {
 ExtractRelease(file, project) {
 	SplitPath, file, f_name, f_dir, f_ext, f_name_no_ext, f_drive
 	sUnz := f_dir "\ext"  ; Directory to unzip files	
-	
 	; empty extraction sub-directory
 	Try {
 		FileRemoveDir, %sUnz%, 1	
@@ -498,9 +497,16 @@ ExtractRelease(file, project) {
 	SplashTextOff
 	
 	; find folder name of extracted archive (to be sure we know the right one)
+	Number := 0
 	Loop, %sUnz%\*, 1, 0
 	{
 		folderName = %A_LoopFileLongPath%
+		Number++
+	}
+	
+	; zip archive was extracted directly into the folder, not by creating a sub folder first
+	If (Number > 1) {
+		folderName := sUnz
 	}
 	
 	Return folderName
