@@ -488,6 +488,7 @@ class Item_ {
 		This.IsMirrored 	:= False
 		This.IsMapFragment 	:= False
 		This.IsEssence		:= False
+		This.IsRelic		:= False
 	}
 }
 Global Item := new Item_
@@ -942,6 +943,16 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 		{
 			BaseType = Jewel
 			SubType = Prismatic Jewel
+			return
+		}
+		
+		; Leaguestones
+		IfInString, LoopField, Leaguestone
+		{
+			RegexMatch(LoopField, "i)(.*)Leaguestone", match)
+			RegexReplace(Trim(match1), "i)\b(\w+)\W*$", match) ; match last word
+			BaseType = Leaguestone
+			SubType := %match1% " Leaguestone"
 			return
 		}
 
@@ -6532,7 +6543,10 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsJewel := (Item.BaseType == "Jewel")
 	Item.IsMirrored := (ItemIsMirrored(ItemDataText) and Not Item.IsCurrency)
 	Item.IsEssence := Item.IsCurrency and RegExMatch(Item.Name, "i)Essence of |Remnant of Corruption")
-	Item.Note := Globals.Get("ItemNote")
+	Item.Note := Globals.Get("ItemNote")	
+	If (RarityLevel = 4) {
+		Item.IsRelic := 
+	}
 
 	TempStr := ItemData.PartsLast
 	Loop, Parse, TempStr, `n, `r
