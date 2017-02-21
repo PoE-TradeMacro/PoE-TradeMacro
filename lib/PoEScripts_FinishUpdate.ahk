@@ -14,6 +14,7 @@ updateScriptPath	= %2%
 installPath		= %3%
 projectName		= %4%
 
+;FileRemoveDir, %installPath%, 1
 FileMoveDir, %updateScriptPath%, %installPath%, 2
 If (ErrorLevel) {
 	MsgBox Error while copying new files to %installPath%. Update failed.

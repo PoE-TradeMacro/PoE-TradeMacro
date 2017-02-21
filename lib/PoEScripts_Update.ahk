@@ -1,5 +1,6 @@
 ﻿#Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\zip.ahk
+#Include, %A_ScriptDir%\lib\WinHttpRequest.ahk
 
 PoEScripts_Update(user, repo, ReleaseVersion, ShowUpdateNotification, userDirectory, isDevVersion, skipSelection, skipBackup, SplashScreenTitle = "") {
 	status := GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirectory, isDevVersion, skipSelection, skipBackup, SplashScreenTitle)
@@ -13,33 +14,21 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	url := "https://api.github.com/repos/" . user . "/" . repo . "/releases"
 	downloadUrl := "https://github.com/" . user . "/" . repo . "/releases"
+	html := ""
+	
+	postData := ""
+	reqHeaders =
+		(LTrim
+			Content-type: application/html
+		)
+	options =
+		(LTrim
+			Charset: UTF-8
+			Codepage: 65001
+		)
 	
 	Try  {
-		Encoding := "utf-8"
-		HttpObj.Open("GET",url)
-		HttpObj.SetRequestHeader("Content-type","application/html")
-		HttpObj.Send("")
-		HttpObj.WaitForResponse()
-
-		Try {				
-			If Encoding {
-				oADO          := ComObjCreate("adodb.stream")
-				oADO.Type     := 1
-				oADO.Mode     := 3
-				oADO.Open()
-				oADO.Write(HttpObj.ResponseBody)
-				oADO.Position := 0
-				oADO.Type     := 2
-				oADO.Charset  := Encoding
-				html := oADO.ReadText()
-				oADO.Close()
-			}
-		} Catch e {			
-			html := HttpObj.ResponseText
-			If (TradeOpts.Debug) {
-				MsgBox, 16,, % "Exception thrown!`n`nwhat: " e.what "`nfile: " e.file	"`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra
-			}
-		}
+		html := PoEScripts_Download(url, ioData := postData, ioHdr := reqHeaders, options, true, true)
 		
 		parsedJSON := JSON.Load(html)
 		LatestRelease := {}
@@ -449,40 +438,34 @@ GetCommonPath(csidl) {
 	return %fpath% 
 }
 
-DownloadRelease(URL, project, ByRef savePath) {
-	static nothing := ComObjError(0)
-	static oHTTP   := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	static oADO    := ComObjCreate("adodb.stream")
-	
+DownloadRelease(url, project, ByRef savePath) {	
 	SplashTextOn, 300, 20, %project% update, Downloading .zip archive...
-	oHTTP.Open("GET",url)
-	oHTTP.SetRequestHeader("Content-type","application/octet-stream")
-	; we need the useragent with the repository name to download files
-	oHTTP.SetRequestHeader("User-Agent", project)
-	oHTTP.Send("")
-	oHTTP.WaitForResponse()
-
+	
 	savePath := A_Temp . "\" . project . "\" . "release.zip"
 	If (!InStr(FileExist(A_Temp "\" project), "D")) {
 		FileCreateDir, %A_Temp%\%project%
 	}
 	
-	oADO.Type := 1 ; adTypeBinary = 1
-	oADO.Open()
-	oADO.Write( oHTTP.ResponseBody )
-	oADO.SaveToFile( savePath, 2 )
-	oADO.Close()
+	postData := ""
+	reqHeaders =
+		(LTrim
+			Content-type: application/octet-stream
+			User-Agent: %project%
+		)
+	options =
+		(LTrim
+			Charset: UTF-8
+			Codepage: 65001
+			SaveAs: %savePath%
+		)	
+	response := PoEScripts_Download(url, ioData := postData, ioHdr := reqHeaders, options, true, true, true)
 	SplashTextOff
 	
-	If (oHTTP.Status != 200) {
-		MsgBox, 16,, % "Error downloading file. HTTP status: " oHTTP.Status " " oHTTP.StatusText 
+	If (response == "Error: Wrong Status") {
 		Return False
 	}
 	
-	; not sure if this is neccessary
-	FileGetSize, sizeOnDisk, %SavePath%
-	size := oHTTP.GetResponseHeader("Content-Length")	
-	If (size != sizeOnDisk) {
+	If (response == "Error: Different Size") {
 		MsgBox, 5,, % "Error: size of downloaded file is incorrect.`n`nUpdate has been cancelled."
 		IfMsgBox, Retry
 		{
@@ -493,7 +476,6 @@ DownloadRelease(URL, project, ByRef savePath) {
 			Return False	
 		}
 	}	
-	; MsgBox % "HTTP/1.1 " oHTTP.Status " " oHTTP.StatusText "`n" oHTTP.GetAllResponseHeaders()
 	
 	Return True
 }
