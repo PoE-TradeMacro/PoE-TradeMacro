@@ -1045,6 +1045,39 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	cfduid      := TradeGlobals.Get("cfduid")
 	cfClearance := TradeGlobals.Get("cfClearance")
 	
+	/* Not working yet, no response
+	postData := payload
+	payLength:= StrLen(payload)
+	reqHeaders =
+		(LTrim
+			Content-type: application/html
+			Host: poe.trade
+			Connection: keep-alive
+			Content-Length: %payLength%
+			Cache-Control: max-age=0
+			Origin: http://poe.trade
+			Upgrade-Insecure-Requests: 1
+			Content-type: application/x-www-form-urlencoded
+			Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+			Referer: http://poe.trade/
+		)
+	If (StrLen(UserAgent)) {
+		options .= "`nUser-Agent: " UserAgent
+		options .= "`nCookie: __cfduid= " cfduid "; cf_clearance= " cfClearance
+	}
+	options =
+		(LTrim
+			Charset: UTF-8
+			Method: POST
+		)
+	If (openSearchInBrowser) {
+		options .= "`nNO_AUTO_REDIRECT" 
+	}
+
+	html := ""
+	html := PoEScripts_Download("http://poe.trade/search", ioData := postData, ioHdr := reqHeaders, options, false)
+	*/
+		
 	ComObjError(0)
 	Encoding := "utf-8"
     ;Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
