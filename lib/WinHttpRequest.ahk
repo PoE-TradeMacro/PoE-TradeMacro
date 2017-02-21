@@ -151,7 +151,7 @@ WinHttpRequest( URL, ByRef In_POST__Out_Data="", ByRef In_Out_HEADERS="", Option
 		DllCall("oleaut32\SafeArrayUnaccessData", "ptr", ComObjValue(body))
 
 		size := GZIP_DecompressBuffer(data, size)
-		
+
 		; 不可以直接 ComObjValue(oHTTP.ResponseBody)！
 		; 需要先将 oHTTP.ResponseBody 赋值给变量，如 body，然后再 ComObjValue(body)。
 		; 直接 ComObjValue(oHTTP.ResponseBody) 会导致在 XP 系统无法获取 gzip 文件的未压缩大小。

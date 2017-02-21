@@ -197,7 +197,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (Item.IsUnique) {		
 		; returns mods with their ranges of the searched item If it is unique and has variable mods
 		uniqueWithVariableMods :=
-		uniqueWithVariableMods := TradeFunc_FindUniqueItemIfItHasVariableRolls(Name)
+		uniqueWithVariableMods := TradeFunc_FindUniqueItemIfItHasVariableRolls(Name, Item.IsRelic)
 		
 		; Return If the advanced search was used but the checked item doesn't have variable mods
 		if(!uniqueWithVariableMods and isAdvancedPriceCheck and not Enchantment and not Corruption) {
@@ -1872,9 +1872,9 @@ class _ParamMod {
 }
 
 ; Return unique item with its variable mods and mod ranges If it has any
-TradeFunc_FindUniqueItemIfItHasVariableRolls(name)
-{
-	data := TradeGlobals.Get("VariableUniqueData")
+TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
+{	
+	data := isRelic ? TradeGlobals.Get("VariableRelicData") : TradeGlobals.Get("VariableUniqueData")
 	For index, uitem in data {		
 		If (uitem.name = name) {
 			Loop % uitem.mods.Length() {
