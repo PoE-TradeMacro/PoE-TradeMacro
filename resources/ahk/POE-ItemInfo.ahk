@@ -953,7 +953,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			RegexMatch(LoopField, "i)(.*)Leaguestone", match)
 			RegexReplace(Trim(match1), "i)\b(\w+)\W*$", match) ; match last word
 			BaseType = Leaguestone
-			SubType := %match1% " Leaguestone"
+			SubType := match1 " Leaguestone"
 			return
 		}
 
@@ -6080,6 +6080,24 @@ ParseSockets(ItemDataText)
 	return SocketsCount
 }
 
+ParseCharges(stats)
+{
+	charges := {}
+	Loop,  Parse, stats, `n, `r 
+	{
+		RegExMatch(A_LoopField, "i)Consumes (\d+) of (\d+) Charges on Use.*", max)
+		RegExMatch(A_LoopField, "i)Currently has (\d+) Charges.*", current)
+		If (max) {
+			charges.usage	:= max1
+			charges.max	:= max2
+		}
+		If (current) {
+			charges.current:= current1
+		}
+	}	
+	return charges
+}
+
 ; Converts a currency stack to Chaos by looking up the
 ; conversion ratio from CurrencyRates.txt or downloaded ratios from poe.ninja
 ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
@@ -6418,7 +6436,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 
 	ItemData.NamePlate	:= ItemDataParts1
 	ItemData.Stats		:= ItemDataParts2
-
+	
 	ItemDataIndexLast := ItemDataParts0
 	ItemDataPartsLast := ItemDataParts%ItemDataIndexLast%
 
@@ -6456,7 +6474,9 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 
 	ItemData.Links		:= ParseLinks(ItemDataText)
 	ItemData.Sockets	:= ParseSockets(ItemDataText)
-
+	
+	Item.Charges		:= ParseCharges(ItemData.Stats)
+	
 	Item.IsUnique := False
 	If (InStr(ItemData.Rarity, "Unique"))
 	{
@@ -6493,7 +6513,6 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	}
 	Else
 	{
-
 		If (Item.IsCurrency and Opts.ShowCurrencyValueInChaos == 1)
 		{
 			dataSource	:= ""
@@ -6615,9 +6634,9 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		ParseAffixes(ItemData.Affixes, Item)
 	}
-	NumPrefixes := AffixTotals.NumPrefixes
-	NumSuffixes := AffixTotals.NumSuffixes
-	TotalAffixes := NumPrefixes + NumSuffixes
+	NumPrefixes	:= AffixTotals.NumPrefixes
+	NumSuffixes	:= AffixTotals.NumSuffixes
+	TotalAffixes	:= NumPrefixes + NumSuffixes
 	AffixTotals.NumTotals := TotalAffixes
 
 	; We need to call this function a second time because now we know the AffixCount.
@@ -6625,7 +6644,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.TypeName := ItemTypeName
 
 	pseudoMods := PreparePseudoModCreation(ItemData.Affixes, Item.Implicit, RarityLevel, Item.isMap)
-	
+
 	; Start assembling the text for the tooltip
 	TT := Item.Name
 	If (Item.TypeName && (Item.TypeName != Item.Name))
