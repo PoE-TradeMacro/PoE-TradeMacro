@@ -1054,7 +1054,7 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	UserAgent   := TradeGlobals.Get("UserAgent")
 	cfduid      := TradeGlobals.Get("cfduid")
 	cfClearance := TradeGlobals.Get("cfClearance")
-	
+
 	/* Not working yet, no response
 	postData := payload
 	payLength:= StrLen(payload)
@@ -1837,7 +1837,7 @@ class RequestParams_ {
 	;relic		:= ""
 	;charges		:= ""
 	
-	ToPayload() 
+	ToPayload()
 	{
 		modGroupStr := this.modGroup.ToPayload()
 		
@@ -1853,8 +1853,33 @@ class RequestParams_ {
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted
 		;p .= "&relic=" this.relic
 		;p .= "&charges=" this.charges
+		
+		temp := p
+		temp := CleanPayload(temp)
+		; not used yet
+		;console.log(temp)
+		
 		Return p
 	}
+}
+
+CleanPayload(payload) {
+	StringSplit, parameters, payload, `&
+	params 	:= []
+	i 		:= 1
+	While (parameters%i%) {
+		RegExMatch(parameters%i%, "=$", match)
+		If (!match) {
+			params.push(parameters%i%)
+		}	
+		i++
+	}
+	
+	payload := ""
+	For key, val in params {
+		payload .= val "&"
+	}
+	return payload
 }
 
 class _ParamModGroup {
