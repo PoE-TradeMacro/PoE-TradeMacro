@@ -210,7 +210,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Gui, SelectModsGui:Destroy
 			
 			preparedItem :=
-			preparedItem := TradeFunc_GetItemsPoeTradeUniqueMods(uniqueWithVariableMods)	
+			preparedItem := TradeFunc_GetItemsPoeTradeUniqueMods(uniqueWithVariableMods)
+			preparedItem := TradeFunc_RemoveAlternativeVersionsMods(preparedItem, ItemData.Affixes)
 			preparedItem.maxSockets := Item.maxSockets
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
@@ -796,7 +797,7 @@ TradeFunc_CalculateQ20(base, affixFlat, affixPercent){
 TradeFunc_ParseItemOffenseStats(Stats, mods){
 	Global ItemData
 	iStats := {}
-	debugOutput :=
+	debugOutput := 
 	
 	RegExMatch(ItemData.Stats, "i)Physical Damage ?:.*?(\d+)-(\d+)", match)
 	physicalDamageLow := match1
@@ -846,7 +847,7 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 						min_affixFlat%dmgType1%Hi     := mod.ranges[1][2] 
 						max_affixFlat%dmgType1%Low    := mod.ranges[2][1] 
 						max_affixFlat%dmgType1%Hi     := mod.ranges[2][2] 						
-					}		
+					}
 					debugOutput .= affix "`nflat " dmgType1 " : " min_affixFlat%dmgType1%Low " - " min_affixFlat%dmgType1%Hi " to " max_affixFlat%dmgType1%Low " - " max_affixFlat%dmgType1%Hi "`n`n"					
 				}
 				If (RegExMatch(affix, "i)Adds.*(\d+) to #.*(Lightning) Damage", match)) {
@@ -954,8 +955,8 @@ TradeFunc_CompareGemNames(name) {
 	}
 }
 
-TradeFunc_GetUniqueStats(name){
-	items := TradeGlobals.Get("VariableUniqueData")
+TradeFunc_GetUniqueStats(name, isRelic = false) {
+	items := isRelic ? TradeGlobals.Get("VariableRelicData") : TradeGlobals.Get("VariableUniqueData")
 	For i, uitem in items {
 		If (name = uitem.name) {
 			Return uitem.stats
@@ -1899,11 +1900,35 @@ TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
 	Return 0
 }
 
+TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
+	Affixes	:= StrSplit(Affixes, "`n")
+	i 		:= 0
+	tempMods	:= []
+	
+	For k, v in Item.mods {
+		modFound := false
+		For key, val in Affixes {
+			t := RegExReplace(val, "i)[\d\.]+\s?to\s?[\d\.]+|[\d\.]+", "#")
+			If (TradeUtils.CleanUp(v.name) == TradeUtils.CleanUp(t)) {				
+				modFound := true
+			}
+		}
+		
+		If (modFound) {
+			tempMods.push(v)
+		}
+	}
+	
+	Item.mods := tempMods
+	
+	return Item
+}
+
 ; Return items mods and ranges
 TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = false, Corruption = false, isMap = false) {
-	Affixes := StrSplit(Affixes, "`n")
-	mods := []
-	i := 0
+	Affixes	:= StrSplit(Affixes, "`n")
+	mods		:= []
+	i		:= 0
 	
 	If (Implicit and not Enchantment and not Corruption) {
 		temp := ModStringToObject(Implicit, true)
