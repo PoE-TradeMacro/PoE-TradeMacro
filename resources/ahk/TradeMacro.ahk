@@ -1835,6 +1835,7 @@ class RequestParams_ {
 	crafted		:= ""
 	enchanted 	:= ""
 	;relic		:= ""
+	;charges		:= ""
 	
 	ToPayload() 
 	{
@@ -1851,6 +1852,7 @@ class RequestParams_ {
 		p .= "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality 
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted
 		;p .= "&relic=" this.relic
+		;p .= "&charges=" this.charges
 		Return p
 	}
 }
