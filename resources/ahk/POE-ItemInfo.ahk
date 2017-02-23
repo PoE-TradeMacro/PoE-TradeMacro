@@ -6932,7 +6932,7 @@ PreparePseudoModCreation(Affixes, Implicit, Rarity, isMap = false) {
 	; ### Append Implicits if any
 	modStrings := Implicit	
 	For i, modString in modStrings {
-		tempMods := ModStringToObject(modString, false)
+		tempMods := ModStringToObject(modString, true)
 		For i, tempMod in tempMods {
 			mods.push(tempMod)
 		}
@@ -8663,7 +8663,6 @@ OnClipBoardChange:
 			{
 				ParseClipBoardChanges()
 			}
-			ParseClipBoardChanges()
 		}
 		Else
 		{

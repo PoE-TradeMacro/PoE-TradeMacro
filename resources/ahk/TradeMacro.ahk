@@ -1934,12 +1934,14 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	mods		:= []
 	i		:= 0
 	
-	If (Implicit and not Enchantment and not Corruption) {
-		temp := ModStringToObject(Implicit, true)
-		For key, val in temp {
-			mods.push(val)
-			i++
-		}		
+	If (Implicit.maxIndex() and not Enchantment and not Corruption) {
+		modStrings := Implicit	
+		For i, modString in modStrings {
+			tempMods := ModStringToObject(modString, true)
+			For i, tempMod in tempMods {
+				mods.push(tempMod)
+			}
+		}
 	}	
 
 	For key, val in Affixes {
@@ -2137,11 +2139,17 @@ TradeFunc_FindInModGroup(modgroup, needle) {
 TradeFunc_GetCorruption(_item) {
 	mods     := TradeGlobals.Get("ModsData")	
 	corrMods := TradeGlobals.Get("CorruptedModsData")
-	RegExMatch(_item.Implicit, "i)([-.0-9]+)", value)
+	
+	If (_item.implicit.maxIndex() > 1) {
+		; there are no corruptions when the item has multiple implicits
+		Return 0
+	}
+	
+	RegExMatch(_item.Implicit[1], "i)([-.0-9]+)", value)
 	If (RegExMatch(imp, "i)Limited to:")) {
 		;return false
 	}
-	imp      := RegExReplace(_item.Implicit, "i)([-.0-9]+)", "#")
+	imp      := RegExReplace(_item.Implicit[1], "i)([-.0-9]+)", "#")
 	
 	corrMod  := {}
 	For i, corr in corrMods {	
@@ -2150,7 +2158,7 @@ TradeFunc_GetCorruption(_item) {
 				match := Trim(RegExReplace(mod, "i)\(implicit\)", ""))					
 				If (match = corr) {
 					corrMod.param := mod
-					corrMod.name  := _item.implicit
+					corrMod.name  := _item.implicit[1]
 				}
 			}
 		}
@@ -2177,7 +2185,7 @@ TradeFunc_GetCorruption(_item) {
 TradeFunc_GetEnchantment(_item, type) {
 	mods     := TradeGlobals.Get("ModsData")	
 	enchants := TradeGlobals.Get("EnchantmentData")	
-	
+
 	group := 
 	If (type = "Boots") {
 		group := enchants.boots
@@ -2189,8 +2197,13 @@ TradeFunc_GetEnchantment(_item, type) {
 		group := enchants.helmet
 	} 
 
-	RegExMatch(_item.implicit, "i)([.0-9]+)(%? to ([.0-9]+))?", values)
-	imp      := RegExReplace(_item.implicit, "i)([.0-9]+)", "#")
+	If (_item.implicit.maxIndex() > 1) {
+		; there are no enchantments when the item has multiple implicits
+		Return 0
+	}
+	
+	RegExMatch(_item.implicit[1], "i)([.0-9]+)(%? to ([.0-9]+))?", values)
+	imp      := RegExReplace(_item.implicit[1], "i)([.0-9]+)", "#")
 
 	enchantment := {}	
 	If (group.length()) {	
@@ -2200,7 +2213,7 @@ TradeFunc_GetEnchantment(_item, type) {
 					match := Trim(RegExReplace(mod, "i)\(enchant\)", ""))					
 					If (match = enchant) {
 						enchantment.param := mod
-						enchantment.name  := _item.implicit
+						enchantment.name  := _item.implicit[1]
 					}
 				}
 			}
