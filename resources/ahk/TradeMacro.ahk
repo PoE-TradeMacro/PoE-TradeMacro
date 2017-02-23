@@ -212,13 +212,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem :=
 			preparedItem := TradeFunc_GetItemsPoeTradeUniqueMods(uniqueWithVariableMods)
 			preparedItem := TradeFunc_RemoveAlternativeVersionsMods(preparedItem, ItemData.Affixes)
-			preparedItem.maxSockets := Item.maxSockets
+			preparedItem.maxSockets 	:= Item.maxSockets
+			preparedItem.isCorrupted	:= Item.isCorrupted
+			preparedItem.isRelic	:= Item.isRelic
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
 			
 			; open TradeFunc_AdvancedPriceCheckGui to select mods and their min/max values
 			If (isAdvancedPriceCheck) {
 				UniqueStats := TradeFunc_GetUniqueStats(Name)
+				
 				If (Enchantment) {
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Enchantment)
 				}
@@ -2410,7 +2413,25 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Destroy    
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values: 
 	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRangeMin "`% / " ValueRangeMax "`%" (lowered for non-unique items)
-	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the (unique) item's mods difference between their min and max value as 100`%.			
+	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the (unique) item's mods difference between their min and max value as 100`%.
+	
+	line :=
+	Loop, 500 {
+		line := line . "-"
+	}
+
+	If (advItem.isUnique) {
+		itemName := advItem.name
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+13, %line%
+		Gui, SelectModsGui:Add, Text, x14 yp+15 cAF5F1C, %itemName%
+		If (advItem.isRelic) {
+			Gui, SelectModsGui:Add, Text, x+10 yp+0 cGreen, Relic
+		}
+		If (advItem.isCorrupted) {
+			Gui, SelectModsGui:Add, Text, x+10 yp+0 cD20000, (Corrupted)
+		}
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+13 cc9cacd, %line%	
+	}
 	
 	ValueRangeMin := ValueRangeMin / 100 	
 	ValueRangeMax := ValueRangeMax / 100 	
@@ -2446,7 +2467,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	
 	boxRows := modCount * 3 + statCount * 3
 	
-	Gui, SelectModsGui:Add, Text, x14 y+10 w%modGroupBox%, Mods
+	modGroupYPos := advItem.isUnique ? 4 : 10
+	Gui, SelectModsGui:Add, Text, x14 y+%modGroupYPos% w%modGroupBox%, Mods
 	Gui, SelectModsGui:Add, Text, x+10 yp+0 w90, min
 	Gui, SelectModsGui:Add, Text, x+10 yp+0 w45, current
 	Gui, SelectModsGui:Add, Text, x+10 yp+0 w90, max
