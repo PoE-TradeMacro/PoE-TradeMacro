@@ -2095,7 +2095,8 @@ GetAffixTypeFromProcessedLine(PartialAffixString)
 ; that can be used in calculations.
 GetActualValue(ActualValueLine)
 {
-	Result := RegExReplace(ActualValueLine, ".*?\+?(\d+(?: to \d+|\.\d+)?).*", "$1")
+	; support negative values, example "Ventors Gamble"
+	Result := RegExReplace(ActualValueLine, ".*?\+?(-?\d+(?: to -?\d+|\.\d+)?).*", "$1")
 	StringReplace, Result, Result, %A_SPACE%to%A_SPACE%, -
 	return Result
 }
@@ -6548,7 +6549,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsEssence := Item.IsCurrency and RegExMatch(Item.Name, "i)Essence of |Remnant of Corruption")
 	Item.Note := Globals.Get("ItemNote")	
 	If (RarityLevel = 4) {
-		Item.IsRelic := 
+		Item.IsRelic := false ; add parsing/comparison here
 	}
 
 	TempStr := ItemData.PartsLast

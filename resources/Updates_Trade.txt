@@ -12,6 +12,8 @@ Moved config files and AdditionalMacros.txt to <WindowsUserFolder\Documents\PoE-
 	More details can be found on the Github Wiki FAQ page.
 Renamed macro start scripts.
 Added reload script menu entry (system tray) because the default one won't work.
+Fixed an issue with negative mod values and the advanced search GUI (Ventors Gamble for example).
+Legacy League (2.6) support, subject to testing/changes.
 
 1.7.3
 ================================================================================================

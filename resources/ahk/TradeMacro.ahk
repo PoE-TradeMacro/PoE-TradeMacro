@@ -205,7 +205,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			return
 		}
 		
-		UniqueStats := TradeFunc_GetUniqueStats(Name)
+		UniqueStats := TradeFunc_GetUniqueStats(Name, Item.IsRelic)
 		If (uniqueWithVariableMods) {
 			Gui, SelectModsGui:Destroy
 			
@@ -1904,12 +1904,16 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
 	tempMods	:= []
-	
+
 	For k, v in Item.mods {
 		modFound := false
 		For key, val in Affixes {
-			t := RegExReplace(val, "i)[\d\.]+\s?to\s?[\d\.]+|[\d\.]+", "#")
-			If (TradeUtils.CleanUp(v.name) == TradeUtils.CleanUp(t)) {				
+			; remove negative sign also
+			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+\s?to\s?-?[\d\.]+|-?[\d\.]+", "#"))
+			n := TradeUtils.CleanUp(v.name)
+			; match with optional positive sign to match for example "-7% to cold resist" with "+#% to cold resist"
+			RegExMatch(n, "i)(\+?" . t . ")", match)
+			If (match) {			
 				modFound := true
 			}
 		}
@@ -2254,13 +2258,14 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 			; handle single value
 			Else {
 				CurrValues.Push(CurrValue)
-				ModStr := StrReplace(A_LoopField, CurrValue, "#")		
+				ModStr := StrReplace(A_LoopField, CurrValue, "#")
 			}			
 			
+			; remove negative sign since poe.trade mods are always positive
+			ModStr := RegExReplace(ModStr, "^-#", "#")			
 			ModStr := StrReplace(ModStr, "+")
 			; replace multi spaces with a single one
 			ModStr := RegExReplace(ModStr, " +", " ")			
-			;MsgBox % "Loop: " A_LoopField "`nCurr: " CurrValue "`nModStr: " ModStr "`ntradeMod: " poeTradeMod
 			
 			IfInString, poeTradeMod, % ModStr
 			{
@@ -2275,8 +2280,8 @@ TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 		ErrorMsg := "Mod not found on poe.trade!"
 		Return ErrorMsg
 	}
-	CurrValue := ""
-	CurrValues := []
+	CurrValue	:= ""
+	CurrValues:= []
 	CurrValue := GetActualValue(itemModifiers.name_orig)
 	If (CurrValue ~= "\d+") {
 		
@@ -2587,7 +2592,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (ChangedImplicit) {
 		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line% 
 	}	
-	
+
 	;add mods	
 	l := 1
 	p := 1
@@ -2630,13 +2635,13 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		SetFormat, FloatFast, 5.2
 		ErrorMsg := 
 		If (advItem.IsUnique) {
-			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)	
+			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)
 		}
 		Else {
 			modValues := TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(advItem.mods[A_Index], advItem.mods[A_Index].param)	
 		}
 		If (modValues.Length() > 1) {
-			modValue := (modValues[1] + modValues[2]) / 2			
+			modValue := (modValues[1] + modValues[2]) / 2		
 		}
 		Else {
 			If (StrLen(modValues) > 10) {
@@ -2646,20 +2651,21 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			}
 			modValue := modValues[1]			
 		}	
-		
+
 		; calculate values to prefill min/max fields		
 		; assume the difference between the theoretical max and min value as 100%
 		If (advItem.mods[A_Index].ranges[1]) {
+		
 			modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
-			modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)	
+			modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)
 		}
 		Else {
 			modValueMin := modValue - (modValue * valueRangeMin)
 			modValueMax := modValue + (modValue * valueRangeMax)
 		}		
-		; floor values only If greater than 2, in case of leech/regen mods
-		modValueMin := (modValueMin > 2) ? Floor(modValueMin) : modValueMin
-		modValueMax := (modValueMax > 2) ? Floor(modValueMax) : modValueMax
+		; floor values only if greater than 2, in case of leech/regen mods, use Abs() to support negative numbers
+		modValueMin := (Abs(modValueMin) > 2) ? Floor(modValueMin) : modValueMin
+		modValueMax := (Abs(modValueMax) > 2) ? Floor(modValueMax) : modValueMax
 		
 		; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
 		If (advItem.mods[A_Index].ranges[1]) {
