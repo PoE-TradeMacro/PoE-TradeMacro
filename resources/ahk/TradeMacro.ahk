@@ -2671,7 +2671,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	PreCheckNormalMods := TradeOpts.AdvancedSearchCheckMods ? "Checked" : ""
 	Loop % advItem.mods.Length() {
 		hidePseudo := advItem.mods[A_Index].hideForTradeMacro ? true : false
-		If ((!advItem.mods[A_Index].isVariable and advItem.IsUnique) or hidePseudo) {
+		If ((!advItem.mods[A_Index].isVariable and advItem.IsUnique) or hidePseudo or not StrLen(advItem.mods[A_Index].name)) {
 			continue
 		}
 		xPosMin := modGroupBox + 25			
