@@ -2365,6 +2365,7 @@ TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 ; Create custom search GUI
 TradeFunc_CustomSearchGui() {
 	Global
+	Gui, CustomSearch:Destroy 
 	customSearchItemTypes := TradeGlobals.Get("ItemTypeList")
 	
 	CustomSearchTypeList := ""		
