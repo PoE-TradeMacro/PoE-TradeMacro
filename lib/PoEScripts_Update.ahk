@@ -91,7 +91,7 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 		description := LatestRelease.body
 		
 		RegExReplace(releaseTag, "^v", releaseTag)
-		versions		:= ParseVersionStringsToObject(releaseTag, ReleaseVersion)
+		versions := ParseVersionStringsToObject(releaseTag, ReleaseVersion)
 		
 		newRelease := CompareVersions(versions.latest, versions.current)
 		If (newRelease) {
@@ -230,6 +230,7 @@ RemoveLeadingZeros(in) {
 ParseVersionStringsToObject(latest, current) {
      ; requires valid semantic versioning
 	; x.x.x
+	; vx.x.x
 	; x.x.x-alpha.x
 	; also possible: beta, rc
 	; priority: normal release (no sub version) > rc > beta > alpha

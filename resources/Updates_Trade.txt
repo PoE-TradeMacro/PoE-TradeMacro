@@ -1,5 +1,9 @@
 The following is a list of what has been updated, starting with 1.1.0
 
+2.0.3
+================================================================================================
+Made sure it's not possible anymore to run from or install the script to the user settings folder which caused the script to fail.
+
 2.0.2
 ================================================================================================
 Added relic rarity/flag to searches now that poe.trade supports it.
