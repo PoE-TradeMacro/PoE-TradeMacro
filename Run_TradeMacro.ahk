@@ -13,8 +13,9 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 }
 
 RunAsAdmin()
-FileRemoveDir, %A_ScriptDir%\temp, 1
-FileCreateDir, %A_ScriptDir%\temp
+If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {
+	ExitApp	
+}
 StartSplashScreen()
 
 /*	 
