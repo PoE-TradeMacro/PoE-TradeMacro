@@ -13,9 +13,8 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 }
 
 RunAsAdmin()
-If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {
-	ExitApp	
-}
+FileRemoveDir, %A_ScriptDir%\temp, 1
+FileCreateDir, %A_ScriptDir%\temp
 StartSplashScreen()
 
 /*	 
@@ -26,6 +25,8 @@ FilesToCopyToUserFolder	:= ["\resources\config\default_config_trade.ini", "\reso
 overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
+
+PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, A_ScriptDir, projectName)
 
 /*	 
 	merge all scripts into `_TradeMacroMain.ahk` and execute it.
@@ -51,7 +52,7 @@ FileAppend, %trade%		, %A_ScriptDir%\_TradeMacroMain.ahk
 ; set script hidden
 FileSetAttrib, +H, %A_ScriptDir%\_TradeMacroMain.ahk
 ; pass some parameters to TradeMacroInit
-Run "%A_AhkPath%" "%A_ScriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%"
+Run "%A_AhkPath%" "%A_ScriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript"
 
 ExitApp
 

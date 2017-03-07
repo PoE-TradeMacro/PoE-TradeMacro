@@ -12,9 +12,8 @@ If (A_AhkVersion < TradeAHKVersionRequired)
     ExitApp
 }
 
-If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {
-	ExitApp	
-}
+FileRemoveDir, %A_ScriptDir%\temp, 1
+FileCreateDir, %A_ScriptDir%\temp
 StartSplashScreen()
 
 /*	 
@@ -25,6 +24,8 @@ FilesToCopyToUserFolder	:= ["\resources\config\default_config_trade.ini", "\reso
 overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
+
+PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, A_ScriptDir, projectName)
 
 /*	 
 	merge all scripts into `_TradeMacroMain.ahk` and execute it.

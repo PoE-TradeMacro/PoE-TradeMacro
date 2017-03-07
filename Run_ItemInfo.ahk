@@ -13,9 +13,8 @@ If (A_AhkVersion < AHKVersionRequired)
 }
 
 RunAsAdmin()
-If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-ItemInfo")) {
-	ExitApp	
-}
+FileRemoveDir, %A_ScriptDir%\temp, 1
+FileCreateDir, %A_ScriptDir%\temp
 StartSplashScreen()
 
 /*	 
@@ -26,6 +25,8 @@ FilesToCopyToUserFolder	:= ["\resources\config\default_config.ini", "\resources\
 overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, "", FilesToCopyToUserFolder, A_ScriptDir)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
+
+PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, A_ScriptDir, projectName)
 
 /*
 	merge all scripts into `_ItemInfoMain.ahk` and execute it.

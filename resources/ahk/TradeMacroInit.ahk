@@ -139,6 +139,8 @@ If (!StrLen(argumentProjectName) > 0) {
 	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
 	argumentIsDevVersion	:= PoEScripts_isDevelopmentVersion()
 	argumentUserDirectory	:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
+	
+	PoEScripts_CompareUserFolderWithScriptFolder(argumentUserDirectory, A_ScriptDir, argumentProjectName)
 }
 
 TradeGlobals.Set("ProjectName", argumentProjectName)
