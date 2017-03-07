@@ -82,6 +82,7 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 		global updateWindow_downloadURL	:= StrLen(downloadURL_asset) ? downloadURL_asset : downloadURL_zip
 		global updateWindow_skipSelection	:= skipSelection
 		global updateWindow_skipBackup	:= skipBackup
+		global updateWindow_userDirectory	:= userDirectory
 
 		isPrerelease:= LatestRelease.prerelease
 		releaseTag  := LatestRelease.tag_name
@@ -278,7 +279,7 @@ GetVersionIdentifierPriority(identifier) {
 	}
 }
 
-UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup) {	
+UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, userDirectory) {	
 	prompt := "Please select the folder you want to install/extract " project " to.`n"
 	prompt .= "Selecting an existing folder will ask for confirmation and will back up that folder, for example 'MyFolder_backup'."
 	
@@ -318,6 +319,11 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup) 
 		; check if install folder is readonly/temporary or an invalid location
 		validPath := CheckForValidInstallFolder(InstallPath)
 		If (!validPath) {
+			Return
+		}
+		; make sure that the user doesn't select the user settings folder
+		If (StrLen(invalidLocation := PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, InstallPath, project, false))) {
+			MsgBox % invalidLocation			
 			Return
 		}
 
@@ -533,5 +539,5 @@ CloseUpdateWindow:
 Return
 
 UpdateScript:
-	UpdateScript(updateWindow_downloadURL, updateWindow_Project, updateWindow_DefaultFolder, updateWindow_isDevVersion, updateWindow_skipSelection, updateWindow_skipBackup)	
+	UpdateScript(updateWindow_downloadURL, updateWindow_Project, updateWindow_DefaultFolder, updateWindow_isDevVersion, updateWindow_skipSelection, updateWindow_skipBackup, updateWindow_userDirectory)	
 Return
