@@ -3443,3 +3443,10 @@ TradeFunc_ChangeLeague() {
 		ShowToolTip("Changed league to " . TradeOpts.SearchLeague . " (" . TradeGlobals.Get("LeagueName") . ").", true)
 	}
 }
+
+ResetWinHttpProxy:
+	PoEScripts_RunAsAdmin()
+	RunWait %comspec% /c netsh winhttp reset proxy ,,Hide
+	Run, "%A_AhkPath%" "%A_ScriptDir%\Run_TradeMacro.ahk"
+	ExitApp
+Return
