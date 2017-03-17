@@ -31,8 +31,8 @@ Try {
 	installFolder		:= RegExReplace(installPath, "(.*\\)")
 	renamedUpdatePath	:= updateParentDir1 "\" installFolder
 	installParentDir	:= installParentDir1
-	
-	RunWait, "copyUpdate.bat" "%updateScriptPath%" "%installPath%", , hide
+
+	RunWait, "copyUpdate.bat" "%updateScriptPath%" "%installPath%" "%installFolder%" "%installPath%_tempInstall" "%installFolder%_tempInstall", , 
 	If (FileExist("exitCode.txt")) {
 		FileRead, exitCode, exitCode.txt
 		code := ""
@@ -43,8 +43,17 @@ Try {
 			}
 		}
 		
+		scriptStartFile := RegExReplace(projectName, "i).*-", "Run_") . ".ahk"
+		
 		If (code = 1) {
-			
+			; do nothing
+		} Else If (code = 17) {
+			; renaming tempInstall to install folder via batch failed, try again with AHK
+			FileMoveDir, %installPath%_tempInstall, %installPath%, R
+			If (ErrorLevel) {
+				; also failed, use tempInstall to run the script
+				installPath := %installPath% "_tempInstall"
+			}
 		} Else {
 			MsgBox,,, % "Exception thrown while copying new files to " installPath ". Update failed!`n`n" ParseExitCode(code)
 			ExitApp
@@ -58,7 +67,7 @@ Try {
 	ExitApp
 }
 
-; remove 'PoE-' from project name since th start files are named 'Run_ItemInfo/Run_TradeMacro'
+; remove 'PoE-' from project name since the start files are named 'Run_ItemInfo/Run_TradeMacro'
 scriptStartFile := RegExReplace(projectName, "i).*-", "Run_") . ".ahk"
 scriptStartFile := installPath . "\" . scriptStartFile
 

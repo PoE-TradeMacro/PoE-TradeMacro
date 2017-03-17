@@ -339,7 +339,7 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 					If (InStr(FileExist(InstallPath "_backup"), "D")) {
 						FileRemoveDir, %InstallPath%_backup, 1
 					}
-					FileMoveDir, %InstallPath%, %InstallPath%_backup, R  ; Simple rename.
+					FileCopyDir, %InstallPath%, %InstallPath%_backup, 1  ; Simple rename.
 				}
 				IfMsgBox No 
 				{
