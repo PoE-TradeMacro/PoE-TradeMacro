@@ -3,6 +3,10 @@
 ; 	v1.02 (2015-12-26) - 修复在 XP 系统中解压 gzip 数据失败的问题。
 ; 	v1.01 (2015-12-07)
 
+
+; 快速測試
+
+
 /*
 	用法:
 	WinHttpRequest( URL, ByRef In_POST__Out_Data="", ByRef In_Out_HEADERS="", Options="", ByRef Out_Headers_Obj)
