@@ -142,7 +142,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Item.xtype := ""
 	Item.UsedInSearch := {}
 	Item.UsedInSearch.iLvl := {}
-	
+
 	RequestParams := new RequestParams_()
 	RequestParams.league := LeagueName
 	RequestParams.buyout := "1"
@@ -156,6 +156,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	If (Item.IsRelic) {
 		IgnoreName := false
+	}
+	
+	If (Item.IsLeagueStone) {
+		ItemData.Affixes := TradeFunc_AddCustomModsToLeaguestone(ItemData.Affixes)
 	}
 	
 	; check If the item implicit mod is an enchantment or corrupted. retrieve this mods data.
@@ -172,13 +176,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, Item)	
 	}
 	
-	If (Item.IsWeapon or Item.IsArmour or (Item.IsFlask and Item.RarityLevel > 1) or Item.IsJewel or (Item.IsMap and Item.RarityLevel > 1) of Item.IsBelt or Item.IsRing or Item.IsAmulet) 
+	If (Item.IsWeapon or Item.IsArmour or Item.IsLeagueStone or (Item.IsFlask and Item.RarityLevel > 1) or Item.IsJewel or (Item.IsMap and Item.RarityLevel > 1) of Item.IsBelt or Item.IsRing or Item.IsAmulet) 
 	{
 		hasAdvancedSearch := true
 	}
 
-	If (!Item.IsUnique) {	
-		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)	
+	If (!Item.IsUnique) {
+		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
 		preparedItem.maxSockets := Item.maxSockets
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
@@ -411,10 +415,23 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
 	}
 	
-	If (Item.isLeagueStone) {
-		; not implemented yet, no idea if supported by poe.trade
-		;RequestParams.charges 	:= Item.Charges.current
-		;Item.UsedInSearch.Charges:= "Charges " Item.Charges.current "/" Item.Charges.max
+	; league stones
+	If (Item.IsLeagueStone){
+		If (Item.AreaMonsterLevelReq.lvl) {
+			modParam := new _ParamMod()
+			modParam.mod_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"			
+			modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
+			modParam.mod_max  := Item.AreaMonsterLevelReq.lvl			
+			RequestParams.modGroup.AddMod(modParam)
+			Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
+		}
+		
+		modParam := new _ParamMod()
+		modParam.mod_name := "(leaguestone) Currently has # Charges"
+		modParam.mod_min  := Item.Charges.Current
+		modParam.mod_max  := Item.Charges.Current
+		RequestParams.modGroup.AddMod(modParam)
+		Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
 	}
 	
 	If (TradeOpts.debug) {
@@ -641,6 +658,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}    
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
+}
+
+TradeFunc_AddCustomModsToLeaguestone(ItemAffixes) {
+	If (Item.AreaMonsterLevelReq.lvl) {
+		ItemAffixes .= "`nCan only be used in Areas with Monster Level " Item.AreaMonsterLevelReq.lvl " or below"
+	}
+	
+	ItemAffixes .= "`nCurrently has " Item.Charges.Current " Charges"
+	
+	return ItemAffixes
 }
 
 ; parse items defense stats
@@ -1599,13 +1626,15 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 			Else {
 				Title .= (Item.UsedInSearch.iLvl.min) ? "| iLvl (>=" . Item.UsedInSearch.iLvl.min . ") " : ""
 				Title .= (Item.UsedInSearch.iLvl.max) ? "| iLvl (<=" . Item.UsedInSearch.iLvl.max . ") " : ""
-			}			
-			;Title .= (StrLen(Item.UsedInSearch.Charges)) ? "| " Item.UsedInSearch.Charges " " : ""
+			}
+			
 			Title .= (Item.UsedInSearch.FullName and ShowFullNameNote) ? "| Full Name " : ""
 			Title .= (Item.UsedInSearch.Rarity) ? "(" Item.UsedInSearch.Rarity ") " : ""
 			Title .= (Item.UsedInSearch.Corruption and not Item.IsMapFragment and not Item.IsDivinationCard and not Item.IsCurrency)   ? "| Corrupted (" . Item.UsedInSearch.Corruption . ") " : ""
 			Title .= (Item.UsedInSearch.Type)     ? "| Type (" . Item.UsedInSearch.Type . ") " : ""
-			Title .= (Item.UsedInSearch.ItemBase and ShowFullNameNote) ? "| Base (" . Item.UsedInSearch.ItemBase . ") " : ""
+			Title .= (Item.UsedInSearch.ItemBase and ShowFullNameNote) ? "| Base (" . Item.UsedInSearch.ItemBase . ") " : ""			
+			Title .= (Item.UsedInSearch.Charges) ? "`n" . Item.UsedInSearch.Charges . " " : ""
+			Title .= (Item.UsedInSearch.AreaMonsterLvl) ? "| " . Item.UsedInSearch.AreaMonsterLvl . " " : ""
 			
 			Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Mod rolls are being ignored !!" : ""
 		}
@@ -2115,6 +2144,9 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["prophecies"], _item.mods[k])
 		}
+		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
+		}
 	}
 	
 	Return _item
@@ -2137,6 +2169,9 @@ TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["map mods"], _item.mods[k])
+		}		
+		If (StrLen(_item.mods[k]["param"]) < 1) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
 		}
 	}
 	
@@ -2149,7 +2184,7 @@ TradeFunc_FindInModGroup(modgroup, needle) {
 	editedNeedle := ""
 
 	For j, mod in modgroup {
-		s  := Trim(RegExReplace(mod, "i)\(pseudo\)|\(total\)|\(crafted\)|\(implicit\)|\(explicit\)|\(enchant\)|\(prophecy\)", ""))
+		s  := Trim(RegExReplace(mod, "i)\(pseudo\)|\(total\)|\(crafted\)|\(implicit\)|\(explicit\)|\(enchant\)|\(prophecy\)|\(leaguestone\)", ""))
 		s  := RegExReplace(s, "# ?to ? #", "#")
 		s  := TradeUtils.CleanUp(s)		
 		ss := TradeUtils.CleanUp(ss)
