@@ -293,7 +293,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				modParam.mod_name := s.mods[A_Index].param
 				modParam.mod_min := s.mods[A_Index].min
 				modParam.mod_max := s.mods[A_Index].max
-				RequestParams.modGroup.AddMod(modParam)
+				RequestParams.modGroup[1].AddMod(modParam)
 			}	
 		}
 		Loop % s.stats.Length() {
@@ -398,13 +398,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			modParam.mod_name := Enchantment.param
 			modParam.mod_min  := Enchantment.min
 			modParam.mod_max  := Enchantment.max
-			RequestParams.modGroup.AddMod(modParam)	
+			RequestParams.modGroup[1].AddMod(modParam)	
 			Item.UsedInSearch.Enchantment := true
 		} Else If (Corruption.param and not isAdvancedPriceCheckRedirect) {			
 			modParam := new _ParamMod()
 			modParam.mod_name := Corruption.param
 			modParam.mod_min  := (Corruption.min) ? Corruption.min : ""
-			RequestParams.modGroup.AddMod(modParam)	
+			RequestParams.modGroup[1].AddMod(modParam)	
 			Item.UsedInSearch.CorruptedMod := true
 		} Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
@@ -416,21 +416,27 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	
 	; league stones
-	If (Item.IsLeagueStone){
-		If (Item.AreaMonsterLevelReq.lvl) {
-			modParam := new _ParamMod()
-			modParam.mod_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"			
+	If (Item.IsLeagueStone){		
+		modParam := new _ParamMod()
+		modParam.mod_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"
+		
+		If (Item.AreaMonsterLevelReq.lvl) {		
 			modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
-			modParam.mod_max  := Item.AreaMonsterLevelReq.lvl			
-			RequestParams.modGroup.AddMod(modParam)
+			modParam.mod_max  := Item.AreaMonsterLevelReq.lvl	
+			RequestParams.modGroup[1].AddMod(modParam)	
 			Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
+		} Else {
+			; add second mod group to exclude area restrictions
+			RequestParams.AddModGroup("Not", 1)
+			RequestParams.modGroup[RequestParams.modGroup.MaxIndex()].AddMod(modParam)
+			Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
 		}
 		
 		modParam := new _ParamMod()
 		modParam.mod_name := "(leaguestone) Currently has # Charges"
 		modParam.mod_min  := Item.Charges.Current
 		modParam.mod_max  := Item.Charges.Current
-		RequestParams.modGroup.AddMod(modParam)
+		RequestParams.modGroup[1].AddMod(modParam)
 		Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
 	}
 	
@@ -1486,7 +1492,7 @@ TradeFunc_GetMeanMedianPrice(html, payload){
 		CurrencyName := TradeUtils.Cleanup(Currency)
 		
 		StringReplace, CurrencyV, CurrencyV, >, , All
-		StringReplace, CurrencyV, CurrencyV, �, , All		
+		StringReplace, CurrencyV, CurrencyV, ?, , All		
 		*/
 		
 		CurrencyName := TradeUtils.Cleanup(Currency)
@@ -1853,7 +1859,7 @@ class RequestParams_ {
 	rint_min 		:= ""
 	rint_max 		:= ""
 	; For future development, change this to array to provide multi mod groups
-	modGroup 	:= new _ParamModGroup()
+	modGroup		:= [new _ParamModGroup()]
 	q_min 		:= ""
 	q_max 		:= ""
 	level_min 	:= ""
@@ -1876,9 +1882,11 @@ class RequestParams_ {
 	enchanted 	:= ""
 	;charges		:= ""
 	
-	ToPayload()
-	{
-		modGroupStr := this.modGroup.ToPayload()
+	ToPayload() {
+		modGroupStr := ""
+		Loop, % this.modGroup.MaxIndex() {
+			modGroupStr .= this.modGroup[A_Index].ToPayload()	
+		}		
 		
 		p := "league=" this.league "&type=" this.xtype "&base=" this.xbase "&name=" this.name "&dmg_min=" this.dmg_min "&dmg_max=" this.dmg_max "&aps_min=" this.aps_min "&aps_max=" this.aps_max 
 		p .= "&crit_min=" this.crit_min "&crit_max=" this.crit_max "&dps_min=" this.dps_min "&dps_max=" this.dps_max "&edps_min=" this.edps_min "&edps_max=" this.edps_max "&pdps_min=" this.pdps_min 
@@ -1886,18 +1894,23 @@ class RequestParams_ {
 		p .= "&shield_max=" this.shield_max "&block_min=" this.block_min "&block_max=" this.block_max "&sockets_min=" this.sockets_min "&sockets_max=" this.sockets_max "&link_min=" this.link_min 
 		p .= "&link_max=" this.link_max "&sockets_r=" this.sockets_r "&sockets_g=" this.sockets_g "&sockets_b=" this.sockets_b "&sockets_w=" this.sockets_w "&linked_r=" this.linked_r 
 		p .= "&linked_g=" this.linked_g "&linked_b=" this.linked_b "&linked_w=" this.linked_w "&rlevel_min=" this.rlevel_min "&rlevel_max=" this.rlevel_max "&rstr_min=" this.rstr_min 
-		p .= "&rstr_max=" this.rstr_max "&rdex_min=" this.rdex_min "&rdex_max=" this.rdex_max "&rint_min=" this.rint_min "&rint_max=" this.rint_max modGroupStr "&q_min=" this.q_min 
-		p .= "&q_max=" this.q_max "&level_min=" this.level_min "&level_max=" this.level_max "&ilvl_min=" this.ilvl_min "&ilvl_max=" this.ilvl_max "&rarity=" this.rarity "&seller=" this.seller 
+		p .= "&rstr_max=" this.rstr_max "&rdex_min=" this.rdex_min "&rdex_max=" this.rdex_max "&rint_min=" this.rint_min "&rint_max=" this.rint_max 
+		p .= modGroupStr	
+		p .= "&q_min=" this.q_min  "&q_max=" this.q_max "&level_min=" this.level_min "&level_max=" this.level_max "&ilvl_min=" this.ilvl_min "&ilvl_max=" this.ilvl_max "&rarity=" this.rarity "&seller=" this.seller 
 		p .= "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality 
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted	
-		;p .= "&charges=" this.charges
-		
+
+		; not used yet
 		temp := p
 		temp := CleanPayload(temp)
-		; not used yet
 		;console.log(temp)
 		
 		Return p
+	}
+	
+	AddModGroup(type, count, min = "", max = "") {
+		this.modGroup.push(new _ParamModGroup())
+		this.modGroup[this.modGroup.MaxIndex()].SetGroupOptions(type, count, min, max)
 	}
 }
 
@@ -1927,8 +1940,7 @@ class _ParamModGroup {
 	group_max := ""
 	group_count := 1
 	
-	ToPayload() 
-	{
+	ToPayload() {
 		p := ""
 		
 		If (this.ModArray.Length() = 0) {
@@ -1940,8 +1952,26 @@ class _ParamModGroup {
 		p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count
 		Return p
 	}
+	
 	AddMod(paraModObj) {
 		this.ModArray.Push(paraModObj)
+	}
+	
+	SetGroupOptions(type, count, min = "", max = "") {
+		this.group_type	:= type
+		this.group_count	:= count
+		this.group_min		:= min
+		this.group_max		:= max
+	}
+	SetGroupType(type) {
+		this.group_type := type 
+	}
+	SetGroupMinMax(min = "", max = "") {
+		this.group_min := min
+		this.group_max := max
+	}
+	SetGroupCount(count) {
+		this.group_count := count
 	}
 }
 
