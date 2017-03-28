@@ -1489,25 +1489,21 @@ TradeFunc_GetMeanMedianPrice(html, payload){
 		StringReplace, CurrencyV, CurrencyV, �, , All		
 		*/
 		
+		CurrencyName := TradeUtils.Cleanup(Currency)
 		CurrencyValue := TradeUtils.Cleanup(CurrencyV)
 		
 		; add chaos-equivalents (chaos prices) together and count results
-		RegExMatch(ChaosValue, "i)data-value=""-?(\d+.?\d+?)""", priceChaos)
-		If (StrLen(priceChaos1) > 0 or StrLen(CurrencyValue) > 0) {
+		; RegExMatch(ChaosValue, "i)data-value=""-?(\d+.?\d+?)""", priceChaos)
+		; If (StrLen(priceChaos1) > 0 or StrLen(CurrencyValue) > 0) {
+		If (StrLen(CurrencyValue) > 0) {
 			SetFormat, float, 6.2
 			chaosEquivalent := 0
-			
-			; if priceChaos is too big there's a chance that poe.trades chaos equiv is wrong
-			If (priceChaos1 > 2000) {
-				For key, val in ChaosEquivalents {
-					haystack := RegExReplace(key, "i)'", "")
-					If (InStr(haystack, CurrencyName)) {
-						chaosEquivalent := val * CurrencyValue
-					}
-				}	
-			}
-			Else {
-				chaosEquivalent := priceChaos1
+
+			For key, val in ChaosEquivalents {
+				haystack := RegExReplace(key, "i)'", "")
+				If (InStr(haystack, CurrencyName)) {
+					chaosEquivalent := val * CurrencyValue
+				}
 			}
 			
 			StringReplace, FloatNumber, chaosEquivalent, ., `,, 1
@@ -1515,7 +1511,7 @@ TradeFunc_GetMeanMedianPrice(html, payload){
 			prices[itemCount-1] := chaosEquivalent
 		}
 	}
-	
+
 	; calculate average and median prices
 	If (prices.MaxIndex() > 0) {
 		; average
