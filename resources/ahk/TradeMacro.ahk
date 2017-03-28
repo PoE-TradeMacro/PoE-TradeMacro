@@ -416,28 +416,35 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	
 	; league stones
-	If (Item.IsLeagueStone){		
-		modParam := new _ParamMod()
-		modParam.mod_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"
-		
-		If (Item.AreaMonsterLevelReq.lvl) {		
-			modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
-			modParam.mod_max  := Item.AreaMonsterLevelReq.lvl	
-			RequestParams.modGroups[1].AddMod(modParam)	
-			Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
-		} Else {
-			; add second mod group to exclude area restrictions
-			RequestParams.AddModGroup("Not", 1)
-			RequestParams.modGroups[RequestParams.modGroups.MaxIndex()].AddMod(modParam)
-			Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
+	If (Item.IsLeagueStone) {
+		; only manually add these mods if they don't already exist (created by advanced search)
+		temp_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"
+		If (not TradeFunc_FindModInRequestParams(RequestParams, temp_name)) {
+			modParam := new _ParamMod()
+			modParam.mod_name := temp_name
+			
+			If (Item.AreaMonsterLevelReq.lvl) {		
+				modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
+				modParam.mod_max  := Item.AreaMonsterLevelReq.lvl	
+				RequestParams.modGroups[1].AddMod(modParam)
+				Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
+			} Else {
+				; add second mod group to exclude area restrictions
+				RequestParams.AddModGroup("Not", 1)
+				RequestParams.modGroups[RequestParams.modGroups.MaxIndex()].AddMod(modParam)
+				Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
+			}
 		}
 		
-		modParam := new _ParamMod()
-		modParam.mod_name := "(leaguestone) Currently has # Charges"
-		modParam.mod_min  := Item.Charges.Current
-		modParam.mod_max  := Item.Charges.Current
-		RequestParams.modGroups[1].AddMod(modParam)
-		Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
+		temp_name := "(leaguestone) Currently has # Charges"
+		If (not TradeFunc_FindModInRequestParams(RequestParams, temp_name)) {
+			modParam := new _ParamMod()
+			modParam.mod_name := "(leaguestone) Currently has # Charges"
+			modParam.mod_min  := Item.Charges.Current
+			modParam.mod_max  := Item.Charges.Current
+			RequestParams.modGroups[1].AddMod(modParam)
+			Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
+		}
 	}
 	
 	If (TradeOpts.debug) {
@@ -1984,6 +1991,17 @@ class _ParamMod {
 		p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
 		Return p
 	}
+}
+	
+TradeFunc_FindModInRequestParams(RequestParams, name) {
+	For gkey, gval in RequestParams.modGroups {
+		For mkey, mval in gval.ModArray {
+			If (mval.mod_name == name) {
+				Return true
+			}
+		}
+	}
+	Return False
 }
 
 ; Return unique item with its variable mods and mod ranges If it has any
