@@ -293,7 +293,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				modParam.mod_name := s.mods[A_Index].param
 				modParam.mod_min := s.mods[A_Index].min
 				modParam.mod_max := s.mods[A_Index].max
-				RequestParams.modGroup[1].AddMod(modParam)
+				RequestParams.modGroups[1].AddMod(modParam)
 			}	
 		}
 		Loop % s.stats.Length() {
@@ -398,13 +398,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			modParam.mod_name := Enchantment.param
 			modParam.mod_min  := Enchantment.min
 			modParam.mod_max  := Enchantment.max
-			RequestParams.modGroup[1].AddMod(modParam)	
+			RequestParams.modGroups[1].AddMod(modParam)	
 			Item.UsedInSearch.Enchantment := true
 		} Else If (Corruption.param and not isAdvancedPriceCheckRedirect) {			
 			modParam := new _ParamMod()
 			modParam.mod_name := Corruption.param
 			modParam.mod_min  := (Corruption.min) ? Corruption.min : ""
-			RequestParams.modGroup[1].AddMod(modParam)	
+			RequestParams.modGroups[1].AddMod(modParam)	
 			Item.UsedInSearch.CorruptedMod := true
 		} Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
@@ -423,12 +423,12 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.AreaMonsterLevelReq.lvl) {		
 			modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
 			modParam.mod_max  := Item.AreaMonsterLevelReq.lvl	
-			RequestParams.modGroup[1].AddMod(modParam)	
+			RequestParams.modGroups[1].AddMod(modParam)	
 			Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
 		} Else {
 			; add second mod group to exclude area restrictions
 			RequestParams.AddModGroup("Not", 1)
-			RequestParams.modGroup[RequestParams.modGroup.MaxIndex()].AddMod(modParam)
+			RequestParams.modGroups[RequestParams.modGroups.MaxIndex()].AddMod(modParam)
 			Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
 		}
 		
@@ -436,7 +436,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		modParam.mod_name := "(leaguestone) Currently has # Charges"
 		modParam.mod_min  := Item.Charges.Current
 		modParam.mod_max  := Item.Charges.Current
-		RequestParams.modGroup[1].AddMod(modParam)
+		RequestParams.modGroups[1].AddMod(modParam)
 		Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
 	}
 	
@@ -1858,8 +1858,7 @@ class RequestParams_ {
 	rdex_max 		:= ""
 	rint_min 		:= ""
 	rint_max 		:= ""
-	; For future development, change this to array to provide multi mod groups
-	modGroup		:= [new _ParamModGroup()]
+	modGroups		:= [new _ParamModGroup()]
 	q_min 		:= ""
 	q_max 		:= ""
 	level_min 	:= ""
@@ -1880,13 +1879,12 @@ class RequestParams_ {
 	buyout_currency:= ""
 	crafted		:= ""
 	enchanted 	:= ""
-	;charges		:= ""
 	
 	ToPayload() {
 		modGroupStr := ""
-		Loop, % this.modGroup.MaxIndex() {
-			modGroupStr .= this.modGroup[A_Index].ToPayload()	
-		}		
+		Loop, % this.modGroups.MaxIndex() {
+			modGroupStr .= this.modGroups[A_Index].ToPayload()	
+		}
 		
 		p := "league=" this.league "&type=" this.xtype "&base=" this.xbase "&name=" this.name "&dmg_min=" this.dmg_min "&dmg_max=" this.dmg_max "&aps_min=" this.aps_min "&aps_max=" this.aps_max 
 		p .= "&crit_min=" this.crit_min "&crit_max=" this.crit_max "&dps_min=" this.dps_min "&dps_max=" this.dps_max "&edps_min=" this.edps_min "&edps_max=" this.edps_max "&pdps_min=" this.pdps_min 
@@ -1909,8 +1907,8 @@ class RequestParams_ {
 	}
 	
 	AddModGroup(type, count, min = "", max = "") {
-		this.modGroup.push(new _ParamModGroup())
-		this.modGroup[this.modGroup.MaxIndex()].SetGroupOptions(type, count, min, max)
+		this.modGroups.push(new _ParamModGroup())
+		this.modGroups[this.modGroups.MaxIndex()].SetGroupOptions(type, count, min, max)
 	}
 }
 
