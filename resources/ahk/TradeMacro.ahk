@@ -1193,6 +1193,11 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	If A_LastError
 		MsgBox % A_LastError
 	
+	If (TradeOpts.Debug) {
+		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
+		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
+	}
+	
 	Return, html
 }
 
@@ -1252,6 +1257,11 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 	If (init) {
 		TradeFunc_ParseCurrencyIDs(html)
 		Return
+	}
+	
+	If (TradeOpts.Debug) {
+		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
+		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
 	}
 	
 	Return, html
