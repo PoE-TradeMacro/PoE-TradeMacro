@@ -449,18 +449,18 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	
 	If (TradeOpts.debug) {
 		uniq := Item.IsUnique ? "Yes" : "No"
-		console.log("Is unique: " uniq)
+		;console.log("Is unique: " uniq)
 		ench := Enchantment.param ? "Yes" : "No"
-		console.log("Has enchantment: " ench " - " Enchantment.param)
+		;console.log("Has enchantment: " ench " - " Enchantment.param)
 		If (ench == "Yes") {
 			enchused := Item.UsedInSearch.Enchantment ? "Yes" : "No"
-			console.log("Enchantment used in search: " enchused)	
+			;console.log("Enchantment used in search: " enchused)	
 		}
 		corr := Corruption.param ? "Yes" : "No"
-		console.log("Has corruption: " corr " - " Corruption.param)
+		;console.log("Has corruption: " corr " - " Corruption.param)
 		If (corr == "Yes") {
 			corrused := Item.UsedInSearch.CorruptedMod ? "Yes" : "No"
-			console.log("Enchantment used in search: " corrused)	
+			;console.log("Enchantment used in search: " corrused)	
 		}
 	}
 	
@@ -1196,6 +1196,7 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
+		console.log("Search finished. Returned content length: " StrLen(html))
 	}
 	
 	Return, html
@@ -1262,6 +1263,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
+		console.log("Search finished. Returned content length: " StrLen(html))
 	}
 	
 	Return, html
