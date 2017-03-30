@@ -51,9 +51,9 @@ Loop, % urls.MaxIndex() {
 			oADO.Close()
 		}
 		If (StrLen(html) > 0) {
-			console.log("First test downloading to variable using WinHTTP adodb.stream successful." "`nContent Length: " StrLen(html))
+			console.log("First test downloading to variable using WinHTTP adodb.stream successful. (Catching Errors)" "`nContent Length: " StrLen(html))
 		} Else {
-			console.log("First test downloading to variable using WinHTTP adodb.stream returned empty string.")
+			console.log("First test downloading to variable using WinHTTP adodb.stream returned an empty string.")
 		}
 	} Catch e {
 		console.log("Exception thrown!`n`nwhat: " e.what "`nfile: " e.file	"`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra)
@@ -75,9 +75,9 @@ Loop, % urls.MaxIndex() {
 	}
 
 	If (StrLen(html) > 0) {
-		console.log("Second test downloading to variable using WinHTTP adodb.stream successful." "`nContent Length: " StrLen(html))	
+		console.log("Second test downloading to variable using WinHTTP adodb.stream successful. (Not catching Errors)" "`nContent Length: " StrLen(html))	
 	} Else {
-		console.log("Second test downloading to variable using WinHTTP adodb.stream returned empty string.")
+		console.log("Second test downloading to variable using WinHTTP adodb.stream returned an empty string.")
 	}
 	console.log("-----------------------------------------")
 }

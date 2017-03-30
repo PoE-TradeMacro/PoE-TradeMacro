@@ -420,20 +420,32 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		; only manually add these mods if they don't already exist (created by advanced search)
 		temp_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"
 		If (not TradeFunc_FindModInRequestParams(RequestParams, temp_name)) {
-			modParam := new _ParamMod()
-			modParam.mod_name := temp_name
-			
-			If (Item.AreaMonsterLevelReq.lvl) {		
-				modParam.mod_min  := Item.AreaMonsterLevelReq.lvl - 10
-				modParam.mod_max  := Item.AreaMonsterLevelReq.lvl	
-				RequestParams.modGroups[1].AddMod(modParam)
-				Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
+			; mod does not exist on poe.trade: "Can only be used in Areas with Monster Level # or above"
+			If (Item.AreaMonsterLevelReq.logicalOperator = "above") {
+				; do nothing, min (above) requirement has no correlation with item level, only with the mods spawned on the stone
+				; stones with the same name should have the same "above" requirement so we ignore it
+			} Else If (Item.AreaMonsterLevelReq.logicalOperator = "between") {
+				; stones with the same name should have the same "above" requirement so we ignore it
+				; the upper limit value ("below") depends on the item level, it should be limit = (ilvl + 11)
+				; so we could use the max item level parameter with some buffer (not sure about the + 11).
+				RequestParams.ilvl_max := Item.AreaMonsterLevelReq.lvl_upper + 15
+				Item.UsedInSearch.iLvl.min := RequestParams.ilvl_max
 			} Else {
-				; add second mod group to exclude area restrictions
-				RequestParams.AddModGroup("Not", 1)
-				RequestParams.modGroups[RequestParams.modGroups.MaxIndex()].AddMod(modParam)
-				Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
-			}
+				modParam := new _ParamMod()
+				modParam.mod_name := temp_name
+				
+				If (Item.AreaMonsterLevelReq.lvl) {		
+					modParam.mod_min  := Item.AreaMonsterLevelReq.lvl_upper - 10
+					modParam.mod_max  := Item.AreaMonsterLevelReq.lvl_upper
+					RequestParams.modGroups[1].AddMod(modParam)
+					Item.UsedInSearch.AreaMonsterLvl := "Area Level: " modParam.mod_min " - " modParam.mod_max
+				} Else {
+					; add second mod group to exclude area restrictions
+					RequestParams.AddModGroup("Not", 1)
+					RequestParams.modGroups[RequestParams.modGroups.MaxIndex()].AddMod(modParam)
+					Item.UsedInSearch.AreaMonsterLvl := "Area Level: no restriction"
+				}	
+			}			
 		}
 		
 		temp_name := "(leaguestone) Currently has # Charges"
