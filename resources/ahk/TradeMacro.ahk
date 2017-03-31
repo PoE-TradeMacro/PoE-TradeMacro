@@ -1176,14 +1176,15 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
 	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
 	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
-		
+
 	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
     ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
     ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")    
 	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
 	HttpObj.Send(payload)
-	HttpObj.WaitForResponse()
+	retCode := HttpObj.WaitForResponse()	; EMPTY = no response
+	
 
 	Try {				
 		If Encoding {
@@ -1210,8 +1211,9 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
-		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
-		console.log("Search finished. Returned content length: " StrLen(html))
+		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt		
+		Out_HEADERS := "Search Finished.`n`n Return Code: " retCode "`n Content Length: " StrLen(html) "`n`nHTTP/1.1 " HttpObj.Status " " HttpObj.StatusText "`n" HttpObj.GetAllResponseHeaders()	
+		console.log(Out_HEADERS)
 	}
 	
 	Return, html
