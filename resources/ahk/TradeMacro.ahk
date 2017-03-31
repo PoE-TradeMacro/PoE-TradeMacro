@@ -376,7 +376,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.IsRelic) {
 			RequestParams.rarity := "relic"
 			Item.UsedInSearch.Rarity := "Relic"
-		}		
+		} Else If (Item.IsUnique) {
+			RequestParams.rarity := "unique"
+			RequestParams.xbase  := Item.TypeName
+		}
 		Item.UsedInSearch.FullName := true
 	} Else If (!Item.isUnique and AdvancedPriceCheckItem.mods.length() <= 0) {
 		isCraftingBase         := TradeFunc_CheckIfItemIsCraftingBase(Item.TypeName)
