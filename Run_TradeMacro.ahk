@@ -15,7 +15,6 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 arguments	= %1%
 If (!InStr(arguments, "-noelevation", 0)) {
 	RunAsAdmin()
-	MsgBox elevation
 }
 
 If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {
