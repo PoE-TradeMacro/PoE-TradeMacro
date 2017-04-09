@@ -621,9 +621,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	ShowToolTip("Running search...")
 	
 	ParsingError := ""
+	currencyUrl := ""
 	If (Item.IsCurrency and !Item.IsEssence) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
-			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, error)	
+			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)	
 			If (error) {
 				ParsingError := Html
 			}
@@ -645,9 +646,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (openSearchInBrowser) {
 		; redirect was prevented to get the url and open the search on poe.trade instead
 		If (Item.isCurrency and !Item.IsEssence) {
-			IDs := TradeGlobals.Get("CurrencyIDs")
-			Have:= TradeOpts.CurrencySearchHave
-			ParsedUrl1 := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . IDs[Name] . "&have=" . IDs[Have]
+			ParsedUrl1 := currencyUrl
 		}
 		Else {
 			RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
@@ -1241,7 +1240,7 @@ TradeFunc_MapCurrencyNameToID(name) {
 
 ; Get currency.poe.trade html
 ; Either at script start to parse the currency IDs or when searching to get currency listings
-TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init = false, ByRef error = 0) {
+TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init = false, ByRef currencyURL = "", ByRef error = 0) {
 	UserAgent   := TradeGlobals.Get("UserAgent")
 	cfduid      := TradeGlobals.Get("cfduid")
 	cfClearance := TradeGlobals.Get("cfClearance")
@@ -1266,6 +1265,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 
 		If (idWant and idHave) {
 			Url := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . idWant . "&have=" . idHave
+			currencyURL := Url
 		} Else {
 			;MsgBox Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade names to the actual names failed. Please report this issue.
 			errorMsg = Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade`nnames to the actual names failed. Please report this issue.
