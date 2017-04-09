@@ -1523,25 +1523,18 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 }
 
 ; Calculate average and median price of X listings
-TradeFunc_GetMeanMedianPrice(html, payload){
+TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = ""){
 	itemCount := 1
 	prices := []
 	average := 0
 	Title := ""
+	error := 0
 	
 	; loop over the first 99 results If possible, otherwise over as many as are available
 	accounts := []
 	NoOfItemsToCount := 99
 	NoOfItemsSkipped := 0
 	While A_Index <= NoOfItemsToCount {
-		/* Old code, somehow stopeed working
-		TBody         := TradeUtils.StrX( html,   "<tbody id=""item-container-" . %A_Index%,  N, 0, "</tbody>" , 1,23, N )
-		AccountName   := TradeUtils.StrX( TBody,  "data-seller=""",                           1,13, """"       , 1,1,  T )
-		ChaosValue    := TradeUtils.StrX( TBody,  "data-name=""price_in_chaos""",             T, 0, "currency" , 1,1,  T )
-		Currency      := TradeUtils.StrX( TBody,  "currency-",                                T, 0, ">"        , 1,1, T  )
-		CurrencyV     := TradeUtils.StrX( TBody, ">",                                         T, 0, "<"        , 1,1, T  )
-		*/
-
 		ItemBlock 	:= TradeUtils.HtmlParseItemData(html, "<tbody id=""item-container-" A_Index - 1 """(.*?)<\/tbody>", html)
 		AccountName 	:= TradeUtils.HtmlParseItemData(ItemBlock, "data-seller=""(.*?)""")
 		ChaosValue 	:= TradeUtils.HtmlParseItemData(ItemBlock, "data-name=""price_in_chaos""(.*?)>")
@@ -1567,16 +1560,6 @@ TradeFunc_GetMeanMedianPrice(html, payload){
 			itemCount++
 		}
 		
-		/*
-		; replace "
-		StringReplace, Currency, Currency, ", , All			; "
-		StringReplace, Currency, Currency, currency-, , All
-		CurrencyName := TradeUtils.Cleanup(Currency)
-		
-		StringReplace, CurrencyV, CurrencyV, >, , All
-		StringReplace, CurrencyV, CurrencyV, ?, , All		
-		*/
-		
 		CurrencyName := TradeUtils.Cleanup(Currency)
 		CurrencyValue := TradeUtils.Cleanup(CurrencyV)
 		
@@ -1586,19 +1569,40 @@ TradeFunc_GetMeanMedianPrice(html, payload){
 		If (StrLen(CurrencyValue) > 0) {
 			SetFormat, float, 6.2
 			chaosEquivalent := 0
-
-			For key, val in ChaosEquivalents {
-				haystack := RegExReplace(key, "i)'", "")
-				If (InStr(haystack, CurrencyName)) {
-					chaosEquivalent := val * CurrencyValue
+			
+			; map poe.trade currency names to actual ingame names
+			mappedCurrencyName := ""
+			For key, val in TradeCurrencyNames.eng {
+				If (val = CurrencyName) {
+					mappedCurrencyName := RegExReplace(key, "i)_", " ")
 				}
+			}
+			
+			; if mapping the exact name failed try to map it a bit less strict (example, poe.trade uses "chrome" for currencies and "chromatic" for items)
+			If (!StrLen(mappedCurrencyName)) {
+				For key, val in TradeCurrencyNames.eng {
+					tempKey := RegExReplace(key, "i)_", " ")
+					If (InStr(tempKey, val, 0)) {
+						mappedCurrencyName := tempKey
+					}
+				}
+			}
+			
+			chaosEquivalentSingle := ChaosEquivalents[mappedCurrencyName]
+			chaosEquivalent := CurrencyValue * chaosEquivalentSingle
+			If (!chaosEquivalentSingle) {
+				error++
 			}
 			
 			StringReplace, FloatNumber, chaosEquivalent, ., `,, 1
 			average += chaosEquivalent
 			prices[itemCount-1] := chaosEquivalent
 		}
-	}
+	}	
+	
+	If (error) {
+		errorMsg := "Couldn't find the chaos equiv. value for " error " item(s). Please report this."	
+	}	
 
 	; calculate average and median prices
 	If (prices.MaxIndex() > 0) {
@@ -1727,7 +1731,10 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	
 	; add average and median prices to title	
 	If (not isItemAgeRequest) {
-		Title .= TradeFunc_GetMeanMedianPrice(html, payload)
+		Title .= TradeFunc_GetMeanMedianPrice(html, payload, error)
+		If (StrLen(error)) {
+			Title .= error "`n`n" 
+		}
 	} Else {
 		Title .= "`n"
 	}	
@@ -3443,6 +3450,7 @@ ReadPoeNinjaCurrencyData:
 	
 	global ChaosEquivalents := {}
 	For key, val in CurrencyHistoryData {
+		currencyTypeName := RegexReplace(val.currencyTypeName, "i)'", "")
 		ChaosEquivalents[val.currencyTypeName] := val.chaosEquivalent		
 	}
 	ChaosEquivalents["Chaos Orb"] := 1
