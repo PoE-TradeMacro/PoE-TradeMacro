@@ -281,6 +281,12 @@ GetVersionIdentifierPriority(identifier) {
 }
 
 UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, userDirectory) {	
+	DriveSpaceFree, freeSpace, %A_Temp%
+	If (freeSpace < 30) {
+		MsgBox You don't have enough free space available on your system drive (at least 30MB). Update will be cancelled. 
+		Return
+	}	
+	
 	prompt := "Please select the folder you want to install/extract " project " to.`n"
 	prompt .= "Selecting an existing folder will ask for confirmation and will back up that folder, for example 'MyFolder_backup'."
 	
@@ -334,9 +340,10 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 			folderSize := Round(folderSize / 1024 / 1024, 2)
 			DriveSpaceFree, freeSpace, %InstallPath%
 			
-			; use some higher number to make sure there's enough space
-			If (freeSpace < folderSize * 1.2) {
-				MsgBox You don't have enough free space on this drive to make a backup of %InstallPath% (Size: %folderSize%MB).`nUpdate will be cancelled.
+			; use some higher number to make sure there's enough space for the backup and update process
+			spaceNeeded := Round(folderSize * 3, 2)
+			If (freeSpace < spaceNeeded) {
+				MsgBox You don't have enough free space on this drive to make a backup of %InstallPath% (Size: %folderSize%MB).`n`nYou should have at least %spaceNeeded%MB of space available to make sure the update will succeed. Update will be cancelled.
 				Return
 			}
 			
@@ -382,7 +389,7 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 			If (StrLen(folderName)) {
 				; successfully downloaded and extracted release.zip to %A_Temp%\%Project%\ext
 				; copy script to %A_Temp%\%Project%
-				SplitPath, savePath, , saveDir
+				SplitPath, savePath, , saveDir				
 				externalScript := saveDir . "\PoEScripts_FinishUpdate.ahk"
 				FileCopy, %A_ScriptDir%\lib\copyUpdate.bat, %saveDir%\copyUpdate.bat, 1
 				FileCopy, %A_ScriptDir%\lib\PoEScripts_FinishUpdate.ahk, %externalScript%, 1
