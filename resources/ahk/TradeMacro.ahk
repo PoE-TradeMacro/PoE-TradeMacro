@@ -651,9 +651,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 		Else {
 			RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
-		}		
-		TradeFunc_OpenUrlInBrowser(ParsedUrl1)
-		SetClipboardContents("")
+		}
+		
+		If (StrLen(ParsingError)) {
+			ShowToolTip("")
+			ShowToolTip(ParsingError)
+		} Else {			
+			TradeFunc_OpenUrlInBrowser(ParsedUrl1)
+			SetClipboardContents("")
+		}
 	}
 	Else If (Item.isCurrency and !Item.IsEssence) {
 		; Default currency search
@@ -1262,7 +1268,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 			Url := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . idWant . "&have=" . idHave
 		} Else {
 			;MsgBox Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade names to the actual names failed. Please report this issue.
-			errorMsg = Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade names to the actual names failed. Please report this issue.
+			errorMsg = Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade`nnames to the actual names failed. Please report this issue.
 			error := 1
 			Return, errorMsg
 		}
