@@ -328,8 +328,30 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 			Return
 		}
 
-		; check if install folder is empty 
+		; check if install folder is empty
 		If (not IsEmpty(InstallPath)) {
+			folderSize := GetFileFolderSize(InstallPath)
+			folderSize := Round(folderSize / 1024 / 1024, 2)
+			DriveSpaceFree, freeSpace, %InstallPath%
+			
+			; use some higher number to make sure there's enough space
+			If (freeSpace < folderSize * 1.2) {
+				MsgBox You don't have enough free space on this drive to make a backup of %InstallPath% (Size: %folderSize%MB).`nUpdate will be cancelled.
+				Return
+			}
+			
+			If (folderSize > 30) {
+				MsgBox, 4,, Folder (%InstallPath%) has a size of %folderSize%MB. That's an unusual size for %project%, are you sure that you have the right folder selected and want to continue overwriting it?
+				IfMsgBox Yes 
+				{			
+					
+				}
+				IfMsgBox No 
+				{
+					Return
+				}
+			}			
+
 			If (not skipBackup) {
 				MsgBox, 4,, Folder (%InstallPath%) is not empty, overwrite it after making a backup?
 				IfMsgBox Yes 
@@ -528,6 +550,19 @@ ExtractRelease(file, project) {
 	}
 	
 	Return folderName
+}
+
+GetFileFolderSize(fPath="") {
+	If InStr( FileExist( fPath ), "D" ) {
+		Loop, %fPath%\*.*, 1, 1
+		FolderSize += %A_LoopFileSize%
+		Return FolderSize ? FolderSize : 0
+	} Else If ( FileExist( fPath ) <> "" ) {
+		FileGetSize, FileSize, %fPath%
+		Return FileSize ? FileSize : 0
+	} Else {
+		Return -1
+	}
 }
 
 IsEmpty(Dir){
