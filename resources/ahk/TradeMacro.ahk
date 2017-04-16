@@ -1228,16 +1228,6 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	Return, html
 }
 
-TradeFunc_MapCurrencyNameToID(name) {
-	; map the actual ingame name of the currency to the one used on poe.trade and get the corresponding ID
-	name := RegExReplace(name, "i) ", "_")
-	name := RegExReplace(name, "i)'", "")
-	mappedName := TradeCurrencyNames.eng[name]
-	ID := TradeGlobals.Get("CurrencyIDs")[mappedName]
-	
-	Return ID
-}
-
 ; Get currency.poe.trade html
 ; Either at script start to parse the currency IDs or when searching to get currency listings
 TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init = false, ByRef currencyURL = "", ByRef error = 0) {
@@ -1260,8 +1250,8 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 		IDs := TradeGlobals.Get("CurrencyIDs")
 		Have:= TradeOpts.CurrencySearchHave		
 		
-		idWant := TradeFunc_MapCurrencyNameToID(currencyName)
-		idHave := TradeFunc_MapCurrencyNameToID(TradeOpts.CurrencySearchHave)
+		idWant := TradeGlobals.Get("CurrencyIDs")[currencyName]
+		idHave := TradeGlobals.Get("CurrencyIDs")[TradeOpts.CurrencySearchHave]
 
 		If (idWant and idHave) {
 			Url := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . idWant . "&have=" . idHave
