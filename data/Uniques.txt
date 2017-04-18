@@ -24,7 +24,7 @@ Hinekora's Sight|@10-16:To all Attributes|:+1000 to Accuracy Rating|6-10:Chance 
 Karui Charge|@20-30:To Dexterity|20-30:To Strength|5-10:Increased Attack Speed|:+100 to Accuracy Rating|:30% increased Projectile Speed|:10% increased Movement Speed|:30% increased Projectile Damage
 Karui Ward|@20-30:To Dexterity|20-30:To Strength|:+100 to Accuracy Rating|:30% increased Projectile Speed|:10% increased Movement Speed|:30% increased Projectile Damage
 Marylene's Fallacy|@20-30:To Intelligence|80-120:To Accuracy Rating|210-240:To Global Critical Strike Multiplier|80-100:To Evasion Rating|10-15:Increased Light Radius|:40% less Critical Strike Chance|:Critical Strikes have Culling Strike
-Natural Hierarchy|@25-35:Increased Damage|10-15:Increased Physical Damage|25-30:Increased Fire Damage|20-25:Increased Cold Damage|15-20:Increased Lightning Damage|30-35:Increased Chaos Damage|:Corrupted
+Natural Hierarchy|@25-35:Increased Damage|10-15:Increased Physical Damage|25-30:Increased Fire Damage|20-25:Increased Cold Damage|15-20:Increased Lightning Damage|30-35:Increased Chaos Damage
 Ngamahu Tiki|@2-4:Life Regenerated per second|50-70:Increased Fire Damage|:You gain 100 Evasion Rating when on Low Life|30-50:To maximum Life|20-30:To Fire Resistance|:1% of Life Regenerated per second while on Low Life
 Night's Hold|@:Has 1 Socket|:+2 to Level of Socketed Gems|:Socketed Gems are Supported by level 10 Added Chaos Damage|:Socketed Gems are supported by level 10 Blind|:Socketed Gems are supported by level 10 Cast when Stunned|:Corrupted
 Presence of Chayula|@10-16:To all Attributes|:30% increased Rarity of Items found|:+60% to Chaos Resistance|:Cannot be Stunned|:20% of Maximum Life Converted to Energy Shield
