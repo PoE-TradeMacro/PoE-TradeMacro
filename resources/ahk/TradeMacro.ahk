@@ -162,7 +162,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ItemData.Affixes := TradeFunc_AddCustomModsToLeaguestone(ItemData.Affixes)
 	}
 	
-	; check If the item implicit mod is an enchantment or corrupted. retrieve this mods data.
+	; check if the item implicit mod is an enchantment or corrupted. retrieve this mods data.
 	Enchantment := false
 	Corruption  := false
 
@@ -206,12 +206,12 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	
 	If (Item.IsUnique) {		
-		; returns mods with their ranges of the searched item If it is unique and has variable mods
+		; returns mods with their ranges of the searched item if it is unique and has variable mods
 		uniqueWithVariableMods :=
 		uniqueWithVariableMods := TradeFunc_FindUniqueItemIfItHasVariableRolls(Name, Item.IsRelic)
 		
-		; Return If the advanced search was used but the checked item doesn't have variable mods
-		if(!uniqueWithVariableMods and isAdvancedPriceCheck and not Enchantment and not Corruption) {
+		; Return if the advanced search was used but the checked item doesn't have variable mods
+		If (!uniqueWithVariableMods and isAdvancedPriceCheck and not Enchantment and not Corruption) {
 			ShowToolTip("Advanced search not available for this item (no variable mods)`nor item is new and the necessary data is not yet available/updated.")
 			return
 		}
@@ -534,7 +534,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.name := ""	
 		}		
 		
-		; Ivory Temple fix, not sure why it's not recognized and If there are more cases like it
+		; Ivory Temple fix, not sure why it's not recognized and if there are more cases like it
 		If (InStr(Name, "Ivory Temple")){
 			RequestParams.xbase  := "Ivory Temple Map"
 		}
@@ -553,7 +553,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			RequestParams.q_min := Item.Quality
 		}
-		; match exact gem level If enhance, empower or enlighten
+		; match exact gem level if enhance, empower or enlighten
 		If (InStr(Name, "Empower") or InStr(Name, "Enlighten") or InStr(Name, "Enhance")) {
 			RequestParams.level_min := Item.Level
 			RequestParams.level_max := Item.Level
@@ -615,13 +615,12 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	If (TradeOpts.Debug) {
 		;console.log(RequestParams)
-		;console.show()
 	}
 	Payload := RequestParams.ToPayload()
 	ShowToolTip("Running search...")
 	
-	ParsingError := ""
-	currencyUrl := ""
+	ParsingError	:= ""
+	currencyUrl	:= ""
 	If (Item.IsCurrency and !Item.IsEssence) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
 			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)	
@@ -2223,7 +2222,7 @@ TradeFunc_CheckIfTempModExists(needle, mods) {
 	Return false
 }
 
-; Add poetrades mod names to the items mods to use as POST parameter
+; Add poe.trades mod names to the items mods to use as POST parameter
 TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 	mods := TradeGlobals.Get("ModsData")
 
@@ -2484,8 +2483,7 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 			; replace multi spaces with a single one
 			ModStr := RegExReplace(ModStr, " +", " ")			
 			
-			IfInString, poeTradeMod, % ModStr
-			{
+			If (RegExMatch(poeTradeMod, "i).*" ModStr "$")) {
 				Return CurrValues
 			}
 		}
@@ -2522,8 +2520,7 @@ TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 		ModStr := RegExReplace(ModStr, " +", " ")
 		poeTradeMod := RegExReplace(poeTradeMod, "# ?to ? #", "#")
 
-		IfInString, poeTradeMod, % ModStr
-		{			
+		If (RegExMatch(poeTradeMod, "i).*" ModStr "$")) {
 			Return CurrValues
 		}
 	}
@@ -2815,7 +2812,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		modValueMax := ChangedImplicit.max
 		displayName := ChangedImplicit.name
 		
-		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 ; edit/text field widths and offsets
+		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 ; edit/text field widths and offsets
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  , % displayName
 		Gui, SelectModsGui:Add, CheckBox, x%xPosMin% yp+1 vTradeAdvancedSelected%e%
 		
@@ -2850,7 +2847,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		}
 		Else {
 			displayName := advItem.mods[A_Index].name			
-			staticValue := 	
+			staticValue := 
 		}
 		
 		If (advItem.mods[A_Index].ranges.Length() > 1) {
@@ -3466,7 +3463,7 @@ Return
 
 DeleteCookies:
 	TradeFunc_ClearWebHistory()
-	Run, Run_only_This.ahk
+	Run, Run_TradeMacro.ahk
 	ExitApp
 Return
 
