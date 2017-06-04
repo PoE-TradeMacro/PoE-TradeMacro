@@ -183,7 +183,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 	If (!Item.IsUnique) {
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
-		preparedItem.maxSockets := Item.maxSockets
+		preparedItem.maxSockets := Item.maxSockets		
+		preparedItem.iLvl := Item.level
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
 		
@@ -226,6 +227,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem.maxSockets 	:= Item.maxSockets
 			preparedItem.isCorrupted	:= Item.isCorrupted
 			preparedItem.isRelic	:= Item.isRelic
+			preparedItem.iLvl 		:= Item.level
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
 			
@@ -2598,7 +2600,7 @@ TradeFunc_CustomSearchGui() {
 TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedImplicit = ""){	
 	;https://autohotkey.com/board/topic/9715-positioning-of-controls-a-cheat-sheet/
 	Global 
-	
+
 	;prevent advanced gui in certain cases 
 	If (not advItem.mods.Length() and not ChangedImplicit) {
 		ShowTooltip("Advanced search not available for this item.")
@@ -2606,6 +2608,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}
 
 	TradeFunc_ResetGUI()
+	advItem := TradeFunc_DetermineAdvancedSearchPreSelectedMods(advItem, Stats)
+
 	ValueRangeMin := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMin : TradeOpts.AdvancedSearchModValueRangeMin / 2
 	ValueRangeMax := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMax : TradeOpts.AdvancedSearchModValueRangeMax / 2
 	
@@ -2731,7 +2735,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1						, % Floor(statValueQ20)
 			Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedStatMax%j% r1	, % statValueMax
 			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen					, % maxLabelFirst maxLabelSecond
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j%
+			checkedState := stat.PreSelected ? "Checked" : ""
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j% %checkedState%
 			
 			TradeAdvancedStatParam%j% := stat.name			
 			j++
@@ -2739,7 +2744,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}	
 	
 	If (j > 1) {
-		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line% 
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line%
 	}	
 
 	k := 1
@@ -2788,7 +2793,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1					  , % Floor(stat.value)
 			Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedStatMax%j% r1, % statValueMax
 			Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen				  , % maxLabelFirst maxLabelSecond
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j%
+			checkedState := stat.PreSelected ? "Checked" : ""
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1       vTradeAdvancedStatSelected%j% %checkedState%
 			
 			TradeAdvancedStatParam%j% := stat.name			
 			j++
@@ -2855,7 +2861,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			theoreticalMaxValue := advItem.mods[A_Index].ranges[2][2]
 		}
 		Else {
-			; use staticValue to create 2 ranges; for example (1 to 50) to (1 to 70) instead of having only 1 to (50 to 70)  
+			; use staticValue to create 2 ranges; for example (1 to 50) to (1 to 70) instead of only having 1 to (50 to 70)  
 			If (staticValue) {
 				theoreticalMinValue := staticValue
 				theoreticalMaxValue := advItem.mods[A_Index].ranges[1][2]
@@ -2929,25 +2935,25 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		}
 		
 		yPosFirst := ( l > 1 ) ? 25 : 20
-		; increment index If the item has an enchantment
+		; increment index if the item has an enchantment
 		index := A_Index + e
 		
 		isPseudo := advItem.mods[A_Index].type = "pseudo" ? true : false	
 		If (isPseudo) {
 			If (p = 1) {
-				;add line if first pseudo mod
+				; add line if first pseudo mod
 				Gui, SelectModsGui:Add, Text, x0 w700 y+5 cc9cacd, %line%
 				yPosFirst := 20
 			}						
 			p++
-			;change color if pseudo mod
+			; change color if pseudo mod
 			color := "cGray"
 		}
 		Else {
 			TradeAdvancedNormalModCount++
 		}
 		
-		state := modValue ? 0 : 1	
+		state := modValue ? 0 : 1
 		
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color% vTradeAdvancedModName%index%			, % isPseudo ? "(pseudo) " . displayName : displayName
 		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 Disabled%state% 	, % modValueMin
@@ -2956,8 +2962,10 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 Disabled%state% 	, % modValueMax
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen 			                       		, % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
 		checkEnabled := ErrorMsg ? 0 : 1
-		If (checkEnabled) {			
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %PreCheckNormalMods% vTradeAdvancedSelected%index%	
+		; pre-select mods according to the options in the settings menu
+		If (checkEnabled) {
+			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods) ? "Checked" : ""
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index%	
 		}
 		Else {
 			GUI, SelectModsGui:Add, Picture, x+10 yp+1 hwndErrorPic 0x0100, %A_ScriptDir%\resources\images\error.png
@@ -3001,11 +3009,17 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		Gui, SelectModsGui:Add, CheckBox, x%offset% yp+0 vTradeAdvancedUseLinksMaxFour Checked, % text
 	}
 	
-	offsetX := (m = 1)  ? "15" : "+15"
+	; ilvl
+	offsetX := (m = 1) ? "15" : "+15"
 	offsetY := (m = 1) ? "20" : "+0"
-	Gui, SelectModsGui:Add, CheckBox, x%offsetX% yp%offsetY% vTradeAdvancedSelectedILvl , % "Item Level (min)"
-	Gui, SelectModsGui:Add, Edit    , x+5 yp-3 w30 vTradeAdvancedMinILvl , % ""
-	Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase , % "Include Item Base"		
+	iLvlCheckState := TradeOpts.AdvancedSearchCheckILVL ? "Checked" : ""
+	Gui, SelectModsGui:Add, CheckBox, x%offsetX% yp%offsetY% vTradeAdvancedSelectedILvl %iLvlCheckState%, % "Item Level (min)"
+	iLvlValue := TradeOpts.AdvancedSearchCheckILVL ? advItem.iLvl : ""
+	Gui, SelectModsGui:Add, Edit    , x+5 yp-3 w30 vTradeAdvancedMinILvl , % iLvlValue
+	
+	; item base
+	baseCheckState := TradeOpts.AdvancedSearchCheckBase ? "Checked" : ""
+	Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase %baseCheckState%, % "Include Item Base"		
 	
 	
 	Item.UsedInSearch.SearchType := "Advanced"
@@ -3030,13 +3044,56 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, Link, x+5 yp+0 cBlue, <a href="https://poe.trade">visit</a>    
 	Gui, SelectModsGui:Add, Text, x+10 yp+0 cGray, (Use Alt + S/E to submit a button)
 
-	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 +40 + 5 + 45 + 10 + 65
+	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 + 65
 	windowWidth := (windowWidth > 510) ? windowWidth : 510
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search
 }
 
+TradeFunc_DetermineAdvancedSearchPreSelectedMods(advItem, ByRef Stats) {
+	Global TradeOpts
+	
+	TotalMaxLifeSelected		:= 0
+	TotalEnergyShieldSelected	:= 0
+	
+	; make sure that normal mods aren't marked as selected if they are included in existing pseudo mods, for example life -> total life
+	; and that mods aren't selected if they are included in defense stats, for example energy shield
+	If (Stats.Defense.TotalEnergyShield.Value > 0 and TradeOpts.AdvancedSearchCheckES) {
+		Stats.Defense.TotalEnergyShield.PreSelected := 1
+		TotalEnergyShieldSelected := 1
+	}
+	
+	If (Stats.Offense.EleDps.Value > 0 and TradeOpts.AdvancedSearchCheckEDPS) {
+		Stats.Offense.EleDps.PreSelected := 1
+	}
+	If (Stats.Offense.PhysDps.Value > 0 and TradeOpts.AdvancedSearchCheckPDPS) {
+		Stats.Offense.PhysDps.PreSelected := 1
+	}
+	
+	i := advItem.mods.maxIndex()
+	Loop, % i {
+		MaxLife	:= RegExMatch(advItem.mods[i].name, "i).* to maximum Life$")
+		ES		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$") or RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$")
+		EleRes	:= RegExMatch(advItem.mods[i].name, "i).* total Elemental Resistance$")
+		
+		If (MaxLife and TradeOpts.AdvancedSearchCheckTotalLife and not TotalMaxLifeSelected) {
+			advItem.mods[i].PreSelected	:= 1
+			TotalMaxLifeSelected		:= 1
+		}
+		Else If (ES and TradeOpts.AdvancedSearchCheckTotalES and not TotalEnergyShieldSelected) {
+			advItem.mods[i].PreSelected	:= 1
+			TotalEnergyShieldSelected	:= 1
+		}
+		Else If (EleRes and TradeOpts.AdvancedSearchCheckTotalEleRes) {
+			advItem.mods[i].PreSelected	:= 1
+		}
+		
+		i--
+	}	
+	
+	Return advItem
+}
+
 AdvancedCheckAllMods:
-	ImplicitCount := TradeAdvancedIsImplicit1 ? 1 : 0
 	ImplicitCount := TradeAdvancedImplicitCount
 	EmptySelect := 0
 	GuiControlGet, IsChecked, SelectModsGui:, TradeAdvancedSelectedCheckAllMods
