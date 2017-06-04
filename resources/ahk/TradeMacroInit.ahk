@@ -866,7 +866,7 @@ CreateTradeSettingsUI()
 	
     ; Search
 	
-	GuiAddGroupBox("[TradeMacro] Search", "x277 y34 w260 h635")
+	GuiAddGroupBox("[TradeMacro] Search", "x277 y34 w260 h605")
 	
 	GuiAddText("League:", "x287 yp+28 w100 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
 	AddToolTip(LblSearchLeagueH, "Defaults to ""standard"" or ""tmpstandard"" If there is a`nTemp-League active at the time of script execution.`n`n""tmpstandard"" and ""tmphardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
@@ -906,50 +906,63 @@ CreateTradeSettingsUI()
 	AddToolTip(LblCurrencySearchHaveH, "This settings sets the currency that you`nwant to use as ""have"" for the currency search.")
 	GuiAddDropDownList(CurrencyList, "x+10 yp-2", TradeOpts.CurrencySearchHave, "CurrencySearchHave", "CurrencySearchHaveH")
 	
-	GuiAddCheckbox("Online only", "x287 yp+22 w210 h35 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
+	; option group start
+	GuiAddCheckbox("Online only", "x287 yp+25 w110 h30 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
 	
-	GuiAddCheckbox("Buyout only (Search on poe.trade)", "x287 yp+30 w210 h35 0x0100", TradeOpts.BuyoutOnly, "BuyoutOnly", "BuyoutOnlyH")
+	GuiAddCheckbox("Buyout only", "x407 yp0 w110 h30 0x0100", TradeOpts.BuyoutOnly, "BuyoutOnly", "BuyoutOnlyH")
 	AddToolTip(BuyoutOnlyH, "This option only takes affect when opening the search on poe.trade.")
 	
-	GuiAddCheckbox("Remove multiple Listings from same Account", "x287 yp+28 w230 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
-	AddToolTip(RemoveMultipleListingsFromSameAccountH, "Removes multiple listings from the same account from`nyour search results (to combat market manipulators).`n`nThe removed items are also removed from the average and`nmedian price calculations.")
-	
-	GuiAddCheckbox("Pre-Fill Min-Values", "x287 yp+30 w230 h40", TradeOpts.PrefillMinValue, "PrefillMinValue", "PrefillMinValueH")
+	; option group start
+	GuiAddCheckbox("Pre-Fill Min-Values", "x287 yp+25 w110 h40", TradeOpts.PrefillMinValue, "PrefillMinValue", "PrefillMinValueH")
 	AddToolTip(PrefillMinValueH, "Automatically fill the min-values in the advanced search GUI.")
-	GuiAddCheckbox("Pre-Fill Max-Values", "x287 yp+30 w230 h40", TradeOpts.PrefillMinValue, "PrefillMaxValue", "PrefillMaxValueH")
+	
+	GuiAddCheckbox("Pre-Fill Max-Values", "x407 yp0 w110 h40", TradeOpts.PrefillMinValue, "PrefillMaxValue", "PrefillMaxValueH")
 	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
 	
+	; option group start
+	GuiAddCheckbox("Remove multiple Listings from same Account", "x287 yp+30 w230 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
+	AddToolTip(RemoveMultipleListingsFromSameAccountH, "Removes multiple listings from the same account from`nyour search results (to combat market manipulators).`n`nThe removed items are also removed from the average and`nmedian price calculations.")
+	
+	; option group start
 	GuiAddCheckbox("Force max links (certain corrupted items)", "x287 yp+30 w230 h40", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
-	AddToolTip(ForceMaxLinksH, "Corrupted 3/4 max-socket unique items always use`nmax links if your item is fully linked.")
+	AddToolTip(ForceMaxLinksH, "Searches for corrupted 3/4 max-socket unique items always use`nthe maximum amount of links if your item is fully linked.")
 	
+	; option group start
 	GuiAddCheckbox("Alternative currency search", "x287 yp+30 w230 h40", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
-	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.")
+	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
 	
+	; header
+	GuiAddText("Pre-Select Options (Advanced Search)", "x287 yp+43 w230 h20 0x0100 cDA4F49", "", "")
+	GuiAddText("------------------------------------------------------------", "x287 yp+6 w230 h20 0x0100 cDA4F49", "", "")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckMods, "AdvancedSearchCheckMods", "AdvancedSearchCheckModsH")
+	; option group start
+	GuiAddCheckbox("Normal mods", "x287 yp+11 w110 h40", TradeOpts.AdvancedSearchCheckMods, "AdvancedSearchCheckMods", "AdvancedSearchCheckModsH")
 	AddToolTip(AdvancedSearchCheckModsH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
-	/*
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckTotalEleRes, "AdvancedSearchCheckTotalEleRes", "AdvancedSearchCheckTotalEleResH")
-	AddToolTip(AdvancedSearchCheckTotalEleResH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckTotalLife, "AdvancedSearchCheckTotalLife", "AdvancedSearchCheckTotalLifeH")
-	AddToolTip(AdvancedSearchCheckTotalLifeH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
+	GuiAddCheckbox("Total Ele Resistances", "x407 yp0 w120 h40", TradeOpts.AdvancedSearchCheckTotalEleRes, "AdvancedSearchCheckTotalEleRes", "AdvancedSearchCheckTotalEleResH")
+	AddToolTip(AdvancedSearchCheckTotalEleResH, "Selects the total elemental resistances pseudo mod`nwhen creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckPDPS, "AdvancedSearchCheckPDPS", "AdvancedSearchCheckPDPSH")
-	AddToolTip(AdvancedSearchCheckPDPSH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
+	; option group start
+	GuiAddCheckbox("Life", "x287 yp+30 w110 h40", TradeOpts.AdvancedSearchCheckTotalLife, "AdvancedSearchCheckTotalLife", "AdvancedSearchCheckTotalLifeH")
+	AddToolTip(AdvancedSearchCheckTotalLifeH, "Selects the total life pseudo mod or life mod`nwhen creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckEDPS, "AdvancedSearchCheckEDPS", "AdvancedSearchCheckEDPSH")
-	AddToolTip(AdvancedSearchCheckEDPSH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
+	GuiAddCheckbox("Energy Shield", "x407 yp0 w110 h40", TradeOpts.AdvancedSearchCheckES, "AdvancedSearchCheckES", "AdvancedSearchCheckESH")
+	AddToolTip(AdvancedSearchCheckESH, "Selects the energy shield defense`nwhen creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckES, "AdvancedSearchCheckES", "AdvancedSearchCheckESH")
-	AddToolTip(AdvancedSearchCheckESH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
+	; option group start
+	GuiAddCheckbox("Elemental DPS", "x287 yp+30 w110 h40", TradeOpts.AdvancedSearchCheckEDPS, "AdvancedSearchCheckEDPS", "AdvancedSearchCheckEDPSH")
+	AddToolTip(AdvancedSearchCheckEDPSH, "Selects elemental damage per second`nwhen creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckILVL, "AdvancedSearchCheckILVL", "AdvancedSearchCheckILVLH")
-	AddToolTip(AdvancedSearchCheckILVLH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
-		
-	GuiAddCheckbox("Pre-select normal mods (advanced search)", "x287 yp+30 w230 h40", TradeOpts.AdvancedSearchCheckBase, "AdvancedSearchCheckBase", "AdvancedSearchCheckBaseH")
-	AddToolTip(AdvancedSearchCheckBaseH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
-	*/
+	GuiAddCheckbox("Physical DPS", "x407 yp0 w110 h40", TradeOpts.AdvancedSearchCheckPDPS, "AdvancedSearchCheckPDPS", "AdvancedSearchCheckPDPSH")
+	AddToolTip(AdvancedSearchCheckPDPSH, "Selects physical damage per second`nwhen creating the advanced search GUI.")
+	
+	; option group start
+	GuiAddCheckbox("Minimum Item Level", "x287 yp+30 w110 h40", TradeOpts.AdvancedSearchCheckILVL, "AdvancedSearchCheckILVL", "AdvancedSearchCheckILVLH")
+	AddToolTip(AdvancedSearchCheckILVLH, "Selects the items itemlevel as minimum itemlevel`nwhen creating the advanced search GUI.")
+	
+	GuiAddCheckbox("Item Base", "x407 yp0 w110 h40", TradeOpts.AdvancedSearchCheckBase, "AdvancedSearchCheckBase", "AdvancedSearchCheckBaseH")
+	AddToolTip(AdvancedSearchCheckBaseH, "Selects the item base`nwhen creating the advanced search GUI.")
+	
 	
 	Gui, Add, Link, x287 yp+43 w230 cBlue BackgroundTrans, <a href="https://github.com/POE-TradeMacro/POE-TradeMacro/wiki/Options">Options Wiki-Page</a>
 	
