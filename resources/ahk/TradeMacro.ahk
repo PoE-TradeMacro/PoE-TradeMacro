@@ -3072,14 +3072,14 @@ TradeFunc_DetermineAdvancedSearchPreSelectedMods(advItem, ByRef Stats) {
 	i := advItem.mods.maxIndex()
 	Loop, % i {
 		MaxLife	:= RegExMatch(advItem.mods[i].name, "i).* to maximum Life$")
-		ES		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$") or RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$")
+		ES		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$")
 		EleRes	:= RegExMatch(advItem.mods[i].name, "i).* total Elemental Resistance$")
 		
 		If (MaxLife and TradeOpts.AdvancedSearchCheckTotalLife and not TotalMaxLifeSelected) {
 			advItem.mods[i].PreSelected	:= 1
 			TotalMaxLifeSelected		:= 1
 		}
-		Else If (ES and TradeOpts.AdvancedSearchCheckTotalES and not TotalEnergyShieldSelected) {
+		Else If (ES and TradeOpts.AdvancedSearchCheckES and not TotalEnergyShieldSelected) {
 			advItem.mods[i].PreSelected	:= 1
 			TotalEnergyShieldSelected	:= 1
 		}
