@@ -355,6 +355,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.xbase := Item.TypeName
 			Item.UsedInSearch.ItemBase := Item.TypeName
 		}
+		
+		If (s.onlineOverride) {
+			RequestParams.online := ""
+		}		
 	}
 	
 	; prepend the item.subtype to match the options used on poe.trade
@@ -3036,16 +3040,19 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	
 	Item.UsedInSearch.SearchType := "Advanced"
 	; closes this window and starts the search
-	offset := (m > 1) ? "+20" : "+10"
+	offset := (m > 1) ? "+25" : "+15"
 	Gui, SelectModsGui:Add, Button, x10 y%offset% gAdvancedPriceCheckSearch, &Search
 	
 	; open search on poe.trade instead
 	Gui, SelectModsGui:Add, Button, x+10 yp+0 gAdvancedOpenSearchOnPoeTrade, Op&en on poe.trade
 	
+	; override online state
+	Gui, SelectModsGui:Add, CheckBox, x+10 yp+5 vTradeAdvancedOverrideOnlineState, % "Show offline results"		
+	
 	; add some widths and margins to align the checkox with the others on the right side
 	RightPos := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10
 	RightPosText := RightPos - 100
-	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+5, Check normal mods
+	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+0, Check normal mods
 	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 %PreCheckNormalMods% vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
 	
 	If (ModNotFound) {
@@ -3171,6 +3178,7 @@ TradeFunc_ResetGUI(){
 	TradeAdvancedSelectedCheckAllMods	:=
 	TradeAdvancedImplicitCount	:=
 	TradeAdvancedNormalModCount	:=
+	TradeAdvancedOverrideOnlineState	:=
 	
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
@@ -3228,6 +3236,7 @@ TradeFunc_HandleGuiSubmit(){
 	newItem.useIlvl	:= TradeAdvancedSelectedILvl
 	newItem.minIlvl	:= TradeAdvancedMinILvl
 	newItem.useBase	:= TradeAdvancedSelectedItemBase
+	newItem.onlineOverride := TradeAdvancedOverrideOnlineState
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)	
 	Gui, SelectModsGui:Destroy
