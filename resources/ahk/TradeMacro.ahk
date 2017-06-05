@@ -925,16 +925,16 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 				}
 				If (RegExMatch(affix, "i)Adds.*#.*(Physical|Fire|Cold|Chaos) Damage", dmgType)) {
 					If (not mod.isVariable) {
-						min_affixFlat%dmgType1%Low    := mod.values[1] 
-						min_affixFlat%dmgType1%Hi     := mod.values[2] 
-						max_affixFlat%dmgType1%Low    := mod.values[1] 
-						max_affixFlat%dmgType1%Hi     := mod.values[2] 						
+						min_affixFlat%dmgType1%Low    := mod.values[1]
+						min_affixFlat%dmgType1%Hi     := mod.values[2]
+						max_affixFlat%dmgType1%Low    := mod.values[1]
+						max_affixFlat%dmgType1%Hi     := mod.values[2]
 					}
 					Else {
-						min_affixFlat%dmgType1%Low    := mod.ranges[1][1] 
-						min_affixFlat%dmgType1%Hi     := mod.ranges[1][2] 
-						max_affixFlat%dmgType1%Low    := mod.ranges[2][1] 
-						max_affixFlat%dmgType1%Hi     := mod.ranges[2][2] 						
+						min_affixFlat%dmgType1%Low    := mod.ranges[1][1]
+						min_affixFlat%dmgType1%Hi     := mod.ranges[1][2]
+						max_affixFlat%dmgType1%Low    := mod.ranges[2][1]
+						max_affixFlat%dmgType1%Hi     := mod.ranges[2][2]
 					}
 					debugOutput .= affix "`nflat " dmgType1 " : " min_affixFlat%dmgType1%Low " - " min_affixFlat%dmgType1%Hi " to " max_affixFlat%dmgType1%Low " - " max_affixFlat%dmgType1%Hi "`n`n"					
 				}
@@ -1058,37 +1058,29 @@ TradeFunc_SetItemSockets() {
 	
 	If (Item.IsWeapon or Item.IsArmour)
 	{
-		If (Item.Level >= 50)
-		{
+		If (Item.Level >= 50) {
 			Item.MaxSockets := 6
 		}
-		Else If (Item.Level >= 35)
-		{
+		Else If (Item.Level >= 35) {
 			Item.MaxSockets := 5
 		}
-		Else If (Item.Level >= 25)
-		{
+		Else If (Item.Level >= 25) {
 			Item.MaxSockets := 4
 		}
-		Else If (Item.Level >= 1)
-		{
+		Else If (Item.Level >= 1) {
 			Item.MaxSockets := 3
 		}
-		Else
-		{
+		Else	{
 			Item.MaxSockets := 2
 		}
 		
-		If(Item.IsFourSocket and Item.MaxSockets > 4)
-		{
+		If (Item.IsFourSocket and Item.MaxSockets > 4) {
 			Item.MaxSockets := 4
 		}
-		Else If(Item.IsThreeSocket and Item.MaxSockets > 3)
-		{
+		Else If (Item.IsThreeSocket and Item.MaxSockets > 3) {
 			Item.MaxSockets := 3
 		}
-		Else If(Item.IsSingleSocket)
-		{
+		Else If (Item.IsSingleSocket)	{
 			Item.MaxSockets := 1
 		}
 	}
@@ -1271,8 +1263,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 		If (idWant and idHave) {
 			Url := "http://currency.poe.trade/search?league=" . LeagueName . "&online=x&want=" . idWant . "&have=" . idHave
 			currencyURL := Url
-		} Else {
-			;MsgBox Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade names to the actual names failed. Please report this issue.
+		} Else {			
 			errorMsg = Couldn't find currency "%currencyname%" on poe.trade's currency search.`n`nThis search needs to know the currency names used on poe.trades currency page.`n`nEither this item doesn't exist on that page or parsing and mapping the poe.trade`nnames to the actual names failed. Please report this issue.
 			error := 1
 			Return, errorMsg
@@ -1567,30 +1558,11 @@ TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = ""){
 		CurrencyValue := TradeUtils.Cleanup(CurrencyV)
 		
 		; add chaos-equivalents (chaos prices) together and count results
-		; RegExMatch(ChaosValue, "i)data-value=""-?(\d+.?\d+?)""", priceChaos)
-		; If (StrLen(priceChaos1) > 0 or StrLen(CurrencyValue) > 0) {
 		If (StrLen(CurrencyValue) > 0) {
 			SetFormat, float, 6.2
 			chaosEquivalent := 0
 			
-			; map poe.trade currency names to actual ingame names
-			mappedCurrencyName := ""
-			For key, val in TradeCurrencyNames.eng {
-				If (val = CurrencyName) {
-					mappedCurrencyName := RegExReplace(key, "i)_", " ")
-				}
-			}
-			
-			; if mapping the exact name failed try to map it a bit less strict (example, poe.trade uses "chrome" for currencies and "chromatic" for items)
-			If (!StrLen(mappedCurrencyName)) {
-				For key, val in TradeCurrencyNames.eng {
-					tempKey := RegExReplace(key, "i)_", " ")
-					If (InStr(tempKey, val, 0)) {
-						mappedCurrencyName := tempKey
-					}
-				}
-			}
-			
+			mappedCurrencyName := TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName)
 			chaosEquivalentSingle := ChaosEquivalents[mappedCurrencyName]
 			chaosEquivalent := CurrencyValue * chaosEquivalentSingle
 			If (!chaosEquivalentSingle) {
@@ -1643,6 +1615,28 @@ TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = ""){
 	Return Title
 }
 
+TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName) {
+	; map poe.trade currency names to actual ingame names
+	mappedCurrencyName := ""
+	For key, val in TradeCurrencyNames.eng {
+		If (val = CurrencyName) {
+			mappedCurrencyName := RegExReplace(key, "i)_", " ")
+		}				
+	}		
+	
+	; if mapping the exact name failed try to map it a bit less strict (example, poe.trade uses "chrome" for currencies and "chromatic" for items)
+	If (!StrLen(mappedCurrencyName)) {
+		For key, val in TradeCurrencyNames.eng {
+			tempKey := RegExReplace(key, "i)_", " ")
+			If (InStr(tempKey, CurrencyName, 0)) {
+				mappedCurrencyName := tempKey
+			}
+		}
+	}
+	
+	Return mappedCurrencyName
+}
+
 ; Parse poe.trade html to display the search result tooltip with X listings
 TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = false)
 {	
@@ -1650,8 +1644,7 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	LeagueName := TradeGlobals.Get("LeagueName")
 	
 	; Target HTML Looks like the ff:
-     ;<tbody id="item-container-97" class="item" data-seller="Jobo" data-sellerid="458008" data-buyout="15 chaos" data-ign="Lolipop_Slave" data-league="Essence" data-name="Tabula Rasa Simple Robe" data-tab="This is a buff" data-x="10" data-y="9"> <tr class="first-line">
-	
+     ; <tbody id="item-container-97" class="item" data-seller="Jobo" data-sellerid="458008" data-buyout="15 chaos" data-ign="Lolipop_Slave" data-league="Essence" data-name="Tabula Rasa Simple Robe" data-tab="This is a buff" data-x="10" data-y="9"> <tr class="first-line">	
 	If (not Item.IsGem and not Item.IsDivinationCard and not Item.IsJewel and not Item.IsCurrency and not Item.IsMap) {
 		showItemLevel := true
 	}
@@ -1820,10 +1813,29 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 		Title .= TradeFunc_ShowAcc(StrPad(subAcc,10), "|") 
 		Title .= StrPad(subIGN,20) 
 		
+		; buyout price
 		RegExMatch(Buyout, "i)([-.0-9]+) (.*)", BuyoutText)
 		RegExMatch(BuyoutText1, "i)(\d+)(.\d+)?", BuyoutPrice)
-		BuyoutPrice    := (BuyoutPrice2) ? StrPad(BuyoutPrice1 BuyoutPrice2, (3 - StrLen(BuyoutPrice1), "left")) : StrPad(StrPad(BuyoutPrice1, 2 + StrLen(BuyoutPrice1), "right"), 3 - StrLen(BuyoutPrice1), "left")
-		BuyoutCurrency := BuyoutText2
+		
+		If (TradeOpts.ShowPricesAsChaosEquiv) {
+			; translate buyout to chaos equivalent
+			RegExMatch(Buyout, "i)\d+(\.|,?\d+)?(.*)", match)
+			CurrencyName := TradeUtils.Cleanup(match2)
+			
+			mappedCurrencyName		:= TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName)
+			chaosEquivalentSingle	:= ChaosEquivalents[mappedCurrencyName]
+			chaosEquivalent		:= BuyoutPrice * chaosEquivalentSingle
+			RegExMatch(chaosEquivalent, "i)(\d+)(.\d+)?", BuyoutPrice)
+			
+			If (chaosEquivalentSingle) {
+				BuyoutPrice    := (BuyoutPrice2) ? StrPad(BuyoutPrice1 BuyoutPrice2, (3 - StrLen(BuyoutPrice1), "left")) : StrPad(StrPad(BuyoutPrice1, 2 + StrLen(BuyoutPrice1), "right"), 3 - StrLen(BuyoutPrice1), "left")
+				BuyoutCurrency := "chaos"
+			}
+		}
+		Else {
+			BuyoutPrice    := (BuyoutPrice2) ? StrPad(BuyoutPrice1 BuyoutPrice2, (3 - StrLen(BuyoutPrice1), "left")) : StrPad(StrPad(BuyoutPrice1, 2 + StrLen(BuyoutPrice1), "right"), 3 - StrLen(BuyoutPrice1), "left")
+			BuyoutCurrency := BuyoutText2			
+		}
 		BuyoutText := StrPad(BuyoutPrice, 5, "left") . " " BuyoutCurrency
 		Title .= StrPad("| " . BuyoutText . "",19,"right")
 		

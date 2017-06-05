@@ -100,6 +100,8 @@ class TradeUserOptions {
 	BuyoutOnly := 1				;
 	ForceMaxLinks := 1				;
 	AlternativeCurrencySearch := 0	;
+	ShowPricesAsChaosEquiv := 0
+	
 	AdvancedSearchCheckMods := 0
 	AdvancedSearchCheckTotalEleRes :=0
 	AdvancedSearchCheckTotalLife :=0
@@ -286,6 +288,7 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 		TradeOpts.BuyoutOnly := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "BuyoutOnly", TradeOpts.BuyoutOnly)	
 		TradeOpts.ForceMaxLinks := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "ForceMaxLinks", TradeOpts.ForceMaxLinks)	
 		TradeOpts.AlternativeCurrencySearch := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AlternativeCurrencySearch", TradeOpts.AlternativeCurrencySearch)	
+		TradeOpts.ShowPricesAsChaosEquiv := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "ShowPricesAsChaosEquiv", TradeOpts.ShowPricesAsChaosEquiv)	
 		
 		TradeOpts.AdvancedSearchCheckMods := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckMods", TradeOpts.AdvancedSearchCheckMods)	
 		TradeOpts.AdvancedSearchCheckTotalEleRes := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckTotalEleRes", TradeOpts.AdvancedSearchCheckTotalEleRes)	
@@ -437,9 +440,10 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 		TradeOpts.PrefillMaxValue		:= PrefillMaxValue
 		TradeOpts.CurrencySearchHave		:= CurrencySearchHave
 		TradeOpts.BuyoutOnly			:= BuyoutOnly
-		TradeOpts.ForceMaxLinks			:= ForceMaxLinks
+		TradeOpts.ForceMaxLinks			:= ForceMaxLinks		
+		TradeOpts.AlternativeCurrencySearch:= AlternativeCurrencySearch
+		TradeOpts.ShowPricesAsChaosEquiv	:= ShowPricesAsChaosEquiv
 		
-		TradeOpts.AlternativeCurrencySearch	:= AlternativeCurrencySearch
 		TradeOpts.AdvancedSearchCheckMods		:= AdvancedSearchCheckMods		
 		TradeOpts.AdvancedSearchCheckTotalEleRes:= AdvancedSearchCheckTotalEleRes		
 		TradeOpts.AdvancedSearchCheckTotalLife	:= AdvancedSearchCheckTotalLife		
@@ -513,6 +517,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 	TradeFunc_WriteIniValue(TradeOpts.BuyoutOnly, TradeConfigPath, "Search", "BuyoutOnly")
 	TradeFunc_WriteIniValue(TradeOpts.ForceMaxLinks, TradeConfigPath, "Search", "ForceMaxLinks")
 	TradeFunc_WriteIniValue(TradeOpts.AlternativeCurrencySearch, TradeConfigPath, "Search", "AlternativeCurrencySearch")
+	TradeFunc_WriteIniValue(TradeOpts.ShowPricesAsChaosEquiv, TradeConfigPath, "Search", "ShowPricesAsChaosEquiv")
 	
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckMods, TradeConfigPath, "Search", "AdvancedSearchCheckMods")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckTotalEleRes, TradeConfigPath, "Search", "AdvancedSearchCheckTotalEleRes")
@@ -571,8 +576,8 @@ TradeFunc_ReadIniValue(iniFilePath, Section = "General", IniKey="", DefaultValue
 	IniRead, OutputVar, %iniFilePath%, %Section%, %IniKey%
 	If (!OutputVar | RegExMatch(OutputVar, "^ERROR$")) { 
 		OutputVar := DefaultValue
-        ; Somehow reading some ini-values is not working with IniRead
-        ; Fallback for these cases via FileReadLine 
+		; Somehow reading some ini-values is not working with IniRead
+		; Fallback for these cases via FileReadLine 
 		lastSection := ""        
 		Loop {
 			FileReadLine, line, %iniFilePath%, %A_Index%
@@ -593,8 +598,7 @@ TradeFunc_ReadIniValue(iniFilePath, Section = "General", IniKey="", DefaultValue
 				}
 				Else {
 					OutputVar := value1
-				}              
-                ;MsgBox % "`n`n`n`n" lastSection ": " IniKey  " = " OutputVar 
+				}
 			}
 		}
 	}   
@@ -866,7 +870,7 @@ CreateTradeSettingsUI()
 	
     ; Search
 	
-	GuiAddGroupBox("[TradeMacro] Search", "x277 y34 w260 h605")
+	GuiAddGroupBox("[TradeMacro] Search", "x277 y34 w260 h625")
 	
 	GuiAddText("League:", "x287 yp+28 w100 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
 	AddToolTip(LblSearchLeagueH, "Defaults to ""standard"" or ""tmpstandard"" If there is a`nTemp-League active at the time of script execution.`n`n""tmpstandard"" and ""tmphardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
@@ -903,7 +907,7 @@ CreateTradeSettingsUI()
 	
 	CurrencyList := TradeFunc_GetDelimitedCurrencyListString()
 	GuiAddText("Currency Search:", "x287 yp+30 w100 h20 0x0100", "LblCurrencySearchHave", "LblCurrencySearchHaveH")
-	AddToolTip(LblCurrencySearchHaveH, "This settings sets the currency that you`nwant to use as ""have"" for the currency search.")
+	AddToolTip(LblCurrencySearchHaveH, "This settings sets the currency that you`nwant to use as ""have"" for the currency search.")	
 	GuiAddDropDownList(CurrencyList, "x+10 yp-2", TradeOpts.CurrencySearchHave, "CurrencySearchHave", "CurrencySearchHaveH")
 	
 	; option group start
@@ -931,9 +935,13 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("Alternative currency search", "x287 yp+30 w230 h40", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
 	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
 	
+	; option group start
+	GuiAddCheckbox("Show prices as chaos equivalent", "x287 yp+30 w230 h40", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
+	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaoes equivalent.")
+	
 	; header
 	GuiAddText("Pre-Select Options (Advanced Search)", "x287 yp+43 w230 h20 0x0100 cDA4F49", "", "")
-	GuiAddText("------------------------------------------------------------", "x287 yp+6 w230 h20 0x0100 cDA4F49", "", "")
+	GuiAddText("-------------------------------------------------------------", "x287 yp+6 w230 h20 0x0100 cDA4F49", "", "")
 	
 	; option group start
 	GuiAddCheckbox("Normal mods", "x287 yp+11 w110 h40", TradeOpts.AdvancedSearchCheckMods, "AdvancedSearchCheckMods", "AdvancedSearchCheckModsH")
