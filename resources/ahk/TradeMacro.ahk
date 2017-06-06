@@ -3071,38 +3071,54 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 TradeFunc_DetermineAdvancedSearchPreSelectedMods(advItem, ByRef Stats) {
 	Global TradeOpts
 	
-	TotalMaxLifeSelected		:= 0
+	FlatMaxLifeSelected			:= 0
+	PercentMaxLifeSelected		:= 0
 	TotalEnergyShieldSelected	:= 0
+	FlatEnergyShieldSelected		:= 0
+	PercentEnergyShieldSelected	:= 0
 	
 	; make sure that normal mods aren't marked as selected if they are included in existing pseudo mods, for example life -> total life
 	; and that mods aren't selected if they are included in defense stats, for example energy shield
-	If (Stats.Defense.TotalEnergyShield.Value > 0 and TradeOpts.AdvancedSearchCheckES) {
+	If (Stats.Defense.TotalEnergyShield.Value > 0 and TradeOpts.AdvancedSearchCheckTotalES) {
 		Stats.Defense.TotalEnergyShield.PreSelected := 1
 		TotalEnergyShieldSelected := 1
 	}
 	
 	If (Stats.Offense.EleDps.Value > 0 and TradeOpts.AdvancedSearchCheckEDPS) {
-		Stats.Offense.EleDps.PreSelected := 1
+		Stats.Offense.EleDps.PreSelected	:= 1
 	}
 	If (Stats.Offense.PhysDps.Value > 0 and TradeOpts.AdvancedSearchCheckPDPS) {
-		Stats.Offense.PhysDps.PreSelected := 1
+		Stats.Offense.PhysDps.PreSelected	:= 1
 	}
 	
 	i := advItem.mods.maxIndex()
 	Loop, % i {
-		MaxLife	:= RegExMatch(advItem.mods[i].name, "i).* to maximum Life$")
-		ES		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$")
-		EleRes	:= RegExMatch(advItem.mods[i].name, "i).* total Elemental Resistance$")
+		FlatLife		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Life$")
+		PercentLife	:= RegExMatch(advItem.mods[i].name, "i).* increased maximum Life$")
+		FlatES		:= RegExMatch(advItem.mods[i].name, "i).* to maximum Energy Shield$")
+		PercentES		:= RegExMatch(advItem.mods[i].name, "i).* increased maximum Energy Shield$")
+		EleRes		:= RegExMatch(advItem.mods[i].name, "i).* total Elemental Resistance$")
 		
-		If (MaxLife and TradeOpts.AdvancedSearchCheckTotalLife and not TotalMaxLifeSelected) {
+		If (FlatLife and TradeOpts.AdvancedSearchCheckTotalLife and not FlatMaxLifeSelected) {
 			advItem.mods[i].PreSelected	:= 1
-			TotalMaxLifeSelected		:= 1
+			FlatMaxLifeSelected			:= 1
 		}
-		Else If (ES and TradeOpts.AdvancedSearchCheckES and not TotalEnergyShieldSelected) {
+		If (PercentLife and TradeOpts.AdvancedSearchCheckTotalLife and not PercentMaxLifeSelected) {
 			advItem.mods[i].PreSelected	:= 1
-			TotalEnergyShieldSelected	:= 1
+			PercentMaxLifeSelected		:= 1
 		}
-		Else If (EleRes and TradeOpts.AdvancedSearchCheckTotalEleRes) {
+		
+		; only select flat ES/percent ES when no defense stat is present (for example on rings, belts, jewels, amulets)
+		If ((FlatES or PercentES) and TradeOpts.AdvancedSearchCheckES and not TotalEnergyShieldSelected) {
+			advItem.mods[i].PreSelected		:= 1
+			If (FlatES) {
+				FlatEnergyShieldSelected		:= 1	
+			} Else {
+				PercentEnergyShieldSelected	:= 1
+			}			
+		}
+		
+		If (EleRes and TradeOpts.AdvancedSearchCheckTotalEleRes) {
 			advItem.mods[i].PreSelected	:= 1
 		}
 		

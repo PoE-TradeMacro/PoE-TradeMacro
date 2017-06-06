@@ -107,6 +107,7 @@ class TradeUserOptions {
 	AdvancedSearchCheckTotalLife :=0
 	AdvancedSearchCheckPDPS :=0
 	AdvancedSearchCheckEDPS :=0
+	AdvancedSearchCheckTotalES :=0
 	AdvancedSearchCheckES :=0
 	AdvancedSearchCheckILVL :=0
 	AdvancedSearchCheckBase :=0
@@ -295,6 +296,7 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 		TradeOpts.AdvancedSearchCheckTotalLife := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckTotalLife", TradeOpts.AdvancedSearchCheckTotalLife)	
 		TradeOpts.AdvancedSearchCheckPDPS := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckPDPS", TradeOpts.AdvancedSearchCheckPDPS)	
 		TradeOpts.AdvancedSearchCheckEDPS := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckEDPS", TradeOpts.AdvancedSearchCheckEDPS)	
+		TradeOpts.AdvancedSearchCheckTotalES := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckTotalES", TradeOpts.AdvancedSearchCheckTotalES)
 		TradeOpts.AdvancedSearchCheckES := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckES", TradeOpts.AdvancedSearchCheckES)	
 		TradeOpts.AdvancedSearchCheckILVL := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckILVL", TradeOpts.AdvancedSearchCheckILVL)	
 		TradeOpts.AdvancedSearchCheckBase := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AdvancedSearchCheckBase", TradeOpts.AdvancedSearchCheckBase)	
@@ -449,6 +451,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 		TradeOpts.AdvancedSearchCheckTotalLife	:= AdvancedSearchCheckTotalLife		
 		TradeOpts.AdvancedSearchCheckPDPS		:= AdvancedSearchCheckPDPS		
 		TradeOpts.AdvancedSearchCheckEDPS		:= AdvancedSearchCheckEDPS		
+		TradeOpts.AdvancedSearchCheckTotalES	:= AdvancedSearchCheckTotalES		
 		TradeOpts.AdvancedSearchCheckES		:= AdvancedSearchCheckES		
 		TradeOpts.AdvancedSearchCheckILVL		:= AdvancedSearchCheckILVL		
 		TradeOpts.AdvancedSearchCheckBase		:= AdvancedSearchCheckBase		
@@ -524,6 +527,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckTotalLife, TradeConfigPath, "Search", "AdvancedSearchCheckTotalLife")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckPDPS, TradeConfigPath, "Search", "AdvancedSearchCheckPDPS")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckEDPS, TradeConfigPath, "Search", "AdvancedSearchCheckEDPS")
+	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckTotalES, TradeConfigPath, "Search", "AdvancedSearchCheckTotalES")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckES, TradeConfigPath, "Search", "AdvancedSearchCheckES")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckILVL, TradeConfigPath, "Search", "AdvancedSearchCheckILVL")
 	TradeFunc_WriteIniValue(TradeOpts.AdvancedSearchCheckBase, TradeConfigPath, "Search", "AdvancedSearchCheckBase")
@@ -951,11 +955,14 @@ CreateTradeSettingsUI()
 	AddToolTip(AdvancedSearchCheckTotalEleResH, "Selects the total elemental resistances pseudo mod`nwhen creating the advanced search GUI.")
 	
 	; option group start
-	GuiAddCheckbox("Life", "x287 yp+30 w110 h40", TradeOpts.AdvancedSearchCheckTotalLife, "AdvancedSearchCheckTotalLife", "AdvancedSearchCheckTotalLifeH")
-	AddToolTip(AdvancedSearchCheckTotalLifeH, "Selects the total life pseudo mod or life mod`nwhen creating the advanced search GUI.")
+	GuiAddCheckbox("Life", "x287 yp+30 w50 h40", TradeOpts.AdvancedSearchCheckTotalLife, "AdvancedSearchCheckTotalLife", "AdvancedSearchCheckTotalLifeH")
+	AddToolTip(AdvancedSearchCheckTotalLifeH, "Selects the total flat life pseudo mod or flat life mod and`n percent maximum increased life mod when creating the advanced search GUI.")
 	
-	GuiAddCheckbox("Energy Shield", "x407 yp0 w110 h40", TradeOpts.AdvancedSearchCheckES, "AdvancedSearchCheckES", "AdvancedSearchCheckESH")
-	AddToolTip(AdvancedSearchCheckESH, "Selects the energy shield defense`nwhen creating the advanced search GUI.")
+	GuiAddCheckbox("ES Mod", "x340 yp0 w60 h40", TradeOpts.AdvancedSearchCheckES, "AdvancedSearchCheckES", "AdvancedSearchCheckESH")
+	AddToolTip(AdvancedSearchCheckESH, "Selects the flat energy shield mod and percent maximum increased `nenergy shield mod when creating the advanced search GUI.")
+	
+	GuiAddCheckbox("ES Defense Total", "x407 yp0 w110 h40", TradeOpts.AdvancedSearchCheckTotalES, "AdvancedSearchCheckTotalES", "AdvancedSearchCheckTotalESH")
+	AddToolTip(AdvancedSearchCheckTotalESH, "Selects the energy shield total defense, for example on `narmour pieces when creating the advanced search GUI.")
 	
 	; option group start
 	GuiAddCheckbox("Elemental DPS", "x287 yp+30 w110 h40", TradeOpts.AdvancedSearchCheckEDPS, "AdvancedSearchCheckEDPS", "AdvancedSearchCheckEDPSH")
@@ -1505,7 +1512,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	If (match) {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_search_form_options.txt, utf-8	
-		TradeFunc_ParseSearchFormOptions()		
+		TradeFunc_ParseSearchFormOptions()	
 		Return 1
 	}
 	Else If (!StrLen(html)) {
@@ -1517,7 +1524,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	}
 }
 
-TradeFunc_HandleWinHttpFailure(){
+TradeFunc_HandleWinHttpFailure() {
 	dhw := A_DetectHiddenWindows
 	DetectHiddenWindows On
 	Run "%ComSpec%" /k,, Hide, pid
