@@ -3525,19 +3525,27 @@ ReadPoeNinjaCurrencyData:
 		ShowToolTip("Changing league to " . TradeOpts.SearchLeague " (" . TradeGlobals.Get("LeagueName") . ")...")
 	}
 	
-	league := TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
-	url := "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league	
-	UrlDownloadToFile, %url% , %A_ScriptDir%\temp\currencyData.json
-	FileRead, JSONFile, %A_ScriptDir%\temp\currencyData.json
-	parsedJSON 	:= JSON.Load(JSONFile)
+	league		:= TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
+	url			:= "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league
+	parsedJSON 	:= TradeFunc_DowloadURLtoJSON(url)
+	
+	; fallback to Standard and Hardcore league if used league seems to not be available 
+	If (!parsedjson.currencyDetails.length()) {
+		If (InStr(league, "Hardcore", 0)) {
+			league := "Hardcore"
+		} Else {
+			league := "Standard"
+		}
+		url			:= "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league		
+		parsedJSON	:= TradeFunc_DowloadURLtoJSON(url)
+	}
 	global CurrencyHistoryData := parsedJSON.lines
-
 	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
 	
-	global ChaosEquivalents := {}
+	global ChaosEquivalents	:= {}
 	For key, val in CurrencyHistoryData {
-		currencyTypeName := RegexReplace(val.currencyTypeName, "[^a-z A-Z]", "")
-		ChaosEquivalents[currencyTypeName] := val.chaosEquivalent		
+		currencyTypeName	:= RegexReplace(val.currencyTypeName, "[^a-z A-Z]", "")
+		ChaosEquivalents[currencyTypeName] := val.chaosEquivalent
 	}
 	ChaosEquivalents["Chaos Orb"] := 1
 	
@@ -3546,6 +3554,14 @@ ReadPoeNinjaCurrencyData:
 	}
 	TempChangingLeagueInProgress := False
 Return
+
+TradeFunc_DowloadURLtoJSON(url) {
+	UrlDownloadToFile, %url%, %A_ScriptDir%\temp\currencyData.json
+	FileRead, JSONFile, %A_ScriptDir%\temp\currencyData.json
+	parsedJSON 	:= JSON.Load(JSONFile)
+	
+	Return parsedJSON
+}
 
 CloseCookieWindow:
 	Gui, CookieWindow:Cancel

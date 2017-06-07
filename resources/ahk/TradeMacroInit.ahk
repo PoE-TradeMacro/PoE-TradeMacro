@@ -657,8 +657,14 @@ TradeFunc_GetLeagues(){
 			Else If (val.id = "Hardcore") {
 				leagues["hardcore"] := val.id			
 			}
-			Else If (InStr(val.id, "Hardcore")) {
+			Else If (InStr(val.id, "Hardcore") and not InStr(val.id, "Beta")) {
 				leagues["tmphardcore"] := val.id			
+			}
+			Else If (InStr(val.id, "Hardcore") and InStr(val.id, "Beta")) {
+				leagues["betahardcore"] := val.id			
+			}
+			Else If (InStr(val.id, "Beta")) {
+				leagues["betastandard"] := val.id			
 			}
 			Else {
 				leagues["tmpstandard"] := val.id			
@@ -878,7 +884,18 @@ CreateTradeSettingsUI()
 	
 	GuiAddText("League:", "x287 yp+28 w100 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
 	AddToolTip(LblSearchLeagueH, "Defaults to ""standard"" or ""tmpstandard"" If there is a`nTemp-League active at the time of script execution.`n`n""tmpstandard"" and ""tmphardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
-	GuiAddDropDownList("tmpstandard|tmphardcore|standard|hardcore", "x+10 yp-2", TradeOpts.SearchLeague, "SearchLeague", "SearchLeagueH")
+	AvailableLeagues	:= TradeGlobals.Get("Leagues")
+	TempLeagueList		:= []
+	i := 0
+	For key, league in AvailableLeagues {
+		TempLeagueList[i] := key
+		i++
+	}
+	Loop, % i {		
+		i--
+		LeagueList .= (i = 0) ? TempLeagueList[i] : TempLeagueList[i] "|"
+	}
+	GuiAddDropDownList(LeagueList, "x+10 yp-2", TradeOpts.SearchLeague, "SearchLeague", "SearchLeagueH")
 	
 	GuiAddText("Account Name:", "x287 yp+32 w100 h20 0x0100", "LblAccountName", "LblAccountNameH")
 	AddToolTip(LblAccountNameH, "Your Account Name used to check your item's age.")
