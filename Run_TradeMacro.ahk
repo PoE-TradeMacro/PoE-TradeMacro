@@ -42,7 +42,7 @@ FileRead, trade	, %A_ScriptDir%\resources\ahk\TradeMacro.ahk
 FileRead, addMacros	, %userDirectory%\AdditionalMacros.txt
 
 info := "`n`r`n`r" . info . "`n`r`n`r"
-addMacros := "#IfWinActive Path of Exile ahk_class POEWindowClass ahk_group PoEexe" . "`n`r`n`r" . addMacros . "`n`r`n`r"
+addMacros := "#IfWinActive Path of Exile ahk_class POEWindowClass ahk_group PoEexe" . "`n`r{`n`r" . addMacros . "`n`r}`n`r`n`r"
 
 CloseScript("_TradeMacroMain.ahk")
 CloseScript("_ItemInfoMain.ahk")

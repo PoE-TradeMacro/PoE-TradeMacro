@@ -1003,7 +1003,7 @@ CreateTradeSettingsUI()
 	
 	Gui, Tab, 2
 	
-	GuiAddText("Use these Buttons to change Item Info Settings only.", "x287 yp+20 w250 h50 cRed")
+	GuiAddText("Use these buttons to change ItemInfo settings (TradeMacro has it's own buttons).", "x287 yp+0 w250 h50 cRed")	
 	GuiAddText("", "x10 y10 w250 h10")
 }
 

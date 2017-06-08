@@ -1,8 +1,8 @@
-﻿;TradeMacro Add-on to POE-ItemInfo
+﻿; TradeMacro Add-on to POE-ItemInfo
 ; IGN: Eruyome
 
 PriceCheck:
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe
 	{
 		Global TradeOpts, Item
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
@@ -14,7 +14,7 @@ PriceCheck:
 return
 
 AdvancedPriceCheck:
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
 		Global TradeOpts, Item
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
@@ -26,7 +26,7 @@ AdvancedPriceCheck:
 return
 
 ShowItemAge:
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
 		Global TradeOpts, Item
 		If (!TradeOpts.AccountName) {
@@ -42,7 +42,7 @@ ShowItemAge:
 return
 
 OpenWiki:
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
 		Global TradeOpts, Item
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
@@ -78,25 +78,28 @@ OpenWiki:
 return
 
 CustomInputSearch:
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
 		TradeFunc_CustomSearchGui()
 	}
 return
 
 OpenSearchOnPoeTrade:
-	Global TradeOpts, Item
-	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-	Send ^{sc02E}
-	Sleep 250
-	TradeFunc_Main(true)
-	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
+	{
+		Global TradeOpts, Item
+		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+		Send ^{sc02E}
+		Sleep 250
+		TradeFunc_Main(true)
+		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+	}
 return
 
 ChangeLeague:
-	Global TradeOpts
-	IfWinActive, Path of Exile ahk_class POEWindowClass 
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
+		Global TradeOpts
 		TradeFunc_ChangeLeague()
 	}
 Return
