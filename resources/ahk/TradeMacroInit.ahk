@@ -1641,6 +1641,9 @@ TradeFunc_StopSplashScreen() {
 	SplashTextOff 
 	
 	If (TradeOpts.Debug) {
+		Menu, Tray, Add ; Separator
+		Menu, Tray, Add, Test Item Pricing, DebugTestItemPricing
+		Menu, Tray, Add ; Separator
 		MsgBox % "Debug mode enabled! Disable in settings-menu unless you're developing!"
 		Class_Console("console",0,335,650,900,,,,9)
 		console.show()

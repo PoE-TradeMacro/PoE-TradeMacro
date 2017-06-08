@@ -4,26 +4,74 @@
 PriceCheck:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe
 	{
-		Global TradeOpts, Item
-		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-		Send ^{sc02E}
-		Sleep 250
-		TradeFunc_Main()
-		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+		TradeFunc_PriceCheckHotkey()
 	}
-return
+Return
+
+TradeFunc_PriceCheckHotkey(priceCheckTest = false, itemData = "") {
+	Global TradeOpts, Item
+	
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+	
+	; simulate clipboard change to test item pricing
+	If (priceCheckTest) {
+		Clipboard :=
+		CLipboard := itemData
+	} Else {
+		Send ^{sc02E}	
+	}	
+	Sleep 250
+	TradeFunc_Main()
+	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+}
 
 AdvancedPriceCheck:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
-		Global TradeOpts, Item
-		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-		Send ^{sc02E}
-		Sleep 250
-		TradeFunc_Main(false, true)
-		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+		TradeFunc_AdvancedPriceCheckHotkey()
 	}
-return
+Return
+
+TradeFunc_AdvancedPriceCheckHotkey(priceCheckTest = false, itemData = "") {
+	Global TradeOpts, Item
+	
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+	
+	; simulate clipboard change to test item pricing
+	If (priceCheckTest) {
+		Clipboard :=
+		CLipboard := itemData
+	} Else {
+		Send ^{sc02E}	
+	}	
+	Sleep 250
+	TradeFunc_Main(false, true)
+	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+}
+
+OpenSearchOnPoeTrade:
+	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
+	{
+		TradeFunc_OpenSearchOnPoeTradeHotkey()
+	}
+Return
+
+TradeFunc_OpenSearchOnPoeTradeHotkey(priceCheckTest = false, itemData = "") {
+	Global TradeOpts, Item
+	
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+	
+	; simulate clipboard change to test item pricing
+	If (priceCheckTest) {
+		Clipboard :=
+		CLipboard := itemData
+	} Else {
+		Send ^{sc02E}	
+	}	
+	Sleep 250
+	TradeFunc_Main(true)
+	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+}
 
 ShowItemAge:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
@@ -39,62 +87,61 @@ ShowItemAge:
 		TradeFunc_Main(false, false, false, true)
 		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
 	}
-return
+Return
 
 OpenWiki:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
-		Global TradeOpts, Item
-		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-		Send ^{sc02E}
-		Sleep 250
-		TradeFunc_DoParseClipboard()
-		
-		If (!Item.Name and TradeOpts.OpenUrlsOnEmptyItem) {
-			TradeFunc_OpenUrlInBrowser("http://pathofexile.gamepedia.com/")
-		}
-		Else {	
-			UrlAffix := 
-			If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
-				UrlAffix := Item.Name
-			} Else If (Item.IsFlask or Item.IsMap) {
-				UrlAffix := Item.SubType
-			} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
-				UrlAffix := Item.Name
-			} Else {
-				UrlAffix := Item.BaseType
-			}
-			
-			If (StrLen(UrlAffix) > 0) {			
-				UrlAffix := StrReplace(UrlAffix," ","_")
-				WikiUrl := "http://pathofexile.gamepedia.com/" UrlAffix		
-				TradeFunc_OpenUrlInBrowser(WikiUrl)	
-			}
-		}
-		
-		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
-		SetClipboardContents("")
+		TradeFunc_OpenWikiHotkey()
 	}
-return
+Return
+
+TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
+	Global TradeOpts, Item
+		
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+	
+	If (priceCheckTest) {
+		Clipboard :=
+		CLipboard := itemData
+	} Else {
+		Send ^{sc02E}
+	}
+	Sleep 250
+	TradeFunc_DoParseClipboard()
+	
+	If (!Item.Name and TradeOpts.OpenUrlsOnEmptyItem) {
+		TradeFunc_OpenUrlInBrowser("http://pathofexile.gamepedia.com/")
+	}
+	Else {	
+		UrlAffix := 
+		If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
+			UrlAffix := Item.Name
+		} Else If (Item.IsFlask or Item.IsMap) {
+			UrlAffix := Item.SubType
+		} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
+			UrlAffix := Item.Name
+		} Else {
+			UrlAffix := Item.BaseType
+		}
+		
+		If (StrLen(UrlAffix) > 0) {			
+			UrlAffix := StrReplace(UrlAffix," ","_")
+			WikiUrl := "http://pathofexile.gamepedia.com/" UrlAffix		
+			TradeFunc_OpenUrlInBrowser(WikiUrl)	
+		}
+	}
+	
+	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+	SetClipboardContents("")
+}
 
 CustomInputSearch:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
 	{
 		TradeFunc_CustomSearchGui()
 	}
-return
-
-OpenSearchOnPoeTrade:
-	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
-	{
-		Global TradeOpts, Item
-		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-		Send ^{sc02E}
-		Sleep 250
-		TradeFunc_Main(true)
-		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
-	}
-return
+Return
 
 ChangeLeague:
 	IfWinActive, Path of Exile ahk_class POEWindowClass ahk_group PoEexe 
@@ -2615,6 +2662,23 @@ TradeFunc_CustomSearchGui() {
 	Gui, CustomSearch:Show, w500 , Custom Search
 }
 
+TradeFunc_CreateItemPricingTestGUI() {
+	Global
+	Gui, PricingTest:Destroy
+	
+	Gui, PricingTest:Add, Text, x10 y10 w480, Input item information/data
+	Gui, PricingTest:Add, Edit, x10 w480 y+10 R30 vPricingTestItemInput
+	
+	Gui, PricingTest:Add, Button, x10 gSubmitPricingTestDefault , &Normal
+	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestAdvanced, &Advanced
+	Gui, PricingTest:Add, Button, x+10 yp+0 gOpenPricingTestOnPoeTrade, Op&en on poe.trade
+	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestWiki, Open &Wiki
+	Gui, PricingTest:Add, Button, x10 yp+40 gClosePricingTest, &Close
+	Gui, PricingTest:Add, Text, x+10 yp+4 cGray, (Use Alt + N/A/E/W/C to submit a button)
+	
+	Gui, PricingTest:Show, w500 , Item Pricing Test
+}
+
 ; Open Gui window to show the items variable mods, select the ones that should be used in the search and set their min/max values
 TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedImplicit = ""){	
 	;https://autohotkey.com/board/topic/9715-positioning-of-controls-a-cheat-sheet/
@@ -3484,7 +3548,7 @@ OpenGithubWikiFromMenu:
 	repo := TradeGlobals.Get("GithubRepo")
 	user := TradeGlobals.Get("GithubUser")
 	TradeFunc_OpenUrlInBrowser("https://github.com/" user "/" repo "/wiki")
-return
+Return
 
 TradeSettingsUI_BtnOK:
 	Global TradeOpts
@@ -3621,6 +3685,35 @@ SubmitCustomSearch:
 	TradeFunc_HandleCustomSearchSubmit()
 Return
 
+DebugTestItemPricing:
+	TradeFunc_CreateItemPricingTestGUI()
+Return
+
+ClosePricingTest:
+	PricingTestItemInput :=
+	Gui, PricingTest:Destroy
+Return
+
+OpenPricingTestOnPoeTrade:
+	Gui, PricingTest:Submit, Nohide
+	TradeFunc_OpenSearchOnPoeTradeHotkey(true, PricingTestItemInput)
+Return
+
+SubmitPricingTestDefault:
+	Gui, PricingTest:Submit, Nohide
+	TradeFunc_PriceCheckHotkey(true, PricingTestItemInput)
+Return
+
+SubmitPricingTestAdvanced:
+	Gui, PricingTest:Submit, Nohide
+	TradeFunc_AdvancedPriceCheckHotkey(true, PricingTestItemInput)
+Return
+
+SubmitPricingTestWiki:
+	Gui, PricingTest:Submit, Nohide
+	TradeFunc_OpenWikiHotkey(true, PricingTestItemInput)
+Return
+
 TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 	Global
 	Gui, CustomSearch:Submit
@@ -3709,7 +3802,7 @@ TradeFunc_ChangeLeague() {
 	; Get currency data only if league was changed while alternate search is active or alternate search was changed from disabled to enabled
 	If (TradeOpts.AlternativeCurrencySearch) {
 		TempChangingLeagueInProgress := True 
-		GoSub, ReadPoeNinjaCurrencyData	
+		GoSub, ReadPoeNinjaCurrencyData
 	}
 	Else {
 		ShowToolTip("Changed league to " . TradeOpts.SearchLeague . " (" . TradeGlobals.Get("LeagueName") . ").", true)
