@@ -364,8 +364,7 @@ TradeFunc_AssignAllHotkeys() {
 	}	
 }
 
-WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
-{
+WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	Global
 	If (StrLen(TradeConfigDir) < 1) {
 		TradeConfigDir := userDirectory
@@ -542,26 +541,22 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 	TradeFunc_WriteIniValue(TradeOpts.CfClearance, TradeConfigPath, "Cookies", "CfClearance")
 }
 
-CopyDefaultTradeConfig()
-{
+CopyDefaultTradeConfig() {
 	FileCopy, %A_ScriptDir%\resources\config\default_config_trade.ini, %userDirectory%
 	FileMove, %userDirectory%\default_config_trade.ini, %userDirectory%\config_trade.ini
 	FileDelete, %userDirectory%\default_config_trade.ini	
 }
 
-RemoveTradeConfig()
-{
+RemoveTradeConfig() {
 	FileDelete, %userDirectory%\config_trade.ini
 }
 
-CreateDefaultTradeConfig()
-{
+CreateDefaultTradeConfig() {
 	path := A_ScriptDir "\resources\config\default_config_trade.ini"	
 	WriteTradeConfig(path)
 }
 
-TradeFunc_SetLeagueIfSelectedIsInactive() 
-{	
+TradeFunc_SetLeagueIfSelectedIsInactive() {	
 	; Check If league from Ini is set to an inactive league and change it to the corresponding active one, for example tmpstandard to standard	
 	If (InStr(TradeOpts.SearchLeague, "tmp") && TradeGlobals.Get("TempLeagueIsRunning") = 0) {
 		
@@ -575,8 +570,7 @@ TradeFunc_SetLeagueIfSelectedIsInactive()
 }
 
 ; ------------------ READ INI AND CHECK IF VARIABLES ARE SET ------------------ 
-TradeFunc_ReadIniValue(iniFilePath, Section = "General", IniKey="", DefaultValue = "")
-{
+TradeFunc_ReadIniValue(iniFilePath, Section = "General", IniKey="", DefaultValue = "") {
 	IniRead, OutputVar, %iniFilePath%, %Section%, %IniKey%
 	If (!OutputVar | RegExMatch(OutputVar, "^ERROR$")) { 
 		OutputVar := DefaultValue
@@ -609,15 +603,14 @@ TradeFunc_ReadIniValue(iniFilePath, Section = "General", IniKey="", DefaultValue
 	Return OutputVar
 }
 
-TradeFunc_WriteIniValue(Val, TradeConfigPath, Section_, Key)
-{
+TradeFunc_WriteIniValue(Val, TradeConfigPath, Section_, Key) {
 	IniWrite, %Val%, %TradeConfigPath%, %Section_%, %Key%
 	if errorlevel
 		msgbox error
 }
 
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------ 
-TradeFunc_AssignHotkey(Key, Label){
+TradeFunc_AssignHotkey(Key, Label) {
 	Hotkey, %Key%, %Label%, UseErrorLevel
 	If (ErrorLevel)	{
 		If (errorlevel = 1)
@@ -646,7 +639,7 @@ TradeFunc_AssignHotkey(Key, Label){
 }
 
 ; ------------------ GET LEAGUES ------------------ 
-TradeFunc_GetLeagues(){	
+TradeFunc_GetLeagues() {	
      ;Loop over league info and get league names    
 	leagues := []
 	For key, val in LeaguesData {
@@ -657,20 +650,19 @@ TradeFunc_GetLeagues(){
 			Else If (val.id = "Hardcore") {
 				leagues["hardcore"] := val.id			
 			}
-			Else If (InStr(val.id, "Hardcore") and not InStr(val.id, "Beta")) {
+			Else If (InStr(val.id, "Hardcore")) {
 				leagues["tmphardcore"] := val.id			
-			}
-			Else If (InStr(val.id, "Hardcore") and InStr(val.id, "Beta")) {
-				leagues["betahardcore"] := val.id			
-			}
-			Else If (InStr(val.id, "Beta")) {
-				leagues["betastandard"] := val.id			
 			}
 			Else {
 				leagues["tmpstandard"] := val.id			
 			}
 		}
 	}
+	
+	; hardcoded beta support (no league API for this)
+	leagues["betastandard"] := "Beta Standard"
+	leagues["betahardcore"] := "Beta Hardcore"
+	
 	Return leagues
 }
 
