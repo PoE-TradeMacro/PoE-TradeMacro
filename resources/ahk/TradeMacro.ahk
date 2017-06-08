@@ -2673,6 +2673,7 @@ TradeFunc_CreateItemPricingTestGUI() {
 	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestAdvanced, &Advanced
 	Gui, PricingTest:Add, Button, x+10 yp+0 gOpenPricingTestOnPoeTrade, Op&en on poe.trade
 	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestWiki, Open &Wiki
+	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestParsing, &Parse
 	Gui, PricingTest:Add, Button, x10 yp+40 gClosePricingTest, &Close
 	Gui, PricingTest:Add, Text, x+10 yp+4 cGray, (Use Alt + N/A/E/W/C to submit a button)
 	
@@ -3712,6 +3713,12 @@ Return
 SubmitPricingTestWiki:
 	Gui, PricingTest:Submit, Nohide
 	TradeFunc_OpenWikiHotkey(true, PricingTestItemInput)
+Return
+
+SubmitPricingTestParsing:
+	Gui, PricingTest:Submit, Nohide
+	Clipboard :=
+	Clipboard := PricingTestItemInput
 Return
 
 TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
