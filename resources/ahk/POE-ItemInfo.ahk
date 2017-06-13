@@ -6633,7 +6633,7 @@ ParseClipBoardChanges()
 	}
 
 	
-	If (StrLen(ParsedData) and Opts.OnlyActiveIfPOEIsFront) {	
+	If (StrLen(ParsedData) and !Opts.OnlyActiveIfPOEIsFront) {	
 		AddLogEntry(ParsedData, CBContents)
 	}
 
