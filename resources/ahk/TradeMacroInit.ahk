@@ -170,6 +170,7 @@ IfNotExist, %userDirectory%\config_trade.ini
 	}
 	CopyDefaultTradeConfig()
 }
+TradeFunc_CheckIfCloudFlareBypassNeeded()
 ReadTradeConfig()
 Sleep, 100
 
@@ -180,6 +181,7 @@ TradeFunc_ScriptUpdate()
 
 firstUpdateCheck := false
 
+;TradeFunc_CheckIfCloudFlareBypassNeeded()
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 TradeFunc_SetLeagueIfSelectedIsInactive()
 SearchLeague := (StrLen(TradeOpts.SearchLeague) > 0) ? TradeOpts.SearchLeague : TradeGlobals.Get("DefaultLeague")
@@ -197,7 +199,6 @@ TradeGlobals.Set("EnchantmentData", TradeFunc_ReadEnchantments())
 TradeGlobals.Set("CorruptedModsData", TradeFunc_ReadCorruptions())
 TradeGlobals.Set("CurrencyIDs", object := {})
 
-TradeFunc_CheckIfCloudFlareBypassNeeded()
 ; get currency ids from currency.poe.trade
 TradeFunc_DoCurrencyRequest("", false, true)
 If (TradeOpts.DownloadDataFiles and not TradeOpts.Debug) {
@@ -264,9 +265,23 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 		; Search     	
 		TradeOpts.AccountName := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "AccountName", TradeOpts.AccountName)	
 		TradeOpts.SearchLeague := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "SearchLeague", TradeGlobals.Get("DefaultLeague"))	
-		temp := TradeOpts.SearchLeague
-		StringLower, temp, temp
-		TradeFunc_SetLeagueIfSelectedIsInactive()	
+		temp		:= TradeOpts.SearchLeague
+		found	:= false
+		For key, val in TradeGlobals.Get("AvailableLeagues") {
+			trimmedLeague := RegExReplace(val, "i)\s", "")
+			If (trimmedLeague = temp) {
+				temp	:= trimmedLeague
+				TradeFunc_WriteIniValue(temp, TradeConfigPath, "Search", "SearchLeague")
+				found := true
+			} Else If (trimmedLeague == temp) {
+				found:= true			
+			}
+		}
+		If (not found and not RegExMatch(temp, "Standard|Hardcore|TmpStandard|TmpHardcore")) {
+			temp := "TmpStandard"			
+			TradeFunc_WriteIniValue(temp, TradeConfigPath, "Search", "SearchLeague")
+		}
+		TradeFunc_SetLeagueIfSelectedIsInactive()
 		TradeOpts.SearchLeague := temp
 		
 		TradeOpts.GemLevel := TradeFunc_ReadIniValue(TradeConfigPath, "Search", "GemLevel", TradeOpts.GemLevel)	
@@ -418,7 +433,13 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 		TradeOpts.SearchLeague			:= SearchLeague
 		
 		TradeFunc_SetLeagueIfSelectedIsInactive()
-		TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])		
+		oldLeague := TradeGlobals.Get("LeagueName")
+		newLeague := TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague]
+		TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
+		If (oldLeague != newLeague) {
+			TempChangingLeagueInProgress := True 
+			GoSub, ReadPoeNinjaCurrencyData
+		}		
 		
 		tempOldAltCurrencySearch			:= TradeOpts.AlternativeCurrencySearch
 		TradeOpts.AlternativeCurrencySearch:= AlternativeCurrencySearch
@@ -641,35 +662,58 @@ TradeFunc_AssignHotkey(Key, Label) {
 ; ------------------ GET LEAGUES ------------------ 
 TradeFunc_GetLeagues() {	
      ;Loop over league info and get league names    
-	leagues := []
+	leagues		:= []
+	poeTradeLeagues:= TradeGlobals.Get("AvailableLeagues")
+
 	For key, val in LeaguesData {
 		If (!val.event and not RegExMatch(val.id, "i)^SSF"))  {
 			If (val.id = "Standard") {
-				leagues["standard"] := val.id			
+				leagues["Standard"] := val.id			
 			}
 			Else If (val.id = "Hardcore") {
-				leagues["hardcore"] := val.id			
+				leagues["Hardcore"] := val.id			
 			}
 			Else If (InStr(val.id, "Hardcore")) {
-				leagues["tmphardcore"] := val.id			
+				leagues["TmpHardcore"] := val.id			
 			}
 			Else {
-				leagues["tmpstandard"] := val.id			
+				leagues["TmpStandard"] := val.id		
+			}
+		}
+		Else {
+			For i, value in poeTradeLeagues {
+				If (value = val.id) {
+					trimmedValue := RegExReplace(value, "i)\s", "")					
+					leagues[trimmedValue] := value
+				}
 			}
 		}
 	}
 	
-	; hardcoded beta support (no league API for this)
-	leagues["betastandard"] := "Beta Standard"
-	leagues["betahardcore"] := "Beta Hardcore"
-	
+	; add additional supported leagues like beta leagues (no league API for them)
+	; make sure there are no deuplicate temp leagues (hardcoded keys)
+	For j, value in poeTradeLeagues {
+		trimmedValue := RegExReplace(value, "i)\s", "")		
+		If (not leagues[trimmedValue]) {
+			found := false
+			For i, l in leagues {
+				If (value = l) {
+					found := true
+				}
+			}
+			If (not found) {
+				leagues[trimmedValue] := value	
+			}			
+		}
+	}
+
 	Return leagues
 }
 
 ; ------------------ CHECK IF A TEMP-LEAGUE IS ACTIVE ------------------ 
 TradeFunc_CheckIfTempLeagueIsRunning() {
 	tempLeagueDates := TradeFunc_GetTempLeagueDates()
-	
+
 	If (!tempLeagueDates) {
 		If (InStr(TradeOpts.SearchLeague, "standard")) {
 			defaultLeague := "standard"
@@ -716,8 +760,9 @@ TradeFunc_DateParse(str) {
 	Return str
 }
 
-TradeFunc_GetTempLeagueDates(){
+TradeFunc_GetTempLeagueDates() {
 	tempLeagueDates := []
+
 	For key, val in LeaguesData {
 		If (val.endAt and val.startAt and not val.event) {
 			tempLeagueDates["start"] := val.startAt
@@ -876,17 +921,7 @@ CreateTradeSettingsUI()
 	
 	GuiAddText("League:", "x287 yp+28 w100 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
 	AddToolTip(LblSearchLeagueH, "Defaults to ""standard"" or ""tmpstandard"" If there is a`nTemp-League active at the time of script execution.`n`n""tmpstandard"" and ""tmphardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
-	AvailableLeagues	:= TradeGlobals.Get("Leagues")
-	TempLeagueList		:= []
-	i := 0
-	For key, league in AvailableLeagues {
-		TempLeagueList[i] := key
-		i++
-	}
-	Loop, % i {		
-		i--
-		LeagueList .= (i = 0) ? TempLeagueList[i] : TempLeagueList[i] "|"
-	}
+	LeagueList := TradeFunc_GetDelimitedLeagueList()
 	GuiAddDropDownList(LeagueList, "x+10 yp-2", TradeOpts.SearchLeague, "SearchLeague", "SearchLeagueH")
 	
 	GuiAddText("Account Name:", "x287 yp+32 w100 h20 0x0100", "LblAccountName", "LblAccountNameH")
@@ -1007,6 +1042,21 @@ CreateTradeSettingsUI()
 	GuiAddText("", "x10 y10 w250 h10")
 }
 
+TradeFunc_GetDelimitedLeagueList() {
+	AvailableLeagues	:= TradeGlobals.Get("Leagues")
+	TempLeagueList		:= []
+	i := 0
+	For key, league in AvailableLeagues {
+		TempLeagueList[i] := key
+		i++
+	}
+	Loop, % i {		
+		i--
+		LeagueList .= (i = 0) ? TempLeagueList[i] : TempLeagueList[i] "|"
+	}
+	Return LeagueList
+}
+
 TradeFunc_GetDelimitedCurrencyListString() {
 	CurrencyList := ""
 	CurrencyTemp := TradeGlobals.Get("CurrencyIDs")	
@@ -1059,7 +1109,7 @@ UpdateTradeSettingsUI()
 	GuiControl,, ShowItemAgeEnabled, % TradeOpts.ShowItemAgeEnabled
 	GuiControl,, ChangeLeagueEnabled, % TradeOpts.ChangeLeagueEnabled
 	
-	GuiUpdateDropdownList("tmpstandard|tmphardcore|standard|hardcore", TradeOpts.SearchLeague, SearchLeague)	
+	GuiUpdateDropdownList(TradeFunc_GetDelimitedLeagueList(), TradeOpts.SearchLeague, SearchLeague)	
 	GuiControl,, AccountName, % TradeOpts.AccountName
 	GuiControl,, GemLevel, % TradeOpts.GemLevel
 	GuiControl,, GemQualityRange, % TradeOpts.GemQualityRange
@@ -1202,18 +1252,28 @@ TradeFunc_CheckBrowserPath(path, showMsg) {
 	}
 }
 
-; parse poe.trades gem names and other item types from the search form
+; parse poe.trades gem names, other item types from the search form and available leagues
 TradeFunc_ParseSearchFormOptions() {
-	FileRead, types, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
+	FileRead, html, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 	
-	RegExMatch(types, "i)(var)?\s*(items_types\s*=\s*{.*})", match)
+	RegExMatch(html, "i)(var)?\s*(items_types\s*=\s*{.*})", match)
 	itemTypes := RegExReplace(match2, "i)items_types\s*=", "{""items_types"" :")
 	itemTypes .= "}"	
 	parsedJSON := JSON.Load(itemTypes)
 
+	availableLeagues := []
+	RegExMatch(html, "isU)select.*name=""league"".*<\/select>", match)
+	Pos := 0
+	While Pos := RegExMatch(match, "iU)option.*value=""(.*)"".*>", option, Pos + (StrLen(option) ? StrLen(option) : 1)) {
+		availableLeagues.push(option1)
+	}
+	
 	TradeGlobals.Set("ItemTypeList", parsedJSON.items_types)
 	TradeGlobals.Set("GemNameList", parsedJSON.items_types.gem)
+	TradeGlobals.Set("AvailableLeagues", availableLeagues)
 	itemTypes := 
+	availableLeagues :=
+	
 	FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 }
 
