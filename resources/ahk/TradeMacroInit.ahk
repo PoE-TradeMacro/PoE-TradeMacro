@@ -578,15 +578,10 @@ CreateDefaultTradeConfig() {
 }
 
 TradeFunc_SetLeagueIfSelectedIsInactive() {	
-	; Check If league from Ini is set to an inactive league and change it to the corresponding active one, for example tmpstandard to standard	
-	If (InStr(TradeOpts.SearchLeague, "tmp") && TradeGlobals.Get("TempLeagueIsRunning") = 0) {
-		
-		If (InStr(TradeOpts.SearchLeague, "standard")) {
-			TradeOpts.SearchLeague := "standard"
-		}
-		Else {
-			TradeOpts.SearchLeague := "hardcore"
-		}		
+	; Check if league from Ini is set to an inactive league and change it to the corresponding active one, for example tmpstandard to standard
+	; Leagues not supported with any API (beta leagues) and events (week races) are being removed while reading the config when they are not supported by poe.trade anymore
+	If (RegExMatch(TradeOpts.SearchLeague, "i)Tmp(Standard)|Tmp(Hardcore)", match) and not TradeGlobals.Get("TempLeagueIsRunning")) {
+		TradeOpts.SearchLeague := match1 ? "Standard" : "Hardcore"
 	}
 }
 
@@ -1267,7 +1262,7 @@ TradeFunc_ParseSearchFormOptions() {
 	While Pos := RegExMatch(match, "iU)option.*value=""(.*)"".*>", option, Pos + (StrLen(option) ? StrLen(option) : 1)) {
 		availableLeagues.push(option1)
 	}
-	
+
 	TradeGlobals.Set("ItemTypeList", parsedJSON.items_types)
 	TradeGlobals.Set("GemNameList", parsedJSON.items_types.gem)
 	TradeGlobals.Set("AvailableLeagues", availableLeagues)
