@@ -79,7 +79,7 @@ class TradeUserOptions {
 	ChangeLeagueEnabled :=1
 	
 	AccountName := ""               	; 
-	SearchLeague := "tmpstandard"   	; Defaults to "standard" or "tmpstandard" If there is an active Temp-League at the time of script execution.
+	SearchLeague := "TmpStandard"   	; Defaults to "standard" or "tmpstandard" If there is an active Temp-League at the time of script execution.
 									; Possible values: 
 									; 	"tmpstandard" (current SC Temp-League) 
 									;	"tmphardcore" (current HC Temp-League) 
@@ -123,7 +123,7 @@ TradeOpts := new TradeUserOptions()
 
 ; Check If Temp-Leagues are active and set defaultLeague accordingly
 TradeGlobals.Set("TempLeagueIsRunning", TradeFunc_CheckIfTempLeagueIsRunning())
-TradeGlobals.Set("DefaultLeague", (tempLeagueIsRunning > 0) ? "tmpstandard" : "standard")
+TradeGlobals.Set("DefaultLeague", (tempLeagueIsRunning > 0) ? "TmpStandard" : "Standard")
 TradeGlobals.Set("GithubUser", "POE-TradeMacro")
 TradeGlobals.Set("GithubRepo", "POE-TradeMacro")
 TradeGlobals.Set("ReleaseVersion", TradeReleaseVersion)
@@ -181,7 +181,6 @@ TradeFunc_ScriptUpdate()
 
 firstUpdateCheck := false
 
-;TradeFunc_CheckIfCloudFlareBypassNeeded()
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 TradeFunc_SetLeagueIfSelectedIsInactive()
 SearchLeague := (StrLen(TradeOpts.SearchLeague) > 0) ? TradeOpts.SearchLeague : TradeGlobals.Get("DefaultLeague")
@@ -710,11 +709,11 @@ TradeFunc_CheckIfTempLeagueIsRunning() {
 	tempLeagueDates := TradeFunc_GetTempLeagueDates()
 
 	If (!tempLeagueDates) {
-		If (InStr(TradeOpts.SearchLeague, "standard")) {
-			defaultLeague := "standard"
+		If (InStr(TradeOpts.SearchLeague, "Standard")) {
+			defaultLeague := "Standard"
 		}
 		Else {
-			defaultLeague := "hardcore"
+			defaultLeague := "Hardcore"
 		}
 		Return 0
 	}
@@ -728,11 +727,11 @@ TradeFunc_CheckIfTempLeagueIsRunning() {
 	
 	If (timeDiffStart > 0 && timeDiffEnd < 0) {
         ; Current datetime is between temp league start and end date
-		defaultLeague := "tmpstandard"
+		defaultLeague := "TmpStandard"
 		Return 1
 	}
 	Else {
-		defaultLeague := "standard"
+		defaultLeague := "Standard"
 		Return 0
 	}
 }
@@ -915,7 +914,7 @@ CreateTradeSettingsUI()
 	GuiAddGroupBox("[TradeMacro] Search", "x277 y34 w260 h625")
 	
 	GuiAddText("League:", "x287 yp+28 w100 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
-	AddToolTip(LblSearchLeagueH, "Defaults to ""standard"" or ""tmpstandard"" If there is a`nTemp-League active at the time of script execution.`n`n""tmpstandard"" and ""tmphardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
+	AddToolTip(LblSearchLeagueH, "Defaults to ""Standard"" or ""TmpStandard"" If there is a`nTemp-League active at the time of script execution.`n`n""TmpStandard"" and ""TmpHardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
 	LeagueList := TradeFunc_GetDelimitedLeagueList()
 	GuiAddDropDownList(LeagueList, "x+10 yp-2", TradeOpts.SearchLeague, "SearchLeague", "SearchLeagueH")
 	
