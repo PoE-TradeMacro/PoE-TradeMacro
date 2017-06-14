@@ -1506,14 +1506,13 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 
 	Title .= StrPad("Days ago" ,10) 	
 	Title .= StrPad("|| Pay (Chaos)",20)
-	Title .= StrPad("|  Get",8)
+	Title .= StrPad("| Get",8)
 	
 	Title .= StrPad("|| Pay",9)
-	Title .= StrPad("|  Get (Chaos)",20)
+	Title .= StrPad("| Get (Chaos)",20)
 	
 	Title .= "`n"
 	Title .= StrPad("----------||------------------|-------||-------|--------------------",40)
-	Title .= "`n"
 	
 	currencyData := 	
 	For key, val in CurrencyHistoryData {
@@ -1523,47 +1522,77 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		}
 	}
 	
+	buyGetArr := []
+	buyPayArr := []
+	sellGetArr := []
+	sellPayArr := []
+	
 	buyPay := currencyData.receive.value
 	buyGet := buyPay < 1 ? 1 / buyPay : 1
 	buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
+	buyGetArr.push(buyGet)
+	buyPayArr.push(buyPay)
 	buyPayCurrent := buyPay
 	
 	sellPay := currencyData.pay.value
 	sellGet := sellPay < 1 ? 1 / sellPay : 1
 	sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
+	sellGetArr.push(sellGet)
+	sellPayArr.push(sellPay)
 	sellGetCurrent := sellGet
 	
-	Title .= StrPad("Currently",  10)
-	Title .= StrPad("|| " buyPay, 20)
-	Title .= StrPad("| "  buyGet, 8)
-	
-	Title .= StrPad("|| " sellPay, 9)
-	Title .= "|"
-	Title .= StrPad(sellGet, 19, "left")
-	
-	length := currencyData.payCurrencyGraphData.Length()
 	length := currencyData.paySparkLine.data.Length()
+
 	i := 2
-	Loop % length - 1 {
-		date := i - 1 > 1 ? i - 1 " days ago" : i - 1 " day ago"
-		
+	Loop % length - 1 {		
 		buyPay := buyPayCurrent * (1 - currencyData.receiveSparkLine.data[i] / 100)
 		buyGet := buyPay < 1 ? 1 / buyPay : 1
 		buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
+		buyGetArr.push(buyGet)
+		buyPayArr.push(buyPay)
 		
 		sellGet := sellGetCurrent * (1 - currencyData.paySparkLine.data[i] / 100)
-		console.log(sellGetCurrent)
 		sellGet := sellGet > 1 ? Round(sellGet, 2) : 1
 		sellPay := sellPay < 1 ? 1 / sellPay : 1
+		sellGetArr.push(sellGet)
+		sellPayArr.push(sellPay)
+		
+		If (A_Index > 10) {
+			break
+		}
+		i++
+	}
+	
+	highestDigitsBuy 	:= 1
+	highestDigitsSell	:= 1
+	Loop, % buyPayArr.Length() {
+		testBuy	:= StrLen(RegExReplace(buyPayArr[A_Index],  "\..*", ""))
+		testSell	:= StrLen(RegExReplace(sellGetArr[A_Index], "\..*", ""))
+		
+		highestDigitsBuy	:= testBuy  > highestDigitsBuy  ? testBuy  : highestDigitsBuy
+		highestDigitsSell	:= testSell > highestDigitsSell ? testSell : highestDigitsSell
+	}	
+
+	i := 0
+	Loop % length {
+		If (i = 0) {
+			date := "Currently"
+		} Else {
+			date := i > 1 ? i " days ago" : i " day ago"	
+		}
 		
 		Title .= "`n"
 		Title .= StrPad(date, 10)
-		Title .= StrPad("|| " buyPay, 20) 
-		Title .= StrPad("| "  buyGet, 8)
+
+		buyPayPart1 := RegExReplace(buyPayArr[A_Index], "\..*")
+		buyPayPart2 := RegExMatch(buyPayArr[A_Index], ".*\.") ? RegExReplace(buyPayArr[A_Index], ".*\.", ".") : ""
+		Title .= StrPad("|| " StrPad(buyPayPart1, highestDigitsBuy, "left") StrPad(buyPayPart2, 2), 20)
+		Title .= StrPad("| "  buyGetArr[A_Index], 8)
 		
-		Title .= StrPad("|| " sellPay, 9)
-		Title .= "|"
-		Title .= StrPad(sellGet, 19, "left")
+		sellGetPart1 := RegExReplace(sellGetArr[A_Index], "\..*")
+		sellGetPart2 := RegExMatch(sellGetArr[A_Index], ".*\.") ? RegExReplace(sellGetArr[A_Index], ".*\.", ".") : ""
+		Title .= StrPad("|| " sellPayArr[A_Index], 9)
+		Title .= StrPad("| "  StrPad(sellGetPart1, highestDigitsSell, "left") StrPad(sellGetPart2, 2), 20)
 		
 		If (A_Index > 10) {
 			break
