@@ -1490,29 +1490,30 @@ TradeFunc_ParseCurrencyHtml(html, payload, ParsingError = "") {
 
 TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	Global Item, ItemData, TradeOpts
-	LeagueName := TradeGlobals.Get("LeagueName")
-	shortName := Trim(RegExReplace(name,  "Orb|of",  ""))	
+	LeagueName	:= RegexReplace(TradeGlobals.Get("LeagueName"), "\s")
+	shortName		:= Trim(RegExReplace(name,  "Orb\s?|\s?of| Cartographer's", ""))
+	shortTitleName	:= Trim(RegExReplace(Item.Name,  " Cartographer's", ""))
 	
-	Title := StrPad(Item.Name " (" LeagueName ")", 30)
-	Title .= StrPad("data provided by poe.ninja", 38, "left")
-	Title .= "`n--------------------------------------------------------------------`n"
+	Title := StrPad(shortTitleName " (" LeagueName ")", 44)
+	Title .= StrPad("provided by poe.ninja", 25, "left")
+	Title .= "`n---------------------------------------------------------------------`n"
 	
-	Title .= StrPad("" ,10) 	
-	Title .= StrPad("|| Buy (" shortName ")" ,28)
-	Title .= StrPad("|| Sell (" shortName ")",28)
+	Title .= StrPad("" , 11) 	
+	Title .= StrPad("|| Buy (" shortName ")" , 28)
+	Title .= StrPad("|| Sell (" shortName ")", 28)
 	Title .= "`n"
-	Title .= StrPad("==========||==========================||============================",40)
+	Title .= StrPad("===========||==========================||============================",40)
 	Title .= "`n"
 
-	Title .= StrPad("Days ago" ,10) 	
-	Title .= StrPad("|| Pay (Chaos)",20)
-	Title .= StrPad("| Get",8)
+	Title .= StrPad("Time" , 11) 	
+	Title .= StrPad("|| Pay (Chaos)", 15)
+	Title .= StrPad("| Get", 13)
 	
-	Title .= StrPad("|| Pay",9)
-	Title .= StrPad("| Get (Chaos)",20)
+	Title .= StrPad("|| Pay", 14)
+	Title .= StrPad("| Get (Chaos)", 15)
 	
 	Title .= "`n"
-	Title .= StrPad("----------||------------------|-------||-------|--------------------",40)
+	Title .= StrPad("-----------||-------------|------------||------------|---------------",40)
 	
 	currencyData := 	
 	For key, val in CurrencyHistoryData {
@@ -1522,83 +1523,68 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		}
 	}
 	
-	buyGetArr := []
-	buyPayArr := []
-	sellGetArr := []
-	sellPayArr := []
-	
-	buyPay := currencyData.receive.value
-	buyGet := buyPay < 1 ? 1 / buyPay : 1
-	buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
-	buyGetArr.push(buyGet)
-	buyPayArr.push(buyPay)
-	buyPayCurrent := buyPay
-	
-	sellPay := currencyData.pay.value
-	sellGet := sellPay < 1 ? 1 / sellPay : 1
-	sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
-	sellGetArr.push(sellGet)
-	sellPayArr.push(sellPay)
-	sellGetCurrent := sellGet
-	
-	length := currencyData.paySparkLine.data.Length()
+	prices		:= {}
+	prices.pay	:= {}
+	prices.receive	:= {}
+	prices.pay.pay	:= []
+	prices.pay.get	:= []	
+	prices.pay.highestDigitPay	:= 1
+	prices.pay.highestDigitGet	:= 1
+	prices.receive.pay	:= []
+	prices.receive.get	:= []
+	prices.receive.highestDigitPay	:= 1
+	prices.receive.highestDigitGet	:= 1
 
-	i := 2
-	Loop % length - 1 {		
-		buyPay := buyPayCurrent * (1 - currencyData.receiveSparkLine.data[i] / 100)
-		buyGet := buyPay < 1 ? 1 / buyPay : 1
-		buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
-		buyGetArr.push(buyGet)
-		buyPayArr.push(buyPay)
-		
-		sellGet := sellGetCurrent * (1 - currencyData.paySparkLine.data[i] / 100)
-		sellGet := sellGet > 1 ? Round(sellGet, 2) : 1
-		sellPay := sellPay < 1 ? 1 / sellPay : 1
-		sellGetArr.push(sellGet)
-		sellPayArr.push(sellPay)
-		
-		If (A_Index > 10) {
-			break
+	arr := ["receive", "pay"]
+	SetFormat, float, 0.6
+	
+	For arrKey, arrVal in arr {		
+		tmpCurrent := currencyData[arrVal].value
+	
+		For key, val in currencyData[arrVal "SparkLine"].data {
+			tmp := tmpCurrent * (1 - val / 100)
+			
+			priceGet := tmp > 1 ? 1 : Round(1 / tmp, 2)
+			pricePay := tmp > 1 ? Round(tmp, 2) : 1
+			
+			prices[arrVal].get.push(priceGet)
+			prices[arrVal].pay.push(pricePay)
+			
+			testGet := StrLen(RegExReplace(priceGet,  "\..*", ""))
+			testPay := StrLen(RegExReplace(pricePay,  "\..*", ""))
+			
+			prices[arrVal].highestDigitGet := testGet > prices[arrVal].highestDigitGet ? testGet : prices[arrVal].highestDigitGet
+			prices[arrVal].highestDigitPay := testPay > prices[arrVal].highestDigitPay ? testPay : prices[arrVal].highestDigitPay
 		}
-		i++
 	}
-	
-	highestDigitsBuy 	:= 1
-	highestDigitsSell	:= 1
-	Loop, % buyPayArr.Length() {
-		testBuy	:= StrLen(RegExReplace(buyPayArr[A_Index],  "\..*", ""))
-		testSell	:= StrLen(RegExReplace(sellGetArr[A_Index], "\..*", ""))
-		
-		highestDigitsBuy	:= testBuy  > highestDigitsBuy  ? testBuy  : highestDigitsBuy
-		highestDigitsSell	:= testSell > highestDigitsSell ? testSell : highestDigitsSell
-	}	
 
-	i := 0
-	Loop % length {
-		If (i = 0) {
+	SetFormat, float, 0.2
+	
+	Loop % prices.receive.pay.length() {
+		If (A_Index = 1) {
 			date := "Currently"
 		} Else {
-			date := i > 1 ? i " days ago" : i " day ago"	
+			date := A_Index > 2 ? A_Index - 1 " days ago" : A_Index - 1 " day ago"	
 		}
 		
 		Title .= "`n"
-		Title .= StrPad(date, 10)
+		Title .= StrPad(date, 11)		
 
-		buyPayPart1 := RegExReplace(buyPayArr[A_Index], "\..*")
-		buyPayPart2 := RegExMatch(buyPayArr[A_Index], ".*\.") ? RegExReplace(buyPayArr[A_Index], ".*\.", ".") : ""
-		Title .= StrPad("|| " StrPad(buyPayPart1, highestDigitsBuy, "left") StrPad(buyPayPart2, 2), 20)
-		Title .= StrPad("| "  buyGetArr[A_Index], 8)
+		buyPayPart1 := RegExReplace(prices.receive.pay[A_Index], "\..*")
+		buyPayPart2 := RegExMatch(prices.receive.pay[A_Index], ".*\.") ? RegExReplace(prices.receive.pay[A_Index], ".*\.", ".") : ""
+		buyGetPart1 := RegExReplace(prices.receive.get[A_Index], "\..*")
+		buyGetPart2 := RegExMatch(prices.receive.get[A_Index], ".*\.") ? RegExReplace(prices.receive.get[A_Index], ".*\.", ".") : ""
+		Title .= StrPad("|| " StrPad(buyPayPart1, prices.receive.highestDigitPay, "left") StrPad(buyPayPart2, 2), 15)
+		Title .= StrPad("| "  StrPad(buyGetPart1, prices.receive.highestDigitGet, "left") StrPad(buyGetPart2, 2), 13)
 		
-		sellGetPart1 := RegExReplace(sellGetArr[A_Index], "\..*")
-		sellGetPart2 := RegExMatch(sellGetArr[A_Index], ".*\.") ? RegExReplace(sellGetArr[A_Index], ".*\.", ".") : ""
-		Title .= StrPad("|| " sellPayArr[A_Index], 9)
-		Title .= StrPad("| "  StrPad(sellGetPart1, highestDigitsSell, "left") StrPad(sellGetPart2, 2), 20)
-		
-		If (A_Index > 10) {
-			break
-		}
-		i++
+		sellGetPart1 := RegExReplace(prices.pay.get[A_Index], "\..*")
+		sellGetPart2 := RegExMatch(prices.pay.get[A_Index], ".*\.") ? RegExReplace(prices.pay.get[A_Index], ".*\.", ".") : ""
+		sellPayPart1 := RegExReplace(prices.pay.pay[A_Index], "\..*")
+		sellPayPart2 := RegExMatch(prices.pay.pay[A_Index], ".*\.") ? RegExReplace(prices.pay.pay[A_Index], ".*\.", ".") : ""
+		Title .= StrPad("|| " StrPad(sellPayPart1, prices.pay.highestDigitPay, "left") StrPad(sellPayPart2, 2), 14)
+		Title .= StrPad("| "  StrPad(sellGetPart1, prices.pay.highestDigitGet, "left") StrPad(sellGetPart2, 2), 15)
 	}
+	
 	Return Title
 }
 
