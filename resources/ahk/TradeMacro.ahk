@@ -1502,7 +1502,7 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	Title .= StrPad("|| Buy (" shortName ")" , 28)
 	Title .= StrPad("|| Sell (" shortName ")", 28)
 	Title .= "`n"
-	Title .= StrPad("===========||==========================||============================",40)
+	Title .= StrPad("===========||==========================||============================", 40)
 	Title .= "`n"
 
 	Title .= StrPad("Time" , 11) 	
@@ -1513,7 +1513,7 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	Title .= StrPad("| Get (Chaos)", 15)
 	
 	Title .= "`n"
-	Title .= StrPad("-----------||-------------|------------||------------|---------------",40)
+	Title .= StrPad("-----------||-------------|------------||------------|---------------", 40)
 	
 	currencyData := 	
 	For key, val in CurrencyHistoryData {
@@ -1542,6 +1542,8 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		tmpCurrent := currencyData[arrVal].value
 	
 		For key, val in currencyData[arrVal "SparkLine"].data {
+			; turn null values into 0
+			val := val >= 0 ? val : 0
 			tmp := tmpCurrent * (1 - val / 100)
 			
 			priceGet := tmp > 1 ? 1 : Round(1 / tmp, 2)
@@ -1574,15 +1576,31 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		buyPayPart2 := RegExMatch(prices.receive.pay[A_Index], ".*\.") ? RegExReplace(prices.receive.pay[A_Index], ".*\.", ".") : ""
 		buyGetPart1 := RegExReplace(prices.receive.get[A_Index], "\..*")
 		buyGetPart2 := RegExMatch(prices.receive.get[A_Index], ".*\.") ? RegExReplace(prices.receive.get[A_Index], ".*\.", ".") : ""
-		Title .= StrPad("|| " StrPad(buyPayPart1, prices.receive.highestDigitPay, "left") StrPad(buyPayPart2, 2), 15)
-		Title .= StrPad("| "  StrPad(buyGetPart1, prices.receive.highestDigitGet, "left") StrPad(buyGetPart2, 2), 13)
-		
+		If (prices.receive.pay[A_Index] > 0) {
+			Title .= StrPad("|| " StrPad(buyPayPart1, prices.receive.highestDigitPay, "left") StrPad(buyPayPart2, 2), 15)	
+		} Else {
+			Title .= StrPad("|| no data", 15)
+		}
+		If (prices.receive.get[A_Index] > 0) {
+			Title .= StrPad("| "  StrPad(buyGetPart1, prices.receive.highestDigitGet, "left") StrPad(buyGetPart2, 2), 13)	
+		} Else {
+			Title .= StrPad("| no data", 13)
+		}
+	
 		sellGetPart1 := RegExReplace(prices.pay.get[A_Index], "\..*")
 		sellGetPart2 := RegExMatch(prices.pay.get[A_Index], ".*\.") ? RegExReplace(prices.pay.get[A_Index], ".*\.", ".") : ""
 		sellPayPart1 := RegExReplace(prices.pay.pay[A_Index], "\..*")
-		sellPayPart2 := RegExMatch(prices.pay.pay[A_Index], ".*\.") ? RegExReplace(prices.pay.pay[A_Index], ".*\.", ".") : ""
-		Title .= StrPad("|| " StrPad(sellPayPart1, prices.pay.highestDigitPay, "left") StrPad(sellPayPart2, 2), 14)
-		Title .= StrPad("| "  StrPad(sellGetPart1, prices.pay.highestDigitGet, "left") StrPad(sellGetPart2, 2), 15)
+		sellPayPart2 := RegExMatch(prices.pay.pay[A_Index], ".*\.") ? RegExReplace(prices.pay.pay[A_Index], ".*\.", ".") : ""		
+		If (prices.pay.pay[A_Index] > 0) {
+			Title .= StrPad("|| " StrPad(sellPayPart1, prices.pay.highestDigitPay, "left") StrPad(sellPayPart2, 2), 14)
+		} Else {
+			Title .= StrPad("|| no data", 15)
+		}
+		If (prices.pay.get[A_Index] > 0) {
+			Title .= StrPad("| "  StrPad(sellGetPart1, prices.pay.highestDigitGet, "left") StrPad(sellGetPart2, 2), 15)	
+		} Else {
+			Title .= StrPad("| no data", 13)
+		}
 	}
 	
 	Return Title
