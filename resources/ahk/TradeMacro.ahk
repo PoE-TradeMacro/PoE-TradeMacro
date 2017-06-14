@@ -1474,7 +1474,7 @@ TradeFunc_ParseCurrencyHtml(html, payload, ParsingError = "") {
 				Break
 			}
 			DisplayNames.Push(Column)
-		}	
+		}
 		
 		subAcc := TradeFunc_TrimNames(AccountName, 10, true)
 		Title .= StrPad(subAcc,10) 
@@ -1594,12 +1594,12 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		If (prices.pay.pay[A_Index] > 0) {
 			Title .= StrPad("|| " StrPad(sellPayPart1, prices.pay.highestDigitPay, "left") StrPad(sellPayPart2, 2), 14)
 		} Else {
-			Title .= StrPad("|| no data", 15)
+			Title .= StrPad("|| no data", 14)
 		}
 		If (prices.pay.get[A_Index] > 0) {
 			Title .= StrPad("| "  StrPad(sellGetPart1, prices.pay.highestDigitGet, "left") StrPad(sellGetPart2, 2), 15)	
 		} Else {
-			Title .= StrPad("| no data", 13)
+			Title .= StrPad("| no data", 15)
 		}
 	}
 	
@@ -1776,7 +1776,7 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	}
 	
 	Title .= ", (" LeagueName ")"
-	Title .= "`n------------------------------ `n"	
+	Title .= "`n---------------------------------------------------------------------`n"	
 	
 	; add notes what parameters where used in the search
 	ShowFullNameNote := false 
@@ -1812,7 +1812,7 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 			
 			Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Mod rolls are being ignored !!" : ""
 		}
-		Title .= "`n------------------------------ `n"	
+		Title .= "`n---------------------------------------------------------------------`n"	
 	}
 	
 	; add average and median prices to title	
