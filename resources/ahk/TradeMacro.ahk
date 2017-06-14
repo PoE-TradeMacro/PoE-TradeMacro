@@ -1515,7 +1515,7 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	Title .= StrPad("----------||------------------|-------||-------|--------------------",40)
 	Title .= "`n"
 	
-	currencyData := 
+	currencyData := 	
 	For key, val in CurrencyHistoryData {
 		If (val.currencyTypeName = name) {
 			currencyData := val
@@ -1523,14 +1523,16 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 		}
 	}
 	
-	buyPay := currencyData.receive.percentile10
+	buyPay := currencyData.receive.value
 	buyGet := buyPay < 1 ? 1 / buyPay : 1
 	buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
+	buyPayCurrent := buyPay
 	
-	sellPay := currencyData.pay.percentile10
+	sellPay := currencyData.pay.value
 	sellGet := sellPay < 1 ? 1 / sellPay : 1
 	sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
-		
+	sellGetCurrent := sellGet
+	
 	Title .= StrPad("Currently",  10)
 	Title .= StrPad("|| " buyPay, 20)
 	Title .= StrPad("| "  buyGet, 8)
@@ -1540,18 +1542,19 @@ TradeFunc_ParseAlternativeCurrencySearch(name, payload) {
 	Title .= StrPad(sellGet, 19, "left")
 	
 	length := currencyData.payCurrencyGraphData.Length()
-	i := 0
-	Loop % currencyData.payCurrencyGraphData.Length() {
-		date := currencyData.receiveCurrencyGraphData[length - i].daysAgo
-		date := date ? date : "Last day" 
+	length := currencyData.paySparkLine.data.Length()
+	i := 2
+	Loop % length - 1 {
+		date := i - 1 > 1 ? i - 1 " days ago" : i - 1 " day ago"
 		
-		buyPay := currencyData.receiveCurrencyGraphData[length - i].value
+		buyPay := buyPayCurrent * (1 - currencyData.receiveSparkLine.data[i] / 100)
 		buyGet := buyPay < 1 ? 1 / buyPay : 1
 		buyPay := buyPay > 1 ? Round(buyPay, 2) : 1
 		
-		sellPay := currencyData.payCurrencyGraphData[length - i].value
-		sellGet := sellPay < 1 ? 1 / sellPay : 1
-		sellPay := sellPay > 1 ? Round(sellPay, 2) : 1
+		sellGet := sellGetCurrent * (1 - currencyData.paySparkLine.data[i] / 100)
+		console.log(sellGetCurrent)
+		sellGet := sellGet > 1 ? Round(sellGet, 2) : 1
+		sellPay := sellPay < 1 ? 1 / sellPay : 1
 		
 		Title .= "`n"
 		Title .= StrPad(date, 10)
