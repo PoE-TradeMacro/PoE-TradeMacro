@@ -16,7 +16,7 @@ TradeFunc_PriceCheckHotkey(priceCheckTest = false, itemData = "") {
 	; simulate clipboard change to test item pricing
 	If (priceCheckTest) {
 		Clipboard :=
-		CLipboard := itemData
+		Clipboard := itemData
 	} Else {
 		Send ^{sc02E}	
 	}	
@@ -2710,9 +2710,10 @@ TradeFunc_CreateItemPricingTestGUI() {
 	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestAdvanced, &Advanced
 	Gui, PricingTest:Add, Button, x+10 yp+0 gOpenPricingTestOnPoeTrade, Op&en on poe.trade
 	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestWiki, Open &Wiki
-	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestParsing, &Parse
+	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestParsing, Parse (&Tooltip)
+	Gui, PricingTest:Add, Button, x+10 yp+0 gSubmitPricingTestParsingObject, Parse (&Object)
 	Gui, PricingTest:Add, Button, x10 yp+40 gClosePricingTest, &Close
-	Gui, PricingTest:Add, Text, x+10 yp+4 cGray, (Use Alt + N/A/E/W/C to submit a button)
+	Gui, PricingTest:Add, Text, x+10 yp+4 cGray, (Use Alt + N/A/E/W/C/T/O to submit a button)
 	
 	Gui, PricingTest:Show, w500 , Item Pricing Test
 }
@@ -3760,9 +3761,23 @@ SubmitPricingTestWiki:
 Return
 
 SubmitPricingTestParsing:
-	Gui, PricingTest:Submit, Nohide
-	Clipboard :=
+	Gui, PricingTest:Submit, Nohide	
+	SuspendPOEItemScript = 1
 	Clipboard := PricingTestItemInput
+	ParseClipBoardChanges(true)
+	SuspendPOEItemScript = 0
+Return
+
+SubmitPricingTestParsingObject:
+	Gui, PricingTest:Submit, Nohide	
+	SuspendPOEItemScript = 1
+	Clipboard := PricingTestItemInput
+	ParseClipBoardChanges(true)
+	DebugTmpObject			:= {}
+	DebugTmpObject.Item		:= Item
+	DebugTmpObject.ItemData	:= ItemData
+	DebugPrintArray(DebugTmpObject)
+	SuspendPOEItemScript = 0
 Return
 
 TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {

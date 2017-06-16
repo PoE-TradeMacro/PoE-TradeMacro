@@ -6606,7 +6606,7 @@ PostProcessData(ParsedData)
 	return Result
 }
 
-ParseClipBoardChanges()
+ParseClipBoardChanges(debug = false)
 {
 	Global Opts, Globals
 
@@ -6633,7 +6633,7 @@ ParseClipBoardChanges()
 	}
 
 	
-	If (StrLen(ParsedData) and !Opts.OnlyActiveIfPOEIsFront) {	
+	If (StrLen(ParsedData) and !Opts.OnlyActiveIfPOEIsFront and debug) {	
 		AddLogEntry(ParsedData, CBContents)
 	}
 
