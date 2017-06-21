@@ -2184,6 +2184,7 @@ class _ParamMod {
 	{
 		; for some reason '+' is not encoded properly, this affects mods like '+#% to all Elemental Resistances'
 		this.mod_name := StrReplace(this.mod_name, "+", "%2B")
+		this.mod_name := TradeUtils.UriEncode(this.mod_name)
 		p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
 		Return p
 	}
