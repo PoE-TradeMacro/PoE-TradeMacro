@@ -1426,7 +1426,11 @@ TradeFunc_ParseCurrencyIDs(html) {
 			Currencies[CurrencyName] := CurrencyID  
 		}
 	}
-
+	
+	If (!Currencies["Chaos Orb"]) {
+		Currencies := TradeCurrencyIDsFallback
+	}
+	
 	TradeGlobals.Set("CurrencyIDs", Currencies)
 }
 
