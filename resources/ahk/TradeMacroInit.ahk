@@ -979,7 +979,7 @@ CreateTradeSettingsUI()
 	
 	; option group start
 	GuiAddCheckbox("Show prices as chaos equivalent", "x287 yp+30 w230 h40", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
-	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaoes equivalent.")
+	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaos equivalent.")
 	
 	; header
 	GuiAddText("Pre-Select Options (Advanced Search)", "x287 yp+43 w230 h20 0x0100 cDA4F49", "", "")

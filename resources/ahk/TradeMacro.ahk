@@ -694,26 +694,29 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}
 	}
-	Else {
+	Else If (not openSearchInBrowser) {
 		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)	
 	}
 	
-	If (openSearchInBrowser) {
-		; redirect was prevented to get the url and open the search on poe.trade instead
+	If (openSearchInBrowser) {		
 		If (Item.isCurrency and !Item.IsEssence) {
 			ParsedUrl1 := currencyUrl
 		}
-		Else {
-			RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
+		Else {			
+			; using GET request instead of preventing the POST request redirect and parsing the url
+			parsedUrl1 := "http://poe.trade/search?" Payload
+			; redirect was prevented to get the url and open the search on poe.trade instead
+			;RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
 		}
 		
 		If (StrLen(ParsingError)) {
 			ShowToolTip("")
 			ShowToolTip(ParsingError)
-		} Else {			
+		} Else {
 			TradeFunc_OpenUrlInBrowser(ParsedUrl1)
 			SetClipboardContents("")
 		}
+		
 	}
 	Else If (Item.isCurrency and !Item.IsEssence) {
 		; Default currency search
@@ -1729,7 +1732,7 @@ TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName) {
 }
 
 ; Parse poe.trade html to display the search result tooltip with X listings
-TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = false) {	
+TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = false) {
 	Global Item, ItemData, TradeOpts
 	LeagueName := TradeGlobals.Get("LeagueName")
 	
@@ -2086,10 +2089,10 @@ class RequestParams_ {
 		p .= "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality 
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted	
 
-		; not used yet
-		temp := p
-		temp := CleanPayload(temp)
-		;console.log(temp)
+		temp		:= p
+		cleaned	:= CleanPayload(temp)
+		;console.log(cleaned)
+		; GET requests won't work with the cleaned payload when including the group_type
 		
 		Return p
 	}
