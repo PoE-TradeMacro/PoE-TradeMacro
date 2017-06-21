@@ -1395,27 +1395,39 @@ TradeFunc_ParseCurrencyIDs(html) {
 	StringReplace, html,html, `n,, All
 	html := RegExReplace(html,"\s+"," ")
 	
-	RegExMatch(html, "is)id=""currency-want"">(.*?)input", match)
-	startString := "<div data-tooltip"	
-	Currencies := {}
-	
-	Loop {
-		CurrencyBlock 	:= TradeUtils.HtmlParseItemData(match1, startString . "(.*?)>", html)
-		CurrencyName 	:= TradeUtils.HtmlParseItemData(CurrencyBlock, "title=""(.*?)""")
-		CurrencyID 	:= TradeUtils.HtmlParseItemData(CurrencyBlock, "data-id=""(.*?)""")
-		CurrencyName := StrReplace(CurrencyName, "&#39;", "'")
-		
-		If (!CurrencyName) {
-			TradeGlobals.Set("CurrencyIDs", Currencies)
-			break
-		}		
-		
-		match1 := match1
-		match1 := SubStr(match1, StrLen(CurrencyBlock))
-		
-		Currencies[CurrencyName] := CurrencyID  
-		TradeGlobals.Set("CurrencyIDs", Currencies)
+	categoryBlocks := []
+	Pos		:= 0
+	While Pos := RegExMatch(html, "i)id=""cat-want-(.*?)(id=""cat-want-|id=""cat-have-|input)", match, Pos + (StrLen(match1) ? StrLen(match1) : 1)) {
+		categoryBlocks.push(match1)
 	}
+	
+	RegExMatch(html, "is)id=""currency-want"">(.*?)input", match)
+	startStringCurrency	:= "<div data-tooltip"
+	startStringOthers	:= "<div class=""currency-selectable"
+	
+	Currencies := {}
+
+	For key, val in categoryBlocks {
+		Loop {
+			start := key > 2 ? startStringOthers : startStringCurrency
+			CurrencyBlock 	:= TradeUtils.HtmlParseItemData(val, start . "(.*?)>", val)
+			CurrencyName 	:= TradeUtils.HtmlParseItemData(CurrencyBlock, "title=""(.*?)""")
+			CurrencyID 	:= TradeUtils.HtmlParseItemData(CurrencyBlock, "data-id=""(.*?)""")
+			CurrencyName 	:= StrReplace(CurrencyName, "&#39;", "'")
+
+			If (!CurrencyName) {
+				TradeGlobals.Set("CurrencyIDs", Currencies)
+				break
+			}
+			
+			match1 := match1
+			match1 := SubStr(match1, StrLen(CurrencyBlock))
+			
+			Currencies[CurrencyName] := CurrencyID  
+		}
+	}
+
+	TradeGlobals.Set("CurrencyIDs", Currencies)
 }
 
 ; Parse currency.poe.trade to display tooltip with first X listings
