@@ -2111,7 +2111,7 @@ class RequestParams_ {
 		p .= "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality 
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted	
 		*/
-	
+		
 		p :=	
 		For key, val in this {
 			; check if not array (modGroups for example are arrays)
@@ -3385,7 +3385,7 @@ TradeFunc_HandleGuiSubmit(){
 	
 	Loop {
 		stat := {param:"",selected:"",min:"",max:""}
-		If (TradeAdvancedStatMin%A_Index%) {
+		If (TradeAdvancedStatMin%A_Index% or TradeAdvancedStatMax%A_Index%) {
 			stat.param    := TradeAdvancedStatParam%A_Index%
 			stat.selected := TradeAdvancedStatSelected%A_Index%
 			stat.min      := TradeAdvancedStatMin%A_Index%
