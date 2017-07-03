@@ -189,13 +189,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	DamageDetails := Item.DamageDetails
 	Name := Item.Name
 
-	Item.xtype := ""
-	Item.UsedInSearch := {}
-	Item.UsedInSearch.iLvl := {}
+	Item.xtype		:= ""
+	Item.UsedInSearch	:= {}
+	Item.UsedInSearch.iLvl	:= {}
 
-	RequestParams := new RequestParams_()
-	RequestParams.league := LeagueName
-	RequestParams.buyout := "1"
+	RequestParams			:= new RequestParams_()
+	RequestParams.league	:= LeagueName
+	RequestParams.buyout	:= "1"
 	
 	; ignore item name in certain cases
 	If (!Item.IsJewel and !Item.IsLeaguestone and Item.RarityLevel > 1 and Item.RarityLevel < 4 and !Item.IsFlask or (Item.IsJewel and isAdvancedPriceCheckRedirect)) {
@@ -672,7 +672,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (TradeOpts.Debug) {
 		;console.log(RequestParams)
 	}
+	
 	Payload := RequestParams.ToPayload()
+
 	ShowToolTip("Running search...")
 	
 	ParsingError	:= ""
@@ -2021,9 +2023,13 @@ TradeFunc_FormatItemAge(age) {
 }
 
 class RequestParams_ {
+	; these are special cases, for example by default, the string key "base" is used to retrieve or set the object's base object, so cannot be used for storing ordinary values with a normal assignment. 
+	xtype		:= ""	
+	xbase		:= ""	
+	xthread 		:= ""	
+	;
+	
 	league		:= ""
-	xtype		:= ""
-	xbase		:= ""
 	name			:= ""
 	dmg_min 		:= ""
 	dmg_max 		:= ""
@@ -2074,7 +2080,6 @@ class RequestParams_ {
 	ilvl_max		:= ""
 	rarity 		:= ""
 	seller 		:= ""
-	xthread 		:= ""
 	identified 	:= ""
 	corrupted		:= "0"
 	online 		:= (TradeOpts.OnlineOnly == 0) ? "" : "x"
@@ -2093,7 +2098,8 @@ class RequestParams_ {
 			modGroupStr .= this.modGroups[A_Index].ToPayload()	
 		}
 		
-		p := "league=" this.league "&type=" this.xtype "&base=" this.xbase "&name=" this.name "&dmg_min=" this.dmg_min "&dmg_max=" this.dmg_max "&aps_min=" this.aps_min "&aps_max=" this.aps_max 
+		/*
+		p := "league=" this.league "&type=" this.type "&base=" this.base "&name=" this.name "&dmg_min=" this.dmg_min "&dmg_max=" this.dmg_max "&aps_min=" this.aps_min "&aps_max=" this.aps_max 
 		p .= "&crit_min=" this.crit_min "&crit_max=" this.crit_max "&dps_min=" this.dps_min "&dps_max=" this.dps_max "&edps_min=" this.edps_min "&edps_max=" this.edps_max "&pdps_min=" this.pdps_min 
 		p .= "&pdps_max=" this.pdps_max "&armour_min=" this.armour_min "&armour_max=" this.armour_max "&evasion_min=" this.evasion_min "&evasion_max=" this.evasion_max "&shield_min=" this.shield_min 
 		p .= "&shield_max=" this.shield_max "&block_min=" this.block_min "&block_max=" this.block_max "&sockets_min=" this.sockets_min "&sockets_max=" this.sockets_max "&link_min=" this.link_min 
@@ -2104,11 +2110,30 @@ class RequestParams_ {
 		p .= "&q_min=" this.q_min  "&q_max=" this.q_max "&level_min=" this.level_min "&level_max=" this.level_max "&ilvl_min=" this.ilvl_min "&ilvl_max=" this.ilvl_max "&rarity=" this.rarity "&seller=" this.seller 
 		p .= "&thread=" this.xthread "&identified=" this.identified "&corrupted=" this.corrupted "&online=" this.online "&has_buyout=" this.buyout "&altart=" this.altart "&capquality=" this.capquality 
 		p .= "&buyout_min=" this.buyout_min "&buyout_max=" this.buyout_max "&buyout_currency=" this.buyout_currency "&crafted=" this.crafted "&enchanted=" this.enchanted	
-
+		*/
+	
+		p :=	
+		For key, val in this {
+			; check if not array (modGroups for example are arrays)
+			If (!this[key].MaxIndex()) {
+				If (StrLen(val)) {
+					; remove prefixed x for special keys
+					argument := RegExReplace(key, "i)(x(base|thread|type))?(.*)", "$2$3")
+					p .= "&" argument "=" TradeUtils.UriEncode(val) 	
+				}				
+			}			
+		}
+		p .= modGroupStr
+		p := RegExReplace(p, "^&", "")
+		console.log(modGroupStr)
+		/*
 		temp		:= p
 		cleaned	:= CleanPayload(temp)
 		;console.log(cleaned)
 		; GET requests won't work with the cleaned payload when including the group_type
+		console.log(p)
+		console.log(j)
+		*/
 		
 		Return p
 	}
@@ -2139,11 +2164,11 @@ CleanPayload(payload) {
 }
 
 class _ParamModGroup {
-	ModArray := []
-	group_type := "And"
-	group_min := ""
-	group_max := ""
-	group_count := 1
+	ModArray		:= []
+	group_type	:= "And"
+	group_min		:= ""
+	group_max		:= ""
+	group_count	:= 1
 	
 	ToPayload() {
 		p := ""
@@ -2155,6 +2180,7 @@ class _ParamModGroup {
 		Loop % this.ModArray.Length()
 			p .= this.ModArray[A_Index].ToPayload()
 		p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count
+		
 		Return p
 	}
 	
@@ -2181,9 +2207,9 @@ class _ParamModGroup {
 }
 
 class _ParamMod {
-	mod_name := ""
-	mod_min := ""
-	mod_max := ""
+	mod_name	:= ""
+	mod_min	:= ""
+	mod_max	:= ""
 	ToPayload() 
 	{		
 		this.mod_name := TradeUtils.UriEncode(this.mod_name)
@@ -3811,8 +3837,8 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 		
 		StringLower, CustomSearchRarity, CustomSearchRarity
 		
-		RequestParams.xtype 	:= CustomSearchType         ? CustomSearchType : ""
-		RequestParams.xbase 	:= CustomSearchBase         ? CustomSearchBase : ""
+		RequestParams.xtype		:= CustomSearchType         ? CustomSearchType : ""
+		RequestParams.xbase		:= CustomSearchBase         ? CustomSearchBase : ""
 		RequestParams.rarity	:= CustomSearchRarity       ? CustomSearchRarity : ""
 		RequestParams.link_min	:= CustomSearchLinksMin     ? CustomSearchLinksMin : ""
 		RequestParams.link_max	:= CustomSearchLinksMax     ? CustomSearchLinksMax : ""
