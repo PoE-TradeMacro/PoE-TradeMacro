@@ -2177,9 +2177,15 @@ class _ParamModGroup {
 			this.AddMod(new _ParamMod())
 		}
 		this.group_count := this.ModArray.Length()
-		Loop % this.ModArray.Length()
+		Loop % this.ModArray.Length() {
 			p .= this.ModArray[A_Index].ToPayload()
-		p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count
+		}
+		p .= "&group_type="  TradeUtils.UriEncode(this.group_type)
+		p .= "&group_min="   TradeUtils.UriEncode(this.group_min)
+		p .= "&group_max="   TradeUtils.UriEncode(this.group_max)		
+		p .= "&group_count=" TradeUtils.UriEncode(this.group_count)
+		
+		;p .= "&group_type=" this.group_type "&group_min=" this.group_min "&group_max=" this.group_max "&group_count=" this.group_count		
 		
 		Return p
 	}
@@ -2212,8 +2218,18 @@ class _ParamMod {
 	mod_max	:= ""
 	ToPayload() 
 	{		
-		this.mod_name := TradeUtils.UriEncode(this.mod_name)
-		p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max		
+		;this.mod_name	:= TradeUtils.UriEncode(this.mod_name)
+		;p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
+		
+		p := ""
+		For key, val in this {
+			If (!this[key].MaxIndex()) {
+				If (StrLen(val)) {
+					p .= "&" key "=" TradeUtils.UriEncode(val) 	
+				}				
+			}			
+		}
+		
 		Return p
 	}
 }
