@@ -2211,15 +2211,8 @@ class _ParamMod {
 	{		
 		;this.mod_name	:= TradeUtils.UriEncode(this.mod_name)
 		;p := "&mod_name=" this.mod_name "&mod_min=" this.mod_min "&mod_max=" this.mod_max
-		
-		p := ""
-		For key, val in this {
-			If (!this[key].MaxIndex()) {
-				If (StrLen(val)) {
-					p .= "&" key "=" TradeUtils.UriEncode(val) 	
-				}				
-			}			
-		}
+		p .= "&mod_name=" TradeUtils.UriEncode(this.mod_name)
+		p .= StrLen(this.mod_min) or StrLen(this.mod_max) ? "&mod_min=" TradeUtils.UriEncode(this.mod_min) "&mod_max="   TradeUtils.UriEncode(this.mod_max) : ""
 		
 		Return p
 	}
