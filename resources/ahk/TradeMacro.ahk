@@ -2125,15 +2125,6 @@ class RequestParams_ {
 		}
 		p .= modGroupStr
 		p := RegExReplace(p, "^&", "")
-		console.log(modGroupStr)
-		/*
-		temp		:= p
-		cleaned	:= CleanPayload(temp)
-		;console.log(cleaned)
-		; GET requests won't work with the cleaned payload when including the group_type
-		console.log(p)
-		console.log(j)
-		*/
 		
 		Return p
 	}
