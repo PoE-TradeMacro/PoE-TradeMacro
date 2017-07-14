@@ -225,7 +225,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, Item)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, Item)	
 	}
-	
+
 	If (Item.IsWeapon or Item.IsQuiver or Item.IsArmour or Item.IsLeagueStone or (Item.IsFlask and Item.RarityLevel > 1) or Item.IsJewel or (Item.IsMap and Item.RarityLevel > 1) of Item.IsBelt or Item.IsRing or Item.IsAmulet) 
 	{
 		hasAdvancedSearch := true
@@ -260,7 +260,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		; returns mods with their ranges of the searched item if it is unique and has variable mods
 		uniqueWithVariableMods :=
 		uniqueWithVariableMods := TradeFunc_FindUniqueItemIfItHasVariableRolls(Name, Item.IsRelic)
-		
+
 		; Return if the advanced search was used but the checked item doesn't have variable mods
 		If (!uniqueWithVariableMods and isAdvancedPriceCheck and not Enchantment and not Corruption) {
 			ShowToolTip("Advanced search not available for this item (no variable mods)`nor item is new and the necessary data is not yet available/updated.")
@@ -279,8 +279,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem.isRelic	:= Item.isRelic
 			preparedItem.iLvl 		:= Item.level
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
-			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
-			
+			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
+
 			; open TradeFunc_AdvancedPriceCheckGui to select mods and their min/max values
 			If (isAdvancedPriceCheck) {
 				UniqueStats := TradeFunc_GetUniqueStats(Name)
@@ -941,7 +941,7 @@ TradeFunc_CalculateQ20(base, affixFlat, affixPercent){
 }
 
 ; parse items dmg stats
-TradeFunc_ParseItemOffenseStats(Stats, mods){
+TradeFunc_ParseItemOffenseStats(Stats, mods) {
 	Global ItemData
 	iStats := {}
 	debugOutput := 
@@ -964,9 +964,13 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 				affixAttackSpeed := match1
 			}
 			
+			nname :=
 			If (RegExMatch(affix, "Adds.*Lightning Damage")) {
 				affix := RegExReplace(affix, "i)to (\d+)", "to #")
 				affix := RegExReplace(affix, "i)to (\d+.*?\d+?)", "to #")
+				If (not mod.isVariable) {
+					nname := RegExReplace(mod.name, "i)(Adds )(#)( Lightning Damage)", "$1" mod.values[1] " to #$3")
+				}				
 			} 
 			Else {
 				affix := RegExReplace(affix, "i)(\d+ to \d+)", "#")
@@ -974,9 +978,9 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 			}						
 			affix := RegExReplace(affix, "i)# %", "#%")
 			affix := Trim(RegExReplace(affix, "\s", " "))
-			name :=  Trim(mod.name)	
-			
-			If ( affix = name ){
+			nname := StrLen(nname) ? Trim(nname) : Trim(mod.name)
+
+			If ( affix = nname ){
 				match :=
 				; ignore mods like " ... per X dexterity" and "damage to spells"
 				If (RegExMatch(affix, "i) per | to spells")) {
@@ -1000,14 +1004,14 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 				If (RegExMatch(affix, "i)Adds.*(\d+) to #.*(Lightning) Damage", match)) {
 					If (not mod.isVariable) {
 						min_affixFlat%match2%Low    := match1 
-						min_affixFlat%match2%Hi     := mod.values[1] 
-						max_affixFlat%match2%Low    := match1
-						max_affixFlat%match2%Hi     := mod.values[1] 
+						min_affixFlat%match2%Hi     := match1 
+						max_affixFlat%match2%Low    := mod.values[2]
+						max_affixFlat%match2%Hi     := mod.values[2] 
 					}
 					Else {
 						min_affixFlat%match2%Low    := match1 
-						min_affixFlat%match2%Hi     := mod.ranges[1][1] 
-						max_affixFlat%match2%Low    := match1
+						min_affixFlat%match2%Hi     := match1 
+						max_affixFlat%match2%Low    := mod.ranges[1][1]
 						max_affixFlat%match2%Hi     := mod.ranges[1][2] 
 					}					
 					debugOutput .= affix "`nflat " match2 " : " min_affixFlat%match2%Low " - " min_affixFlat%match2%Hi " to " max_affixFlat%match2%Low " - " max_affixFlat%match2%Hi "`n`n"
@@ -1044,8 +1048,8 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 	basePhysHi   := TradeFunc_CalculateBase(physicalDamageHi , affixPercentPhys, Stats.Quality, affixFlatPhysHi)
 	
 	minPhysLow   := Round(TradeFunc_CalculateQ20(basePhysLow, min_affixFlatPhysicalLow, min_affixPercentPhys))
-	minPhysHi    := Round(TradeFunc_CalculateQ20(basePhysHi , min_affixFlatPhysicalHi , min_affixPercentPhys))
-	maxPhysLow   := Round(TradeFunc_CalculateQ20(basePhysLow, max_affixFlatPhysicalLow, max_affixPercentPhys))
+	minPhysHi    := Round(TradeFunc_CalculateQ20(basePhysHi , max_affixFlatPhysicalLow, min_affixPercentPhys))
+	maxPhysLow   := Round(TradeFunc_CalculateQ20(basePhysLow, min_affixFlatPhysicalHi , max_affixPercentPhys))
 	maxPhysHi    := Round(TradeFunc_CalculateQ20(basePhysHi , max_affixFlatPhysicalHi , max_affixPercentPhys))
 	min_affixPercentAPS := (min_affixPercentAPS) ? min_affixPercentAPS : 0
 	max_affixPercentAPS := (max_affixPercentAPS) ? max_affixPercentAPS : 0
@@ -1055,16 +1059,16 @@ TradeFunc_ParseItemOffenseStats(Stats, mods){
 	iStats.PhysDps        := {}
 	iStats.PhysDps.Name   := "Physical Dps (Q20)"
 	iStats.PhysDps.Value  := (Stats.Q20Dps > 0) ? (Stats.Q20Dps - Stats.EleDps - Stats.ChaosDps) : Stats.PhysDps 
-	iStats.PhysDps.Min    := ((minPhysLow + minPhysHi) / 2) * minAPS
-	iStats.PhysDps.Max    := ((maxPhysLow + maxPhysHi) / 2) * maxAPS
+	iStats.PhysDps.Min    := Round(((minPhysLow + minPhysHi) / 2) * minAPS)
+	iStats.PhysDps.Max    := Round(((maxPhysLow + maxPhysHi) / 2) * maxAPS)
 	iStats.EleDps         := {}
 	iStats.EleDps.Name    := "Elemental Dps"
 	iStats.EleDps.Value   := Stats.EleDps
-	iStats.EleDps.Min     := TradeFunc_CalculateEleDps(min_affixFlatFireLow, min_affixFlatFireHi, min_affixFlatColdLow, min_affixFlatColdHi, min_affixFlatLightningLow, min_affixFlatLightningHi, minAPS)
-	iStats.EleDps.Max     := TradeFunc_CalculateEleDps(max_affixFlatFireLow, max_affixFlatFireHi, max_affixFlatColdLow, max_affixFlatColdHi, max_affixFlatLightningLow, max_affixFlatLightningHi, maxAPS)
+	iStats.EleDps.Min     := TradeFunc_CalculateEleDps(min_affixFlatFireLow, max_affixFlatFireLow, min_affixFlatColdLow, max_affixFlatColdLow, min_affixFlatLightningLow, max_affixFlatLightningLow, minAPS)
+	iStats.EleDps.Max     := TradeFunc_CalculateEleDps(min_affixFlatFireHi, max_affixFlatFireHi, min_affixFlatColdHi, max_affixFlatColdHi, min_affixFlatLightningHi, max_affixFlatLightningHi, maxAPS)
 	
 	debugOutput .= "Phys DPS: " iStats.PhysDps.Value "`n" "Phys Min: " iStats.PhysDps.Min "`n" "Phys Max: " iStats.PhysDps.Max "`n" "EleDps: " iStats.EleDps.Value "`n" "Ele Min: " iStats.EleDps.Min "`n" "Ele Max: "  iStats.EleDps.Max
-	
+
 	If (TradeOpts.Debug) {
 		;console.log(debugOutput)
 	}
@@ -1080,6 +1084,9 @@ TradeFunc_CalculateEleDps(fireLo, fireHi, coldLo, coldHi, lightLo, lightHi, aps)
 	lightLo := lightLo > 0 ? lightLo : 0
 	lightHi := lightHi > 0 ? lightHi : 0
 	
+	If (TradeOpts.Debug) {
+		;console.log("((" fireLo " + " fireHi " + " coldLo " + " coldHi " + " lightLo " + " lightHi ") / 2) * " aps " )")
+	}
 	dps := ((fireLo + fireHi + coldLo + coldHi + lightLo + lightHi) / 2) * aps
 	
 	return dps
@@ -2257,8 +2264,8 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		modFound := false
 		For key, val in Affixes {
 			; remove negative sign also
-			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+\s?to\s?-?[\d\.]+|-?[\d\.]+", "#"))
-			n := TradeUtils.CleanUp(v.name)
+			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
+			n := TradeUtils.CleanUp(v.param)
 			; match with optional positive sign to match for example "-7% to cold resist" with "+#% to cold resist"
 			RegExMatch(n, "i)(\+?" . t . ")", match)
 			If (match) {			
@@ -2270,7 +2277,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 			tempMods.push(v)
 		}
 	}
-	
+
 	Item.mods := tempMods
 	
 	return Item
@@ -2768,7 +2775,7 @@ TradeFunc_CreateItemPricingTestGUI() {
 TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedImplicit = "") {	
 	;https://autohotkey.com/board/topic/9715-positioning-of-controls-a-cheat-sheet/
 	Global 
-	
+
 	;prevent advanced gui in certain cases 
 	If (not advItem.mods.Length() and not ChangedImplicit) {
 		ShowTooltip("Advanced search not available for this item.")
