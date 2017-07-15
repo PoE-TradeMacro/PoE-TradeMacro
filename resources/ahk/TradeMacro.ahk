@@ -219,11 +219,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (Item.hasImplicit) {
 		Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
 		Corruption  := Item.IsCorrupted ? TradeFunc_GetCorruption(Item) : false
-	}	
-
-	If (Item.IsWeapon or Item.IsArmour and not Item.IsUnique) {
-		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, Item)
-		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, Item)	
 	}
 
 	If (Item.IsWeapon or Item.IsQuiver or Item.IsArmour or Item.IsLeagueStone or (Item.IsFlask and Item.RarityLevel > 1) or Item.IsJewel or (Item.IsMap and Item.RarityLevel > 1) of Item.IsBelt or Item.IsRing or Item.IsAmulet) 
@@ -236,7 +231,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		preparedItem.maxSockets := Item.maxSockets		
 		preparedItem.iLvl := Item.level
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
-		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)	
+		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)		
 		
 		If (isAdvancedPriceCheck and hasAdvancedSearch) {
 			If (Enchantment) {
@@ -1053,25 +1048,39 @@ TradeFunc_ParseItemOffenseStats(Stats, mods) {
 	maxPhysHi    := Round(TradeFunc_CalculateQ20(basePhysHi , max_affixFlatPhysicalHi , max_affixPercentPhys))
 	min_affixPercentAPS := (min_affixPercentAPS) ? min_affixPercentAPS : 0
 	max_affixPercentAPS := (max_affixPercentAPS) ? max_affixPercentAPS : 0
+	
+	SetFormat, FloatFast, 5.4
 	minAPS       := baseAPS * (1 + min_affixPercentAPS)
 	maxAPS       := baseAPS * (1 + max_affixPercentAPS)
+	For key, val in mods.stats {
+		If (val.name = "APS") {		
+			If (val.ranges[1][1]) {
+				minAPS := val.ranges[1][1]
+			}
+			If (val.ranges[1][2]) {
+				maxAPS := val.ranges[1][2]
+			}
+		}
+	}
 	
 	iStats.PhysDps        := {}
 	iStats.PhysDps.Name   := "Physical Dps (Q20)"
 	iStats.PhysDps.Value  := (Stats.Q20Dps > 0) ? (Stats.Q20Dps - Stats.EleDps - Stats.ChaosDps) : Stats.PhysDps 
-	iStats.PhysDps.Min    := Round(((minPhysLow + minPhysHi) / 2) * minAPS)
-	iStats.PhysDps.Max    := Round(((maxPhysLow + maxPhysHi) / 2) * maxAPS)
+	iStats.PhysDps.Min    := Floor(((minPhysLow + minPhysHi) / 2) * minAPS)
+	iStats.PhysDps.Max    := Ceil(((maxPhysLow + maxPhysHi) / 2) * maxAPS)
 	iStats.EleDps         := {}
 	iStats.EleDps.Name    := "Elemental Dps"
 	iStats.EleDps.Value   := Stats.EleDps
-	iStats.EleDps.Min     := TradeFunc_CalculateEleDps(min_affixFlatFireLow, max_affixFlatFireLow, min_affixFlatColdLow, max_affixFlatColdLow, min_affixFlatLightningLow, max_affixFlatLightningLow, minAPS)
-	iStats.EleDps.Max     := TradeFunc_CalculateEleDps(min_affixFlatFireHi, max_affixFlatFireHi, min_affixFlatColdHi, max_affixFlatColdHi, min_affixFlatLightningHi, max_affixFlatLightningHi, maxAPS)
+	iStats.EleDps.Min     := Floor(TradeFunc_CalculateEleDps(min_affixFlatFireLow, max_affixFlatFireLow, min_affixFlatColdLow, max_affixFlatColdLow, min_affixFlatLightningLow, max_affixFlatLightningLow, minAPS))
+	iStats.EleDps.Max     := Ceil(TradeFunc_CalculateEleDps(min_affixFlatFireHi, max_affixFlatFireHi, min_affixFlatColdHi, max_affixFlatColdHi, min_affixFlatLightningHi, max_affixFlatLightningHi, maxAPS))
 	
 	debugOutput .= "Phys DPS: " iStats.PhysDps.Value "`n" "Phys Min: " iStats.PhysDps.Min "`n" "Phys Max: " iStats.PhysDps.Max "`n" "EleDps: " iStats.EleDps.Value "`n" "Ele Min: " iStats.EleDps.Min "`n" "Ele Max: "  iStats.EleDps.Max
 
 	If (TradeOpts.Debug) {
 		;console.log(debugOutput)
 	}
+	SetFormat, FloatFast, 5.2
+	
 	Return iStats
 }
 
@@ -1088,6 +1097,7 @@ TradeFunc_CalculateEleDps(fireLo, fireHi, coldLo, coldHi, lightLo, lightHi, aps)
 		;console.log("((" fireLo " + " fireHi " + " coldLo " + " coldHi " + " lightLo " + " lightHi ") / 2) * " aps " )")
 	}
 	dps := ((fireLo + fireHi + coldLo + coldHi + lightLo + lightHi) / 2) * aps
+	dps := Round(dps, 1)
 	
 	return dps
 }
