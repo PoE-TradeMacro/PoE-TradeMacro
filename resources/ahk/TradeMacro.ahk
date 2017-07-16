@@ -209,9 +209,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	
 	If (Item.IsLeagueStone) {
-		ItemData.Affixes := TradeFunc_AddCustomModsToLeaguestone(ItemData.Affixes)
+		ItemData.Affixes := TradeFunc_AddCustomModsToLeaguestone(ItemData.Affixes, Item.Charges)
 	}
-	
+
 	; check if the item implicit mod is an enchantment or corrupted. retrieve this mods data.
 	Enchantment := false
 	Corruption  := false
@@ -502,14 +502,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}			
 		}
 		
-		temp_name := "(leaguestone) Currently has # Charges"
-		If (not TradeFunc_FindModInRequestParams(RequestParams, temp_name)) {
-			modParam := new _ParamMod()
-			modParam.mod_name := "(leaguestone) Currently has # Charges"
-			modParam.mod_min  := Item.Charges.Current
-			modParam.mod_max  := Item.Charges.Current
-			RequestParams.modGroups[1].AddMod(modParam)
-			Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
+		If (Item.Charges.max > 1) {
+			temp_name := "(leaguestone) Currently has # Charges"
+			If (not TradeFunc_FindModInRequestParams(RequestParams, temp_name)) {
+				modParam := new _ParamMod()
+				modParam.mod_name := "(leaguestone) Currently has # Charges"
+				modParam.mod_min  := Item.Charges.Current
+				modParam.mod_max  := Item.Charges.Current
+				RequestParams.modGroups[1].AddMod(modParam)
+				Item.UsedInSearch.Charges:= "Charges: " Item.Charges.Current
+			}
 		}
 	}
 	
@@ -752,12 +754,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
 
-TradeFunc_AddCustomModsToLeaguestone(ItemAffixes) {
+TradeFunc_AddCustomModsToLeaguestone(ItemAffixes, Charges) {
 	If (Item.AreaMonsterLevelReq.lvl) {
 		ItemAffixes .= "`nCan only be used in Areas with Monster Level " Item.AreaMonsterLevelReq.lvl " or below"
 	}
 	
-	ItemAffixes .= "`nCurrently has " Item.Charges.Current " Charges"
+	If (Charges.max > 1) {
+		ItemAffixes .= "`nCurrently has " Item.Charges.Current " Charges"	
+	}	
 	
 	return ItemAffixes
 }
@@ -2307,7 +2311,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 				mods.push(tempMod)
 			}
 		}
-	}	
+	}
 
 	For key, val in Affixes {
 		If (!val or RegExMatch(val, "i)---")) {
@@ -2368,7 +2372,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 			Index++			
 		}
 	}
-	
+
 	mods := CreatePseudoMods(mods, True)
 
 	tempItem		:= {}
@@ -2396,7 +2400,7 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 
 	; use this to control search order (which group is more important)
 	For k, imod in _item.mods {
-		; check total and then implicits first If mod is implicit, otherwise check later
+		; check total and then implicits first if mod is implicit, otherwise check later
 		If (_item.mods[k].type == "implicit" and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["[total] mods"], _item.mods[k])			
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
@@ -2434,14 +2438,13 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
 		}
 	}
-	
+
 	Return _item
 }
 
 ; Add poe.trades mod names to the items mods to use as POST parameter
 TradeFunc_GetItemsPoeTradeUniqueMods(_item) {	
 	mods := TradeGlobals.Get("ModsData")
-	
 	For k, imod in _item.mods {	
 		_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["unique explicit"], _item.mods[k])
 		If (StrLen(_item.mods[k]["param"]) < 1) {
@@ -2464,18 +2467,18 @@ TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 	Return _item
 }
 
-; find mod in modgroup and Return its name
-TradeFunc_FindInModGroup(modgroup, needle) {	
+; find mod in modgroup and return its name
+TradeFunc_FindInModGroup(modgroup, needle) {
 	matches := []
 	editedNeedle := ""
-
+	
 	For j, mod in modgroup {
 		s  := Trim(RegExReplace(mod, "i)\(pseudo\)|\(total\)|\(crafted\)|\(implicit\)|\(explicit\)|\(enchant\)|\(prophecy\)|\(leaguestone\)", ""))
 		s  := RegExReplace(s, "# ?to ? #", "#")
 		s  := TradeUtils.CleanUp(s)		
 		ss := TradeUtils.CleanUp(ss)
 		ss := Trim(needle.name)
-		;matches "1 to" in for example "adds 1 to (20-40) lightning damage"
+		; matches "1 to" in for example "adds 1 to (20-40) lightning damage"
 		ss := RegExReplace(ss, "\d+ ?to ?#", "#")		
 		ss := RegExReplace(ss, "Monsters' skills Chain # additional times", "Monsters' skills Chain 2 additional times")
 		editedNeedle := ss
@@ -3327,7 +3330,7 @@ AdvancedOpenSearchOnPoeTrade:
 	TradeFunc_Main(true, false, true)
 return
 
-TradeFunc_ResetGUI(){
+TradeFunc_ResetGUI() {
 	Global 
 	Loop {
 		If (TradeAdvancedModMin%A_Index% or TradeAdvancedParam%A_Index%) {
@@ -3337,7 +3340,7 @@ TradeFunc_ResetGUI(){
 			TradeAdvancedModMax%A_Index%	:=
 			TradeAdvancedModName%A_Index%	:=
 		}
-		Else If (A_Index >= 20){
+		Else If (A_Index >= 20) {
 			TradeAdvancedStatCount :=
 			break
 		}
@@ -3350,7 +3353,7 @@ TradeFunc_ResetGUI(){
 			TradeAdvancedStatMin%A_Index%		:=
 			TradeAdvancedStatMax%A_Index%		:=
 		}
-		Else If (A_Index >= 20){
+		Else If (A_Index >= 20) {
 			TradeAdvancedModCount := 
 			break
 		}
@@ -3369,7 +3372,7 @@ TradeFunc_ResetGUI(){
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
 
-TradeFunc_HandleGuiSubmit(){
+TradeFunc_HandleGuiSubmit() {
 	Global 
 
 	Gui, SelectModsGui:Submit
