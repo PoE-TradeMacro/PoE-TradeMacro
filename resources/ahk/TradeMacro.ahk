@@ -672,7 +672,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	
 	Payload := RequestParams.ToPayload()
 
-	ShowToolTip("Running search...")
+	If (openSearchInBrowser) {
+		ShowToolTip("Opening search in your browser...")
+	} Else {
+		ShowToolTip("Requesting search results...")
+	}
 	
 	ParsingError	:= ""
 	currencyUrl	:= ""
@@ -3881,8 +3885,6 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 			RequestParams.corrupted := "x"
 		}		
 		Item.UsedInSearch.Corruption := CustomSearchCorrupted
-
-		ShowToolTip("Running search...")
 		
 		Payload := RequestParams.ToPayload()
 		If (openInBrowser) {
@@ -3892,6 +3894,7 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 			TradeFunc_OpenUrlInBrowser(ParsedUrl1)
 		}
 		Else {
+			ShowToolTip("Requesting search results...")
 			Html := TradeFunc_DoPostRequest(Payload)
 			ParsedData := TradeFunc_ParseHtml(Html, Payload)
 			SetClipboardContents(ParsedData)
