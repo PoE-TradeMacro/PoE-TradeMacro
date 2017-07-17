@@ -1220,8 +1220,6 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	cfduid      := TradeGlobals.Get("cfduid")
 	cfClearance := TradeGlobals.Get("cfClearance")
 
-	useGzipCompression := true
-
 	postData := payload
 	payLength:= StrLen(payload)
 	reqHeaders =
@@ -1248,66 +1246,9 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	If (openSearchInBrowser) {
 		options .= "`nNO_AUTO_REDIRECT"
 	}
-	If (useGzipCompression) {
-		options .= "Compressed"
-	}
-
+	
 	html := ""
 	html := PoEScripts_Download("http://poe.trade/search", ioData := postData, ioHdr := reqHeaders, options, false)
-	
-	/*
-	ComObjError(0)
-	Encoding := "utf-8"
-     ; Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
-	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-	If (openSearchInBrowser) {
-		HttpObj.Option(6) := False
-	}    
-	
-	HttpObj.Open("POST","http://poe.trade/search")
-	HttpObj.SetRequestHeader("Host","poe.trade")	
-	HttpObj.SetRequestHeader("Connection","keep-alive")
-	HttpObj.SetRequestHeader("Content-Length",StrLen(payload))
-	HttpObj.SetRequestHeader("Cache-Control","max-age=0")
-	HttpObj.SetRequestHeader("Origin","http://poe.trade")
-	HttpObj.SetRequestHeader("Upgrade-Insecure-Requests","1")
-	HttpObj.SetRequestHeader("User-Agent", UserAgent)
-	HttpObj.SetRequestHeader("Content-type","application/x-www-form-urlencoded")
-	HttpObj.SetRequestHeader("Accept","text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	HttpObj.SetRequestHeader("Referer","http://poe.trade/")
-
-	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
-    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip;q=0,deflate;q=0") ; disables compression
-    ;HttpObj.SetRequestHeader("Accept-Encoding","gzip, deflate")
-    ;HttpObj.SetRequestHeader("Accept-Language","en-US,en;q=0.8")    
-	HttpObj.SetRequestHeader("Cookie","__cfduid=" cfduid "; cf_clearance=" cfClearance)
-	HttpObj.Send(payload)
-	retCode := HttpObj.WaitForResponse()	; EMPTY = no response
-	
-
-	Try {				
-		If Encoding {
-			oADO          := ComObjCreate("adodb.stream")
-			oADO.Type     := 1
-			oADO.Mode     := 3
-			oADO.Open()
-			oADO.Write(HttpObj.ResponseBody)
-			oADO.Position := 0
-			oADO.Type     := 2
-			oADO.Charset  := Encoding
-			html := oADO.ReadText()
-			oADO.Close()
-		}
-	} Catch e {			
-		html := HttpObj.ResponseText
-		If (TradeOpts.Debug) {
-			MsgBox % e
-		}
-	}
-	
-	If A_LastError
-		MsgBox % A_LastError
-	*/
 	
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
