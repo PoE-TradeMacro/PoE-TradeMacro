@@ -678,11 +678,17 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ShowToolTip("Requesting search results...")
 	}
 	
+	TimestampLast		:= A_Tickcount	
+	RequestEnd	:=
+	ParsingStart	:=
+	ParsingEnd	:=
+	
 	ParsingError	:= ""
 	currencyUrl	:= ""
 	If (Item.IsCurrency and !Item.IsEssence) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
-			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)	
+			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)
+			RequestEnd	:= A_TickCount	
 			If (error) {
 				ParsingError := Html
 			}
@@ -697,8 +703,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}
 	}
-	Else If (not openSearchInBrowser) {
-		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)	
+	Else If (not openSearchInBrowser) {		
+		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)
+		RequestEnd	:= A_TickCount		
 	}
 	
 	If (openSearchInBrowser) {		
@@ -723,6 +730,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	Else If (Item.isCurrency and !Item.IsEssence) {
 		; Default currency search
+		ParsingStart	:= A_TickCount
 		If (!TradeOpts.AlternativeCurrencySearch) {
 			ParsedData := TradeFunc_ParseCurrencyHtml(Html, Payload, ParsingError)
 		}
@@ -730,8 +738,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			ParsedData := TradeFunc_ParseAlternativeCurrencySearch(Item.Name, Payload)
 		}
+		ParsingEnd	:= A_TickCount
 		
-		;SetClipboardContents(ParsedData)		
 		SetClipboardContents("")
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
@@ -747,14 +755,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			Item.UsedInSearch.SearchType := "Default" 
 		}
+		ParsingStart	:= A_TickCount
 		ParsedData := TradeFunc_ParseHtml(Html, Payload, iLvl, Enchantment, isItemAgeRequest)
+		ParsingEnd	:= A_TickCount
 		
-		;SetClipboardContents(ParsedData)		
 		SetClipboardContents("")
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
-	}    
-
+	}
+	console.log("Request duration: " RequestEnd - TimestampLast "`nParsing after: " ParsingStart - RequestEnd "`nParsing duration : " ParsingEnd - ParsingStart)
+	
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
 
@@ -1210,25 +1220,25 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	cfduid      := TradeGlobals.Get("cfduid")
 	cfClearance := TradeGlobals.Get("cfClearance")
 
-	/* Not working yet, no response
+	useGzipCompression := true
+
 	postData := payload
 	payLength:= StrLen(payload)
 	reqHeaders =
 		(LTrim
-			Content-type: application/html
 			Host: poe.trade
 			Connection: keep-alive
 			Content-Length: %payLength%
 			Cache-Control: max-age=0
 			Origin: http://poe.trade
-			Upgrade-Insecure-Requests: 1
+			Upgrade-Insecure-Requests: 1			
 			Content-type: application/x-www-form-urlencoded
 			Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
 			Referer: http://poe.trade/
 		)
 	If (StrLen(UserAgent)) {
-		options .= "`nUser-Agent: " UserAgent
-		options .= "`nCookie: __cfduid= " cfduid "; cf_clearance= " cfClearance
+		reqHeaders .= "`nUser-Agent: " UserAgent
+		reqHeaders .= "`nCookie: __cfduid= " cfduid "; cf_clearance= " cfClearance
 	}
 	options =
 		(LTrim
@@ -1236,16 +1246,19 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 			Method: POST
 		)
 	If (openSearchInBrowser) {
-		options .= "`nNO_AUTO_REDIRECT" 
+		options .= "`nNO_AUTO_REDIRECT"
+	}
+	If (useGzipCompression) {
+		options .= "Compressed"
 	}
 
 	html := ""
 	html := PoEScripts_Download("http://poe.trade/search", ioData := postData, ioHdr := reqHeaders, options, false)
-	*/
-		
+	
+	/*
 	ComObjError(0)
 	Encoding := "utf-8"
-    ;Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
+     ; Reference in making POST requests - http://stackoverflow.com/questions/158633/how-can-i-send-an-http-post-request-to-a-server-from-excel-using-vba
 	HttpObj := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 	If (openSearchInBrowser) {
 		HttpObj.Option(6) := False
@@ -1294,12 +1307,11 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	
 	If A_LastError
 		MsgBox % A_LastError
+	*/
 	
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
-		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt		
-		Out_HEADERS := "Search Finished.`n`n Return Code: " retCode "`n Content Length: " StrLen(html) "`n`nHTTP/1.1 " HttpObj.Status " " HttpObj.StatusText "`n" HttpObj.GetAllResponseHeaders()	
-		console.log(Out_HEADERS)
+		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
 	}
 	
 	Return, html
@@ -1391,7 +1403,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\DebugSearchOutput.txt
-		console.log("Search finished. Returned content length: " StrLen(html))
+		;console.log("Search finished. Returned content length: " StrLen(html))
 	}
 	
 	Return, html
