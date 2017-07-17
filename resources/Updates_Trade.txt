@@ -5,7 +5,7 @@ The following is a list of what has been updated, starting with 1.1.0
 Rewrote AdditionalMacros.txt:
 	Hotkeys can be set and enabled/disabled via global variables.
 	You can completely disable the entire file with all it's hotkeys in the settings menu (ItemInfo tab).
-Added a subfolder "CustomMacros" in the user directory:
+Added a subfolder "CustomMacros" to the user directory:
 	This folder is now being created on script start, all files (.txt, .ahk) in there will be appended to AdditionalMacros/TradeMacro.
 	You can still edit AdditionalMacros, but also add your own macros as seperate files.	
 
