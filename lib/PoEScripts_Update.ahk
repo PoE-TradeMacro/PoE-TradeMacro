@@ -488,7 +488,7 @@ DownloadRelease(url, project, ByRef savePath) {
 	
 	postData := ""
 	reqHeaders := []
-	options := "SaveAs: " %savePath%	
+	options := "SaveAs: " savePath
 	response := PoEScripts_Download(url, ioData := postData, ioHdr := reqHeaders, options, true, true, true)
 	SplashTextOff
 	

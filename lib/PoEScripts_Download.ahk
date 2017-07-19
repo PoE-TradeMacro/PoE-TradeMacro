@@ -65,7 +65,7 @@
 	Else If (not e.what) {
 		; check returned request headers
 		ioHdr := ParseReturnedHeaders(html)
-		If (not RegExMatch(html, "curl: Saved to filename", match)) {
+		If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK")) {
 			MsgBox, 16,, % "Error downloading file to " SavePath
 			Return "Error: Wrong Status"
 		}
