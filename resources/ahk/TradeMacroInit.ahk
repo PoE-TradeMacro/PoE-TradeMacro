@@ -24,7 +24,10 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-trade-bl.ico
 Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
 
-TradeFunc_StartSplashScreen()
+argumentSkipSplash = %6%
+If (not argumentSkipSplash) {
+	TradeFunc_StartSplashScreen()	
+}
 
 ; empty clipboard on start to fix first search searching random stuff
 Clipboard := ""

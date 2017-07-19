@@ -25,7 +25,7 @@
 	}
 	
 	e := {}
-	Try {		
+	Try {
 		commandData	:= curl
 		commandHdr	:= curl
 		If (binaryDL) {
