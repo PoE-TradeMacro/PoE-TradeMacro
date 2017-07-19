@@ -1,6 +1,5 @@
 ﻿#Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\zip.ahk
-#Include, %A_ScriptDir%\lib\WinHttpRequest.ahk
 
 PoEScripts_Update(user, repo, ReleaseVersion, ShowUpdateNotification, userDirectory, isDevVersion, skipSelection, skipBackup, SplashScreenTitle = "") {
 	status := GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirectory, isDevVersion, skipSelection, skipBackup, SplashScreenTitle)
@@ -15,7 +14,7 @@ GetLatestRelease(user, repo, ReleaseVersion, ShowUpdateNotification, userDirecto
 	url			:= "https://api.github.com/repos/" . user . "/" . repo . "/releases"
 	downloadUrl	:= "https://github.com/" . user . "/" . repo . "/releases"
 	html			:= ""
-		
+
 	postData		:= ""
 	options		:= ""
 	
