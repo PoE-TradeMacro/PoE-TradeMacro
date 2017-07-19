@@ -1250,9 +1250,9 @@ TradeFunc_CheckBrowserPath(path, showMsg) {
 TradeFunc_ParseSearchFormOptions() {
 	FileRead, html, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 	
-	RegExMatch(html, "i)(var)?\s*(items_types\s*=\s*{.*})", match)
+	RegExMatch(html, "i)(var)?\s*(items_types\s*=\s*{.*})", match)	
 	itemTypes := RegExReplace(match2, "i)items_types\s*=", "{""items_types"" :")
-	itemTypes .= "}"	
+	itemTypes .= "}"
 	parsedJSON := JSON.Load(itemTypes)
 
 	availableLeagues := []
@@ -1547,21 +1547,18 @@ TradeFunc_GetLatestDotNetInstallation() {
 }
 
 TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", useCookies=false) {	
-	postData		:= ""
-	reqHeaders	:= ""
+	postData		:= ""	
+	options		:= ""
+	
+	reqHeaders	:= []
 	If (StrLen(UserAgent)) {
-		reqHeaders .= "`nUser-Agent: " UserAgent
-		reqHeaders .= "`nCookie: __cfduid= " cfduid "; cf_clearance= " cfClearance
+		reqHeaders.push("User-Agent: " UserAgent)
+		reqHeaders.push("Cookie: __cfduid= " cfduid "; cf_clearance= " cfClearance)
 	}
-	options =
-		(LTrim
-			Charset: UTF-8
-			Method: GET
-		)
-
+	
 	html := ""
 	html := PoEScripts_Download(Url, ioData := postData, ioHdr := reqHeaders, options, false)
-	
+
 	; pathofexile.com link in page footer (forum thread)
 	RegExMatch(html, "i)pathofexile", match)
 	If (match) {
