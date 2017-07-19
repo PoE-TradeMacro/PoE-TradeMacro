@@ -10,6 +10,8 @@
 		binaryDL	= file download (zip for example)
 		errorMsg	= optional error message, will be added to default message
 	*/
+	
+	; https://curl.haxx.se/download.html -> https://bintray.com/vszakats/generic/curl/
 	curl		:= A_ScriptDir "\lib\curl.exe"	
 	headers	:= ""
 	For key, val in ioHdr {
