@@ -50,7 +50,9 @@
 		If (not binaryDL) {
 			; get headers in seperate request
 			ioHdr := StdOutStream(commandHdr """" url payload """") ; add payload to url since you can't use the -I argument with POST requests
-		}		
+		}
+		console.log(commandData """" url """")
+		console.log(commandHdr """" url payload """")
 	} Catch e {
 		
 	}
@@ -58,9 +60,9 @@
 	If (!binaryDL) {
 		; Use fallback download if curl fails
 		If ((not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK") or e.what) and useFallback) {
-			DownloadFallback(url, html, e, critical, errorMsg)
+			DownloadFallback(url, html, e, critical, ioHdr)
 		} Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK" and e.what)) {
-			ThrowError(e)
+			ThrowError(e, false, ioHdr)
 		}
 	}
 	; handle binary file downloads
@@ -80,7 +82,7 @@
 			html := "Error: Different Size"
 		}
 	} Else {
-		ThrowError(e)
+		ThrowError(e, false, ioHdr)
 	}
 	
 	Return html
@@ -132,9 +134,9 @@ DownloadFallback(url, ByRef html, e, critical, errorMsg) {
 }
 
 ThrowError(e, critical = false, errorMsg = "") {
-	msg := "Exception thrown (download)!"
-	msg := StrLen(errorMsg) ? msg "`n`n" errorMsg : msg
-	msg .= "`n`nwhat: " e.what "`nfile: " e.file "`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra	
+	msg := "Exception thrown (download)!"	
+	msg .= "`n`nwhat: " e.what "`nfile: " e.file "`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra
+	msg .= StrLen(errorMsg) ? msg "`n`n" errorMsg : msg
 	
 	If (critical) {
 		MsgBox, 16,, % msg

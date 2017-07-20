@@ -1298,7 +1298,7 @@ TradeFunc_DownloadDataFiles() {
 		If (FileExist(filePath) and not ErrorLevel) {
 			FileMove, %filePath%.bak, %bakDir%\%file%
 		}
-		Else {
+		Else {			
 			FileMove, %dir%\%file%.bak, %dir%\%file%
 		}
 		ErrorLevel := 0
