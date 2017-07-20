@@ -1289,8 +1289,10 @@ TradeFunc_DownloadDataFiles() {
 	Loop % files.Length() {
 		file := files[A_Index]
 		filePath = %dir%\%file%
-		FileCopy, %filePath%, %filePath%.bak
-		UrlDownloadToFile, %url%%file%, %filePath%
+		FileCopy, %filePath%, %filePath%.bak		
+		output := PoEScripts_Download(url . file, postData := "", reqHeaders := "", options := "", false)
+		FileDelete, %filePath%
+		FileAppend, %output%, %filePath%
 		
 		Sleep,50
 		If (FileExist(filePath) and not ErrorLevel) {

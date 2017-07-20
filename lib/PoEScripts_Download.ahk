@@ -34,8 +34,8 @@
 				commandData .= "-o """ SavePath """ "	; set target destination and name
 			}
 		} Else {
-			commandData .= " -Ls --compressed "			; follow redirects
-			commandHdr  .= " -ILs "						; follow redirects
+			commandData .= " -Lks --compressed "			; follow redirects
+			commandHdr  .= " -ILks "						; follow redirects
 		}
 		If (StrLen(headers)) {
 			commandData .= headers
@@ -50,7 +50,7 @@
 		If (not binaryDL) {
 			; get headers in seperate request
 			ioHdr := StdOutStream(commandHdr """" url payload """") ; add payload to url since you can't use the -I argument with POST requests
-		}
+		}		
 	} Catch e {
 		
 	}
