@@ -63,7 +63,6 @@ PoEScripts_CopyFolder(source, destination) {
 	; recreate hashes file
 	FileDelete, %destination%\data\FileHashes.txt
 	For key, hash in hashes_new {
-		MsgBox, %key% = %hash%`n, %destination%\data\FileHashes.txt
 		; make sure to write only hashes for files that we wanted to copy over, removing files not included in the new release
 		For k, fileName in files {
 			If (key == fileName) {
