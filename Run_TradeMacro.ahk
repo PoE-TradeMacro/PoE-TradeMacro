@@ -33,17 +33,23 @@ userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 
 PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, A_ScriptDir, projectName)
 
+sourceMacroDirectory	:= A_ScriptDir . "\resources\ahk\CustomMacros"
+userMacroDirectory		:= userDirectory . "\CustomMacros"
+overwrittenFiles		.= PoEScripts_CopyFolder(sourceMacroDirectory, userMacroDirectory)
+
 /*	 
 	merge all scripts into `_TradeMacroMain.ahk` and execute it.
 */
-FileRead, info		, %A_ScriptDir%\resources\ahk\POE-ItemInfo.ahk
-FileRead, tradeInit	, %A_ScriptDir%\resources\ahk\TradeMacroInit.ahk
-FileRead, trade	, %A_ScriptDir%\resources\ahk\TradeMacro.ahk
-FileRead, addMacros	, %userDirectory%\AdditionalMacros.txt
+FileRead, info, %A_ScriptDir%\resources\ahk\POE-ItemInfo.ahk
+FileRead, tradeInit, %A_ScriptDir%\resources\ahk\TradeMacroInit.ahk
+FileRead, trade, %A_ScriptDir%\resources\ahk\TradeMacro.ahk
+FileRead, addMacros, %userDirectory%\AdditionalMacros.txt
 
+includes	:= IncludeCustomMacros(userDirectory)
+includes	:= "`n`r`n`r" . includes . "`n`r`n`r"
 info		:= "`n`r`n`r" . info . "`n`r`n`r"
 addMacros	:= "#IfWinActive Path of Exile ahk_class POEWindowClass ahk_group PoEexe" . "`n`r`n`r" . addMacros . "`n`r`n`r"
-addMacros	.= AppendCustomMacros(userDirectory)
+
 
 CloseScript("_TradeMacroMain.ahk")
 CloseScript("_ItemInfoMain.ahk")
@@ -51,6 +57,7 @@ FileDelete, %A_ScriptDir%\_TradeMacroMain.ahk
 FileDelete, %A_ScriptDir%\_ItemInfoMain.ahk
 FileCopy,   %A_ScriptDir%\resources\ahk\TradeMacroInit.ahk, %A_ScriptDir%\_TradeMacroMain.ahk
 
+FileAppend, %includes%	, %A_ScriptDir%\_TradeMacroMain.ahk
 FileAppend, %info%		, %A_ScriptDir%\_TradeMacroMain.ahk
 FileAppend, %addMacros%	, %A_ScriptDir%\_TradeMacroMain.ahk
 FileAppend, %trade%		, %A_ScriptDir%\_TradeMacroMain.ahk
@@ -103,9 +110,7 @@ StartSplashScreen() {
 
 AppendCustomMacros(userDirectory)
 {
-	If(!InStr(FileExist(userDirectory "\CustomMacros"), "D")) {
-		FileCreateDir, %userDirectory%\CustomMacros\
-	}
+	PoEScripts_CreateDirIfNotExist(userDirectory "\CustomMacros")
 	
 	appendedMacros := "`n`n"
 	extensions := "txt,ahk"
@@ -120,4 +125,23 @@ AppendCustomMacros(userDirectory)
 	}
 	
 	Return appendedMacros
+}
+
+; Allows custom macros to use auto-execute section
+IncludeCustomMacros(userDirectory) 
+{
+	PoEScripts_CreateDirIfNotExist(userDirectory "\CustomMacros")
+	
+	includeMacros := ";---------------------- CustomMacros --------------------------------`n"
+	extensions := "txt,ahk"
+	Loop %userDirectory%\CustomMacros\* 
+	{
+		If A_LoopFileExt in %extensions% 
+		{
+			includeMacros .= "#Include, " A_LoopFileFullPath "`n"
+		}
+	}
+	includeMacros .= ";--------------------------------------------------------------------`n"
+	
+	Return includeMacros
 }

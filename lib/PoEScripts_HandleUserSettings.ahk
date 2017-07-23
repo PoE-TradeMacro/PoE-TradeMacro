@@ -19,9 +19,66 @@ PoEScripts_HandleUserSettings(ProjectName, BaseDir, External, FilesToCopy, sourc
 	Return fileList
 }
 
+PoEScripts_CopyFolder(source, destination) {
+	tempObj 		:= PoEScripts_ParseFileHashes(Dir)
+	hashes_old	 	:= tempObj.static
+	hashes_new		:= Object()
+	overwrittenFiles := ""
+	
+	PoEScripts_CreateDirIfNotExist(destination)
+	
+	; get source files
+	files := Object()
+	Loop %source%\* {
+		files.push(A_LoopFileName)
+	}
+	
+	; iterate source files
+	For i, fileName in files {
+		sourceFile := source . "\" . fileName
+		destinationFile := destination . "\" . fileName 
+		If (FileExist(destinationFile)) {
+			sourceHash 		:= HashFile(sourceFile, "SHA")
+			destinationHash	:= HashFile(destinationFile, "SHA")
+			dataHash		:= hashes_old[fileName]
+			
+			If (sourceHash != destinationHash And sourceHash != dataHash) {
+				; set new hash
+				hashes_new[fileName] := sourceHash
+				; backup
+				backup 		:= destination . "\backup"
+				backupFile	:= backup . "\" . fileName
+				PoEScripts_CreateDirIfNotExist(backup)
+				FileMove, %destinationFile%, %backupFile%, 1
+				; overwrite
+				overwrittenFiles .= fileName
+				FileCopy, %sourceFile%, %destinationFile%, 1
+			}
+		}
+		else {
+			FileCopy, %sourceFile%, %destinationFile%, 1
+		}
+	}
+	
+	; recreate hashes file
+	FileDelete, %destination%\data\FileHashes.txt
+	For key, hash in hashes_new {
+		MsgBox, %key% = %hash%`n, %destination%\data\FileHashes.txt
+		; make sure to write only hashes for files that we wanted to copy over, removing files not included in the new release
+		For k, fileName in files {
+			If (key == fileName) {
+				PoEScripts_CreateDirIfNotExist(destination "\data")
+				FileAppend, %key% = %hash%`n, %destination%\data\FileHashes.txt
+			}			
+		}
+	}
+	
+	Return overwrittenFiles
+}
+
 PoEScripts_CopyFiles(Files, sourceDir, Dir, ByRef fileList) {
 	tempObj 		:= PoEScripts_ParseFileHashes(Dir)
-	hashes 		:= tempObj.dynamic
+	hashes 			:= tempObj.dynamic
 	hashes_locked 	:= tempObj.static
 
 	fileNames := []
