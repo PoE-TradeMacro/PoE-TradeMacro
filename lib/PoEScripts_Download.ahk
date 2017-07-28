@@ -51,8 +51,6 @@
 			; get headers in seperate request
 			ioHdr := StdOutStream(commandHdr """" url payload """") ; add payload to url since you can't use the -I argument with POST requests
 		}
-		console.log(commandData """" url """")
-		console.log(commandHdr """" url payload """")
 	} Catch e {
 		
 	}
@@ -136,7 +134,7 @@ DownloadFallback(url, ByRef html, e, critical, errorMsg) {
 ThrowError(e, critical = false, errorMsg = "") {
 	msg := "Exception thrown (download)!"	
 	msg .= "`n`nwhat: " e.what "`nfile: " e.file "`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra
-	msg .= StrLen(errorMsg) ? msg "`n`n" errorMsg : msg
+	msg := StrLen(errorMsg) ? msg "`n`n" errorMsg : msg
 	
 	If (critical) {
 		MsgBox, 16,, % msg
