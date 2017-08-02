@@ -18,10 +18,15 @@
 		headers .= "-H """ val """ "
 	}	
 	
+	PreventErrorMsg := false
 	If (StrLen(options)) {
-		RegExMatch(options, "i)SaveAs:[ \t]*\K[^\r\n]+", SavePath)
-		commandData	.= " " options " "
-		commandHdr	.= ""
+		If (RegExMatch(options, "i)SaveAs:[ \t]*\K[^\r\n]+", SavePath)) {
+			commandData	.= " " options " "
+			commandHdr	.= ""	
+		}
+		If (RegExMatch(options, "i)PreventErrorMsg")) {
+			PreventErrorMsg := true
+		}
 	}
 	
 	e := {}
@@ -45,6 +50,9 @@
 			commandData .= "--data """ ioData """ "
 		}
 
+		If (InStr(ioHdr, "poe.trade")) {
+			msgbox % commandHdr """" url payload """"
+		}
 		; get data
 		html	:= StdOutStream(commandData """" url """")
 		If (not binaryDL) {
@@ -58,9 +66,9 @@
 	If (!binaryDL) {
 		; Use fallback download if curl fails
 		If ((not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK") or e.what) and useFallback) {
-			DownloadFallback(url, html, e, critical, ioHdr)
+			DownloadFallback(url, html, e, critical, ioHdr, PreventErrorMsg)
 		} Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK" and e.what)) {
-			ThrowError(e, false, ioHdr)
+			ThrowError(e, false, ioHdr, PreventErrorMsg)
 		}
 	}
 	; handle binary file downloads
@@ -80,7 +88,7 @@
 			html := "Error: Different Size"
 		}
 	} Else {
-		ThrowError(e, false, ioHdr)
+		ThrowError(e, false, ioHdr, PreventErrorMsg)
 	}
 	
 	Return html
@@ -117,7 +125,7 @@ ParseReturnedHeaders(output) {
 }
 
 ; only works if no post data required/not downloading for example .zip files
-DownloadFallback(url, ByRef html, e, critical, errorMsg) {
+DownloadFallback(url, ByRef html, e, critical, errorMsg, PreventErrorMsg = false) {
 	ErrorLevel := 0
 	fileName := RandomStr() . ".txt"
 	
@@ -125,13 +133,17 @@ DownloadFallback(url, ByRef html, e, critical, errorMsg) {
 	If (!ErrorLevel) {
 		FileRead, html, %A_ScriptDir%\temp\%fileName%
 		FileDelete, %A_ScriptDir%\temp\%fileName%
-	} Else {
+	} Else If (!PreventErrorMsg) {
 		SplashTextOff
 		ThrowError(e, critical, errorMsg)
 	}
 }
 
-ThrowError(e, critical = false, errorMsg = "") {
+ThrowError(e, critical = false, errorMsg = "", PreventErrorMsg = false) {
+	If (PreventErrorMsg) {
+		Return
+	}
+	
 	msg := "Exception thrown (download)!"	
 	msg .= "`n`nwhat: " e.what "`nfile: " e.file "`nline: " e.line "`nmessage: " e.message "`nextra: " e.extra
 	msg := StrLen(errorMsg) ? msg "`n`n" errorMsg : msg

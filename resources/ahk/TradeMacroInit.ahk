@@ -1309,9 +1309,10 @@ TradeFunc_DownloadDataFiles() {
 TradeFunc_CheckIfCloudFlareBypassNeeded() {
 	; call this function without parameters to access poe.trade without cookies
 	; if it succeeds we don't need any cookies
-	If (!TradeFunc_TestCloudflareBypass("http://poe.trade")) {
+	If (!TradeFunc_TestCloudflareBypass("http://poe.trade", "", "", "", false, "PreventErrorMsg")) {
 		TradeFunc_ReadCookieData()
 	}
+
 }
 
 TradeFunc_ReadCookieData() {
@@ -1321,7 +1322,7 @@ TradeFunc_ReadCookieData() {
 		If (TradeOpts.DeleteCookies) {
 			TradeFunc_ClearWebHistory()
 		}
-	
+
 		; compile the c# script reading the user-agent and cookies
 		DotNetFrameworkInstallation := TradeFunc_GetLatestDotNetInstallation()
 		DotNetFrameworkPath := DotNetFrameworkInstallation.Path
@@ -1388,7 +1389,7 @@ TradeFunc_ReadCookieData() {
 		ErrorLevel := 1
 	}
 	If (StrLen(TradeGlobals.Get("cfClearance")) < 1) {
-		ErrorLevel := 1
+		;ErrorLevel := 1
 	}	
 	
 	; test connection to poe.trade
@@ -1552,9 +1553,10 @@ TradeFunc_GetLatestDotNetInstallation() {
 	Return LatestDotNetInstall
 }
 
-TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", useCookies=false) {	
+TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", useCookies=false, PreventErrorMsg = "") {	
 	postData		:= ""	
 	options		:= ""
+	options		.= "`n" PreventErrorMsg
 	
 	reqHeaders	:= []
 	If (StrLen(UserAgent)) {
@@ -1574,7 +1576,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		Return 1
 	}
 	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK")) {
-		TradeFunc_HandleConnectionFailure()
+		TradeFunc_HandleConnectionFailure(reqHeaders)
 	}
 	Else {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt
@@ -1582,13 +1584,20 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	}
 }
 
-TradeFunc_HandleConnectionFailure() {	
+TradeFunc_HandleConnectionFailure(reqHeaders) {	
 	SplashTextOff
+	Gui, ConnectionFailure:Add, Text, x10 cRed, Request to poe.trade using cookies failed!
 	
-	Gui, ConnectionFailure:Add, Text, cRed, Request to poe.trade failed!
+	headers := ""
+	For key, val in reqHeaders {
+		headers .= val "`n"
+	}	
+	Gui, ConnectionFailure:Add, Edit, r6 ReadOnly w430, %headers%
+	LinkText := "Take a look at the <a href=""https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/FAQ"">FAQ</a>."
+	Gui, ConnectionFailure:Add, Link, x10 y+10 cBlue, % LinkText
 	
 	Gui, ConnectionFailure:Show, w450 xCenter yCenter, Connection Failure
-	ControlFocus, Reset Proxy, Connection Failure
+	ControlFocus, %LinkText%, Connection Failure
 	WinWaitClose, Connection Failure
 	
 	SplashTextOn, 300, 20, PoE-TradeMacro, No poe.trade connection possible, exiting script...
