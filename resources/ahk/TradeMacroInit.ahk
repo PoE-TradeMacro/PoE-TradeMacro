@@ -1559,10 +1559,22 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	options		.= "`n" PreventErrorMsg
 	
 	reqHeaders	:= []
+	authHeaders	:= []
 	If (StrLen(UserAgent)) {
 		reqHeaders.push("User-Agent: " UserAgent)
+		authHeaders.push("User-Agent: " UserAgent)
 		reqHeaders.push("Cookie: __cfduid= " cfduid "; cf_clearance= " cfClearance)
+		authHeaders.push("Cookie: __cfduid= " cfduid "; cf_clearance= " cfClearance)
+	} Else {
+		reqHeaders.push("User-Agent:Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36")
 	}
+	
+	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+	reqHeaders.push("Accept-Encoding:gzip, deflate")
+	reqHeaders.push("Accept-Language:de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4")
+	reqHeaders.push("Connection:keep-alive")
+	reqHeaders.push("Host:poe.trade")
+	reqHeaders.push("Upgrade-Insecure-Requests:1")	
 	
 	html := ""
 	html := PoEScripts_Download(Url, ioData := postData, ioHdr := reqHeaders, options, false)
@@ -1576,7 +1588,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		Return 1
 	}
 	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK")) {
-		TradeFunc_HandleConnectionFailure(reqHeaders)
+		TradeFunc_HandleConnectionFailure(authHeaders)
 	}
 	Else {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt

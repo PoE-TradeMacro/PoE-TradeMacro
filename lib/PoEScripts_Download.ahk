@@ -39,8 +39,8 @@
 				commandData .= "-o """ SavePath """ "	; set target destination and name
 			}
 		} Else {
-			commandData .= " -Lks --compressed "			; follow redirects
-			commandHdr  .= " -ILks "						; follow redirects
+			commandData .= " -Lks --compressed "			
+			commandHdr  .= " -ILks "
 		}
 		If (StrLen(headers)) {
 			commandData .= headers
@@ -50,14 +50,17 @@
 			commandData .= "--data """ ioData """ "
 		}
 
-		If (InStr(ioHdr, "poe.trade")) {
-			msgbox % commandHdr """" url payload """"
-		}
 		; get data
 		html	:= StdOutStream(commandData """" url """")
-		If (not binaryDL) {
-			; get headers in seperate request
-			ioHdr := StdOutStream(commandHdr """" url payload """") ; add payload to url since you can't use the -I argument with POST requests
+		
+		; get return headers in seperate request
+		If (not binaryDL) {			
+			If (StrLen(ioData)) {
+				commandHdr := commandHdr """" url "?" ioData """"		; add payload to url since you can't use the -I argument with POST requests
+			} Else {
+				commandHdr := commandHdr """" url """"
+			}
+			ioHdr := StdOutStream(commandHdr)		
 		}
 	} Catch e {
 		
