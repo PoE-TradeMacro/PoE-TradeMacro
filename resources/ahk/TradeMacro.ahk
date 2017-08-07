@@ -3812,8 +3812,8 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 		If (openInBrowser) {
 			ShowToolTip("")
 			Html := TradeFunc_DoPostRequest(Payload, true)
-			RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
-			TradeFunc_OpenUrlInBrowser(ParsedUrl1)
+			RegExMatch(Html, "i)href=""\/(search\/.*?)\/live", ParsedUrl)
+			TradeFunc_OpenUrlInBrowser("http://poe.trade/" ParsedUrl1)
 		}
 		Else {
 			ShowToolTip("Requesting search results...")
