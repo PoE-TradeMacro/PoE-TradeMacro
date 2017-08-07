@@ -1,9 +1,0 @@
-HTTP/1.1 200 OK
-Date: Mon, 07 Aug 2017 10:28:32 GMT
-Content-Type: text/html; charset=utf-8
-Connection: keep-alive
-X-Frame-Options: DENY
-Content-Encoding: gzip
-Server: cloudflare-nginx
-CF-RAY: 38a98cb692d90f69-FRA
-
