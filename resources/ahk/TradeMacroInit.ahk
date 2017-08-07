@@ -1557,7 +1557,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	postData		:= ""	
 	options		:= ""
 	options		.= "`n" PreventErrorMsg
-	
+	return 0
 	reqHeaders	:= []
 	authHeaders	:= []
 	If (StrLen(UserAgent)) {
@@ -1587,7 +1587,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		TradeFunc_ParseSearchFormOptions()	
 		Return 1
 	}
-	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK")) {
+	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK") and not StrLen(PreventErrorMsg)) {
 		TradeFunc_HandleConnectionFailure(authHeaders, ioHdr)
 	}
 	Else {
@@ -1610,7 +1610,7 @@ TradeFunc_HandleConnectionFailure(authHeaders, returnedHeaders) {
 	headers .= "`n--------------------------------`n`n" returnedHeaders
 
 	Gui, ConnectionFailure:Add, Edit, r6 ReadOnly w430, %headers%
-	LinkText := "Take a look at the <a href=""https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/FAQ"">FAQ</a>."
+	LinkText := "Take a look at the <a href=""https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/FAQ"">FAQ</a>, especially the parts mentioning ""cURL""."
 	Gui, ConnectionFailure:Add, Link, x10 y+10 cBlue, % LinkText
 	
 	Gui, ConnectionFailure:Add, Button, gContinueAtConnectionFailure, Continue  
