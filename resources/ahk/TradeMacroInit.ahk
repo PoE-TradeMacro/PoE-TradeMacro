@@ -1588,7 +1588,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		Return 1
 	}
 	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK")) {
-		TradeFunc_HandleConnectionFailure(authHeaders)
+		TradeFunc_HandleConnectionFailure(authHeaders, ioHdr)
 	}
 	Else {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt
@@ -1596,25 +1596,28 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	}
 }
 
-TradeFunc_HandleConnectionFailure(reqHeaders) {	
+TradeFunc_HandleConnectionFailure(authHeaders, returnedHeaders) {	
 	SplashTextOff
 	Gui, ConnectionFailure:Add, Text, x10 cRed, Request to poe.trade using cookies failed!
-	
+	text := "You can continue to run PoE-TradeMacro with limited functionality.`nThe only searches that will probably work are the ones`ndirectly openend in your browser."
+	Gui, ConnectionFailure:Add, Text, , % text
+
 	headers := ""
-	For key, val in reqHeaders {
+	For key, val in authHeaders {
 		headers .= val "`n"
-	}	
+	}
+	
+	headers .= "`n--------------------------------`n`n" returnedHeaders
+
 	Gui, ConnectionFailure:Add, Edit, r6 ReadOnly w430, %headers%
 	LinkText := "Take a look at the <a href=""https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/FAQ"">FAQ</a>."
 	Gui, ConnectionFailure:Add, Link, x10 y+10 cBlue, % LinkText
 	
+	Gui, ConnectionFailure:Add, Button, gContinueAtConnectionFailure, Continue  
+	Gui, ConnectionFailure:Add, Edit, ReadOnly, sdsd
 	Gui, ConnectionFailure:Show, w450 xCenter yCenter, Connection Failure
+
 	ControlFocus, %LinkText%, Connection Failure
-	WinWaitClose, Connection Failure
-	
-	SplashTextOn, 300, 20, PoE-TradeMacro, No poe.trade connection possible, exiting script...
-	Sleep, 3000
-	ExitApp
 }
 
 TradeFunc_ClearWebHistory() {

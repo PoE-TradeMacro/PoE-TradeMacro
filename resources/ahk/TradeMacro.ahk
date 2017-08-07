@@ -3668,6 +3668,10 @@ CloseCookieWindow:
 	Gui, CookieWindow:Cancel
 Return
 
+ContinueAtConnectionFailure:
+	Gui, ConnectionFailure:Cancel
+Return
+
 OpenCookieFile:
 	Run, %A_ScriptDir%\temp\cookie_data.txt
 Return
