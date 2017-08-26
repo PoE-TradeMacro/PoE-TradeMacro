@@ -965,7 +965,7 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("Pre-Fill Min-Values", "x287 yp+25 w110 h40", TradeOpts.PrefillMinValue, "PrefillMinValue", "PrefillMinValueH")
 	AddToolTip(PrefillMinValueH, "Automatically fill the min-values in the advanced search GUI.")
 	
-	GuiAddCheckbox("Pre-Fill Max-Values", "x407 yp0 w110 h40", TradeOpts.PrefillMinValue, "PrefillMaxValue", "PrefillMaxValueH")
+	GuiAddCheckbox("Pre-Fill Max-Values", "x407 yp0 w110 h40", TradeOpts.PrefillMaxValue, "PrefillMaxValue", "PrefillMaxValueH")
 	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
 	
 	; option group start

@@ -8639,75 +8639,76 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; ### Generate Basic Stats pseudos
 	If (lifeFlat > 0) {
 		temp := {}
-		temp.values := [lifeFlat]
-		temp.name_orig := "+" . lifeFlat . " to maximum Life"
-		temp.name     := "+# to maximum Life"
-		temp.simplifiedName := "xToMaximumLife"
+		temp.values		:= [lifeFlat]
+		temp.name_orig		:= "+" . lifeFlat . " to maximum Life"
+		temp.name			:= "+# to maximum Life"
+		temp.simplifiedName	:= "xToMaximumLife"
+		temp.exception		:= true
 		temp.possibleParentSimplifiedNames := ["xToMaximumLife"]
 		tempMods.push(temp)
 	}
 	If (manaFlat > 0) {
 		temp := {}
-		temp.values := [manaFlat]
-		temp.name_orig := "+" . manaFlat . " to maximum Mana"
-		temp.name     := "+# to maximum Mana"
-		temp.simplifiedName := "xToMaximumMana"
+		temp.values		:= [manaFlat]
+		temp.name_orig		:= "+" . manaFlat . " to maximum Mana"
+		temp.name			:= "+# to maximum Mana"
+		temp.simplifiedName	:= "xToMaximumMana"
 		temp.possibleParentSimplifiedNames := ["xToMaximumMana"]
 		tempMods.push(temp)
 	}
 	If (energyShieldFlat > 0) {
 		temp := {}
-		temp.values := [energyShieldFlat]
-		temp.name_orig := "+" . energyShieldFlat . " to maximum Energy Shield"
-		temp.name     := "+# to maximum Energy Shield"
-		temp.simplifiedName := "xToMaximumEnergyShield"
+		temp.values		:= [energyShieldFlat]
+		temp.name_orig		:= "+" . energyShieldFlat . " to maximum Energy Shield"
+		temp.name			:= "+# to maximum Energy Shield"
+		temp.simplifiedName	:= "xToMaximumEnergyShield"
 		temp.possibleParentSimplifiedNames := ["xToMaximumEnergyShield"]
 		tempMods.push(temp)
 	}
 	If (energyShieldPercent > 0) {
 		temp := {}
-		temp.values := [energyShieldPercent]
-		temp.name_orig := energyShieldPercent . "% increased maximum Energy Shield"
-		temp.name     := "#% increased maximum Energy Shield"
-		temp.simplifiedName := "xIncreasedMaximumEnergyShield"
+		temp.values		:= [energyShieldPercent]
+		temp.name_orig		:= energyShieldPercent . "% increased maximum Energy Shield"
+		temp.name			:= "#% increased maximum Energy Shield"
+		temp.simplifiedName	:= "xIncreasedMaximumEnergyShield"
 		temp.possibleParentSimplifiedNames := ["xIncreasedMaximumEnergyShield"]
 		tempMods.push(temp)
 	}
 	; ### Generate rarity item found pseudo
 	If (rarityItemsFoundPercent > 0) {
 		temp := {}
-		temp.values := [rarityItemsFoundPercent]
-		temp.name_orig := rarityItemsFoundPercent . "% increased Rarity of items found"
-		temp.name     := "#% increased Rarity of items found"
-		temp.simplifiedName := "xIncreasedRarityOfItemsFound"
+		temp.values		:= [rarityItemsFoundPercent]
+		temp.name_orig		:= rarityItemsFoundPercent . "% increased Rarity of items found"
+		temp.name			:= "#% increased Rarity of items found"
+		temp.simplifiedName	:= "xIncreasedRarityOfItemsFound"
 		temp.possibleParentSimplifiedNames := ["xIncreasedRarityOfItemsFound"]
 		tempMods.push(temp)
 	}
 	; ### Generate crit pseudos	
 	If (globalCritChancePercent > 0) {
 		temp := {}
-		temp.values := [globalCritChancePercent]
-		temp.name_orig := globalCritChancePercent . "% increased Global Critical Strike Chance"
-		temp.name     := "#% increased Global Critical Strike Chance"
-		temp.simplifiedName := "xIncreasedGlobalCriticalChance"
+		temp.values		:= [globalCritChancePercent]
+		temp.name_orig		:= globalCritChancePercent . "% increased Global Critical Strike Chance"
+		temp.name			:= "#% increased Global Critical Strike Chance"
+		temp.simplifiedName	:= "xIncreasedGlobalCriticalChance"
 		temp.possibleParentSimplifiedNames := ["xIncreasedGlobalCriticalChance"]
 		tempMods.push(temp)
 	}
 	If (globalCritMultiplierPercent > 0) {
 		temp := {}
-		temp.values := [globalCritMultiplierPercent]
-		temp.name_orig := "+" . globalCritMultiplierPercent . "% to Global Critical Strike Multiplier"
-		temp.name     := "+#% to Global Critical Strike Multiplier"
-		temp.simplifiedName := "xIncreasedGlobalCriticalMultiplier"
+		temp.values		:= [globalCritMultiplierPercent]
+		temp.name_orig		:= "+" . globalCritMultiplierPercent . "% to Global Critical Strike Multiplier"
+		temp.name			:= "+#% to Global Critical Strike Multiplier"
+		temp.simplifiedName	:= "xIncreasedGlobalCriticalMultiplier"
 		temp.possibleParentSimplifiedNames := ["xIncreasedGlobalCriticalMultiplier"]
 		tempMods.push(temp)
 	}
 	If (critChanceForSpellsPercent > 0) {
 		temp := {}
-		temp.values := [critChanceForSpellsPercent]
-		temp.name_orig := critChanceForSpellsPercent . "% increased Critical Strike Chance for Spells"
-		temp.name     := "#% increased Critical Strike Chance for Spells"
-		temp.simplifiedName := "xIncreasedCriticalSpells"
+		temp.values		:= [critChanceForSpellsPercent]
+		temp.name_orig		:= critChanceForSpellsPercent . "% increased Critical Strike Chance for Spells"
+		temp.name			:= "#% increased Critical Strike Chance for Spells"
+		temp.simplifiedName	:= "xIncreasedCriticalSpells"
 		temp.possibleParentSimplifiedNames := ["xIncreasedCriticalSpells"]
 		tempMods.push(temp)
 	}
@@ -8715,10 +8716,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	For i, attribute in ["Strength", "Dexterity", "Intelligence"] {
 		If ( %attribute%Flat > 0 ) {
 			temp := {}
-			temp.values := [%attribute%Flat]
-			temp.name_orig := "+" .  %attribute%Flat . " to " .  attribute
-			temp.name     := "+# to " . attribute
-			temp.simplifiedName := "xTo" attribute
+			temp.values		:= [%attribute%Flat]
+			temp.name_orig		:= "+" .  %attribute%Flat . " to " .  attribute
+			temp.name			:= "+# to " . attribute
+			temp.simplifiedName	:= "xTo" attribute
 			temp.possibleParentSimplifiedNames := ["xTo" attribute, "xToAllAttributes"]
 			tempMods.push(temp)
 		}
@@ -8726,10 +8727,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; cumulative all attributes mods
 	If (allAttributesFlat > 0) {
 		temp := {}
-		temp.values := [allAttributesFlat]
-		temp.name_orig := "+" . allAttributesFlat . " to all Attributes"
-		temp.name     := "+#% to all Attributes"
-		temp.simplifiedName := "xToAllAttributes"
+		temp.values		:= [allAttributesFlat]
+		temp.name_orig		:= "+" . allAttributesFlat . " to all Attributes"
+		temp.name			:= "+#% to all Attributes"
+		temp.simplifiedName	:= "xToAllAttributes"
 		temp.possibleParentSimplifiedNames := ["xToAllAttributes"]
 		tempMods.push(temp)
 	}
@@ -8738,10 +8739,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	For i, element in ["Fire", "Cold", "Lightning"] {
 		If ( %element%Resist > 0) {
 			temp := {}
-			temp.values := [%element%Resist]
-			temp.name_orig := "+" %element%Resist "% to " element " Resistance"
-			temp.name     := "+#% to " element " Resistance"
-			temp.simplifiedName := "xTo" element "Resistance"
+			temp.values		:= [%element%Resist]
+			temp.name_orig		:= "+" %element%Resist "% to " element " Resistance"
+			temp.name			:= "+#% to " element " Resistance"
+			temp.simplifiedName	:= "xTo" element "Resistance"
 			temp.possibleParentSimplifiedNames := ["xTo" element "Resistance", "xToAllElementalResistances"]
 			temp.hideForTradeMacro := true
 			tempMods.push(temp)
@@ -8749,10 +8750,11 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	}
 	If (toAllElementalResist > 0) {
 		temp := {}
-		temp.values := [toAllElementalResist]
-		temp.name_orig := "+" . toAllElementalResist . "% to all Elemental Resistances"
-		temp.name     := "+#% to all Elemental Resistances"
-		temp.simplifiedName := "xToAllElementalResistances"
+		temp.values		:= [toAllElementalResist]
+		temp.name_orig		:= "+" . toAllElementalResist . "% to all Elemental Resistances"
+		temp.name			:= "+#% to all Elemental Resistances"
+		temp.simplifiedName	:= "xToAllElementalResistances"
+		temp.exception		:= true
 		temp.possibleParentSimplifiedNames := ["xToAllElementalResistances"]
 		temp.hideForTradeMacro := true
 		tempMods.push(temp)
@@ -8760,18 +8762,20 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; Note that total resistances are calculated values with no possible child mods, so they have no simplifiedName
 	If (totalElementalResistance > 0) {
 		temp := {}
-		temp.values := [totalElementalResistance]
-		temp.name_orig := "+" . totalElementalResistance . "% total Elemental Resistance"
-		temp.name     := "+#% total Elemental Resistance"
+		temp.values		:= [totalElementalResistance]
+		temp.name_orig		:= "+" . totalElementalResistance . "% total Elemental Resistance"
+		temp.name			:= "+#% total Elemental Resistance"
+		temp.exception		:= true
 		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
 		tempMods.push(temp)
 	}
 	; without chaos resist, this would have the same value as totalElementalResistance
 	If ((totalResistance > 0) AND (chaosResist > 0)) {
 		temp := {}
-		temp.values := [totalResistance]
-		temp.name_orig := "+" . totalResistance . "% total Resistance"
-		temp.name     := "+#% total Resistance"
+		temp.values		:= [totalResistance]
+		temp.name_orig		:= "+" . totalResistance . "% total Resistance"
+		temp.name			:= "+#% total Resistance"
+		temp.exception		:= true
 		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances", "xToChaosResistance"]
 		tempMods.push(temp)
 	}
@@ -8779,40 +8783,40 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; ### Generate remaining pseudos derived from attributes
 	If (meleePhysDmgGlobal_Percent > 0) {
 		temp := {}
-		temp.values := [meleePhysDmgGlobal_Percent]
-		temp.name_orig := meleePhysDmgGlobal_Percent . "% increased Melee Physical Damage"
-		temp.name     := "#% increased Melee Physical Damage"
-		temp.simplifiedName := "xIncreasedMeleePhysicalDamage"
+		temp.values		:= [meleePhysDmgGlobal_Percent]
+		temp.name_orig		:= meleePhysDmgGlobal_Percent . "% increased Melee Physical Damage"
+		temp.name			:= "#% increased Melee Physical Damage"
+		temp.simplifiedName	:= "xIncreasedMeleePhysicalDamage"
 		temp.possibleParentSimplifiedNames := ["xIncreasedMeleePhysicalDamage"]
 		temp.hideForTradeMacro := true
 		tempMods.push(temp)
 	}
 	If (energyShieldPercentGlobal > 0) {
 		temp := {}
-		temp.values := [energyShieldPercentGlobal]
-		temp.name_orig := energyShieldPercentGlobal . "% increased Energy Shield (Global)"
-		temp.name     := "#% increased Energy Shield (Global)"
-		temp.simplifiedName := "xIncreasedEnergyShieldPercentGlobal"
+		temp.values		:= [energyShieldPercentGlobal]
+		temp.name_orig		:= energyShieldPercentGlobal . "% increased Energy Shield (Global)"
+		temp.name			:= "#% increased Energy Shield (Global)"
+		temp.simplifiedName	:= "xIncreasedEnergyShieldPercentGlobal"
 		temp.possibleParentSimplifiedNames := ["xIncreasedEnergyShieldPercentGlobal"]
 		temp.hideForTradeMacro := true
 		tempMods.push(temp)
 	}
 	If (evasionRatingPercentGlobal > 0) {
 		temp := {}
-		temp.values := [evasionRatingPercentGlobal]
-		temp.name_orig := evasionRatingPercentGlobal . "% increased Evasion (Global)"
-		temp.name     := "#% increased Evasion (Global)"
-		temp.simplifiedName := "xIncreasedEvasionRatingPercentGlobal"
+		temp.values		:= [evasionRatingPercentGlobal]
+		temp.name_orig		:= evasionRatingPercentGlobal . "% increased Evasion (Global)"
+		temp.name			:= "#% increased Evasion (Global)"
+		temp.simplifiedName	:= "xIncreasedEvasionRatingPercentGlobal"
 		temp.possibleParentSimplifiedNames := ["xIncreasedEvasionRatingPercentGlobal"]
 		temp.hideForTradeMacro := true
 		tempMods.push(temp)
 	}
 	If (accuracyRatingFlat > 0) {
 		temp := {}
-		temp.values := [accuracyRatingFlat]
-		temp.name_orig := "+" . accuracyRatingFlat . " to Accuracy Rating"
-		temp.name     := "+# to Accuracy Rating"
-		temp.simplifiedName := "xToAccuracyRating"
+		temp.values		:= [accuracyRatingFlat]
+		temp.name_orig		:= "+" . accuracyRatingFlat . " to Accuracy Rating"
+		temp.name			:= "+# to Accuracy Rating"
+		temp.simplifiedName	:= "xToAccuracyRating"
 		temp.possibleParentSimplifiedNames := ["xToAccuracyRating"]
 		tempMods.push(temp)
 	}
@@ -8821,10 +8825,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; spell damage global
 	If (spellDmg_Percent > 0) {
 		temp := {}
-		temp.values := [spellDmg_Percent]
-		temp.name_orig := spellDmg_Percent . "% increased Spell Damage"
-		temp.name     := "#% increased Spell Damage"
-		temp.simplifiedName := "xIncreasedSpellDamage"
+		temp.values		:= [spellDmg_Percent]
+		temp.name_orig		:= spellDmg_Percent . "% increased Spell Damage"
+		temp.name			:= "#% increased Spell Damage"
+		temp.simplifiedName	:= "xIncreasedSpellDamage"
 		temp.possibleParentSimplifiedNames := ["xIncreasedSpellDamage"]
 		tempMods.push(temp)
 	}
@@ -8840,10 +8844,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			If (%element%Dmg_%dmgType%Percent > 0) {
 				modSuffix := percentDamageModSuffixes[j]
 				temp := {}
-				temp.values := [%element%Dmg_%dmgType%Percent]
-				temp.name_orig := %element%Dmg_%dmgType%Percent "% increased " element . modSuffix
-				temp.name     := "#% increased " element . modSuffix
-				temp.simplifiedName := "xIncreased" element "Damage" dmgType
+				temp.values		:= [%element%Dmg_%dmgType%Percent]
+				temp.name_orig		:= %element%Dmg_%dmgType%Percent "% increased " element . modSuffix
+				temp.name			:= "#% increased " element . modSuffix
+				temp.simplifiedName	:= "xIncreased" element "Damage" dmgType
 				temp.possibleParentSimplifiedNames := ["xIncreased" element "Damage" dmgType, "xIncreased" element "Damage"]
 				( element != "Elemental" ) ? temp.possibleParentSimplifiedNames.push("xIncreasedElementalDamage" dmgType) : False
 				( dmgType == "Spells" ) ? temp.possibleParentSimplifiedNames.push("xIncreasedSpellDamage") : False
@@ -8853,10 +8857,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			If (%element%Dmg_%dmgType%FlatLow > 0) {
 				modSuffix := flatDamageModSuffixes[j]
 				temp := {}
-				temp.values := [%element%Dmg_%dmgType%FlatLow, %element%Dmg_%dmgType%FlatHi]
-				temp.name_orig := "Adds " %element%Dmg_%dmgType%FlatLow " to " %element%Dmg_%dmgType%FlatHi " " element " Damage" modSuffix
-				temp.name     := "Adds # " element " Damage" modSuffix
-				temp.simplifiedName := "xFlat" element "Damage" dmgType
+				temp.values		:= [%element%Dmg_%dmgType%FlatLow, %element%Dmg_%dmgType%FlatHi]
+				temp.name_orig		:= "Adds " %element%Dmg_%dmgType%FlatLow " to " %element%Dmg_%dmgType%FlatHi " " element " Damage" modSuffix
+				temp.name			:= "Adds # " element " Damage" modSuffix
+				temp.simplifiedName	:= "xFlat" element "Damage" dmgType
 				temp.possibleParentSimplifiedNames := ["xFlat" element "Damage" dmgType]
 				( element != "Elemental" ) ? temp.possibleParentSimplifiedNames.push("xFlatElementalDamage" dmgType) : False
 				tempMods.push(temp)
@@ -8877,7 +8881,6 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; remove pseudos that are shadowed by an original mod ONLY if they have the same name
 	; inherited values not taken into account for this 1st pass
 	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' ) BUT don't have same name
-
 	allPseudoMods := []
 	For i, tempMod in tempMods {
 		higher := true
@@ -8892,8 +8895,6 @@ CreatePseudoMods(mods, returnAllMods := False) {
 				If (mod.values[2]) {
 					mv := (mod.values[1] + mod.values[2]) / 2
 					tv := (tempMod.values[1] + tempMod.values[2]) / 2
-					
-					console.log(mod.name "`n" mv " - " tv)
 					If (tv <= mv) {
 						higher := false
 					}
@@ -8906,13 +8907,13 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		If (higher) {
+		If (higher or tempMod.exception) {
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			allPseudoMods.push(tempMod)
 		}
 	}
-	
+
 	; 2nd pass
 	; now we remove pseudos that are shadowed by an original mod they inherited from
 	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' )
@@ -8946,13 +8947,13 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		If (higher) {
+		If (higher or tempMod.exception) {
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			tempPseudoMods.push(tempMod)
 		}
 	}
-	
+
 	; 3rd Pass
 	; same logic as above but compare pseudo with other pseudos
 	; remove pseudos that are shadowed by another pseudo
@@ -8991,7 +8992,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		If (higher){
+		If (higher) {
 			tempPseudoA.isVariable:= false
 			tempPseudoA.type := "pseudo"
 			pseudoMods.push(tempPseudoA)
