@@ -10013,7 +10013,7 @@ StdOutStream(sCmd, Callback = "") {
 
 ReadConsoleOutputFromFile(command, fileName) {
 	file := "temp\" fileName ".txt"
-	RunWait %comspec% /c "chcp 1251 /f >nul 2>&1 & %command% > %file%", , Hide
+	RunWait %comspec% /c "chcp 1251 /f >nul 2>&1 & %command% > %file%", , Hide  
 	FileRead, io, %file%
 	
 	Return io
@@ -10412,7 +10412,7 @@ AdvancedItemInfoExt() {
 			itemTextBase64 := ""
 			FileDelete, %A_ScriptDir%\temp\itemText.txt
 			FileAppend, %CBContents%, %A_ScriptDir%\temp\itemText.txt, utf-8
-			command		:= "certutil -encode -f %cd%\temp\itemText.txt %cd%\temp\base64ItemText.txt & type %cd%\temp\base64ItemText.txt"
+			command		:= "certutil -encode -f ""%cd%\temp\itemText.txt"" ""%cd%\temp\base64ItemText.txt"" & type ""%cd%\temp\base64ItemText.txt"""
 			itemTextBase64	:= ReadConsoleOutputFromFile(command, "encodeToBase64.txt")
 			itemTextBase64	:= Trim(RegExReplace(itemTextBase64, "i)-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|77u/", ""))				
 			itemTextBase64	:= UriEncode(itemTextBase64)
