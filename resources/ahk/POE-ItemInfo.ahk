@@ -10457,7 +10457,7 @@ LookUpAffixes() {
 				ev		:= RegExMatch(ItemData.Stats, "i)Evasion Rating") ? "ev" : ""
 				ar		:= RegExMatch(ItemData.Stats, "i)Armour") ? "ar" : ""
 				es		:= RegExMatch(ItemData.Stats, "i)Energy Shield") ? "es" : ""
-				RegExMatch(Item.SubType, "i)Axe|Sword|Mace|Sceptre|Bow|Staff|Wand|Fish", weapon)
+				RegExMatch(Item.SubType, "i)Axe|Sword|Mace|Sceptre|Bow|Staff|Wand|Fish|Dagger", weapon)
 				RegExMatch(Item.Subtype, "i)Amulet|Ring|Belt|Quiver|Flask", accessory)
 				RegExMatch(Item.Subtype, "i)Cobalt|Viridian|Crimson", jewel)
 				
