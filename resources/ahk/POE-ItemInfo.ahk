@@ -569,6 +569,7 @@ Menu, Tray, NoStandard
 Menu, Tray, Add, Reload Script (Use only this), ReloadScript
 Menu, Tray, Add ; Separator
 Menu, Tray, Add, About..., MenuTray_About
+Menu, Tray, Add, Show all assigned Hotkeys, ShowAssignedHotkeys
 Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE Item Info Settings"), ShowSettingsUI
 Menu, Tray, Add, Check for updates, CheckForUpdates
 Menu, Tray, Add, Update Notes, ShowUpdateNotes
@@ -578,7 +579,6 @@ Menu, Tray, Add, Open User Folder, EditOpenUserSettings
 Menu, Tray, Add ; Separator
 Menu, Tray, Standard
 Menu, Tray, Default, % Globals.Get("SettingsUITitle", "PoE Item Info Settings")
-
 
 IfNotExist, %A_ScriptDir%\data
 {
@@ -8766,7 +8766,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		temp.name_orig		:= "+" . totalElementalResistance . "% total Elemental Resistance"
 		temp.name			:= "+#% total Elemental Resistance"
 		temp.exception		:= true
-		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances"]
+		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLightningResistance", "xToAllElementalResistances"]
 		tempMods.push(temp)
 	}
 	; without chaos resist, this would have the same value as totalElementalResistance
@@ -8776,7 +8776,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		temp.name_orig		:= "+" . totalResistance . "% total Resistance"
 		temp.name			:= "+#% total Resistance"
 		temp.exception		:= true
-		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLignthningResistance", "xToAllElementalResistances", "xToChaosResistance"]
+		temp.possibleParentSimplifiedNames := ["xToFireResistance", "xToColdResistance", "xToLightningResistance", "xToAllElementalResistances", "xToChaosResistance"]
 		tempMods.push(temp)
 	}
 	
@@ -8907,7 +8907,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		If (higher or tempMod.exception) {
+		If (higher or (tempMod.exception and returnAllMods)) {
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			allPseudoMods.push(tempMod)
@@ -8917,12 +8917,11 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; 2nd pass
 	; now we remove pseudos that are shadowed by an original mod they inherited from
 	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' )
- 
 	tempPseudoMods := []
 	For i, tempMod in allPseudoMods {
 		higher := true
 		For j, mod in mods {
-			; check if its a parent mod
+			; check if it's a parent mod
 			isParentMod := false
 			For k, simplifiedName in tempMod.possibleParentSimplifiedNames {
 				If (mod.simplifiedName == simplifiedName) {
@@ -8931,7 +8930,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 				}
 			}
 			If ( isParentMod ) {
-				; check if its a flat damage mod
+				; check if it's a flat damage mod
 				If (mod.values[2]) {
 					mv := (mod.values[1] + mod.values[2]) / 2
 					tv := (tempMod.values[1] + tempMod.values[2]) / 2
@@ -8947,7 +8946,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			}
 		}
 		; add the tempMod to pseudos if it has greater values, or no parent
-		If (higher or tempMod.exception) {
+		If (higher or (tempMod.exception and returnAllMods)) {
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
 			tempPseudoMods.push(tempMod)
@@ -10046,6 +10045,39 @@ UriEncode(Uri, Enc = "UTF-8")	{
 	Return, Res
 }
 
+ScriptInfo(Command) {
+	; https://autohotkey.com/boards/viewtopic.php?t=9656
+	; Command must be "ListLines", "ListVars", "ListHotkeys" or "KeyHistory".
+    static hEdit := 0, pfn, bkp
+    if !hEdit {
+        hEdit := DllCall("GetWindow", "ptr", A_ScriptHwnd, "uint", 5, "ptr")
+        user32 := DllCall("GetModuleHandle", "str", "user32.dll", "ptr")
+        pfn := [], bkp := []
+        for i, fn in ["SetForegroundWindow", "ShowWindow"] {
+            pfn[i] := DllCall("GetProcAddress", "ptr", user32, "astr", fn, "ptr")
+            DllCall("VirtualProtect", "ptr", pfn[i], "ptr", 8, "uint", 0x40, "uint*", 0)
+            bkp[i] := NumGet(pfn[i], 0, "int64")
+        }
+    }
+ 
+    if (A_PtrSize=8) {  ; Disable SetForegroundWindow and ShowWindow.
+        NumPut(0x0000C300000001B8, pfn[1], 0, "int64")  ; return TRUE
+        NumPut(0x0000C300000001B8, pfn[2], 0, "int64")  ; return TRUE
+    } else {
+        NumPut(0x0004C200000001B8, pfn[1], 0, "int64")  ; return TRUE
+        NumPut(0x0008C200000001B8, pfn[2], 0, "int64")  ; return TRUE
+    }
+ 
+    static cmds := {ListLines:65406, ListVars:65407, ListHotkeys:65408, KeyHistory:65409}
+    cmds[Command] ? DllCall("SendMessage", "ptr", A_ScriptHwnd, "uint", 0x111, "ptr", cmds[Command], "ptr", 0) : 0
+ 
+    NumPut(bkp[1], pfn[1], 0, "int64")  ; Enable SetForegroundWindow.
+    NumPut(bkp[2], pfn[2], 0, "int64")  ; Enable ShowWindow.
+ 
+    ControlGetText, text,, ahk_id %hEdit%
+    return text
+}
+
 GetContributors(AuthorsPerLine=0)
 {
 	IfNotExist, %A_ScriptDir%\resources\AUTHORS.txt
@@ -10064,6 +10096,62 @@ GetContributors(AuthorsPerLine=0)
 		}
 	}
 	return Authors
+}
+
+ShowAssignedHotkeys() {
+	scriptInfo	:= ScriptInfo("ListHotkeys")
+	hotkeys		:= []
+	
+	Loop, Parse, scriptInfo, `n`r, 
+	{
+		line		:= RegExReplace(A_Loopfield, "[\t]", "|")
+		line		:= RegExReplace(line, "\|(?!\s)", "| ") . "|"
+		fields	:= []
+		
+		If (StrLen(line)) {
+			Pos		:= 0
+			While Pos	:= RegExMatch(line, "i)(.*?\|+)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+				fields.push(Trim(RegExReplace(value1, "\|")))
+			}
+			If (StrLen(fields[1]) and not InStr(fields[1], "--------")) {				
+				hotkeys.push(fields)	
+			}
+		}
+	}
+
+	Gui, ShowHotkeys:Add, Text, , List of this scripts assigned hotkeys.
+	Gui, ShowHotkeys:Default
+	Gui, Font, , Courier New
+	Gui, Font, , Consolas
+	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination	
+	For key, val in hotkeys {	
+		If (key != 1) {
+			LV_Add("", val*)
+			LV_ModifyCol()
+		}
+	}
+	
+	i := 0
+	Loop % LV_GetCount("Column")
+	{
+		i++
+		LV_ModifyCol(a_index,"AutoHdr")
+	}
+	
+	text := "reg: The hotkey is implemented via the operating system's RegisterHotkey() function." . "`n"
+	text .= "reg(no): Same as above except that this hotkey is inactive (due to being unsupported, disabled, or suspended)." . "`n"
+	text .= "k-hook: The hotkey is implemented via the keyboard hook." . "`n"
+	text .= "m-hook: The hotkey is implemented via the mouse hook." . "`n"
+	text .= "2-hooks: The hotkey requires both the hooks mentioned above." . "`n"
+	text .= "joypoll: The hotkey is implemented by polling the joystick at regular intervals." . "`n"
+	text .= "`n"
+	text .= "Enabled: Hotkey is assigned but enabled/disabled [on/off] via the Hotkey command." . "`n"
+	
+	Gui, ShowHotkeys:Add, Text, , % text
+	
+	Gui, ShowHotkeys:Show, w820 xCenter yCenter, Assigned Hotkeys
+	Gui, 1:Default
+	Gui, Font
 }
 
 CloseScripts() {
@@ -10640,6 +10728,10 @@ EditCurrencyRates:
 ReloadScript:
 	scriptName := RegExReplace(Globals.Get("ProjectName"), "i)poe-", "Run_") . ".ahk"
 	Run, "%A_AhkPath%" "%A_ScriptDir%\%scriptName%"
+	return
+	
+ShowAssignedHotkeys:
+	ShowAssignedHotkeys()
 	return
 
 3GuiClose:
