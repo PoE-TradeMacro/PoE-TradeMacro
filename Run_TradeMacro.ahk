@@ -28,8 +28,24 @@ If (InStr(arguments, "-nosplash", 0)) {
 	StartSplashScreen()
 }
 
+/*	 
+	Set ProjectName to create user settings folder in A_MyDocuments
+*/
+projectName := "PoE-TradeMacro"
+
+/*
+	Check some folder permissions
+*/
+If (not FolderWriteAccess(A_MyDocuments . "\" . projectName)) {
+	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
+	ExitApp	
+}
 If (not FolderWriteAccess(A_ScriptDir)) {
-	Msgbox, 4096, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
+	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
+	ExitApp	
+}
+If (not FolderWriteAccess(A_ScriptDir)) {
+	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
 	ExitApp	
 }
 If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {
@@ -41,9 +57,8 @@ If (InStr(A_ScriptDir, A_Desktop)) {
 }
 
 /*	 
-	Set ProjectName to create user settings folder in A_MyDocuments
+	Set some important variables
 */
-projectName			:= "PoE-TradeMacro"
 FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
 overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
