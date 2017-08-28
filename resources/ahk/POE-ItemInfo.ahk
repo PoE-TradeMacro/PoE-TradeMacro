@@ -10419,10 +10419,22 @@ AdvancedItemInfoExt() {
 			itemTextBase64	:= RegExReplace(itemTextBase64, "i)^(%0D)?(%0A)?|((%0D)?(%0A)?)+$", "")
 			url 			:= "http://pathof.info/?item=" itemTextBase64
 			openWith := AssociatedProgram("html")
-			Run, %openWith% -new-tab "%Url%"
+			OpenWebPageWith(openWith, Url)
 		}
 		SuspendPOEItemScript = 0
 	}	
+}
+
+OpenWebPageWith(application, url) {
+	If (InStr(application, "iexplore")) {
+		ie := ComObjCreate("InternetExplorer.Application")
+		ie.Visible:=True
+		ie.Navigate(url)
+	} Else {
+		; while this should work with IE there may be cases where it doesn't
+		Run, "%application%" -new-tab "%Url%"
+	}
+	Return
 }
 
 LookUpAffixes() {
@@ -10479,7 +10491,7 @@ LookUpAffixes() {
 				url		.= prefix "-" suffix ; ".html"
 			}			
 			openWith := AssociatedProgram("html")
-			Run, %openWith% -new-tab "%Url%"
+			OpenWebPageWith(openWith, Url)
 		}
 		
 		Sleep, 10

@@ -1343,11 +1343,11 @@ TradeFunc_OpenUrlInBrowser(Url) {
 	openWith := 
 	If (TradeFunc_CheckBrowserPath(TradeOpts.BrowserPath, false)) {
 		openWith := TradeOpts.BrowserPath
-		Run, %openWith% -new-tab "%Url%"
+		OpenWebPageWith(openWith, Url)
 	}		
 	Else If (TradeOpts.OpenWithDefaultWin10Fix) {
 		openWith := AssociatedProgram("html") 
-		Run, %openWith% -new-tab "%Url%"
+		OpenWebPageWith(openWith, Url)
 	}
 	Else {		
 		Run %Url%

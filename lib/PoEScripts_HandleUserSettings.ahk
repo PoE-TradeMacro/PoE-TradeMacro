@@ -126,6 +126,34 @@ PoEScripts_CreateDirIfNotExist(directory) {
 	}
 }
 
+PoEScripts_CopyFilesAndFolders(SourcePattern, DestinationFolder, DoOverwrite = false) {
+	; Copies all files and folders matching SourcePattern into the folder named DestinationFolder (recursively), skipping empty folders.
+	If (!InStr(FileExist(DestinationFolder), "D")) {
+		count := 0
+		Loop, %SourcePattern%\*.*, 1, 1
+			count++
+		If (count > 0) {
+			FileCreateDir, %DestinationFolder%
+		} Else {
+			Return
+		}
+	}
+	
+	Loop %SourcePattern%\*.*, 1
+	{
+		If (InStr(FileExist(A_LoopFileFullPath), "D")) {
+			CopyFilesAndFolders(A_LoopFileFullPath, DestinationFolder "\" A_LoopFileName, true)
+		} Else {
+			FileCopy, %A_LoopFileFullPath%, %DestinationFolder%, %DoOverwrite%
+			ErrorCount += ErrorLevel
+		}
+		If (ErrorLevel) {
+			MsgBox Could not copy %A_LoopFileFullPath% into %DestinationFolder%
+		}
+	}	
+	Return
+}
+
 PoEScripts_CompareFileHashes(name, sourceHash, hashes_locked) {
 	If (hashes_locked[name] != sourceHash) {
 		Return 1
