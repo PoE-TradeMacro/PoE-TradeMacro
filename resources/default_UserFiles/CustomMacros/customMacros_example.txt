@@ -11,13 +11,20 @@
 		If you want to use one of those hotkeys for your own macro you have to reassign it via the Hotkey
 		command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.			
 		https://autohotkey.com/docs/commands/Hotkey.htm	
-		
+	
+	";" are used to comment single lines
+	
 	COMMENT BLOCK END
 */
 
 CM_ExecuteCustomMacrosCode_Label:
 	/*
 		Don't remove/rename this Label (and this file in general).
+		
+		TLDR:	All code that you want to be executed at script start has to be placed here in this Label.
+				You can reassign hotkeys defined elsewhere via the "hotkey" command.
+				Code that should be triggered by keypress need its own Label/Hotkey declaration outside of this Label.
+		
 		
 		AHK has two ways to execute code, the "normal" way by simply writing it down in the script or via 
 		function/label call. AdditionalMacros and all custom macros are included in ItemInfo/TradeMacro after
@@ -40,6 +47,7 @@ CM_ExecuteCustomMacrosCode_Label:
 			
 			global cmMyVar := false
 		
+		
 		Remember: All code that you want to be executed at script start has to be placed here.
 		
 		COMMENT BLOCK END
@@ -49,10 +57,16 @@ CM_ExecuteCustomMacrosCode_Label:
 Return
 
 CM_MyHotkey:
-	;Label Example that can be assigned via the hotkey command. It will be called when you press the assigned hotkey.
+	/*
+		EXAMPLE of a label that needs a hotkey created/assigned via the "hotkey" command.
+	*/
+	
 	SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}	
 Return
 
-/* commented (disabled) hotkey example without hotkey command (overwriting previously assigned hotkeys is not possible this way).
-F2::SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}
-*/
+/*	
+	EXAMPLE of a commented (disabled), created without the "hotkey" command.
+	Overwriting previously assigned hotkeys is not possible this way, resulting in a "duplicate key" error.
+*/	
+;F2::SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}
+
