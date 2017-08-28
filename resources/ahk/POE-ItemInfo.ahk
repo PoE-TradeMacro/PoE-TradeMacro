@@ -560,6 +560,7 @@ GoSub, FetchCurrencyData
 
 Menu, TextFiles, Add, Additional Macros, EditAdditionalMacros
 Menu, TextFiles, Add, Map Mod Warnings, EditMapModWarnings
+Menu, TextFiles, Add, Custom Macros Example, EditCustomMacrosExample
 
 ; Menu tooltip
 RelVer := Globals.Get("ReleaseVersion")
@@ -574,7 +575,7 @@ Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE Item Info Settings"), Sho
 Menu, Tray, Add, Check for updates, CheckForUpdates
 Menu, Tray, Add, Update Notes, ShowUpdateNotes
 Menu, Tray, Add ; Separator
-Menu, Tray, Add, Edit, :TextFiles
+Menu, Tray, Add, Edit Files, :TextFiles
 Menu, Tray, Add, Open User Folder, EditOpenUserSettings
 Menu, Tray, Add ; Separator
 Menu, Tray, Standard
@@ -10731,6 +10732,10 @@ EditAdditionalMacros:
 
 EditMapModWarnings:
 	OpenUserDirFile("MapModWarnings.txt")
+	return
+	
+EditCustomMacrosExample:
+	OpenUserDirFile("CustomMacros\customMacros_example.txt")
 	return
 
 EditCurrencyRates:
