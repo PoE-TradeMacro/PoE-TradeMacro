@@ -65,6 +65,8 @@ AM_AssignHotkeys:
 		Hotkey, % AM_AdvancedItemInfo[2]	, AM_AdvancedItemInfo_HKey		, % AM_AdvancedItemInfo[1]
 		Hotkey, % AM_WhoisLastWhisper[2]	, AM_WhoisLastWhisper_HKey		, % AM_WhoisLastWhisper[1]
 	}
+	
+	GoSub, CM_ExecuteCustomMacrosCode_Label
 Return
 
 AM_TogglePOEItemScript_HKey:
