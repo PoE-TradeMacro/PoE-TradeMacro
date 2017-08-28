@@ -13,6 +13,10 @@ If (A_AhkVersion < AHKVersionRequired)
 }
 
 RunAsAdmin()
+If (not FolderWriteAccess(A_ScriptDir)) {
+	Msgbox, 4096, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
+	ExitApp	
+}
 If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-ItemInfo")) {
 	ExitApp	
 }
@@ -135,4 +139,13 @@ ReadFileToMerge(path, fallbackSrcPath = "") {
 		Msgbox, 4096, Critical file read error, The file "%path%" doesn't exist. %fallback%`n`nClosing Script...
 		ExitApp		
 	}	
+}
+
+FolderWriteAccess(Folder) {
+	If InStr( FileExist(Folder), "D" ) {
+		FileAppend,,%Folder%\fa.tmp
+		rval := ! ErrorLevel
+		FileDelete, %Folder%\fa.tmp
+		Return rval 
+	} Return - 1  
 }
