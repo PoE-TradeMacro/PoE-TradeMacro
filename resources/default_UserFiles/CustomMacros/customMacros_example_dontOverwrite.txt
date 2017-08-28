@@ -9,7 +9,7 @@
 		Every hotkey assigned in AdditionalMacros will be assigned no matter if it's set to ON or OFF. It
 		simply won't be triggered if it's off.
 		If you want to use one of those hotkeys for your own macro you have to reassign it via the Hotkey
-		command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.			
+		command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.
 		https://autohotkey.com/docs/commands/Hotkey.htm	
 	
 	";" are used to comment single lines
@@ -37,7 +37,7 @@ CM_ExecuteCustomMacrosCode_Label:
 		
 		
 		Example of reassigning the "F4" hotkey that is assigned in AdditionalMacros:
-			- First of you have to create a label such as this, for example "CM_MyHotkey" (look further down in this script).
+			- First you have to create a label such as this, for example "CM_MyHotkey" (look further down in this script for the example).
 			- Then you use the following code placed here inside this label:
 			
 			Hotkey, F4, CM_MyHotkey		
@@ -65,7 +65,7 @@ CM_MyHotkey:
 Return
 
 /*	
-	EXAMPLE of a commented (disabled), created without the "hotkey" command.
+	EXAMPLE of a commented (disabled) hotkey, created without the "hotkey" command.
 	Overwriting previously assigned hotkeys is not possible this way, resulting in a "duplicate key" error.
 */	
 ;F2::SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}
