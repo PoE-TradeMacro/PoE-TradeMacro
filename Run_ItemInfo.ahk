@@ -22,15 +22,17 @@ projectName := "PoE-ItemInfo"
 /*
 	Check some folder permissions
 */
-If (not FolderWriteAccess(A_MyDocuments . "\" . projectName)) {
-	msg := "The script is not able to write any file to " A_MyDocuments "\" projectName ".`nYour user may not have the necessary permissions.`n"
-	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`nClosing Script..."
+If (not FolderWriteAccess(A_MyDocuments  . "\" . projectName)) {
+	msg := "The script is not able to write any file to " A_MyDocuments  "\" projectName ".`nYour user may not have the necessary permissions.`n"
+	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`n"
+	msg .= "The reason for this can be your AntiVir software blocking Autohotkey from modyfiying files!`n`nClosing Script..."
 	Msgbox, 0x1010, Critical permission error, % msg
 	ExitApp
 }
 If (not FolderWriteAccess(A_ScriptDir)) {
 	msg := "The script is not able to write any file to " A_ScriptDir ".`nYour user may not have the necessary permissions.`n"
-	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`nClosing Script..."
+	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`n"
+	msg .= "The reason for this can be your AntiVir software blocking Autohotkey from modyfiying files!`n`nClosing Script..."
 	Msgbox, 0x1010, Critical permission error, % msg
 	ExitApp
 }
