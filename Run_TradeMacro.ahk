@@ -40,8 +40,8 @@ If (InStr(A_ScriptDir, A_Desktop)) {
 	Set ProjectName to create user settings folder in A_MyDocuments
 */
 projectName			:= "PoE-TradeMacro"
-FilesToCopyToUserFolder	:= ["\resources\config\default_config_trade.ini", "\resources\config\default_config.ini", "\resources\ahk\default_AdditionalMacros.txt", "\resources\ahk\default_MapModWarnings.txt"]
-overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
+FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
+overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 

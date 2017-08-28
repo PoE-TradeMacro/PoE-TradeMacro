@@ -24,9 +24,9 @@ If (InStr(A_ScriptDir, A_Desktop)) {
 /*	 
 	Set ProjectName to create user settings folder in A_MyDocuments
 */
-projectName				:= "PoE-ItemInfo"
-FilesToCopyToUserFolder	:= ["\resources\config\default_config.ini", "\resources\ahk\default_AdditionalMacros.txt", "\resources\ahk\default_MapModWarnings.txt"]
-overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, "", FilesToCopyToUserFolder, A_ScriptDir)
+projectName			:= "PoE-ItemInfo"
+FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
+overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, "", FilesToCopyToUserFolder)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion()
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 

@@ -148,8 +148,8 @@ argumentOverwrittenFiles = %4%
 ; when using the fallback exe we're missing the parameters passed by the merge script
 If (!StrLen(argumentProjectName) > 0) {
 	argumentProjectName		:= "PoE-TradeMacro"
-	FilesToCopyToUserFolder	:= ["\resources\config\default_config_trade.ini", "\resources\config\default_config.ini", "\resources\ahk\default_AdditionalMacros.txt"]
-	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
+	FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
+	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder)
 	argumentIsDevVersion	:= PoEScripts_isDevelopmentVersion()
 	argumentUserDirectory	:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 	
