@@ -6,7 +6,7 @@
 		- To give some examples on how to add your own macros.
 	
 	IMPORTANT NOTICE:
-		Every hotkey assigned in AdditionalMacros will be assigned not matter if it's set to ON or OFF. It will
+		Every hotkey assigned in AdditionalMacros will be assigned no matter if it's set to ON or OFF. It
 		simply won't be triggered if it's off.
 		If you want to use one of those hotkeys for your own macro you have to reassign it via the Hotkey
 		command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.			
@@ -22,7 +22,7 @@ CM_ExecuteCustomMacrosCode_Label:
 		AHK has two ways to execute code, the "normal" way by simply writing it down in the script or via 
 		function/label call. AdditionalMacros and all custom macros are included in ItemInfo/TradeMacro after
 		at least one "return" was written in the script. This means that "normal" code execution is not 
-		possible anymore. All code after this point has to be executed via label call.
+		possible anymore. All code after this point has to be executed via label/function call.
 		
 		Labels can only be called in two ways. Via hotkey or from inside other labels/functions. 
 		This means you either have to add your own hotkeys or add your code inside this label since it gets called
@@ -30,7 +30,7 @@ CM_ExecuteCustomMacrosCode_Label:
 		
 		
 		Example of reassigning the "F4" hotkey that is assigned in AdditionalMacros:
-			- First of you have to create a label such as this, for example "CM_MyHotkey"
+			- First of you have to create a label such as this, for example "CM_MyHotkey" (look further down in this script).
 			- Then you use the following code placed here inside this label:
 			
 			Hotkey, F4, CM_MyHotkey		
@@ -42,10 +42,10 @@ CM_ExecuteCustomMacrosCode_Label:
 Return
 
 CM_MyHotkey:
-	;Label Example that can be assigned via the hotkey command.
+	;Label Example that can be assigned via the hotkey command. It will be called when you press the assigned hotkey.
 	SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}	
 Return
 
-/* commented (disabled) hotkey example
+/* commented (disabled) hotkey example without hotkey command (overwriting previously assigned hotkeys is not possible this way).
 F2::SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}
 */
