@@ -37,12 +37,16 @@ projectName := "PoE-TradeMacro"
 	Check some folder permissions
 */
 If (not FolderWriteAccess(A_MyDocuments . "\" . projectName)) {
-	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
-	ExitApp	
+	msg := "The script is not able to write any file to " A_MyDocuments "\" projectName ".`nYour user may not have the necessary permissions.`n"
+	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`nClosing Script..."
+	Msgbox, 0x1010, Critical permission error, % msg
+	ExitApp
 }
 If (not FolderWriteAccess(A_ScriptDir)) {
-	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
-	ExitApp	
+	msg := "The script is not able to write any file to " A_ScriptDir ".`nYour user may not have the necessary permissions.`n"
+	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`nClosing Script..."
+	Msgbox, 0x1010, Critical permission error, % msg
+	ExitApp
 }
 If (not FolderWriteAccess(A_ScriptDir)) {
 	Msgbox, 0x1010, Critical permission error, The script is not able to write any file to "A_ScriptDir".`nYour user may not have the necessary permissions.`n`nClosing Script...
