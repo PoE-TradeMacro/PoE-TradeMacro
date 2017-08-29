@@ -1,4 +1,6 @@
-﻿#Include, CalcChecksum.ahk
+﻿; ignore include errors to support two different paths
+#Include, *i CalcChecksum.ahk
+#Include, *i %A_ScriptDir%\..\..\lib\CalcChecksum.ahk
 
 PoEScripts_HandleUserSettings(ProjectName, BaseDir, External, sourceDir) {
 	Dir := BaseDir . "\" . ProjectName
@@ -152,10 +154,11 @@ PoEScripts_CreateDirIfNotExist(directory) {
 	}
 }
 
-PoEScripts_isDevelopmentVersion() {
-	If (FileExist(A_ScriptDir "\.git")) {
-		If (FileExist(A_ScriptDir "\.git\HEAD")) {
-			FileRead, head, %A_ScriptDir%\.git\HEAD
+PoEScripts_isDevelopmentVersion(directory = "") {
+	directory := StrLen(directory) ? directory : A_ScriptDir
+	If (FileExist(directory "\.git")) {
+		If (FileExist(directory "\.git\HEAD")) {
+			FileRead, head, %directory%\.git\HEAD
 			branch := ""
 			Loop, Parse, head, `n, `r
 			{

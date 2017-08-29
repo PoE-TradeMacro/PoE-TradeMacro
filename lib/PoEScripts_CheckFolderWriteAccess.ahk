@@ -1,9 +1,9 @@
 ﻿PoE_Scripts_CheckFolderWriteAccess(Folder, critical = true) {
 	access := FolderWriteAccess(Folder) 
 	
-	msg := "The script is not able to write any file to " Folder ".`nYour user may not have the necessary permissions.`n"
+	msg := "The script is not able to write any file to " Folder ".`nYour user may not have the necessary permissions. "
 	msg .= "While it may be possible to manually copy and create files in this folder it doesn't work programmatically.`n`n"
-	msg .= "The reason for this can be your AntiVir software blocking Autohotkey from modifying files!"
+	msg .= "The reason for this could be your AntiVir software blocking Autohotkey from modifying files in this directory!"
 	
 	If (not access) {
 		If (critical) {
