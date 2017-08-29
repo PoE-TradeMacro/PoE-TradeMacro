@@ -11,3 +11,4 @@ If (A_AhkVersion < AHKVersionRequired)
 }
 
 Run "%A_AhkPath%" "%A_ScriptDir%\resources\ahk\Merge_ItemInfo.ahk" "%A_ScriptDir%"
+ExitApp

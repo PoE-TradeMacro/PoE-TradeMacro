@@ -17,3 +17,4 @@ Loop, %0%  ; For each parameter
 }
 
 Run "%A_AhkPath%" "%A_ScriptDir%\resources\ahk\Merge_TradeMacro.ahk" "%A_ScriptDir%" %arguments%
+ExitApp
