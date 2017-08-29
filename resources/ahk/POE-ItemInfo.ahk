@@ -7132,7 +7132,7 @@ AssembleDamageDetails(FullItemData)
 
 	; Only show Q20 values if item is not Q20
 	If (Quality < 20) {
-		Q20Dps		:= PhysDps * (PhysMult + 120) / (PhysMult + Quality + 100)
+		Q20Dps := Q20PhysDps := PhysDps * (PhysMult + 120) / (PhysMult + Quality + 100)
 
 		If ( twoColDisplay )
 		{
@@ -7143,6 +7143,9 @@ AssembleDamageDetails(FullItemData)
 		Else
 		{
 			Q20Dps	:= Q20Dps + EleDps + ChaosDps
+			If (Q20Dps != Q20PhysDps) {
+				Result	= %Result%`nQ20 PDPS:   %Q20PhysDps%	
+			}			
 			Result	= %Result%`nQ20 DPS:    %Q20Dps%
 		}
 	}
