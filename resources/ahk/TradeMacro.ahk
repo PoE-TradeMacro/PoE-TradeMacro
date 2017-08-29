@@ -226,6 +226,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		hasAdvancedSearch := true
 	}
 
+	; Harbinger fragments/maps are unique but not flagged as such on poe.trade
+	If (RegExMatch(Item.Name, "i)(First|Second|Third|Fourth) Piece of.*|The Beachhead.*")) {
+		Item.IsUnique 	:= false
+	}
+	
 	If (!Item.IsUnique) {
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
 		preparedItem.maxSockets	:= Item.maxSockets		
@@ -602,10 +607,20 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	
 	If (Item.IsMap) {	
 		; add Item.subtype to make sure to only find maps
-		RequestParams.xbase := Item.SubType
+		If (not RegExMatch(Item.Name, "i)The Beachhead.*", isHarbingerMap)) {
+			RequestParams.xbase := Item.SubType	
+		} Else {
+			RequestParams.xbase := ""
+		}
 		RequestParams.xtype := ""
-		If (!Item.IsUnique) {
-			RequestParams.name := ""	
+		If (not Item.IsUnique) {
+			console.log(isHarbingerMap)
+			If (StrLen(isHarbingerMap)) {
+				; Beachhead Map workaround (unique but not flagged as such on poe.trade)
+				RequestParams.name := Item.Name	
+			} Else {
+				RequestParams.name := ""	
+			}
 		}		
 		
 		; Ivory Temple fix, not sure why it's not recognized and if there are more cases like it

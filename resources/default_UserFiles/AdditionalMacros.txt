@@ -45,6 +45,8 @@ AM_AssignHotkeys:
 	global AM_AdvancedItemInfo	:= ["on", "^!c"]
 	global AM_WhoisLastWhisper	:= ["on", "^!Enter"]
 
+	; This option can be set in the settings menu (ItemInfo tab) to completely disable assigning 
+	; AdditionalMacros hotkeys.
 	If (Opts.EnableAdditionalMacros) {
 		Hotkey, % AM_TogglePOEItemScript[2]	, AM_TogglePOEItemScript_HKey	, % AM_TogglePOEItemScript[1]
 		Hotkey, % AM_Minimize[2]			, AM_Minimize_HKey				, % AM_Minimize[1]
