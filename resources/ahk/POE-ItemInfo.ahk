@@ -8558,7 +8558,9 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		; flat 'element' damage; source: various (wands/rings/amulets etc)
 		Else If (RegExMatch(mod.name, "i)adds .* (Cold|Fire|Lightning|Elemental) damage to (Attacks|Spells)$", element)) {
 			%element1%Dmg_%element2%FlatLow := %element1%Dmg_%element2%FlatLow + mod.values[1]
-			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi  + mod.values[2]
+			%element1%Dmg_%element2%FlatHi  := %element1%Dmg_%element2%FlatHi  + mod.values[2]			
+			ElementalDmg_%element2%FlatLow  += %element1%Dmg_%element2%FlatLow
+			ElementalDmg_%element2%FlatHi   += %element1%Dmg_%element2%FlatHi
 			mod.simplifiedName := "xFlat" element1 "Damage" element2
 		}
 		; this would catch any * Spell * Damage * ( we might need to be more precise here )
@@ -8838,7 +8840,8 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	percentDamageModSuffixes := [" Damage", " Damage with Attack Skills", " Spell Damage"]
 	flatDamageModSuffixes    := ["", " to Attacks", " to Spells"]
 	
-	For i, element in ["Fire", "Cold", "Lightning", "Elemental"] {
+	For i, element in dmgTypes {
+		StringUpper, element, element, T
 		
 		For j, dmgType in ["", "Attacks",  "Spells"]	{			
 			; ### Percentage damages
@@ -8855,7 +8858,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 				tempMods.push(temp)
 			}
 			; ### Flat damages
-			If (%element%Dmg_%dmgType%FlatLow > 0) {
+			If (%element%Dmg_%dmgType%FlatLow > 0 or %element%Dmg_%dmgType%FlatHi > 0) {				
 				modSuffix := flatDamageModSuffixes[j]
 				temp := {}
 				temp.values		:= [%element%Dmg_%dmgType%FlatLow, %element%Dmg_%dmgType%FlatHi]
@@ -8863,7 +8866,15 @@ CreatePseudoMods(mods, returnAllMods := False) {
 				temp.name			:= "Adds # " element " Damage" modSuffix
 				temp.simplifiedName	:= "xFlat" element "Damage" dmgType
 				temp.possibleParentSimplifiedNames := ["xFlat" element "Damage" dmgType]
-				( element != "Elemental" ) ? temp.possibleParentSimplifiedNames.push("xFlatElementalDamage" dmgType) : False
+				If (element != "Elemental") {
+					temp.possibleParentSimplifiedNames.push("xFlatElementalDamage" dmgType)
+				} Else {
+					temp.possibleParentSimplifiedNames := []
+					For e, el in dmgTypes {
+						StringUpper, upperEl, el, T
+						temp.possibleParentSimplifiedNames.push("xFlat" upperEl "Damage" dmgType)
+					}
+				}
 				tempMods.push(temp)
 			}
 		}
@@ -8882,6 +8893,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; remove pseudos that are shadowed by an original mod ONLY if they have the same name
 	; inherited values not taken into account for this 1st pass
 	; ex ( '25% increased Cold Spell Damage' is shadowed by '%25 increased Spell Damage' ) BUT don't have same name
+
 	allPseudoMods := []
 	For i, tempMod in tempMods {
 		higher := true
@@ -8894,8 +8906,8 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			If ( tempMod.name == mod.name ) {
 				; check if it's a flat damage mod
 				If (mod.values[2]) {
-					mv := (mod.values[1] + mod.values[2]) / 2
-					tv := (tempMod.values[1] + tempMod.values[2]) / 2
+					mv := Round((mod.values[1] + mod.values[2]) / 2, 3)
+					tv := Round((tempMod.values[1] + tempMod.values[2]) / 2, 3)
 					If (tv <= mv) {
 						higher := false
 					}
@@ -8933,8 +8945,8 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			If ( isParentMod ) {
 				; check if it's a flat damage mod
 				If (mod.values[2]) {
-					mv := (mod.values[1] + mod.values[2]) / 2
-					tv := (tempMod.values[1] + tempMod.values[2]) / 2
+					mv := Round((mod.values[1] + mod.values[2]) / 2, 3)
+					tv := Round((tempMod.values[1] + tempMod.values[2]) / 2, 3)
 					If (tv <= mv) {
 						higher := false
 					}
@@ -8946,7 +8958,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 				}
 			}
 		}
-		; add the tempMod to pseudos if it has greater values, or no parent
+		; add the tempMod to pseudos if it has greater values, or no parent		
 		If (higher or (tempMod.exception and returnAllMods)) {
 			tempMod.isVariable:= false
 			tempMod.type := "pseudo"
@@ -8965,8 +8977,8 @@ CreatePseudoMods(mods, returnAllMods := False) {
 		higher := true
 		For j, tempPseudoB in tempPseudoMods {
 			; skip if its the same object
-			if( i != j ) {
-				; check if its a parent mod
+			If ( i != j ) {
+				; check if it's a parent mod
 				isParentMod := false
 				For k, simplifiedName in tempPseudoA.possibleParentSimplifiedNames {
 					if (tempPseudoB.simplifiedName == simplifiedName) {
@@ -8975,10 +8987,10 @@ CreatePseudoMods(mods, returnAllMods := False) {
 					}
 				}
 				If ( isParentMod ) {
-					; check if its a flat damage mod
+					; check if it's a flat damage mod
 					If (tempPseudoB.values[2]) {
-						mv := (tempPseudoB.values[1] + tempPseudoB.values[2]) / 2
-						tv := (tempPseudoA.values[1] + tempPseudoA.values[2]) / 2
+						mv := Round((tempPseudoB.values[1] + tempPseudoB.values[2]) / 2, 3)
+						tv := Round((tempPseudoA.values[1] + tempPseudoA.values[2]) / 2, 3)
 						If (tv <= mv) {
 							higher := false
 						}
@@ -8998,7 +9010,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			pseudoMods.push(tempPseudoA)
 		}
 	}
-	
+
 	; ### This is mostly for TradeMacro
 	; returns all original mods and the pseudo mods if requested
 	If (returnAllMods) {
