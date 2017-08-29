@@ -1,64 +1,63 @@
 /*
-	Custom macro example and main file.
+	Custom macro example and main file. This file contains descriptions and comments intended for an
+	audience that desires to add their own code and/or custom hotkeys.
 	
 	There are two reasons for this file to be included:
 		- You can't execute any code outside of hotkey labels or by editing AdditionalMacros without it.
 		- To give some examples on how to add your own macros.
 	
-	IMPORTANT NOTICE:
-		Every hotkey assigned in AdditionalMacros will be assigned no matter if it's set to ON or OFF. It
-		simply won't be triggered if it's off.
-		If you want to use one of those hotkeys for your own macro you have to reassign it via the Hotkey
-		command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.
-		https://autohotkey.com/docs/commands/Hotkey.htm	
-	
-	";" are used to comment single lines
-	
-	COMMENT BLOCK END
-*/
+		";" are used to comment single lines
 
-CM_ExecuteCustomMacrosCode_Label:
-	/*
-		Don't remove/rename this Label (and this file in general).
+		**IMPORTANT NOTICE**:		
+			Don't remove/rename the label "CM_ExecuteCustomMacrosCode_Label." (and this file in general).
 		
-		TLDR:	All code that you want to be executed at script start has to be placed here in this Label.
-				You can reassign hotkeys defined elsewhere via the "hotkey" command.
-				Code that should be triggered by keypress need its own Label/Hotkey declaration outside of this Label.
-		
-		
-		AHK has two ways to execute code, the "normal" way by simply writing it down in the script or via 
-		function/label call. AdditionalMacros and all custom macros are included in ItemInfo/TradeMacro after
-		at least one "return" was written in the script. This means that "normal" code execution is not 
-		possible anymore. All code after this point has to be executed via label/function call.
-		
-		Labels can only be called in two ways. Via hotkey or from inside other labels/functions. 
-		This means you either have to add your own hotkeys or add your code inside this label since it gets called
-		by AdditionalMacros if you don't want to edit AdditionalMacros.
-		
-		
-		Example of reassigning the "F4" hotkey that is assigned in AdditionalMacros:
-			- First you have to create a label such as this, for example "CM_MyHotkey" (look further down in this script for the example).
-			- Then you use the following code placed here inside this label:
+			Every hotkey assigned in AdditionalMacros will be assigned no matter if it's set to ON or OFF. It
+			simply won't be triggered if it's off.
+			If you want to use one of those hotkeys for your own macro you have to reassign it via the Hotkey
+			command. Use the "CM_ExecuteCustomMacrosCode_Label" label for this.
+			https://autohotkey.com/docs/commands/Hotkey.htm
+
 			
-			Hotkey, F4, CM_MyHotkey		
+		**Summary**: 
+			All code that you want to be executed at script start has to be placed here in the "CM_ExecuteCustomMacrosCode_Label" Label.
+			You can reassign hotkeys defined elsewhere via the "hotkey" command.
+			Code that should be triggered by keypress needs its own Label/Hotkey declaration outside of the mentioned Label.		
 		
-		Example of defining a global variable for further use in your macros:
-			- To avoid any conflicts with global variables defined elsewhere it is suggested to prefix your variable, for example "cm".
+		**Technical Information**: 
+			AHK has two ways to execute code, the "normal" way by simply writing it down in the script or via 
+			function/label call. AdditionalMacros and all custom macros are included in ItemInfo/TradeMacro after
+			at least one "return" was written in the script. This means that "normal" code execution is not 
+			possible anymore. All code after this point has to be executed via label/function call.
+		
+			Labels can only be called in two ways. Via hotkey or from inside other labels/functions. 	
+			This means you either have to add your own hotkeys or add your code inside this label since it gets called
+			by AdditionalMacros if you don't want to edit AdditionalMacros.
+		
+		**Examples**:
+			Example of reassigning the "F4" hotkey that is assigned in AdditionalMacros:
+				- First you have to create a label such as this, for example "CM_MyHotkey" (look at the end of this file for the example).
+				- Then you use the following code placed here inside this label:
 			
-			global cmMyVar := false
+				Hotkey, F4, CM_MyHotkey		
+		
+			Example of defining a global variable for further use in your macros:
+				- To avoid any conflicts with global variables defined elsewhere it is suggested to prefix your variable, for example "cm".
+			
+				global cmMyVar := false
 		
 		
 		Remember: All code that you want to be executed at script start has to be placed here.
 		
-		COMMENT BLOCK END
+
 	*/
-	
+
+CM_ExecuteCustomMacrosCode_Label:	
 	
 Return
 
-CM_MyHotkey:
+CM_MyHotkey_Label:
 	/*
-		EXAMPLE of a label that needs a hotkey created/assigned via the "hotkey" command.
+		EXAMPLE of a label that needs a hotkey created/assigned via the "hotkey" command to be triggered.
 	*/
 	
 	SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}	
@@ -69,4 +68,3 @@ Return
 	Overwriting previously assigned hotkeys is not possible this way, resulting in a "duplicate key" error.
 */	
 ;F2::SendInput {Ctrl Down}{Enter}{Ctrl Up}Thx, have a nice day.{Enter}
-
