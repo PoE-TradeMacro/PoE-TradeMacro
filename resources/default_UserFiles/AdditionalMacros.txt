@@ -24,6 +24,10 @@
 ;#                                                                                       #
 ;# Curated list of awesome AHK libs, lib distributions, scripts, tools and resources:    # 
 ;# https://github.com/ahkscript/awesome-AutoHotkey                                       #
+;#                                                                                       #
+;#                                                                                       #
+;# AdditionalMacros Wiki entry:                                                          #
+;#     https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/AdditionalMacros            #
 ;###########-------------------------------------------------------------------###########
 	
 AM_AssignHotkeys:
