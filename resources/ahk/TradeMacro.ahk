@@ -3747,11 +3747,11 @@ ReadPoeNinjaCurrencyData:
 	If (TempChangingLeagueInProgress) {
 		ShowToolTip("Changing league to " . TradeOpts.SearchLeague " (" . TradeGlobals.Get("LeagueName") . ")...", true)
 	}
-	
+	sampleValue	:= ChaosEquivalents["Chaos Orb"]
 	league		:= TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
 	fallback		:= ""
 	url			:= "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league
-	parsedJSON 	:= TradeFunc_DowloadURLtoJSON(url)
+	parsedJSON 	:= TradeFunc_DowloadURLtoJSON(url, sampleValue)
 	
 	; fallback to Standard and Hardcore league if used league seems to not be available 
 	If (!parsedjson.currencyDetails.length()) {
@@ -3762,8 +3762,9 @@ ReadPoeNinjaCurrencyData:
 			league	:= "Standard"
 			fallback	:= "Standard"
 		}
+		
 		url			:= "http://poeninja.azureedge.net/api/Data/GetCurrencyOverview?league=" . league		
-		parsedJSON	:= TradeFunc_DowloadURLtoJSON(url)
+		parsedJSON	:= TradeFunc_DowloadURLtoJSON(url, sampleValue, true, league)
 	}
 	global CurrencyHistoryData := parsedJSON.lines
 	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
@@ -3781,13 +3782,40 @@ ReadPoeNinjaCurrencyData:
 		msg .= StrLen(fallback) ? "`n- Using data from " fallback " league since the requested data is not available." : ""
 		ShowToolTip(msg, true)
 	}
+	
 	TempChangingLeagueInProgress := False
 Return
 
-TradeFunc_DowloadURLtoJSON(url) {
-	UrlDownloadToFile, %url%, %A_ScriptDir%\temp\currencyData.json
-	FileRead, JSONFile, %A_ScriptDir%\temp\currencyData.json
-	parsedJSON 	:= JSON.Load(JSONFile)
+TradeFunc_DowloadURLtoJSON(url, sampleValue, critical = false, league = "") {	
+	errorMsg := "Parsing the currency data (json) from poe.ninja failed.`n"
+	errorMsg .= "This should only happen when the servers are down / unavailable." 
+	errorMsg .= "`n`n"
+	errorMsg .= "Using archived data from a fallback file. League: "" league ""."
+	errorMsg .= "`n`n"
+	errorMsg .= "This can fix itself when the servers are up again and the data gets updated automatically or if you restart the script at such a time."
+	
+	errors := 0
+	Try {
+		UrlDownloadToFile, %url%, %A_ScriptDir%\temp\currencyData.json
+		FileRead, JSONFile, %A_ScriptDir%\temp\currencyData.json
+		parsedJSON := JSON.Load(JSONFile)
+		
+		; first currency data parsing (script start)
+		If (critical and not sampleValue or not parsedJSON.lines.length()) {
+			errors++
+		}
+	} Catch error {
+		; first currency data parsing (script start)
+		If (critical and not sampleValue) {	
+			errors++
+		}
+	}
+	
+	If (errors and critical and not sampleValue) {
+		MsgBox, 16, PoE-TradeMacro - Error, %errorMsg%
+		FileRead, JSONFile, %A_ScriptDir%\data_trade\currencyData_Fallback_%league%.json
+		parsedJSON := JSON.Load(JSONFile)
+	}
 	
 	Return parsedJSON
 }
