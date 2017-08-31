@@ -2,6 +2,12 @@
 	Custom macro example and main file. This file contains descriptions and comments intended for an
 	audience that desires to add their own code and/or custom hotkeys.
 	
+	TLDR:
+		You can add your own code here, use the existing Label.
+		View a better formatted version here -> https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/Custom-Macros.
+		You can ignore all other explanations here when reading this version.
+		
+	
 	There are two reasons for this file to be included:
 		- You can't execute any code outside of hotkey labels or by editing AdditionalMacros without it.
 		- To give some examples on how to add your own macros.
@@ -35,10 +41,10 @@
 		
 		**Examples**:
 			Example of reassigning the "F4" hotkey that is assigned in AdditionalMacros:
-				- First you have to create a label such as this, for example "CM_MyHotkey" (look at the end of this file for the example).
+				- First you have to create a label such as this, for example "CM_MyHotkey_Label" (look at the end of this file for the example).
 				- Then you use the following code placed here inside this label:
 			
-				Hotkey, F4, CM_MyHotkey		
+				Hotkey, F4, CM_MyHotkey_Label		
 		
 			Example of defining a global variable for further use in your macros:
 				- To avoid any conflicts with global variables defined elsewhere it is suggested to prefix your variable, for example "cm".
