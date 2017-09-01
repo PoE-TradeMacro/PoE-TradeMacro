@@ -3,7 +3,7 @@ The following is a list of what has been updated, starting with 1.1.0
 2.5.1
 ================================================================================================
 Fixed an issue with binary download error handling that mistakenly reports a failed download, resulting in the updater not working.
-You'll have to manually update/install this new version. 
+You'll have to manually update/install this new version (replace the TradeMacro folder with the zip files contents). 
 
 2.5.0
 ================================================================================================
