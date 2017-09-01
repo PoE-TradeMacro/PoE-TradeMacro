@@ -4066,4 +4066,5 @@ TrackUserCount:
 	} Catch error {
 		
 	}
+	SetTimer, TrackUserCount, Off
 Return
