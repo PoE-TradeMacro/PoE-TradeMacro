@@ -3706,6 +3706,11 @@ OpenGithubWikiFromMenu:
 	TradeFunc_OpenUrlInBrowser("https://github.com/" user "/" repo "/wiki")
 Return
 
+OpenPayPal:
+	url := "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4ZVTWJNH6GSME"
+	TradeFunc_OpenUrlInBrowser(url)
+Return
+
 TradeSettingsUI_BtnOK:
 	Global TradeOpts
 	Gui, Submit

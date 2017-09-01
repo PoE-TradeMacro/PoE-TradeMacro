@@ -22,6 +22,7 @@ If (A_AhkVersion < TradeAHKVersionRequired)
 }
 
 Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-trade-bl.ico
+Menu, Tray, Add, Donate, OpenPayPal
 Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
 
 argumentSkipSplash = %6%
@@ -149,8 +150,8 @@ argumentOverwrittenFiles = %4%
 If (!StrLen(argumentProjectName) > 0) {
 	argumentProjectName		:= "PoE-TradeMacro"
 	FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
-	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder)
-	argumentIsDevVersion	:= PoEScripts_isDevelopmentVersion()
+	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, A_ScriptDir)
+	argumentIsDevVersion	:= PoEScripts_isDevelopmentVersion(A_ScriptDir)
 	argumentUserDirectory	:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 	
 	If (!PoEScripts_CreateTempFolder(A_ScriptDir, "PoE-TradeMacro")) {

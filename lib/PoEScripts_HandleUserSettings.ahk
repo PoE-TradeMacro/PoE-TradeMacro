@@ -2,11 +2,11 @@
 #Include, *i CalcChecksum.ahk
 #Include, *i %A_ScriptDir%\..\..\lib\CalcChecksum.ahk
 
-PoEScripts_HandleUserSettings(ProjectName, BaseDir, External, sourceDir) {
+PoEScripts_HandleUserSettings(ProjectName, BaseDir, External, sourceDir, scriptDir = "") {
 	Dir := BaseDir . "\" . ProjectName
 	
 	; check for git files to determine if it's a development version, return a path using the branch name
-	devBranch := PoEScripts_isDevelopmentVersion()
+	devBranch := PoEScripts_isDevelopmentVersion(scriptDir)
 	If (StrLen(devBranch)) {
 		Dir := Dir . devBranch
 	}
@@ -61,7 +61,7 @@ PoEScripts_CopyFolderContentsRecursive(SourcePattern, DestinationFolder, ByRef f
 			Return
 		}
 	}
-	
+
 	FileRemoveDir, %DestinationFolder%\temp, 1
 	FileCreateDir, %DestinationFolder%\temp
 	

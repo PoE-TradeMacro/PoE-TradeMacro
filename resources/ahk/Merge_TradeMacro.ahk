@@ -53,7 +53,7 @@ If (InStr(scriptDir, A_Desktop)) {
 	Set some important variables
 */
 FilesToCopyToUserFolder	:= scriptDir . "\resources\default_UserFiles"
-overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder)
+overwrittenFiles 		:= PoEScripts_HandleUserSettings(projectName, A_MyDocuments, projectName, FilesToCopyToUserFolder, scriptDir)
 isDevelopmentVersion	:= PoEScripts_isDevelopmentVersion(scriptDir)
 userDirectory			:= A_MyDocuments . "\" . projectName . isDevelopmentVersion
 
