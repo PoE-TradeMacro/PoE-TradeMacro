@@ -18,6 +18,7 @@ Try {
 		ExitApp
 	}
 }
+
 ExitApp
 
 IELoad(wb)	;You need to send the IE handle to the function unless you define it as global.
@@ -27,8 +28,12 @@ IELoad(wb)	;You need to send the IE handle to the function unless you define it 
 		Return False
 	Loop
 	{
-		Sleep,100	
-		loaded := wb.Document.getElementById("loaded").innerHTML = "Loaded." ? true : false
+		Sleep,100
+		Try {
+			loaded := wb.Document.getElementById("loaded").innerHTML = "Loaded." ? true : false
+		} catch e {
+		
+		}
 		i++
 	}
 	Until ((wb.Document.Readystate = "Complete" and loaded or i = 2000))
