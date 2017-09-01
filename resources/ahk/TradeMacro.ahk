@@ -4056,6 +4056,7 @@ ResetWinHttpProxy:
 Return
 
 TrackUserCount:
+	Sleep 2000
 	url := "https://poe-trademacro.github.io/userCount/"
 	Try {		
 		wb := ComObjCreate("InternetExplorer.Application")
@@ -4068,7 +4069,8 @@ TrackUserCount:
 			wb := ComObjCreate("InternetExplorer.Application")
 			wb.Visible := True
 			wb.Navigate(url)
-			TradeFunc_IELoad(wb)			
+			TradeFunc_IELoad(wb)
+			wb.quit
 		} Catch e {
 			
 		}
