@@ -18,6 +18,17 @@ GroupAdd, PoEexe, ahk_exe PathOfExile_x64Steam.exe
 #Include, %A_ScriptDir%\resources\Version.txt
 #Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
+#Include, %A_ScriptDir%\lib\Gdip2.ahk
+
+; Start Gdip
+global gdip := new Gdip()
+global windowSize := new gdip.Size(800, 600)
+global window := new gdip.Window(windowSize)
+global fillBrush := new gdip.Brush(220, 0, 0, 0)
+global borderBrush := new gdip.Brush(220, 145, 96,5955)
+global fontBrush := new gdip.Brush(220, 255, 255, 255)
+window.Clear()
+window.Update()
 
 MsgWrongAHKVersion := "AutoHotkey v" . AHKVersionRequired . " or later is needed to run this script. `n`nYou are using AutoHotkey v" . A_AhkVersion . " (installed at: " . A_AhkPath . ")`n`nPlease go to http://ahkscript.org to download the most recent version."
 If (A_AhkVersion < AHKVersionRequired)
@@ -179,6 +190,14 @@ class UserOptions {
 	ScreenOffsetX := 0
 	ScreenOffsetY := 0
 	
+	; Set this to 1 to enable GDI+ rendering
+	UseGDI := 0
+
+	; Alpha channel [0,255]
+	GDIWindowTransparency := 200
+	; Alpha channel [0,255]
+	GDITextTransparency := 225
+
 	ScanUI()
 	{		
 		For key, val in this {
@@ -8951,10 +8970,115 @@ ExtractRareItemTypeName(ItemName)
 	return ItemTypeName
 }
 
+CalcStringWidth(String)
+{
+	width := 0
+	StringArray := StrSplit(String, "`n")
+	Loop % StringArray.MaxIndex()
+	{
+		element := StringArray[a_index]
+		len := StrLen(element)
+		
+		if (len > width)
+		{
+			width := len
+		}
+	}
+
+	return width
+}
+
+CalcStringHeight(String)
+{
+	StringReplace, String, String, `n, `n, UseErrorLevel
+	height := ErrorLevel
+	return height
+}
+
+ShowGdiTooltip(String, XCoord,YCoord)
+{
+	global gdip, window, fillBrush, borderBrush
+	
+	If (String == "") {
+		HideGdiTooltip()
+		return
+	}	
+
+	borderSize := new gdip.Size(2, 2)
+	padding := new gdip.Size(5, 5)
+	position := new gdip.Point(XCoord, YCoord)
+
+	;MsgBox show
+
+	lineWidth := CalcStringWidth(String)
+	lineHeight := CalcStringHeight(String)
+
+	if (lineWidth == 0){
+		lineWidth := 1
+	}
+	if (lineHeight == 0){
+		lineHeight := 1
+	}
+
+	lineWidth := lineWidth * 8
+
+	if (lineWidth > 800){
+		lineWidth := 800
+	}
+	
+	lineHeight := lineHeight * 14
+	
+	if (lineHeight > 600){
+		lineHeight := 600
+	}
+
+	textAreaWidth := lineWidth + (2*padding.width)
+	textAreaHeight := lineHeight + (2*padding.height)
+
+	console.log("[" . String . "]")
+	console.log("lineDims: " . lineWidth . "x" . lineHeight)
+	console.log("textArea: " . textAreaWidth . "x" . textAreaHeight)
+
+	window.Update({ x: XCoord, y: YCoord})
+
+	window.FillRectangle(fillBrush, new gdip.Point(borderSize.width, borderSize.height), new gdip.Size(textAreaWidth-(borderSize.width*2), textAreaHeight-(borderSize.height*2)))
+	window.FillRectangle(borderBrush, new gdip.Point(0, 0), new gdip.Size(borderSize.width, textAreaHeight))
+	window.FillRectangle(borderBrush, new gdip.Point(textAreaWidth-borderSize.width, 0), new gdip.Size(borderSize.width, textAreaHeight))
+	window.FillRectangle(borderBrush, new gdip.Point(0, 0), new gdip.Size(textAreaWidth, borderSize.height))
+	window.FillRectangle(borderBrush, new gdip.Point(0, textAreaHeight-borderSize.height), new gdip.Size(textAreaWidth, borderSize.height))
+
+	options1 := {}
+	options1.font := "Consolas"
+	options1.brush := fontBrush
+	;options1.style := ["underline", "italic"]
+	;options1.horizontalAlign := "center"
+	options1.width := lineWidth
+	options1.height := lineHeight
+	options1.size := 12
+	options1.left := padding.width
+	options1.top := padding.height
+
+	window.WriteText(String, options1)
+	window.Update({ x: XCoord, y: YCoord})
+}
+
+HideGdiTooltip()
+{
+	global window
+	window.Clear()
+	window.Update()
+}
+
+;==========
 ; Show tooltip, with fixed width font
 ShowToolTip(String, Centered = false)
 {
 	Global X, Y, ToolTipTimeout, Opts
+
+	If (Opts.UseGDI) 
+	{
+		HideGdiTooltip()
+	}
 
 	; Get position of mouse cursor
 	MouseGetPos, X, Y
@@ -8969,17 +9093,32 @@ ShowToolTip(String, Centered = false)
 			XCoord := 0 + ScreenOffsetX
 			YCoord := 0 + ScreenOffsetY
 
-			ToolTip, %String%, XCoord, YCoord
-			Fonts.SetFixedFont()
-			ToolTip, %String%, XCoord, YCoord
+			If (Opts.UseGDI) 
+			{
+				ShowGdiTooltip(String, XCoord, YCoord)
+			}
+			Else
+			{
+				ToolTip, %String%, XCoord, YCoord
+				Fonts.SetFixedFont()
+				ToolTip, %String%, XCoord, YCoord
+			}
 		}
 		Else
 		{
 			XCoord := (X - 135 >= 0) ? X - 135 : 0
 			YCoord := (Y +  35 >= 0) ? Y +  35 : 0
-			ToolTip, %String%, XCoord, YCoord
-			Fonts.SetFixedFont()
-			ToolTip, %String%, XCoord, YCoord
+			
+			If (Opts.UseGDI) 
+			{
+				ShowGdiTooltip(String, XCoord, YCoord)
+			}
+			Else
+			{
+				ToolTip, %String%, XCoord, YCoord
+				Fonts.SetFixedFont()
+				ToolTip, %String%, XCoord, YCoord
+			}
 		}
 	}
 	Else
@@ -8997,9 +9136,16 @@ ShowToolTip(String, Centered = false)
 		XCoord := 0 + ScreenOffsetX
 		YCoord := 0 + ScreenOffsetY
 
-		ToolTip, %String%, XCoord, YCoord
-		Fonts.SetFixedFont()
-		ToolTip, %String%, XCoord, YCoord
+		If (Opts.UseGDI) 
+		{
+			ShowGdiTooltip(String, XCoord, YCoord)
+		}
+		Else
+		{
+			ToolTip, %String%, XCoord, YCoord
+			Fonts.SetFixedFont()
+			ToolTip, %String%, XCoord, YCoord
+		}
 	}
 	;Fonts.SetFixedFont()
 
@@ -9296,10 +9442,19 @@ CreateSettingsUI()
 	GuiAddText("Font Size:", "xs10 ys157 w160 h20", "LblFontSize")
 	GuiAddEdit(Opts.FontSize, "xs180 ys155 w50 h20 Number", "FontSize")
 
+	; GDI+
+	GuiAddGroupBox("GDI+", "x7 y+20 w260 h120 Section")
+	GuiAddCheckBox("Enable GDI+", "xs10 ys20 w210", Opts.UseGDI, "UseGDI", "UseGDIH", "SettingsUI_ChkUseGDI")
+	AddToolTip(UseGDIH, "Enables GDI rendering of tooltips")
+	GuiAddText("Window Transparency [0,255]:", "xs20 ys45 w150", "LblGDIWindowTransparency")
+	GuiAddEdit(Opts.GDIWindowTransparency, "xs180 ys41 w50 Number", "GDIWindowTransparency")
+	GuiAddText("Text Transparency [0,255]:", "xs20 ys75 w150", "LblGDITextTransparency")
+	GuiAddEdit(Opts.GDITextTransparency, "xs180 ys71 w50 Number", "GDITextTransparency")
+
 	; Display - Affixes
 
 	; This groupbox is positioned relative to the last control (first column), this is not optimal but makes it possible to wrap these groupboxes in Tabs without further repositing.
-	displayAffixesPos := SkipItemInfoUpdateCall ? "415" : "505"
+	displayAffixesPos := SkipItemInfoUpdateCall ? "515" : "605"
 	GuiAddGroupBox("Display - Affixes", "xs270 yp-" displayAffixesPos " w260 h360 Section")
 
 	GuiAddCheckbox("Show affix totals", "xs10 ys20 w210 h30", Opts.ShowAffixTotals, "ShowAffixTotals", "ShowAffixTotalsH")
@@ -9469,6 +9624,28 @@ UpdateSettingsUI()
 	GuiControl,, ToolTipTimeoutTicks, % Opts.ToolTipTimeoutTicks
 	GuiControl,, MouseMoveThreshold, % Opts.MouseMoveThreshold
 	GuiControl,, FontSize, % Opts.FontSize
+
+	; GDI+
+	GuiControl,, UseGDI, % Opts.UseGDI
+	
+	fillBrush := new gdip.Brush(Opts.GDIWindowTransparency, 0, 0, 0)
+	borderBrush := new gdip.Brush(Opts.GDIWindowTransparency, 145, 96,5955)
+	fontBrush := new gdip.Brush(Opts.GDITextTransparency, 255, 255, 255)
+
+	If (Opts.UseGDI == False)
+	{
+		GuiControl, Disable, LblGDIWindowTransparency
+		GuiControl, Disable, GDIWindowTransparency
+		GuiControl, Disable, LblGDITextTransparency
+		GuiControl, Disable, GDITextTransparency
+	}
+	Else
+	{
+		GuiControl, Enable, LblGDIWindowTransparency
+		GuiControl, Enable, GDIWindowTransparency
+		GuiControl, Enable, LblGDITextTransparency
+		GuiControl, Enable, GDITextTransparency
+	}
 }
 
 ShowSettingsUI()
@@ -9607,6 +9784,11 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 		Opts.ScreenOffsetY := IniRead(ConfigPath, "Tooltip", "ScreenOffsetY", Opts.ScreenOffsetY)
 		Opts.ToolTipTimeoutTicks := IniRead(ConfigPath, "Tooltip", "ToolTipTimeoutTicks", Opts.ToolTipTimeoutTicks)
 		Opts.FontSize := IniRead(ConfigPath, "Tooltip", "FontSize", Opts.FontSize)
+
+		; GDI+
+		Opts.UseGDI := IniRead(ConfigPath, "GDI", "Enabled", Opts.UseGDI)
+		Opts.GDIWindowTransparency := IniRead(ConfigPath, "GDI", "WindowTransparency", Opts.GDIWindowTransparency)
+		Opts.GDITextTransparency := IniRead(ConfigPath, "GDI", "TextTransparency", Opts.GDITextTransparency)
 	}
 }
 
@@ -9675,6 +9857,11 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 	IniWrite(Opts.ScreenOffsetY, ConfigPath, "Tooltip", "ScreenOffsetY")
 	IniWrite(Opts.ToolTipTimeoutTicks, ConfigPath, "Tooltip", "ToolTipTimeoutTicks")
 	IniWrite(Opts.FontSize, ConfigPath, "Tooltip", "FontSize")
+
+	; GDI+
+	IniWrite(Opts.UseGDI, ConfigPath, "GDI", "Enabled")
+	IniWrite(Opts.GDIWindowTransparency, ConfigPath, "GDI", "WindowTransparency")
+	IniWrite(Opts.GDITextTransparency, ConfigPath, "GDI", "TextTransparency")
 }
 
 CopyDefaultConfig()
@@ -10271,7 +10458,14 @@ ToolTipTimer:
 	If (MouseMoved or ((UseTooltipTimeout == 1) and (ToolTipTimeout >= Opts.ToolTipTimeoutTicks)))
 	{
 		SetTimer, ToolTipTimer, Off
-		ToolTip
+		If (Opts.UseGDI) 
+		{
+			HideGdiTooltip()
+		}
+		Else
+		{
+			ToolTip
+		}
 	}
 	return
 
@@ -10392,6 +10586,25 @@ SettingsUI_ChkUseTooltipTimeout:
 		GuiControl, Enable, LblToolTipTimeoutTicks
 		GuiControl, Enable, ToolTipTimeoutTicks
 	}
+	return
+
+SettingsUI_ChkUseGDI:
+	GuiControlGet, IsChecked,, UseGDI
+	If (Not IsChecked)
+	{
+		GuiControl, Disable, LblGDIWindowTransparency
+		GuiControl, Disable, GDIWindowTransparency
+		GuiControl, Disable, LblGDITextTransparency
+		GuiControl, Disable, GDITextTransparency
+	}
+	Else
+	{
+		GuiControl, Enable, LblGDIWindowTransparency
+		GuiControl, Enable, GDIWindowTransparency
+		GuiControl, Enable, LblGDITextTransparency
+		GuiControl, Enable, GDITextTransparency
+	}
+
 	return
 
 SettingsUI_ChkDisplayToolTipAtFixedCoords:
