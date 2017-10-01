@@ -18,6 +18,15 @@ GroupAdd, PoEexe, ahk_exe PathOfExile_x64Steam.exe
 #Include, %A_ScriptDir%\resources\Version.txt
 #Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
+#Include, %A_ScriptDir%\lib\Gdip2.ahk
+
+; Start Gdip
+global gdip1 := new Gdip()
+global windowSize := new Gdip.Size(800, 600)
+global win1 := new Gdip.Window(windowSize)
+global fillBrush := new gdip1.Brush(170, 0, 0, 0)
+global borderBrush := new gdip1.Brush(200, 145, 96,5955)
+global fontBrush := new Gdip.Brush(187, 255, 255, 255)
 
 MsgWrongAHKVersion := "AutoHotkey v" . AHKVersionRequired . " or later is needed to run this script. `n`nYou are using AutoHotkey v" . A_AhkVersion . " (installed at: " . A_AhkPath . ")`n`nPlease go to http://ahkscript.org to download the most recent version."
 If (A_AhkVersion < AHKVersionRequired)
@@ -8951,9 +8960,103 @@ ExtractRareItemTypeName(ItemName)
 	return ItemTypeName
 }
 
+CalcStringWidth(String)
+{
+	width := 0
+	StringArray := StrSplit(String, "`n")
+	Loop % StringArray.MaxIndex()
+	{
+		element := StringArray[a_index]
+		len := StrLen(element)
+		
+		if (len > width)
+		{
+			width := len
+		}
+	}
+
+	return width
+}
+
+CalcStringHeight(String)
+{
+	StringReplace, String, String, `n, `n, UseErrorLevel
+	height := ErrorLevel
+	return height
+}
+
+ShowWindow(String, XCoord,YCoord)
+{
+	borderSize := new Gdip.Size(2, 2)
+	padding := new Gdip.Size(5, 5)
+	position := new Gdip.Point(XCoord, YCoord)
+
+	;MsgBox show
+
+	lineWidth := CalcStringWidth(String)
+	lineHeight := CalcStringHeight(String)
+
+	console.log(String)
+	console.log(lineWidth . "x" . lineHeight)
+
+	if (lineWidth == 0)
+		lineWidth := 1
+	if (lineHeight == 0)
+		lineHeight := 1
+
+	lineWidth := lineWidth * 8
+
+	if (lineWidth > 800)
+		lineWidth := 800
+	
+	lineHeight := lineHeight * 14
+	
+	if (lineHeight > 600)
+		lineHeight := 600
+
+	textAreaWidth := lineWidth + (2*padding.width)
+	textAreaHeight := lineHeight + (2*padding.height)
+
+	HideWindow()
+	; Draw our bitmap into our window, at x = 0, y = 0
+	; The 3rd paramter is a size object we want to draw our image
+	; Update the window with its current position
+	win1.Update({ x: XCoord, y: YCoord})
+
+	win1.FillRoundedRectangle(fillBrush, new Gdip.Point(borderSize.width, borderSize.height), new Gdip.Size(textAreaWidth-(borderSize.width*2), textAreaHeight-(borderSize.height*2)), 0)
+	win1.FillRoundedRectangle(borderBrush, new Gdip.Point(0, 0), new Gdip.Size(borderSize.width, textAreaHeight), 0)
+	win1.FillRoundedRectangle(borderBrush, new Gdip.Point(textAreaWidth-borderSize.width, 0), new Gdip.Size(borderSize.width, textAreaHeight), 0)
+
+	win1.FillRoundedRectangle(borderBrush, new Gdip.Point(0, 0), new Gdip.Size(textAreaWidth, borderSize.height), 0)
+	win1.FillRoundedRectangle(borderBrush, new Gdip.Point(0, textAreaHeight-borderSize.height), new Gdip.Size(textAreaWidth, borderSize.height), 0)
+
+	options1 := {}
+	options1.font := "Consolas"
+	options1.brush := fontBrush
+	;options1.style := ["underline", "italic"]
+	;options1.horizontalAlign := "center"
+	options1.width := lineWidth
+	options1.height := lineHeight
+	options1.size := 12
+	options1.left := padding.width
+	options1.top := padding.height
+
+	win1.WriteText(String, options1)
+	win1.Update({ x: XCoord, y: YCoord})
+}
+
+HideWindow()
+{
+	;MsgBox hide
+	win1.Clear()
+	win1.Update()
+}
+
+;==========
 ; Show tooltip, with fixed width font
 ShowToolTip(String, Centered = false)
 {
+	HideWindow()
 	Global X, Y, ToolTipTimeout, Opts
 
 	; Get position of mouse cursor
@@ -8972,6 +9075,7 @@ ShowToolTip(String, Centered = false)
 			ToolTip, %String%, XCoord, YCoord
 			Fonts.SetFixedFont()
 			ToolTip, %String%, XCoord, YCoord
+			ShowWindow(String, XCoord, YCoord)
 		}
 		Else
 		{
@@ -8980,6 +9084,7 @@ ShowToolTip(String, Centered = false)
 			ToolTip, %String%, XCoord, YCoord
 			Fonts.SetFixedFont()
 			ToolTip, %String%, XCoord, YCoord
+			ShowWindow(String, XCoord,YCoord)
 		}
 	}
 	Else
@@ -8997,9 +9102,10 @@ ShowToolTip(String, Centered = false)
 		XCoord := 0 + ScreenOffsetX
 		YCoord := 0 + ScreenOffsetY
 
-		ToolTip, %String%, XCoord, YCoord
-		Fonts.SetFixedFont()
-		ToolTip, %String%, XCoord, YCoord
+		;ToolTip, %String%, XCoord, YCoord
+		;Fonts.SetFixedFont()
+		;ToolTip, %String%, XCoord, YCoord
+		ShowWindow(String, XCoord,YCoord)
 	}
 	;Fonts.SetFixedFont()
 
@@ -10272,6 +10378,7 @@ ToolTipTimer:
 	{
 		SetTimer, ToolTipTimer, Off
 		ToolTip
+		HideWindow()
 	}
 	return
 
