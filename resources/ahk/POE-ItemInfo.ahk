@@ -19,6 +19,7 @@ GroupAdd, PoEexe, ahk_exe PathOfExile_x64Steam.exe
 #Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\EasyIni.ahk
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
+#Include, %A_ScriptDir%\lib\ConvertKeyToKeyCode.ahk
 #Include, %A_ScriptDir%\resources\ahk\GdipTooltip.ahk
 
 global gdipTooltip = new GdipTooltip()
@@ -9347,7 +9348,7 @@ CreateSettingsUI()
 	; Display - Affixes
 
 	; This groupbox is positioned relative to the last control (first column), this is not optimal but makes it possible to wrap these groupboxes in Tabs without further repositing.
-	displayAffixesPos := SkipItemInfoUpdateCall ? "415" : "505"
+	displayAffixesPos := SkipItemInfoUpdateCall ? "515" : "605"
 	GuiAddGroupBox("Display - Affixes", "xs270 yp-" displayAffixesPos " w260 h360 Section")
 
 	GuiAddCheckbox("Show affix totals", "xs10 ys20 w210 h30", Opts.ShowAffixTotals, "ShowAffixTotals", "ShowAffixTotalsH")
