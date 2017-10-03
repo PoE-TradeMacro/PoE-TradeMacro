@@ -18,17 +18,9 @@ GroupAdd, PoEexe, ahk_exe PathOfExile_x64Steam.exe
 #Include, %A_ScriptDir%\resources\Version.txt
 #Include, %A_ScriptDir%\lib\JSON.ahk
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
-#Include, %A_ScriptDir%\lib\Gdip2.ahk
+#Include, %A_ScriptDir%\resources\ahk\GdipTooltip.ahk
 
-; Start Gdip
-global gdip := new Gdip()
-global windowSize := new gdip.Size(800, 600)
-global window := new gdip.Window(windowSize)
-global fillBrush := new gdip.Brush(220, 0, 0, 0)
-global borderBrush := new gdip.Brush(220, 145, 96,5955)
-global fontBrush := new gdip.Brush(220, 255, 255, 255)
-window.Clear()
-window.Update()
+global gdipTooltip = new GdipTooltip()
 
 MsgWrongAHKVersion := "AutoHotkey v" . AHKVersionRequired . " or later is needed to run this script. `n`nYou are using AutoHotkey v" . A_AhkVersion . " (installed at: " . A_AhkPath . ")`n`nPlease go to http://ahkscript.org to download the most recent version."
 If (A_AhkVersion < AHKVersionRequired)
@@ -193,10 +185,10 @@ class UserOptions {
 	; Set this to 1 to enable GDI+ rendering
 	UseGDI := 0
 
-	; Alpha channel [0,255]
-	GDIWindowTransparency := 200
-	; Alpha channel [0,255]
-	GDITextTransparency := 225
+	; Format: 0xAARRGGBB
+	GDIWindowColor := "0xE1000000"
+	GDIBorderColor := "0xE191603B"
+	GDITextColor := "0xE1FFFFFF"
 
 	ScanUI()
 	{		
@@ -8970,115 +8962,11 @@ ExtractRareItemTypeName(ItemName)
 	return ItemTypeName
 }
 
-CalcStringWidth(String)
-{
-	width := 0
-	StringArray := StrSplit(String, "`n")
-	Loop % StringArray.MaxIndex()
-	{
-		element := StringArray[a_index]
-		len := StrLen(element)
-		
-		if (len > width)
-		{
-			width := len
-		}
-	}
-
-	return width
-}
-
-CalcStringHeight(String)
-{
-	StringReplace, String, String, `n, `n, UseErrorLevel
-	height := ErrorLevel
-	return height
-}
-
-ShowGdiTooltip(String, XCoord,YCoord)
-{
-	global gdip, window, fillBrush, borderBrush
-	
-	If (String == "") {
-		HideGdiTooltip()
-		return
-	}	
-
-	borderSize := new gdip.Size(2, 2)
-	padding := new gdip.Size(5, 5)
-	position := new gdip.Point(XCoord, YCoord)
-
-	;MsgBox show
-
-	lineWidth := CalcStringWidth(String)
-	lineHeight := CalcStringHeight(String)
-
-	if (lineWidth == 0){
-		lineWidth := 1
-	}
-	if (lineHeight == 0){
-		lineHeight := 1
-	}
-
-	lineWidth := lineWidth * 8
-
-	if (lineWidth > 800){
-		lineWidth := 800
-	}
-	
-	lineHeight := lineHeight * 14
-	
-	if (lineHeight > 600){
-		lineHeight := 600
-	}
-
-	textAreaWidth := lineWidth + (2*padding.width)
-	textAreaHeight := lineHeight + (2*padding.height)
-
-	console.log("[" . String . "]")
-	console.log("lineDims: " . lineWidth . "x" . lineHeight)
-	console.log("textArea: " . textAreaWidth . "x" . textAreaHeight)
-
-	window.Update({ x: XCoord, y: YCoord})
-
-	window.FillRectangle(fillBrush, new gdip.Point(borderSize.width, borderSize.height), new gdip.Size(textAreaWidth-(borderSize.width*2), textAreaHeight-(borderSize.height*2)))
-	window.FillRectangle(borderBrush, new gdip.Point(0, 0), new gdip.Size(borderSize.width, textAreaHeight))
-	window.FillRectangle(borderBrush, new gdip.Point(textAreaWidth-borderSize.width, 0), new gdip.Size(borderSize.width, textAreaHeight))
-	window.FillRectangle(borderBrush, new gdip.Point(0, 0), new gdip.Size(textAreaWidth, borderSize.height))
-	window.FillRectangle(borderBrush, new gdip.Point(0, textAreaHeight-borderSize.height), new gdip.Size(textAreaWidth, borderSize.height))
-
-	options1 := {}
-	options1.font := "Consolas"
-	options1.brush := fontBrush
-	;options1.style := ["underline", "italic"]
-	;options1.horizontalAlign := "center"
-	options1.width := lineWidth
-	options1.height := lineHeight
-	options1.size := 12
-	options1.left := padding.width
-	options1.top := padding.height
-
-	window.WriteText(String, options1)
-	window.Update({ x: XCoord, y: YCoord})
-}
-
-HideGdiTooltip()
-{
-	global window
-	window.Clear()
-	window.Update()
-}
-
 ;==========
 ; Show tooltip, with fixed width font
 ShowToolTip(String, Centered = false)
 {
-	Global X, Y, ToolTipTimeout, Opts
-
-	If (Opts.UseGDI) 
-	{
-		HideGdiTooltip()
-	}
+	Global X, Y, ToolTipTimeout, Opts, gdipTooltip
 
 	; Get position of mouse cursor
 	MouseGetPos, X, Y
@@ -9095,7 +8983,7 @@ ShowToolTip(String, Centered = false)
 
 			If (Opts.UseGDI) 
 			{
-				ShowGdiTooltip(String, XCoord, YCoord)
+				gdipTooltip.ShowGdiTooltip(String, XCoord, YCoord)
 			}
 			Else
 			{
@@ -9111,7 +8999,7 @@ ShowToolTip(String, Centered = false)
 			
 			If (Opts.UseGDI) 
 			{
-				ShowGdiTooltip(String, XCoord, YCoord)
+				gdipTooltip.ShowGdiTooltip(String, XCoord, YCoord)
 			}
 			Else
 			{
@@ -9138,7 +9026,7 @@ ShowToolTip(String, Centered = false)
 
 		If (Opts.UseGDI) 
 		{
-			ShowGdiTooltip(String, XCoord, YCoord)
+			gdipTooltip.ShowGdiTooltip(String, XCoord, YCoord)
 		}
 		Else
 		{
@@ -9443,14 +9331,16 @@ CreateSettingsUI()
 	GuiAddEdit(Opts.FontSize, "xs180 ys155 w50 h20 Number", "FontSize")
 
 	; GDI+
-	GuiAddGroupBox("GDI+", "x7 y+20 w260 h120 Section")
+	GuiAddGroupBox("GDI+", "x7 y+20 w260 h130 Section")
 	GuiAddCheckBox("Enable GDI+", "xs10 ys20 w210", Opts.UseGDI, "UseGDI", "UseGDIH", "SettingsUI_ChkUseGDI")
 	AddToolTip(UseGDIH, "Enables GDI rendering of tooltips")
-	GuiAddText("Window Transparency [0,255]:", "xs20 ys45 w150", "LblGDIWindowTransparency")
-	GuiAddEdit(Opts.GDIWindowTransparency, "xs180 ys41 w50 Number", "GDIWindowTransparency")
-	GuiAddText("Text Transparency [0,255]:", "xs20 ys75 w150", "LblGDITextTransparency")
-	GuiAddEdit(Opts.GDITextTransparency, "xs180 ys71 w50 Number", "GDITextTransparency")
-
+	GuiAddText("Window Color (0xARGB):", "xs20 ys45 w150", "LblGDIWindowColor")
+	GuiAddEdit(Opts.GDIWindowColor, "xs180 ys41 w70", "GDIWindowColor")
+	GuiAddText("Border Color (0xARGB):", "xs20 ys75 w150", "LblGDIBorderColor")
+	GuiAddEdit(Opts.GDIBorderColor, "xs180 ys71 w70", "GDIBorderColor")
+	GuiAddText("Text Color (0xARGB):", "xs20 ys105 w150", "LblGDITextColor")
+	GuiAddEdit(Opts.GDITextColor, "xs180 ys101 w70", "GDITextColor")
+	
 	; Display - Affixes
 
 	; This groupbox is positioned relative to the last control (first column), this is not optimal but makes it possible to wrap these groupboxes in Tabs without further repositing.
@@ -9628,23 +9518,25 @@ UpdateSettingsUI()
 	; GDI+
 	GuiControl,, UseGDI, % Opts.UseGDI
 	
-	fillBrush := new gdip.Brush(Opts.GDIWindowTransparency, 0, 0, 0)
-	borderBrush := new gdip.Brush(Opts.GDIWindowTransparency, 145, 96,5955)
-	fontBrush := new gdip.Brush(Opts.GDITextTransparency, 255, 255, 255)
-
+	gdipTooltip.UpdateFromOptions(Opts)
+	
 	If (Opts.UseGDI == False)
 	{
-		GuiControl, Disable, LblGDIWindowTransparency
-		GuiControl, Disable, GDIWindowTransparency
-		GuiControl, Disable, LblGDITextTransparency
-		GuiControl, Disable, GDITextTransparency
+		GuiControl, Disable, LblGDIWindowColor
+		GuiControl, Disable, GDIWindowColor
+		GuiControl, Disable, LblGDIBorderColor
+		GuiControl, Disable, GDIBorderColor
+		GuiControl, Disable, LblGDITextColor
+		GuiControl, Disable, GDITextColor
 	}
 	Else
 	{
-		GuiControl, Enable, LblGDIWindowTransparency
-		GuiControl, Enable, GDIWindowTransparency
-		GuiControl, Enable, LblGDITextTransparency
-		GuiControl, Enable, GDITextTransparency
+		GuiControl, Enable, LblGDIWindowColor
+		GuiControl, Enable, GDIWindowColor
+		GuiControl, Enable, LblGDIBorderColor
+		GuiControl, Enable, GDIBorderColor
+		GuiControl, Enable, LblGDITextColor
+		GuiControl, Enable, GDITextColor
 	}
 }
 
@@ -9787,8 +9679,10 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 
 		; GDI+
 		Opts.UseGDI := IniRead(ConfigPath, "GDI", "Enabled", Opts.UseGDI)
-		Opts.GDIWindowTransparency := IniRead(ConfigPath, "GDI", "WindowTransparency", Opts.GDIWindowTransparency)
-		Opts.GDITextTransparency := IniRead(ConfigPath, "GDI", "TextTransparency", Opts.GDITextTransparency)
+		Opts.GDIWindowColor := IniRead(ConfigPath, "GDI", "WindowColor", Opts.GDIWindowColor)
+		Opts.GDIBorderColor := IniRead(ConfigPath, "GDI", "BorderColor", Opts.GDIBorderColor)
+		Opts.GDITextColor := IniRead(ConfigPath, "GDI", "TextColor", Opts.GDITextColor)
+		gdipTooltip.UpdateFromOptions(Opts)
 	}
 }
 
@@ -9860,8 +9754,9 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 
 	; GDI+
 	IniWrite(Opts.UseGDI, ConfigPath, "GDI", "Enabled")
-	IniWrite(Opts.GDIWindowTransparency, ConfigPath, "GDI", "WindowTransparency")
-	IniWrite(Opts.GDITextTransparency, ConfigPath, "GDI", "TextTransparency")
+	IniWrite(Opts.GDIWindowColor, ConfigPath, "GDI", "WindowColor")
+	IniWrite(Opts.GDIBorderColor, ConfigPath, "GDI", "BorderColor")
+	IniWrite(Opts.GDITextColor, ConfigPath, "GDI", "TextColor")
 }
 
 CopyDefaultConfig()
@@ -10451,7 +10346,7 @@ LookUpAffixes() {
 ; Tick every 100 ms
 ; Remove tooltip if mouse is moved or 5 seconds pass
 ToolTipTimer:
-	Global Opts, ToolTipTimeout
+	Global Opts, ToolTipTimeout, gdipTooltip
 	ToolTipTimeout += 1
 	MouseGetPos, CurrX, CurrY
 	MouseMoved := (CurrX - X) ** 2 + (CurrY - Y) ** 2 > Opts.MouseMoveThreshold ** 2
@@ -10460,7 +10355,7 @@ ToolTipTimer:
 		SetTimer, ToolTipTimer, Off
 		If (Opts.UseGDI) 
 		{
-			HideGdiTooltip()
+			gdipTooltip.HideGdiTooltip()
 		}
 		Else
 		{
@@ -10592,17 +10487,21 @@ SettingsUI_ChkUseGDI:
 	GuiControlGet, IsChecked,, UseGDI
 	If (Not IsChecked)
 	{
-		GuiControl, Disable, LblGDIWindowTransparency
-		GuiControl, Disable, GDIWindowTransparency
-		GuiControl, Disable, LblGDITextTransparency
-		GuiControl, Disable, GDITextTransparency
+		GuiControl, Disable, LblGDIWindowColor
+		GuiControl, Disable, GDIWindowColor
+		GuiControl, Disable, LblGDIBorderColor
+		GuiControl, Disable, GDIBorderColor
+		GuiControl, Disable, LblGDITextColor
+		GuiControl, Disable, GDITextColor
 	}
 	Else
 	{
-		GuiControl, Enable, LblGDIWindowTransparency
-		GuiControl, Enable, GDIWindowTransparency
-		GuiControl, Enable, LblGDITextTransparency
-		GuiControl, Enable, GDITextTransparency
+		GuiControl, Enable, LblGDIWindowColor
+		GuiControl, Enable, GDIWindowColor
+		GuiControl, Enable, LblGDIBorderColor
+		GuiControl, Enable, GDIBorderColor
+		GuiControl, Enable, LblGDITextColor
+		GuiControl, Enable, GDITextColor
 	}
 
 	return
