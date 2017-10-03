@@ -58,28 +58,32 @@ PoEScripts_ConvertOldFiles(sourceDir, destDir, ByRef overwrittenFiles) {
 		overwrittenFiles.Push("AdditionalMacros.txt")
 	}
 	If (FileExist(destDir "\config.ini")) {
-		PoEScripts_CreateDirIfNotExist(destDir "\backup")
-		FileCopy, %destDir%\config.ini, %destDir%\backup\config.ini, 1
-		PoEScripts_ConvertItemInfoConfig(sourceDir, destDir)
-		overwrittenFiles.Push("config.ini")
+		PoEScripts_ConvertItemInfoConfig(sourceDir, destDir, overwrittenFiles)
 	}
 	Return
 }
 
-PoEScripts_ConvertItemInfoConfig(sourceDir, destDir) {
+PoEScripts_ConvertItemInfoConfig(sourceDir, destDir, ByRef overwrittenFiles) {
 	; due to massive changes of comments it's better to convert old file first, and perform update after
 	NewConfigObj := class_EasyIni(sourceDir "\config.ini")
 	OldConfigObj := class_EasyIni(destDir "\config.ini")
-	for sectionName, sectionKeys in OldConfigObj {
-		if (NewConfigObj.HasKey(sectionName)) {
-			for sectionKeyName, sectionKeyVal in sectionKeys {
-				if NewConfigObj[sectionName].HasKey(sectionKeyName) {
-					NewConfigObj.SetKeyVal(sectionName, sectionKeyName, sectionKeyVal)
+	if (!InStr(OldConfigObj.GetTopComments(), "Converted")) {
+		PoEScripts_CreateDirIfNotExist(destDir "\backup")
+		FileCopy, %destDir%\config.ini, %destDir%\backup\config.ini, 1
+		for sectionName, sectionKeys in OldConfigObj {
+			if (NewConfigObj.HasKey(sectionName)) {
+				for sectionKeyName, sectionKeyVal in sectionKeys {
+					if NewConfigObj[sectionName].HasKey(sectionKeyName) {
+						NewConfigObj.SetKeyVal(sectionName, sectionKeyName, sectionKeyVal)
+					}
 				}
 			}
 		}
+		FormatTime, ConvertedAt, A_NowUTC, dd-MM-yyyy
+		NewConfigObj.AddTopComment("Converted " ConvertedAt)
+		NewConfigObj.Save(destDir "\config.ini")
+		overwrittenFiles.Push("config.ini")
 	}
-	NewConfigObj.Save(destDir "\config.ini")
 	Return
 }
 
