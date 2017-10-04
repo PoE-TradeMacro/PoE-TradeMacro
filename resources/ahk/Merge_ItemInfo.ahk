@@ -48,7 +48,7 @@ PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, scriptDir, projectNa
 	merge all scripts into `_ItemInfoMain.ahk` and execute it.
 */
 info		:= ReadFileToMerge(scriptDir "\resources\ahk\POE-ItemInfo.ahk")
-addMacros := ReadFileToMerge(userDirectory "\AdditionalMacros.txt", FilesToCopyToUserFolder)
+addMacros := ReadFileToMerge(scriptDir "\resources\ahk\AdditionalMacros.ahk")
 
 info		:= info . "`n`r`n`r"
 addMacros	:= "#IfWinActive Path of Exile ahk_class POEWindowClass ahk_group PoEexe" . "`n`r`n`r" . addMacros

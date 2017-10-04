@@ -26,6 +26,7 @@ PoEScripts_HandleUserSettings(ProjectName, BaseDir, External, sourceDir, scriptD
 
 PoEScripts_CopyFiles(sourceDir, destDir, ByRef fileList) {
 	overwrittenFiles := []
+	PoEScripts_ConvertOldFiles(sourceDir, destDir, overwrittenFiles)
 	PoEScripts_CopyFolderContentsRecursive(sourceDir, destDir, overwrittenFiles)
 
 	; provide data for user notification on what files were updated/replaced and backed up if such
@@ -44,21 +45,23 @@ PoEScripts_CopyFiles(sourceDir, destDir, ByRef fileList) {
 PoEScripts_ConvertOldFiles(sourceDir, destDir, ByRef overwrittenFiles) {
 	; TODO: trim whitespaces in key names in current configs?
 	If (FileExist(destDir "\MapModWarnings.txt")) {
-		PoEScripts_CreateDirIfNotExist(destDir "\backup")
-		FileCopy, %destDir%\MapModWarnings.txt, %destDir%\backup\MapModWarnings.txt, 1
+		PoEScripts_BackupUserFileOnDate(destDir, "MapModWarnings.txt")
 		PoEScripts_ConvertMapModsWarnings(destDir)
 		FileDelete, %destDir%\MapModWarnings.txt
 		overwrittenFiles.Push("MapModWarnings.txt")
 	}
 	If (!FileExist(destDir "\AdditionalMacros.ini") and FileExist(destDir "\AdditionalMacros.txt")) {
-		PoEScripts_CreateDirIfNotExist(destDir "\backup")
-		FileCopy, %destDir%\AdditionalMacros.txt, %destDir%\backup\AdditionalMacros.txt, 1
+		PoEScripts_BackupUserFileOnDate(destDir, "AdditionalMacros.txt")
 		PoEScripts_ConvertAdditionalMacrosSettings(destDir)
-		FileDelete, %destDir%\MapModWarnings.txt
+		FileDelete, %destDir%\AdditionalMacros.txt
 		overwrittenFiles.Push("AdditionalMacros.txt")
 	}
 	If (FileExist(destDir "\config.ini")) {
 		PoEScripts_ConvertItemInfoConfig(sourceDir, destDir, overwrittenFiles)
+	}
+	if (InStr(FileExist(destDir "\data"), "D")) {
+		PoEScripts_BackupUserFileOnDate(destDir, "data")
+		FileRemoveDir, %destDir%\data, 1
 	}
 	Return
 }
@@ -68,8 +71,7 @@ PoEScripts_ConvertItemInfoConfig(sourceDir, destDir, ByRef overwrittenFiles) {
 	NewConfigObj := class_EasyIni(sourceDir "\config.ini")
 	OldConfigObj := class_EasyIni(destDir "\config.ini")
 	if (!InStr(OldConfigObj.GetTopComments(), "Converted")) {
-		PoEScripts_CreateDirIfNotExist(destDir "\backup")
-		FileCopy, %destDir%\config.ini, %destDir%\backup\config.ini, 1
+		PoEScripts_BackupUserFileOnDate(destDir, "config.ini")
 		for sectionName, sectionKeys in OldConfigObj {
 			if (NewConfigObj.HasKey(sectionName)) {
 				for sectionKeyName, sectionKeyVal in sectionKeys {
@@ -80,7 +82,7 @@ PoEScripts_ConvertItemInfoConfig(sourceDir, destDir, ByRef overwrittenFiles) {
 			}
 		}
 		FormatTime, ConvertedAt, A_NowUTC, dd-MM-yyyy
-		NewConfigObj.AddTopComment("Converted " ConvertedAt)
+		NewConfigObj.AddTopComment("Converted with PoEScripts_ConvertItemInfoConfig() on " ConvertedAt " / DO NOT EDIT OR REMOVE THIS COMMENT MANUALLY")
 		NewConfigObj.Save(destDir "\config.ini")
 		overwrittenFiles.Push("config.ini")
 	}
@@ -123,6 +125,8 @@ PoEScripts_ConvertAdditionalMacrosSettings(destDir) {
 		}
 		AdditionalMacros_INI.AddKey(labelName1, "Hotkeys", labelHotkeys)
 	}
+	FormatTime, ConvertedAt, A_NowUTC, dd-MM-yyyy
+	AdditionalMacros_INI.AddTopComment("Converted with PoEScripts_ConvertAdditionalMacrosSettings() on " ConvertedAt " / DO NOT EDIT OR REMOVE THIS COMMENT MANUALLY")
 	AdditionalMacros_INI.Save(destDir "\AdditionalMacros.ini")
 	Return
 }
@@ -142,6 +146,8 @@ PoEScripts_ConvertMapModsWarnings(destDir) {
 	For keyName, keyVal in MapModWarnings_JSON {
 		MapModWarnings_INI.AddKey(secAffixes, keyName, keyVal)
 	}
+	FormatTime, ConvertedAt, A_NowUTC, dd-MM-yyyy
+	MapModWarnings_INI.AddTopComment("Converted with PoEScripts_ConvertMapModsWarnings() on " ConvertedAt " / DO NOT EDIT OR REMOVE THIS COMMENT MANUALLY")
 	MapModWarnings_INI.Save(destDir "\MapModWarnings.ini")
 	Return
 }
@@ -159,9 +165,6 @@ PoEScripts_CopyFolderContentsRecursive(SourcePath, DestDir, ByRef overwrittenFil
 		Else {
 			Return
 		}
-	}
-	Else {
-		PoEScripts_ConvertOldFiles(SourcePath, DestDir, overwrittenFiles)
 	}
 	Loop %SourcePath%\*.*, 1
 	{
@@ -221,21 +224,21 @@ PoEScripts_DoActionForFile(fileAction, filePath, destDir, ByRef overwrittenFiles
 		Return
 	}
 	Else {
-		PoEScripts_CreateDirIfNotExist(destDir "\backup")
 		If (fileAction == 2) {
 			; make backup
-			FileCopy, %destDir%\%fileFullName%, %destDir%\backup\%fileFullName%, 1
+			PoEScripts_BackupUserFileOnDate(destDir, fileFullName)
 			; load file into object
 			destIniObj := class_EasyIni(destDir "\" fileFullName)
 			; update object with source file
 			destIniObj.Update(filePath)
+			; TODO: add top comment with update date/script release version?
 			; save changes to file
 			destIniObj.Save(destDir "\" fileFullName)
 			overwrittenFiles.Push(fileFullName)
 		}
 		Else If (fileAction == 3) {
 			; make backup
-			FileCopy, %destDir%\%fileFullName_cleaned%, %destDir%\backup\%fileFullName_cleaned%, 1
+			PoEScripts_BackupUserFileOnDate(destDir, fileFullName_cleaned)
 			; replace file
 			FileCopy %filePath%, %destDir%\%fileFullName_cleaned%, 1
 			overwrittenFiles.Push(fileFullName_cleaned)
@@ -251,6 +254,22 @@ PoEScripts_DoActionForFile(fileAction, filePath, destDir, ByRef overwrittenFiles
 PoEScripts_CreateDirIfNotExist(directory) {
 	If (!InStr(FileExist(directory), "D")) {
 		FileCreateDir, %directory%
+	}
+	Return
+}
+
+PoEScripts_BackupUserFileOnDate(destDir, fileFullName)
+{
+	if (FileExist(destDir "\" fileFullName)) {
+		FormatTime, BackupOnDate, A_NowUTC, dd_MM_yyyy
+		PoEScripts_CreateDirIfNotExist(destDir "\backup")
+		PoEScripts_CreateDirIfNotExist(destDir "\backup\" BackupOnDate)
+		if (!InStr(FileExist(destDir "\" fileFullName), "D")) {
+			FileCopy, %destDir%\%fileFullName%, %destDir%\backup\%BackupOnDate%\%fileFullName%, 1
+		}
+		else {
+			FileCopyDir, %destDir%\%fileFullName%, %destDir%\backup\%BackupOnDate%\%fileFullName%, 1
+		}
 	}
 	Return
 }
