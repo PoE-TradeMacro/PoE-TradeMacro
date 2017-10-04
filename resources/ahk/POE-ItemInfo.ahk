@@ -522,12 +522,14 @@ OpenTextFileReadOnly(FilePath)
 	if (FileExist(FilePath)) {
 		openWith := AssociatedProgram("txt")
 		if (openWith) {
-			if (InStr(openWith, "NOTEPAD")) {
+			if (InStr(openWith, "system32\NOTEPAD.exe")) {
 				if (InStr(openWith, "SystemRoot")) {
 					; because `Run` cannot expand environment variable for some reason
 					EnvGet, SystemRoot, SystemRoot
 					StringReplace, openWith, openWith, `%SystemRoot`%, %SystemRoot%
 				}
+			}
+			if (InStr(openWith, " %1")) {
 				; trim `%1`
 				StringTrimRight, openWith, openWith, 2
 			}
