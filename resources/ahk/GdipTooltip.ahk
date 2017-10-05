@@ -20,9 +20,8 @@ class GdipTooltip
 
 	ShowGdiTooltip(String, XCoord, YCoord)
 	{
-		If (String == "") {
-			return
-		}	
+		;this.HideGdiTooltip(false)
+		this.window.Clear()
 		
 		position := new this.gdip.Point(XCoord, YCoord)
 
@@ -51,12 +50,12 @@ class GdipTooltip
 		textAreaWidth := lineWidth + (2*this.padding.width)
 		textAreaHeight := lineHeight + (2*this.padding.height)
 
-		;console.log("[" . String . "]")
-		;console.log("lineDims: " . lineWidth . "x" . lineHeight)
-		;console.log("textArea: " . textAreaWidth . "x" . textAreaHeight)
+		console.log("[" . String . "]")
+		console.log("lineDims: " . lineWidth . "x" . lineHeight)
+		console.log("textArea: " . textAreaWidth . "x" . textAreaHeight)
 
-		;console.log("lineDims: " . %lineWidth% . "x" . %lineHeight% . "`n" . "textArea: " . %textAreaWidth% . "x" . %textAreaHeight%)
-		this.window.Update({ x: XCoord, y: YCoord})
+		;console.log("lineDims: " . lineWidth . "x" . lineHeight . "`n" . "textArea: " . textAreaWidth . "x" . textAreaHeight)
+		;this.window.Update({ x: XCoord, y: YCoord})
 
 		this.window.FillRectangle(this.fillBrush, new this.gdip.Point(this.borderSize.width, this.borderSize.height), new this.gdip.Size(textAreaWidth-(this.borderSize.width*2), textAreaHeight-(this.borderSize.height*2)))
 		this.window.FillRectangle(this.borderBrush, new this.gdip.Point(0, 0), new this.gdip.Size(this.borderSize.width, textAreaHeight))
@@ -77,9 +76,12 @@ class GdipTooltip
 		this.window.Update({ x: XCoord, y: YCoord})
 	}
 
-	HideGdiTooltip()
+	HideGdiTooltip(debug)
 	{
-		console.log("HideGdiTooltip")
+		If (debug) {
+			console.log("HideGdiTooltip")
+		}
+
 		this.window.Clear()
 		this.window.Update()
 	}

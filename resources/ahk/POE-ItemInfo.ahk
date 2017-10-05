@@ -10369,7 +10369,7 @@ ToolTipTimer:
 		SetTimer, ToolTipTimer, Off
 		If (Opts.UseGDI) 
 		{
-			gdipTooltip.HideGdiTooltip()
+			gdipTooltip.HideGdiTooltip(true)
 		}
 		Else
 		{
