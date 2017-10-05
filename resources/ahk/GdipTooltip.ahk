@@ -21,7 +21,6 @@ class GdipTooltip
 	ShowGdiTooltip(String, XCoord, YCoord)
 	{
 		If (String == "") {
-			this.HideGdiTooltip()
 			return
 		}	
 		
@@ -56,7 +55,7 @@ class GdipTooltip
 		;console.log("lineDims: " . lineWidth . "x" . lineHeight)
 		;console.log("textArea: " . textAreaWidth . "x" . textAreaHeight)
 
-		;MsgBox "lineDims: " . %lineWidth% . "x" . %lineHeight% . `n . "textArea: " . %textAreaWidth% . "x" . %textAreaHeight%
+		;console.log("lineDims: " . %lineWidth% . "x" . %lineHeight% . "`n" . "textArea: " . %textAreaWidth% . "x" . %textAreaHeight%)
 		this.window.Update({ x: XCoord, y: YCoord})
 
 		this.window.FillRectangle(this.fillBrush, new this.gdip.Point(this.borderSize.width, this.borderSize.height), new this.gdip.Size(textAreaWidth-(this.borderSize.width*2), textAreaHeight-(this.borderSize.height*2)))
@@ -80,6 +79,7 @@ class GdipTooltip
 
 	HideGdiTooltip()
 	{
+		console.log("HideGdiTooltip")
 		this.window.Clear()
 		this.window.Update()
 	}
