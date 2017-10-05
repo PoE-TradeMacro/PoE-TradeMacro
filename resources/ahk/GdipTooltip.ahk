@@ -81,7 +81,7 @@ class GdipTooltip
 		this.window.Update({ x: XCoord, y: YCoord})
 	}
 
-	HideGdiTooltip(debug)
+	HideGdiTooltip(debug = false)
 	{
 		If (debug) {
 			console.log("HideGdiTooltip")
