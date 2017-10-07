@@ -84,7 +84,7 @@ class ColorPicker
 		SubhWnd := WinExist()
 		DllCall("SetParent", "uint", SubhWnd, "uint", MainhWnd)
 		WinSet, Style, -0xC00000, A
-		GoSub ColorPickerSetValues
+		;GoSub ColorPickerSetValues
 		
 		; wait until the GUI is closed to return the picked color values
 		WinWaitClose, % PickerTitle		
@@ -153,12 +153,10 @@ class ColorPicker
 		Return
 
 		ColorPickerSetValues:
-			; doesn't work, see function
-			;ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)			
-			
 			;Convert values to Hex
-			GoSub, rgbaToARGBHex
+			ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
 			RGBVal	:= RegexReplace(ARGBval, "i)^.{4}")
+			
 			; remove "0x" and alpha value
 			windowColor := RegexReplace(ARGBval, "i)^.{4}")
 			; convert alpha value to 0-255
@@ -172,26 +170,6 @@ class ColorPicker
 			SetTimer, ColorPickerRemoveToolTip, 375
 			;Apply colour to preview
 			GuiControl, +Background%ARGBval%, pC
-		Return
-		
-		rgbaToARGBHex:
-			r := Rval
-			g := Gval
-			b := Bval
-			a := Aval
-			; convert percent alpha to 0-255
-			a := (a / 100) * 255
-			if (a < 1) {
-				a := Floor(a)
-			} else {
-				a := Ceil(a)
-			}
-			
-			SetFormat, Integer, % (f := A_FormatInteger) = "D" ? "H" : f
-			h := a + 0 . r + 0 . g + 0 . b + 0
-			SetFormat, Integer, %f%
-			
-			ARGBval := "0x" . RegExReplace(RegExReplace(h, "0x(.)(?=$|0x)", "0$1"), "0x")
 		Return
 
 		ColorPickerRemoveToolTip:
@@ -221,11 +199,6 @@ class ColorPicker
 	}
 	
 	rgbaToARGBHex(r, g, b, a) {
-		/*
-			This doesn't work when called from a Label unless I put a Sleep here, for example a second.
-			The function returns the value but assigning this function to a variable results
-			in an empty variable.
-		*/
 		; convert percent alpha to 0-255
 		a := (a / 100) * 255
 		if (a < 1) {
@@ -234,7 +207,8 @@ class ColorPicker
 			a := Ceil(a)
 		}
 		
-		SetFormat, Integer, % (f := A_FormatInteger) = "D" ? "H" : f
+		; won't work without IntegerFast when called from a Label
+		SetFormat, IntegerFast, % (f := A_FormatInteger) = "D" ? "H" : f
 		h := a + 0 . r + 0 . g + 0 . b + 0
 		SetFormat, Integer, %f%
 		
