@@ -20,7 +20,7 @@
 
 class ColorPicker
 {
-	__New(RGBv = "", Av = "", PickerTitle = "", bgImage = "") 
+	__New(RGBv = "", Av = "", PickerTitle = "Color Picker", bgImage = "") 
 	{		
 		/*
 			RBGv:				RGB hex value (000000 - FFFFFF).
@@ -29,7 +29,6 @@ class ColorPicker
 		*/
 		
 		global
-		this.PickerTitle:= PickerTitle
 		
 		RGBv := not RGBv ? "FFFFFF" : this.ValidateRGBColor(RGBv, "FFFFFF")
 		Av := not Av ? 85 : this.ValidateOpacity(Av, 100)
@@ -74,7 +73,7 @@ class ColorPicker
 		Gui, GDIColorPicker:Add, Button, x115 y100 w80 h20 vbS gColorPickerButtonSave, Save
 		Gui, GDIColorPicker:Add, Button, x+10 y100 w80 h20 gColorPickerButtonCancel, Cancel
 		Gui, GDIColorPicker:+LastFound
-		Gui, GDIColorPicker:Show, w401 h125, % this.PickerTitle
+		Gui, GDIColorPicker:Show, w401 h125, % PickerTitle
 
 		MainhWnd := WinExist()
 
@@ -88,7 +87,7 @@ class ColorPicker
 		GoSub ColorPickerSetValues
 		
 		; wait until the GUI is closed to return the picked color values
-		WinWaitClose, % this.PickerTitle		
+		WinWaitClose, % PickerTitle		
 		Results := [ColorPickerResultARGBHex, ColorPickerResultColor, ColorPickerResultTrans]
 		
 		Return Results
