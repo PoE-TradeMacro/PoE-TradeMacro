@@ -41,6 +41,7 @@ class ColorPicker
 		Aval := Av
 		ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
 		RGBval :=	
+		hasImage := FileExist(bgImage)		
 		
 		ColorPickerResultARGBHex	:= ARGBval
 		ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
@@ -67,13 +68,16 @@ class ColorPicker
 		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuB gColorPickerUpDownSub, %Bval%
 		Gui, GDIColorPicker:Add, Edit, x265 y70 w45 h20 gColorPickerEditSub veA +Limit3 +Number, %Aval%
 		Gui, GDIColorPicker:Add, UpDown, Range0-100 vuA gColorPickerUpDownSub, %Aval%
-		If (FileExist(bgImage)) {
-			Gui, GDIColorPicker:Add, Picture, w80 h80 x315 y10, %bgImage%
+		If (hasImage) {
+			Gui, GDIColorPicker:Add, Picture, vPbg w80 h80 x315 y10, %bgImage%
+			Gui, GDIColorPicker:Add, Button, x315 y100 w80 h20 gColorPickerButtonToggleBg, Toggle BG
+			showImage := true
 		}		
 		Gui, GDIColorPicker:Add, Button, x115 y100 w80 h20 vbS gColorPickerButtonSave, Save
 		Gui, GDIColorPicker:Add, Button, x+10 y100 w80 h20 gColorPickerButtonCancel, Cancel
 		Gui, GDIColorPicker:+LastFound
 		Gui, GDIColorPicker:Show, w401 h125, % PickerTitle
+		GuiControl, Hide, Pbg
 
 		MainhWnd := WinExist()
 
@@ -84,10 +88,11 @@ class ColorPicker
 		SubhWnd := WinExist()
 		DllCall("SetParent", "uint", SubhWnd, "uint", MainhWnd)
 		WinSet, Style, -0xC00000, A
-		;GoSub ColorPickerSetValues
+		WinActivate, ahk_id %MainhWnd%
+		GoSub, ColorPickerSetValues
 		
 		; wait until the GUI is closed to return the picked color values
-		WinWaitClose, % PickerTitle		
+		WinWaitClose, ahk_id %MainhWnd%
 		Results := [ColorPickerResultARGBHex, ColorPickerResultColor, ColorPickerResultTrans]
 		
 		Return Results
@@ -195,6 +200,11 @@ class ColorPicker
 		ColorPickerButtonCancel:
 			Gui, GDIColorPicker:Destroy
 			Gui, GDIColorPickerPreview:Destroy
+		Return
+		
+		ColorPickerButtonToggleBg:
+			GuiControl, % ( showImage ) ? "hide" : "show", Pbg
+			showImage := showImage ? false : true
 		Return
 	}
 	
