@@ -1,12 +1,31 @@
+; AutoHotkey Version: 1.1.12.00
+; Language:       	English
+; Dev Platform:   	Windows 7 Home Premium x64
+; Original Author:	Joe DF  |  http://joedf.co.nr  |  joedf@users.sourceforge.net
+; Date:           	August 20th, 2013
+; Link:				https://autohotkey.com/boards/viewtopic.php?t=65
+;
+; Script Function:
+;   Color Dialog script.
+;
+; Extended and rewritten as a class for the PoE-TradeMacro script (https://github.com/PoE-TradeMacro/POE-TradeMacro)
+; Author:			Eruyome
+; Date:				October 7th, 2017
+; Class function:
+;	Color picker UI with color preview (including opacity).
+;	Returns an array with:
+;		ARGB hex value (0x00000000)
+;		RGB hex value (000000)
+;		Alpha value in percent (100)
+
 class ColorPicker
 {
-	__New(RGBv, Av, GuiIdentifier = "", ColorIdentifier = "", PickerTitle = "") 
+	__New(RGBv, Av, PickerTitle = "", bgImage = "") 
 	{		
 		/*
 			RBGv:				RGB value in hex.
 			Av:					Alpha/Opacity value in percent.
-			GuiIdentifier: 		Gui number or name.
-			ColorIdentifier:	Identifier to use in Gui Controls/variables, like "BackGround".
+			PickerTitle:		Window title.
 		*/	
 		global
 		this.GuiID		:= StrLen(GuiIdentifier) ? GuiIdentifier ":" : ""
@@ -22,7 +41,6 @@ class ColorPicker
 		ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
 		RGBval :=	
 		
-		; wanted to use dynamic variables here, but they can't be used inside labels, so overwriting them later doesn't work
 		ColorPickerResultARGBHex	:= ARGBval
 		ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
 		ColorPickerResultTrans		:= Aval
@@ -48,6 +66,9 @@ class ColorPicker
 		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuB gColorPickerUpDownSub, %Bval%
 		Gui, GDIColorPicker:Add, Edit, x265 y70 w45 h20 gColorPickerEditSub veA +Limit3 +Number, %Aval%
 		Gui, GDIColorPicker:Add, UpDown, Range0-100 vuA gColorPickerUpDownSub, %Aval%
+		If (FileExist(bgImage)) {
+			Gui, GDIColorPicker:Add, Picture, w80 h80 x315 y10, %bgImage%
+		}		
 		Gui, GDIColorPicker:Add, Button, x115 y100 w80 h20 vbS gColorPickerButtonSave, Save
 		Gui, GDIColorPicker:Add, Button, x+10 y100 w80 h20 gColorPickerButtonCancel, Cancel
 		Gui, GDIColorPicker:+LastFound
@@ -63,9 +84,16 @@ class ColorPicker
 		DllCall("SetParent", "uint", SubhWnd, "uint", MainhWnd)
 		WinSet, Style, -0xC00000, A
 		GoSub ColorPickerSetValues
-			
-		Return 1
 		
+		; wait until the GUI is closed to return the picked color values
+		WinWaitClose, % this.PickerTitle		
+		Results := [ColorPickerResultARGBHex, ColorPickerResultColor, ColorPickerResultTrans]
+		
+		Return Results
+		
+		/* 
+			GUI Labels
+		*/
 		ColorPickerEditSub:
 			;Get Values
 			GuiControlGet, Rval, GDIColorPicker:, eR
@@ -171,12 +199,10 @@ class ColorPicker
 		Return
 
 		ColorPickerButtonSave:
-			; can't use dynamic variables here
-			; they have to be globally assigned outside of this class
 			ColorPickerResultARGBHex	:= ARGBval
 			ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
 			ColorPickerResultTrans		:= Aval
-		
+			
 			;Remove '0x' prefix to hex color code, saving it directly to the clipboard
 			StringReplace, Clipboard, ARGBval, 0x
 			;Display Last selected values... (these values can later be used), and Notify the user

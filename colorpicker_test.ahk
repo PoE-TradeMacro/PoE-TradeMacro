@@ -1,12 +1,8 @@
 #SingleInstance, force
 #Include, Class_ColorPicker.ahk
 
-global ColorPickerResultColor :=
-global ColorPickerResultTrans :=
+image := A_ScriptDir "\resources\images\colorPickerPreviewBg.png"
+ColorPickerResults	:= new ColorPicker("FFFFFF", 85, "GDI Tooltip Text Color Picker", image)
 
-ColorPickerTitle := "GDI Tooltip Text Color Picker"
+MsgBox % ColorPickerResults[1] "`n" ColorPickerResults[2] "`n" ColorPickerResults[3]
 
-colorpicker := new ColorPicker("FFFFFF", 85, "", "Text", ColorPickerTitle)
-WinWaitClose, %ColorPickerTitle%
-
-Msgbox % ColorPickerResultARGBHex "`n" ColorPickerResultColor "`n" ColorPickerResultTrans
