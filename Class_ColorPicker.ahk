@@ -1,0 +1,210 @@
+class ColorPicker
+{
+	__New(ByRef RGBv, ByRef Av, GuiIdentifier = "", ColorIdentifier = "", PickerTitle = "") 
+	{		
+		/*
+			RBGv:				RGB value in hex.
+			Av:					Alpha/Opacity value in percent.
+			GuiIdentifier: 		Gui number or name.
+			ColorIdentifier:	Identifier to use in Gui Controls/variables, like "BackGround".
+		*/	
+		global
+		this.GuiID		:= StrLen(GuiIdentifier) ? GuiIdentifier ":" : ""
+		this.ColorID	:= ColorIdentifier 
+		this.PickerTitle:= PickerTitle
+
+		RegexMatch(RGBv, "i)(.{2})(.{2})(.{2})", match)
+		RegexMatch(this.hexToRgb(RGBv), "i)(\d+),\s?(\d+),\s?(\d+)", match)
+		Rval := match1
+		Gval := match2
+		Bval := match3
+		Aval := Av
+		this.ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
+		this.RGBval :=		
+		
+		;Destroy GUIs in case they still exist
+		this.Destroy() 
+		
+		;Create Color Dialog GUI
+		Gui, GDIColorPicker:Add, Text, x0 y10 w75 h20 +Right, Red
+		Gui, GDIColorPicker:Add, Text, x0 y30 w75 h20 +Right, Green
+		Gui, GDIColorPicker:Add, Text, x0 y50 w75 h20 +Right, Blue
+		Gui, GDIColorPicker:Add, Text, x0 y70 w75 h20 +Right, Alpha/Opacity		
+		Gui, GDIColorPicker:Add, Slider, x75 y10 w190 h20 AltSubmit +NoTicks +Range0-255 vsR gColorPickerSliderSub, %Rval%
+		Gui, GDIColorPicker:Add, Slider, x75 y30 w190 h20 AltSubmit +NoTicks +Range0-255 vsG gColorPickerSliderSub, %Gval%
+		Gui, GDIColorPicker:Add, Slider, x75 y50 w190 h20 AltSubmit +NoTicks +Range0-255 vsB gColorPickerSliderSub, %Bval%
+		Gui, GDIColorPicker:Add, Slider, x75 y70 w190 h20 AltSubmit +NoTicks +Range0-100 vsA gColorPickerSliderSub, %Aval%
+		Gui, GDIColorPicker:Add, Edit, x265 y10 w45 h20 gColorPickerEditSub veR +Limit3 +Number, %Rval%
+		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuR gColorPickerUpDownSub, %Rval%
+		Gui, GDIColorPicker:Add, Edit, x265 y30 w45 h20 gColorPickerEditSub veG +Limit3 +Number, %Gval%
+		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuG gColorPickerUpDownSub, %Gval%
+		Gui, GDIColorPicker:Add, Edit, x265 y50 w45 h20 gColorPickerEditSub veB +Limit3 +Number, %Bval%
+		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuB gColorPickerUpDownSub, %Bval%
+		Gui, GDIColorPicker:Add, Edit, x265 y70 w45 h20 gColorPickerEditSub veA +Limit3 +Number, %Aval%
+		Gui, GDIColorPicker:Add, UpDown, Range0-100 vuA gColorPickerUpDownSub, %Aval%
+		Gui, GDIColorPicker:Add, Button, x155 y100 w110 h20 vbS gColorPickerButtonSave, Save
+		Gui, GDIColorPicker:+LastFound
+		Gui, GDIColorPicker:Show, w401 h125, % this.PickerTitle
+
+		MainhWnd := WinExist()
+
+		Gui, GDIColorPickerPreview: New, +AlwaysOnTop -resize -SysMenu -Caption
+		gui, GDIColorPickerPreview: color, blue
+		Gui, GDIColorPickerPreview: Show, x315 y10 w80 h80
+		Gui, GDIColorPickerPreview: +LastFound
+		SubhWnd := WinExist()
+		DllCall("SetParent", "uint", SubhWnd, "uint", MainhWnd)
+		WinSet, Style, -0xC00000, A
+		GoSub ColorPickerSetValues
+			
+		Return 1
+		
+		ColorPickerEditSub:
+			;Get Values
+			GuiControlGet, Rval, GDIColorPicker:, eR
+			GuiControlGet, Gval, GDIColorPicker:, eG
+			GuiControlGet, Bval, GDIColorPicker:, eB
+			GuiControlGet, Aval, GDIColorPicker:, eA
+			;Set preview
+			GoSub ColorPickerSetValues
+			;Make Everything else aware
+			GuiControl, GDIColorPicker:, uR, %Rval%
+			GuiControl, GDIColorPicker:, uG, %Gval%
+			GuiControl, GDIColorPicker:, uB, %Bval%
+			GuiControl, GDIColorPicker:, uA, %Aval%
+			GuiControl, GDIColorPicker:, sR, %Rval%
+			GuiControl, GDIColorPicker:, sG, %Gval%
+			GuiControl, GDIColorPicker:, sB, %Bval%
+			GuiControl, GDIColorPicker:, sA, %Aval%	
+		Return
+
+		ColorPickerUpDownSub:
+			;Get Values
+			GuiControlGet, Rval, GDIColorPicker:, uR
+			GuiControlGet, Gval, GDIColorPicker:, uG
+			GuiControlGet, Bval, GDIColorPicker:, uB
+			GuiControlGet, Aval, GDIColorPicker:, uA
+			;Set preview
+			GoSub ColorPickerSetValues
+			;Make Everything else aware
+			GuiControl, GDIColorPicker:, eR, %Rval%
+			GuiControl, GDIColorPicker:, eG, %Gval%
+			GuiControl, GDIColorPicker:, eB, %Bval%
+			GuiControl, GDIColorPicker:, eA, %Aval%
+			GuiControl, GDIColorPicker:, sR, %Rval%
+			GuiControl, GDIColorPicker:, sG, %Gval%
+			GuiControl, GDIColorPicker:, sB, %Bval%
+			GuiControl, GDIColorPicker:, sA, %Aval%
+		Return
+
+		ColorPickerSliderSub:
+			;Get Values
+			GuiControlGet, Rval, GDIColorPicker:, sR
+			GuiControlGet, Gval, GDIColorPicker:, sG
+			GuiControlGet, Bval, GDIColorPicker:, sB
+			GuiControlGet, Aval, GDIColorPicker:, sA
+			;Set preview
+			GoSub ColorPickerSetValues
+			;Make Everything else aware
+			GuiControl,, eR, %Rval%
+			GuiControl,, eG, %Gval%
+			GuiControl,, eB, %Bval%
+			GuiControl,, eA, %Aval%
+			GuiControl,, uR, %Rval%
+			GuiControl,, uG, %Gval%
+			GuiControl,, uB, %Bval%
+			GuiControl,, uA, %Aval%
+		Return
+
+		ColorPickerSetValues:
+			;Convert values to Hex
+			;ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
+			GoSub, rgbaToARGBHex
+			RGBVal	:= RegexReplace(ARGBval, "i)^.{4}")
+			; remove "0x" and alpha value
+			windowColor := RegexReplace(ARGBval, "i)^.{4}")
+			; convert alpha value to 0-255
+			alpha := Aval / 100 * 255
+			Gui, GDIColorPickerPreview:Color, %windowColor%
+			WinSet, Transparent, %alpha%, ahk_id %SubhWnd%
+			
+			;Display Tooltip
+			ToolTip Red: %Rval%`nGreen: %Gval%`nBlue: %Bval%`nOpacity: %Aval%`%`nHex: %ARGBval%
+			;Make tooltip disappear after 375 ms (3/8th of a second)
+			SetTimer, ColorPickerRemoveToolTip, 375
+			;Apply colour to preview
+			GuiControl, +Background%ARGBval%, pC
+		Return
+		
+		rgbaToARGBHex:
+			r := Rval
+			g := Gval
+			b := Bval
+			a := Aval
+			; convert percent alpha to 0-255
+			a := (a / 100) * 255
+			if (a < 1) {
+				a := Floor(a)
+			} else {
+				a := Ceil(a)
+			}
+			
+			SetFormat, Integer, % (f := A_FormatInteger) = "D" ? "H" : f
+			h := a + 0 . r + 0 . g + 0 . b + 0
+			SetFormat, Integer, %f%
+			
+			ARGBval := "0x" . RegExReplace(RegExReplace(h, "0x(.)(?=$|0x)", "0$1"), "0x")
+		Return
+
+		ColorPickerRemoveToolTip:
+			SetTimer, ColorPickerRemoveToolTip, Off ;Turn timer off
+			ToolTip ;Turn off tooltip
+		Return
+
+		ColorPickerButtonSave:
+			;Remove '0x' prefix to hex color code, saving it directly to the clipboard
+			_argb := this.ARGBval
+			StringReplace, Clipboard, _argb, 0x
+			;Display Last selected values... (these values can later be used), and Notify the user
+			output := "RGBA: (" Rval ", " Gval ", " Bval ", " Round(Aval / 100, 2) ")`nARGB Hex: " this.ARGBval "`nCopied to Clipboard!"
+			MsgBox, 64, Simple Color Dialog, % output
+			
+			this.Destroy()
+		Return
+	}
+	
+	Destroy() {
+		Gui, GDIColorPicker:Destroy
+		Gui, GDIColorPickerPreview:Destroy
+	}
+	
+	rgbaToARGBHex(r, g, b, a) {
+		/*
+			This doesn't work when called from a Label unless I put a Sleep here, for example a second.
+			The function returns the value but assigning this function to a variable results
+			in an empty variable.
+		*/
+		; convert percent alpha to 0-255
+		a := (a / 100) * 255
+		if (a < 1) {
+			a := Floor(a)
+		} else {
+			a := Ceil(a)
+		}
+		
+		SetFormat, Integer, % (f := A_FormatInteger) = "D" ? "H" : f
+		h := a + 0 . r + 0 . g + 0 . b + 0
+		SetFormat, Integer, %f%
+		
+		res := "0x" . RegExReplace(RegExReplace(h, "0x(.)(?=$|0x)", "0$1"), "0x")
+		Return, res
+	}	
+	
+	hexToRgb(s, d = "") {
+		SetFormat, Integer, % (f := A_FormatInteger) = "H" ? "D" : f
+		Loop, % StrLen(s := RegExReplace(s, "^(?:0x|#)")) // 2
+			c%A_Index% := 0 + (h := "0x" . SubStr(s, A_Index * 2 - 1, 2))
+		SetFormat, Integer, %f%
+		Return, c1 . (d := d = "" ? "," : d) . c2 . d . c3
+	}
+}

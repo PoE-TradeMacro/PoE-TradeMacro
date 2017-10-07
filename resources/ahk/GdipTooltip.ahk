@@ -199,8 +199,8 @@ class GdipTooltip
 	}
 	
 	ValidateRGBColor(Color, Default) {
+		StringUpper, Color, Color
 		RegExMatch(Trim(Color), "i)(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)", hex)
-		console.log(Color)
 		Return hex ? hex : Default
 	}
 	
