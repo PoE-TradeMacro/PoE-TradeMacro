@@ -191,9 +191,9 @@ class UserOptions {
 	GDIWindowColor := "000000"
 	GDIBorderColor := "91603B"
 	GDITextColor 	:= "FFFFFF"
-	GDIWindowTrans := 85
-	GDIBorderTrans := 85
-	GDITextTrans := 85
+	GDIWindowOpacity := 85
+	GDIBorderOpacity := 85
+	GDITextOpacity	:= 85
 
 	ScanUI()
 	{
@@ -9373,16 +9373,16 @@ CreateSettingsUI()
 	AddToolTip(Opts.UseGDI, "Enables GDI rendering of tooltips")	
 	GuiAddText("Window Color (hex RGB):", "xs20 ys45 w150", "LblGDIWindowColor")
 	GuiAddEdit(Opts.GDIWindowColor, "xs180 ys41 w70", "GDIWindowColor")	
-	GuiAddText("Window Transparency (0-100):", "xs20 ys75 w150", "LblGDIWindowTrans")
-	GuiAddEdit(Opts.GDIWindowTrans, "xs180 ys71 w70", "GDIWindowTrans")	
+	GuiAddText("Window Opactiy (0-100):", "xs20 ys75 w150", "LblGDIWindowOpacity")
+	GuiAddEdit(Opts.GDIWindowOpacity, "xs180 ys71 w70", "GDIWindowOpacity")	
 	GuiAddText("Border Color (hex RGB):", "xs20 ys105 w150", "LblGDIBorderColor")
 	GuiAddEdit(Opts.GDIBorderColor, "xs180 ys101 w70", "GDIBorderColor")	
-	GuiAddText("Border Transparency (0-100):", "xs20 ys135 w150", "LblGDIBorderTrans")
-	GuiAddEdit(Opts.GDIBorderTrans, "xs180 ys131 w70", "GDIBorderTrans")	
+	GuiAddText("Border Opacity (0-100):", "xs20 ys135 w150", "LblGDIBorderOpacity")
+	GuiAddEdit(Opts.GDIBorderOpacity, "xs180 ys131 w70", "GDIBorderOpacity")	
 	GuiAddText("Text Color (hex RGB):", "xs20 ys165 w150", "LblGDITextColor")
 	GuiAddEdit(Opts.GDITextColor, "xs180 ys161 w70", "GDITextColor")	
-	GuiAddText("Text Transparency (0-100):", "xs20 ys195 w150", "LblGDITextTrans")
-	GuiAddEdit(Opts.GDITextTrans, "xs180 ys191 w70", "GDITextTrans")
+	GuiAddText("Text Opacity (0-100):", "xs20 ys195 w150", "LblGDITextOpacity")
+	GuiAddEdit(Opts.GDITextOpacity, "xs180 ys191 w70", "GDITextOpacity")
 	
 	; Display - Affixes
 
@@ -9561,43 +9561,43 @@ UpdateSettingsUI()
 	; GDI+
 	GuiControl,, UseGDI, % Opts.UseGDI	
 	
-	GuiControl,, GDIWindowColor, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, "000000")
-	GuiControl,, GDIWindowTrans, % gdipTooltip.ValidateTransparency(Opts.WindowTrans, 85)
-	GuiControl,, GDIBorderColor, % gdipTooltip.ValidateRGBColor(Opts.GDIBorderColor, "91603B")
-	GuiControl,, GDIBorderTrans, % gdipTooltip.ValidateTransparency(Opts.BorderTrans, 85)
-	GuiControl,, GDITextColor, % gdipTooltip.ValidateRGBColor(Opts.GDITextColor, "FFFFFF")
-	GuiControl,, GDITextTrans, % gdipTooltip.ValidateTransparency(Opts.TextTrans, 85)
+	GuiControl,, GDIWindowColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, "000000")
+	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.WindowOpacity, 85)
+	GuiControl,, GDIBorderColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIBorderColor, "91603B")
+	GuiControl,, GDIBorderOpacity	, % gdipTooltip.ValidateOpacity(Opts.BorderOpacity, 85)
+	GuiControl,, GDITextColor	, % gdipTooltip.ValidateRGBColor(Opts.GDITextColor, "FFFFFF")
+	GuiControl,, GDITextOpacity	, % gdipTooltip.ValidateOpacity(Opts.TextOpacity, 85)
 	gdipTooltip.UpdateFromOptions(Opts)	
 	
 	If (Opts.UseGDI == False)
 	{
 		GuiControl, Disable, LblGDIWindowColor
-		GuiControl, Disable, LblGDIWindowTrans		
+		GuiControl, Disable, LblGDIWindowOpacity	
 		GuiControl, Disable, GDIWindowColor
-		GuiControl, Disable, GDIWindowTrans
+		GuiControl, Disable, GDIWindowOpacity
 		GuiControl, Disable, LblGDIBorderColor
-		GuiControl, Disable, LblGDIBorderTrans
+		GuiControl, Disable, LblGDIBorderOpacity
 		GuiControl, Disable, GDIBorderColor
-		GuiControl, Disable, GDIBorderTrans
+		GuiControl, Disable, GDIBorderOpacity
 		GuiControl, Disable, LblGDITextColor
-		GuiControl, Disable, LblGDITextTrans
+		GuiControl, Disable, LblGDITextOpacity
 		GuiControl, Disable, GDITextColor
-		GuiControl, Disable, GDITextTrans
+		GuiControl, Disable, GDITextOpacity
 	}
 	Else
 	{
 		GuiControl, Enable, LblGDIWindowColor
-		GuiControl, Enable, LblGDIWindowTrans
+		GuiControl, Enable, LblGDIWindowOpacity
 		GuiControl, Enable, GDIWindowColor
-		GuiControl, Enable, GDIWindowTrans
+		GuiControl, Enable, GDIWindowOpacity
 		GuiControl, Enable, LblGDIBorderColor
-		GuiControl, Enable, LblGDIBorderTrans
+		GuiControl, Enable, LblGDIBorderOpacity
 		GuiControl, Enable, GDIBorderColor
-		GuiControl, Enable, GDIBorderTrans
+		GuiControl, Enable, GDIBorderOpacity
 		GuiControl, Enable, LblGDITextColor
-		GuiControl, Enable, LblGDITextTrans
+		GuiControl, Enable, LblGDITextOpacity
 		GuiControl, Enable, GDITextColor
-		GuiControl, Enable, GDITextTrans
+		GuiControl, Enable, GDITextOpacity
 	}
 }
 
@@ -9739,13 +9739,13 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 		Opts.FontSize			:= IniRead(ConfigPath, "Tooltip", "FontSize", Opts.FontSize)
 
 		; GDI+		
-		Opts.UseGDI		:= IniRead(ConfigPath, "GDI", "Enabled", Opts.UseGDI)
-		Opts.GDIWindowColor	:= IniRead(ConfigPath, "GDI", "WindowColor", Opts.GDIWindowColor)
-		Opts.GDIWindowTrans	:= IniRead(ConfigPath, "GDI", "WindowTrans", Opts.GDIWindowTrans)
-		Opts.GDIBorderColor	:= IniRead(ConfigPath, "GDI", "BorderColor", Opts.GDIBorderColor)
-		Opts.GDIBorderTrans	:= IniRead(ConfigPath, "GDI", "BorderTrans", Opts.GDIBorderTrans)
-		Opts.GDITextColor	:= IniRead(ConfigPath, "GDI", "TextColor", Opts.GDITextColor)
-		Opts.GDITextTrans	:= IniRead(ConfigPath, "GDI", "TextTrans", Opts.GDITextTrans)
+		Opts.UseGDI			:= IniRead(ConfigPath, "GDI", "Enabled", Opts.UseGDI)
+		Opts.GDIWindowColor		:= IniRead(ConfigPath, "GDI", "WindowColor", Opts.GDIWindowColor)
+		Opts.GDIWindowOpacity	:= IniRead(ConfigPath, "GDI", "WindowOpacity", Opts.GDIWindowOpacity)
+		Opts.GDIBorderColor		:= IniRead(ConfigPath, "GDI", "BorderColor", Opts.GDIBorderColor)
+		Opts.GDIBorderOpacity	:= IniRead(ConfigPath, "GDI", "BorderOpacity", Opts.GDIBorderOpacity)
+		Opts.GDITextColor		:= IniRead(ConfigPath, "GDI", "TextColor", Opts.GDITextColor)
+		Opts.GDITextOpacity		:= IniRead(ConfigPath, "GDI", "TextOpacity", Opts.GDITextOpacity)
 		gdipTooltip.UpdateFromOptions(Opts)
 	}
 }
@@ -9819,11 +9819,11 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 	; GDI+
 	IniWrite(Opts.UseGDI, ConfigPath, "GDI", "Enabled")
 	IniWrite(Opts.GDIWindowColor, ConfigPath, "GDI", "WindowColor")
-	IniWrite(Opts.GDIWindowTrans, ConfigPath, "GDI", "WindowTrans")
+	IniWrite(Opts.GDIWindowOpacity, ConfigPath, "GDI", "WindowOpacity")
 	IniWrite(Opts.GDIBorderColor, ConfigPath, "GDI", "BorderColor")
-	IniWrite(Opts.GDIBorderTrans, ConfigPath, "GDI", "BorderTrans")
+	IniWrite(Opts.GDIBorderOpacity, ConfigPath, "GDI", "BorderOpacity")
 	IniWrite(Opts.GDITextColor, ConfigPath, "GDI", "TextColor")
-	IniWrite(Opts.GDITextTrans, ConfigPath, "GDI", "TextTrans")
+	IniWrite(Opts.GDITextOpacity, ConfigPath, "GDI", "TextOpacity")
 }
 
 CopyDefaultConfig()
@@ -10565,32 +10565,32 @@ SettingsUI_ChkUseGDI:
 	If (Not IsChecked)
 	{
 		GuiControl, Disable, LblGDIWindowColor
-		GuiControl, Disable, LblGDIWindowTrans		
+		GuiControl, Disable, LblGDIWindowOpacity		
 		GuiControl, Disable, GDIWindowColor
-		GuiControl, Disable, GDIWindowTrans
+		GuiControl, Disable, GDIWindowOpacity
 		GuiControl, Disable, LblGDIBorderColor
-		GuiControl, Disable, LblGDIBorderTrans
+		GuiControl, Disable, LblGDIBorderOpacity
 		GuiControl, Disable, GDIBorderColor
-		GuiControl, Disable, GDIBorderTrans
+		GuiControl, Disable, GDIBorderOpacity
 		GuiControl, Disable, LblGDITextColor
-		GuiControl, Disable, LblGDITextTrans
+		GuiControl, Disable, LblGDITextOpacity
 		GuiControl, Disable, GDITextColor
-		GuiControl, Disable, GDITextTrans
+		GuiControl, Disable, GDITextOpacity
 	}
 	Else
 	{
 		GuiControl, Enable, LblGDIWindowColor
-		GuiControl, Enable, LblGDIWindowTrans		
+		GuiControl, Enable, LblGDIWindowOpacity		
 		GuiControl, Enable, GDIWindowColor
-		GuiControl, Enable, GDIWindowTrans
+		GuiControl, Enable, GDIWindowOpacity
 		GuiControl, Enable, LblGDIBorderColor
-		GuiControl, Enable, LblGDIBorderTrans
+		GuiControl, Enable, LblGDIBorderOpacity
 		GuiControl, Enable, GDIBorderColor
-		GuiControl, Enable, GDIBorderTrans
+		GuiControl, Enable, GDIBorderOpacity
 		GuiControl, Enable, LblGDITextColor
-		GuiControl, Enable, LblGDITextTrans
+		GuiControl, Enable, LblGDITextOpacity
 		GuiControl, Enable, GDITextColor
-		GuiControl, Enable, GDITextTrans
+		GuiControl, Enable, GDITextOpacity
 	}
 
 	return
