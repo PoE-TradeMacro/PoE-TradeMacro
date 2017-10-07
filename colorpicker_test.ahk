@@ -1,5 +1,12 @@
 #SingleInstance, force
 #Include, Class_ColorPicker.ahk
 
-;ByRef RGBv, ByRef Av, GuiIdentifier = "", ColorIdentifier = "", PickerTitle = ""
-picker := new ColorPicker("FFFFFF", 85, "", "Text", "GDI Tooltip Text Color Picker")
+global ColorPickerResultColor :=
+global ColorPickerResultTrans :=
+
+ColorPickerTitle := "GDI Tooltip Text Color Picker"
+
+colorpicker := new ColorPicker("FFFFFF", 85, "", "Text", ColorPickerTitle)
+WinWaitClose, %ColorPickerTitle%
+
+Msgbox % ColorPickerResultARGBHex "`n" ColorPickerResultColor "`n" ColorPickerResultTrans

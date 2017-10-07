@@ -1,6 +1,6 @@
 class ColorPicker
 {
-	__New(ByRef RGBv, ByRef Av, GuiIdentifier = "", ColorIdentifier = "", PickerTitle = "") 
+	__New(RGBv, Av, GuiIdentifier = "", ColorIdentifier = "", PickerTitle = "") 
 	{		
 		/*
 			RBGv:				RGB value in hex.
@@ -19,11 +19,17 @@ class ColorPicker
 		Gval := match2
 		Bval := match3
 		Aval := Av
-		this.ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
-		this.RGBval :=		
+		ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
+		RGBval :=	
+		
+		; wanted to use dynamic variables here, but they can't be used inside labels, so overwriting them later doesn't work
+		ColorPickerResultARGBHex	:= ARGBval
+		ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
+		ColorPickerResultTrans		:= Aval
 		
 		;Destroy GUIs in case they still exist
-		this.Destroy() 
+		Gui, GDIColorPicker:Destroy
+		Gui, GDIColorPickerPreview:Destroy
 		
 		;Create Color Dialog GUI
 		Gui, GDIColorPicker:Add, Text, x0 y10 w75 h20 +Right, Red
@@ -42,7 +48,8 @@ class ColorPicker
 		Gui, GDIColorPicker:Add, UpDown, Range0-255 vuB gColorPickerUpDownSub, %Bval%
 		Gui, GDIColorPicker:Add, Edit, x265 y70 w45 h20 gColorPickerEditSub veA +Limit3 +Number, %Aval%
 		Gui, GDIColorPicker:Add, UpDown, Range0-100 vuA gColorPickerUpDownSub, %Aval%
-		Gui, GDIColorPicker:Add, Button, x155 y100 w110 h20 vbS gColorPickerButtonSave, Save
+		Gui, GDIColorPicker:Add, Button, x115 y100 w80 h20 vbS gColorPickerButtonSave, Save
+		Gui, GDIColorPicker:Add, Button, x+10 y100 w80 h20 gColorPickerButtonCancel, Cancel
 		Gui, GDIColorPicker:+LastFound
 		Gui, GDIColorPicker:Show, w401 h125, % this.PickerTitle
 
@@ -117,8 +124,10 @@ class ColorPicker
 		Return
 
 		ColorPickerSetValues:
+			; doesn't work, see function
+			;ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)			
+			
 			;Convert values to Hex
-			;ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
 			GoSub, rgbaToARGBHex
 			RGBVal	:= RegexReplace(ARGBval, "i)^.{4}")
 			; remove "0x" and alpha value
@@ -162,20 +171,26 @@ class ColorPicker
 		Return
 
 		ColorPickerButtonSave:
+			; can't use dynamic variables here
+			; they have to be globally assigned outside of this class
+			ColorPickerResultARGBHex	:= ARGBval
+			ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
+			ColorPickerResultTrans		:= Aval
+		
 			;Remove '0x' prefix to hex color code, saving it directly to the clipboard
-			_argb := this.ARGBval
-			StringReplace, Clipboard, _argb, 0x
+			StringReplace, Clipboard, ARGBval, 0x
 			;Display Last selected values... (these values can later be used), and Notify the user
-			output := "RGBA: (" Rval ", " Gval ", " Bval ", " Round(Aval / 100, 2) ")`nARGB Hex: " this.ARGBval "`nCopied to Clipboard!"
-			MsgBox, 64, Simple Color Dialog, % output
+			output := "RGBA: (" Rval ", " Gval ", " Bval ", " Round(Aval / 100, 2) ")`nARGB Hex: " ARGBval "`nCopied to Clipboard!"
+			;MsgBox, 64, Simple Color Dialog, % output
 			
-			this.Destroy()
+			Gui, GDIColorPicker:Destroy
+			Gui, GDIColorPickerPreview:Destroy			
 		Return
-	}
-	
-	Destroy() {
-		Gui, GDIColorPicker:Destroy
-		Gui, GDIColorPickerPreview:Destroy
+		
+		ColorPickerButtonCancel:
+			Gui, GDIColorPicker:Destroy
+			Gui, GDIColorPickerPreview:Destroy
+		Return
 	}
 	
 	rgbaToARGBHex(r, g, b, a) {
