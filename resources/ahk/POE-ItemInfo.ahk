@@ -21,6 +21,7 @@ GroupAdd, PoEexe, ahk_exe PathOfExile_x64Steam.exe
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
 #Include, %A_ScriptDir%\lib\ConvertKeyToKeyCode.ahk
 #Include, %A_ScriptDir%\resources\ahk\GdipTooltip.ahk
+#Include, %A_ScriptDir%\lib\Class_ColorPicker.ahk
 
 global gdipTooltip = new GdipTooltip()
 
@@ -188,12 +189,18 @@ class UserOptions {
 	UseGDI := 0
 
 	; Format: 0xAARRGGBB
-	GDIWindowColor := "000000"
-	GDIBorderColor := "91603B"
-	GDITextColor 	:= "FFFFFF"
-	GDIWindowOpacity := 85
-	GDIBorderOpacity := 85
-	GDITextOpacity	:= 85
+	GDIWindowColor			:= "000000"
+	GDIWindowColorDefault	:= "000000"
+	GDIBorderColor			:= "91603B"
+	GDIBorderColorDefault	:= "91603B"
+	GDITextColor 			:= "FFFFFF"
+	GDITextColorDefault 	:= "FFFFFF"
+	GDIWindowOpacity		:= 85
+	GDIWindowOpacityDefault	:= 85
+	GDIBorderOpacity		:= 85
+	GDIBorderOpacityDefault	:= 85
+	GDITextOpacity			:= 85
+	GDITextOpacityDefault	:= 85
 
 	ScanUI()
 	{
@@ -9371,18 +9378,21 @@ CreateSettingsUI()
 	GuiAddGroupBox("GDI+", "x7 y+20 w260 h220 Section")
 	GuiAddCheckBox("Enable GDI+", "xs10 ys20 w210", Opts.UseGDI, "UseGDI", "UseGDIH", "SettingsUI_ChkUseGDI")
 	AddToolTip(Opts.UseGDI, "Enables GDI rendering of tooltips")	
-	GuiAddText("Window Color (hex RGB):", "xs20 ys45 w150", "LblGDIWindowColor")
-	GuiAddEdit(Opts.GDIWindowColor, "xs180 ys41 w70", "GDIWindowColor")	
-	GuiAddText("Window Opactiy (0-100):", "xs20 ys75 w150", "LblGDIWindowOpacity")
-	GuiAddEdit(Opts.GDIWindowOpacity, "xs180 ys71 w70", "GDIWindowOpacity")	
-	GuiAddText("Border Color (hex RGB):", "xs20 ys105 w150", "LblGDIBorderColor")
-	GuiAddEdit(Opts.GDIBorderColor, "xs180 ys101 w70", "GDIBorderColor")	
-	GuiAddText("Border Opacity (0-100):", "xs20 ys135 w150", "LblGDIBorderOpacity")
-	GuiAddEdit(Opts.GDIBorderOpacity, "xs180 ys131 w70", "GDIBorderOpacity")	
-	GuiAddText("Text Color (hex RGB):", "xs20 ys165 w150", "LblGDITextColor")
-	GuiAddEdit(Opts.GDITextColor, "xs180 ys161 w70", "GDITextColor")	
-	GuiAddText("Text Opacity (0-100):", "xs20 ys195 w150", "LblGDITextOpacity")
-	GuiAddEdit(Opts.GDITextOpacity, "xs180 ys191 w70", "GDITextOpacity")
+	GuiAddButton("Edit Window", "xs9 ys40 w80 h23", "SettingsUI_BtnGDIWindowColor", "BtnGDIWindowColor")
+	GuiAddText("Color (hex RGB):", "x+5 yp+5 w150", "LblGDIWindowColor")
+	GuiAddEdit(Opts.GDIWindowColor, "xs190 ys41 w60", "GDIWindowColor", "GDIWindowColorH")
+	GuiAddText("Opactiy (0-100):", "xs105 ys75 w150", "LblGDIWindowOpacity")
+	GuiAddEdit(Opts.GDIWindowOpacity, "xs190 ys71 w60", "GDIWindowOpacity", "GDIWindowOpacityH")	
+	GuiAddButton("Edit Border", "xs9 ys100 w80 h23", "SettingsUI_BtnGDIBorderColor", "BtnGDIBorderColor")
+	GuiAddText("Color (hex RGB):", "x+5 yp+5 w150", "LblGDIBorderColor")
+	GuiAddEdit(Opts.GDIBorderColor, "xs190 ys101 w60", "GDIBorderColor", "GDIBorderColorH")	
+	GuiAddText("Opacity (0-100):", "xs105 ys135 w150", "LblGDIBorderOpacity")
+	GuiAddEdit(Opts.GDIBorderOpacity, "xs190 ys131 w60", "GDIBorderOpacity", "GDIBorderOpacityH")	
+	GuiAddButton("Edit Text", "xs9 ys160 w80 h23", "SettingsUI_BtnGDITextColor", "BtnGDITextColor")
+	GuiAddText("Color (hex RGB):", "x+5 ys165 w150", "LblGDITextColor")
+	GuiAddEdit(Opts.GDITextColor, "xs190 ys161 w60", "GDITextColor", "GDITextColorH")
+	GuiAddText("Opacity (0-100):", "xs105 ys195 w150", "LblGDITextOpacity")
+	GuiAddEdit(Opts.GDITextOpacity, "xs190 ys191 w60", "GDITextOpacity", "GDITextOpacityH")
 	
 	; Display - Affixes
 
@@ -9561,44 +9571,40 @@ UpdateSettingsUI()
 	; GDI+
 	GuiControl,, UseGDI, % Opts.UseGDI	
 	
-	GuiControl,, GDIWindowColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, "000000")
-	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.WindowOpacity, 85)
-	GuiControl,, GDIBorderColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIBorderColor, "91603B")
-	GuiControl,, GDIBorderOpacity	, % gdipTooltip.ValidateOpacity(Opts.BorderOpacity, 85)
-	GuiControl,, GDITextColor	, % gdipTooltip.ValidateRGBColor(Opts.GDITextColor, "FFFFFF")
-	GuiControl,, GDITextOpacity	, % gdipTooltip.ValidateOpacity(Opts.TextOpacity, 85)
-	gdipTooltip.UpdateFromOptions(Opts)	
+	GuiControl,, GDIWindowColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, Opts.GDIWindowColorDefault)
+	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIWindowOpacity, Opts.GDIWindowOpacityDefault)
+	GuiControl,, GDIBorderColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIBorderColor, Opts.GDIBorderColorDefault)
+	GuiControl,, GDIBorderOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIBorderOpacity, Opts.GDIBorderOpacityDefault)
+	GuiControl,, GDITextColor	, % gdipTooltip.ValidateRGBColor(Opts.GDITextColor, Opts.GDITextColorDefault)
+	GuiControl,, GDITextOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDITextOpacity, Opts.GDITextOpacityDefault)
+	gdipTooltip.UpdateFromOptions(Opts)
 	
 	If (Opts.UseGDI == False)
 	{
-		GuiControl, Disable, LblGDIWindowColor
-		GuiControl, Disable, LblGDIWindowOpacity	
 		GuiControl, Disable, GDIWindowColor
 		GuiControl, Disable, GDIWindowOpacity
-		GuiControl, Disable, LblGDIBorderColor
-		GuiControl, Disable, LblGDIBorderOpacity
 		GuiControl, Disable, GDIBorderColor
 		GuiControl, Disable, GDIBorderOpacity
-		GuiControl, Disable, LblGDITextColor
-		GuiControl, Disable, LblGDITextOpacity
 		GuiControl, Disable, GDITextColor
-		GuiControl, Disable, GDITextOpacity
+		GuiControl, Disable, GDITextOpacity	
+		
+		GuiControl, Disable, BtnGDIWindowColor
+		GuiControl, Disable, BtnGDIBorderColor
+		GuiControl, Disable, BtnGDITextColor	
 	}
-	Else
+	Else 
 	{
-		GuiControl, Enable, LblGDIWindowColor
-		GuiControl, Enable, LblGDIWindowOpacity
 		GuiControl, Enable, GDIWindowColor
 		GuiControl, Enable, GDIWindowOpacity
-		GuiControl, Enable, LblGDIBorderColor
-		GuiControl, Enable, LblGDIBorderOpacity
 		GuiControl, Enable, GDIBorderColor
 		GuiControl, Enable, GDIBorderOpacity
-		GuiControl, Enable, LblGDITextColor
-		GuiControl, Enable, LblGDITextOpacity
 		GuiControl, Enable, GDITextColor
-		GuiControl, Enable, GDITextOpacity
-	}
+		GuiControl, Enable, GDITextOpacity	
+		
+		GuiControl, Enable, BtnGDIWindowColor
+		GuiControl, Enable, BtnGDIBorderColor
+		GuiControl, Enable, BtnGDITextColor
+	}		
 }
 
 ShowSettingsUI()
@@ -10508,6 +10514,48 @@ SettingsUI_BtnDefaults:
 	ShowSettingsUI()
 	return
 
+OpenGDIColorPicker(type, rgb, opacity, title, image) {
+	global
+	_defaultColor		:= Opts["GDI" type "Color"]
+	_defaultOpacity	:= Opts["GDI" type "Opacity"]
+	_rgb				:= gdipTooltip.ValidateRGBColor(_rgb, _defaultColor)
+	_opacity			:= gdipTooltip.ValidateOpacity(_opacity, _defaultOpacity)	
+	_ColorHandle		:= GDI%_type%ColorH
+	_OpacityHandle		:= GDI%_type%OpacityH	
+	
+	msgbox % type "`n" _rgb "`n" _opacity
+	
+	ColorPickerResults	:= new ColorPicker(_rgb, _opacity, title, image)
+	If (ColorPickerResults[2]) {		
+		GuiControl, , % _ColorHandle, % ColorPickerResults[2]
+		GuiControl, , % _OpacityHandle, % ColorPickerResults[3]	
+	}
+}
+
+SettingsUI_BtnGDIWindowColor:
+	_image	:= A_ScriptDir "\resources\images\colorPickerPreviewBg.png"	
+	_type	:= "Window"
+	GuiControlGet, _cGDIColor1  , , % GDIWindowColorH
+	GuiControlGet, _cGDIOpacity1, , % GDIWindowOpacityH
+	OpenGDIColorPicker(_type, _cGDIColor1, _cGDIOpacity1, "GDI+ Tooltip " _type " Color Picker", _image)
+	return
+	
+SettingsUI_BtnGDIBorderColor:
+	_image	:= A_ScriptDir "\resources\images\colorPickerPreviewBg.png"	
+	_type	:= "Border"
+	GuiControlGet, _cGDIColor2  , , % GDIBorderColorH
+	GuiControlGet, _cGDIOpacity2, , % GDIBorderOpacityH	
+	OpenGDIColorPicker(_type, _cGDIColor2, _cGDIOpacity2, "GDI+ Tooltip " _type " Color Picker", _image)
+	return
+	
+SettingsUI_BtnGDITextColor:
+	_image	:= A_ScriptDir "\resources\images\colorPickerPreviewBg.png"	
+	_type	:= "Text"
+	GuiControlGet, _cGDIColor3  , , % GDITextColorH
+	GuiControlGet, _cGDIOpacity3, , % GDITextOpacityH
+	OpenGDIColorPicker(_type, _cGDIColor3, _cGDIOpacity3, "GDI+ Tooltip " _type " Color Picker", _image)
+	return
+
 SettingsUI_ChkShowAffixDetails:
 	GuiControlGet, IsChecked,, ShowAffixDetails
 	If (Not IsChecked)
@@ -10561,36 +10609,33 @@ SettingsUI_ChkUseTooltipTimeout:
 	return
 
 SettingsUI_ChkUseGDI:
+	; GDI+
 	GuiControlGet, IsChecked,, UseGDI
 	If (Not IsChecked)
-	{
-		GuiControl, Disable, LblGDIWindowColor
-		GuiControl, Disable, LblGDIWindowOpacity		
+	{		
 		GuiControl, Disable, GDIWindowColor
 		GuiControl, Disable, GDIWindowOpacity
-		GuiControl, Disable, LblGDIBorderColor
-		GuiControl, Disable, LblGDIBorderOpacity
 		GuiControl, Disable, GDIBorderColor
 		GuiControl, Disable, GDIBorderOpacity
-		GuiControl, Disable, LblGDITextColor
-		GuiControl, Disable, LblGDITextOpacity
 		GuiControl, Disable, GDITextColor
 		GuiControl, Disable, GDITextOpacity
+		
+		GuiControl, Disable, BtnGDIWindowColor
+		GuiControl, Disable, BtnGDIBorderColor
+		GuiControl, Disable, BtnGDITextColor
 	}
 	Else
 	{
-		GuiControl, Enable, LblGDIWindowColor
-		GuiControl, Enable, LblGDIWindowOpacity		
 		GuiControl, Enable, GDIWindowColor
 		GuiControl, Enable, GDIWindowOpacity
-		GuiControl, Enable, LblGDIBorderColor
-		GuiControl, Enable, LblGDIBorderOpacity
 		GuiControl, Enable, GDIBorderColor
 		GuiControl, Enable, GDIBorderOpacity
-		GuiControl, Enable, LblGDITextColor
-		GuiControl, Enable, LblGDITextOpacity
 		GuiControl, Enable, GDITextColor
 		GuiControl, Enable, GDITextOpacity
+		
+		GuiControl, Enable, BtnGDIWindowColor
+		GuiControl, Enable, BtnGDIBorderColor
+		GuiControl, Enable, BtnGDITextColor
 	}
 
 	return

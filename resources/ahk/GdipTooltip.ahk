@@ -137,15 +137,16 @@ class GdipTooltip
 	}
 	
 	ValidateOpacity(Opacity, Default) {
+		Opacity := Opacity + 0	; convert string to int
 		If (not RegExMatch(Opacity, "i)[0-9]+")) {
 			Opacity := Default
 		}
+		
 		If (Opacity > 100) {
 			Opacity := 100
 		} Else If (Opacity < 0) {
 			Opacity := 0
 		}
-		
 		Return Opacity
 	}
 	
