@@ -20,18 +20,20 @@
 
 class ColorPicker
 {
-	__New(RGBv, Av, PickerTitle = "", bgImage = "") 
+	__New(RGBv = "", Av = "", PickerTitle = "", bgImage = "") 
 	{		
 		/*
-			RBGv:				RGB value in hex.
-			Av:					Alpha/Opacity value in percent.
+			RBGv:				RGB hex value (000000 - FFFFFF).
+			Av:					Alpha/Opacity (0 - 100) %.
 			PickerTitle:		Window title.
-		*/	
+		*/
+		
 		global
-		this.GuiID		:= StrLen(GuiIdentifier) ? GuiIdentifier ":" : ""
-		this.ColorID	:= ColorIdentifier 
 		this.PickerTitle:= PickerTitle
-
+		
+		RGBv := not RGBv ? "FFFFFF" : this.ValidateRGBColor(RGBv, "FFFFFF")
+		Av := not Av ? 85 : this.ValidateOpacity(Av, 100)
+		
 		RegexMatch(RGBv, "i)(.{2})(.{2})(.{2})", match)
 		RegexMatch(this.hexToRgb(RGBv), "i)(\d+),\s?(\d+),\s?(\d+)", match)
 		Rval := match1
@@ -247,5 +249,24 @@ class ColorPicker
 			c%A_Index% := 0 + (h := "0x" . SubStr(s, A_Index * 2 - 1, 2))
 		SetFormat, Integer, %f%
 		Return, c1 . (d := d = "" ? "," : d) . c2 . d . c3
+	}
+	
+	ValidateRGBColor(Color, Default) {
+		StringUpper, Color, Color
+		RegExMatch(Trim(Color), "i)(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)", hex)
+		Return hex ? hex : Default
+	}
+	
+	ValidateOpacity(Opacity, Default) {
+		If (not RegExMatch(Opacity, "i)[0-9]+")) {
+			Opacity := Default
+		}
+		If (Opacity > 100) {
+			Opacity := 100
+		} Else If (Opacity < 0) {
+			Opacity := 0
+		}
+		
+		Return Opacity
 	}
 }
