@@ -10515,18 +10515,17 @@ SettingsUI_BtnDefaults:
 	return
 
 OpenGDIColorPicker(type, rgb, opacity, title, image) {
-	global
+	global	
 	_defaultColor		:= Opts["GDI" type "Color"]
 	_defaultOpacity	:= Opts["GDI" type "Opacity"]
-	_rgb				:= gdipTooltip.ValidateRGBColor(_rgb, _defaultColor)
-	_opacity			:= gdipTooltip.ValidateOpacity(_opacity, _defaultOpacity)	
+	_rgb				:= gdipTooltip.ValidateRGBColor(rgb, _defaultColor)
+	_opacity			:= gdipTooltip.ValidateOpacity(opacity, _defaultOpacity)	
 	_ColorHandle		:= GDI%_type%ColorH
 	_OpacityHandle		:= GDI%_type%OpacityH	
-	
-	msgbox % type "`n" _rgb "`n" _opacity
+	;msgbox % type "`n" rgb " -> " _defaultColor " -> " _rgb "`n" opacity " -> " _defaultOpacity " -> " _opacity
 	
 	ColorPickerResults	:= new ColorPicker(_rgb, _opacity, title, image)
-	If (ColorPickerResults[2]) {		
+	If (StrLen(ColorPickerResults[2])) {		
 		GuiControl, , % _ColorHandle, % ColorPickerResults[2]
 		GuiControl, , % _OpacityHandle, % ColorPickerResults[3]	
 	}

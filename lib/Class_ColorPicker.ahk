@@ -3,14 +3,14 @@
 ; Dev Platform:   	Windows 7 Home Premium x64
 ; Original Author:	Joe DF  |  http://joedf.co.nr  |  joedf@users.sourceforge.net
 ; Date:           	August 20th, 2013
-; Link:				https://autohotkey.com/boards/viewtopic.php?t=65
+; Link:			https://autohotkey.com/boards/viewtopic.php?t=65
 ;
 ; Script Function:
 ;   Color Dialog script.
 ;
 ; Extended and rewritten as a class for the PoE-TradeMacro script (https://github.com/PoE-TradeMacro/POE-TradeMacro)
 ; Author:			Eruyome
-; Date:				October 7th, 2017
+; Date:			October 7th, 2017
 ; Class function:
 ;	Color picker UI with color preview (including opacity).
 ;	Returns an array with:
@@ -23,29 +23,29 @@ class ColorPicker
 	__New(RGBv = "", Av = "", PickerTitle = "Color Picker", bgImage = "") 
 	{		
 		/*
-			RBGv:				RGB hex value (000000 - FFFFFF).
-			Av:					Alpha/Opacity (0 - 100) %.
-			PickerTitle:		Window title.
+			RBGv:		RGB hex value (000000 - FFFFFF).
+			Av:			Alpha/Opacity (0 - 100) %.
+			PickerTitle:	Window title.
+			bgImage:		Optional background image for the color preview.
 		*/
 		
 		global
-		
-		RGBv := not RGBv ? "FFFFFF" : this.ValidateRGBColor(RGBv, "FFFFFF")
-		Av := not Av ? 85 : this.ValidateOpacity(Av, 100)
+		RGBv	:= this.ValidateRGBColor(RGBv, "FFFFFF")
+		Av	:= (not StrLen(Av) > 0) ? 85 : this.ValidateOpacity(Av, 100)
 		
 		RegexMatch(RGBv, "i)(.{2})(.{2})(.{2})", match)
 		RegexMatch(this.hexToRgb(RGBv), "i)(\d+),\s?(\d+),\s?(\d+)", match)
-		Rval := match1
-		Gval := match2
-		Bval := match3
-		Aval := Av
-		ARGBval := this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
-		RGBval :=	
-		hasImage := FileExist(bgImage)		
+		Rval	:= match1
+		Gval	:= match2
+		Bval	:= match3
+		Aval	:= Av
+		ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
+		RGBval	:=	
+		hasImage	:= FileExist(bgImage)		
 		
 		ColorPickerResultARGBHex	:= ARGBval
-		ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
-		ColorPickerResultTrans		:= Aval
+		ColorPickerResultColor	:= RegexReplace(ARGBval, "i)^.{4}")
+		ColorPickerResultTrans	:= Aval
 		
 		;Destroy GUIs in case they still exist
 		Gui, GDIColorPicker:Destroy
@@ -162,10 +162,9 @@ class ColorPicker
 			ARGBval	:= this.rgbaToARGBHex(Rval, Gval, Bval, Aval)
 			RGBVal	:= RegexReplace(ARGBval, "i)^.{4}")
 			
-			; remove "0x" and alpha value
-			windowColor := RegexReplace(ARGBval, "i)^.{4}")
-			; convert alpha value to 0-255
-			alpha := Aval / 100 * 255
+			; remove "0x" and alpha value and convert alpha value to 0-255
+			windowColor	:= RegexReplace(ARGBval, "i)^.{4}")
+			alpha		:= Aval / 100 * 255
 			Gui, GDIColorPickerPreview:Color, %windowColor%
 			WinSet, Transparent, %alpha%, ahk_id %SubhWnd%
 			
@@ -184,8 +183,8 @@ class ColorPicker
 
 		ColorPickerButtonSave:
 			ColorPickerResultARGBHex	:= ARGBval
-			ColorPickerResultColor		:= RegexReplace(ARGBval, "i)^.{4}")
-			ColorPickerResultTrans		:= Aval
+			ColorPickerResultColor	:= RegexReplace(ARGBval, "i)^.{4}")
+			ColorPickerResultTrans	:= Aval
 			
 			;Remove '0x' prefix to hex color code, saving it directly to the clipboard
 			StringReplace, Clipboard, ARGBval, 0x
@@ -237,10 +236,11 @@ class ColorPicker
 	ValidateRGBColor(Color, Default) {
 		StringUpper, Color, Color
 		RegExMatch(Trim(Color), "i)(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)", hex)
-		Return hex ? hex : Default
+		Return StrLen(hex) ? hex : Default
 	}
 	
 	ValidateOpacity(Opacity, Default) {
+		Opacity := Opacity + 0	; convert string to int
 		If (not RegExMatch(Opacity, "i)[0-9]+")) {
 			Opacity := Default
 		}

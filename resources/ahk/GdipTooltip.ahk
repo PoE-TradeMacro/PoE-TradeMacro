@@ -133,7 +133,7 @@ class GdipTooltip
 	ValidateRGBColor(Color, Default) {
 		StringUpper, Color, Color
 		RegExMatch(Trim(Color), "i)(^[0-9A-F]{6}$)|(^[0-9A-F]{3}$)", hex)
-		Return hex ? hex : Default
+		Return StrLen(hex) ? hex : Default
 	}
 	
 	ValidateOpacity(Opacity, Default) {
