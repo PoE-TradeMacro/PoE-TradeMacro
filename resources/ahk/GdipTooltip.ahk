@@ -209,47 +209,19 @@ class GdipTooltip
 
 		; validate opacity and convert to hex values (in decimal)
 		If (opacityBase == 10) {
-			; todo: ValidateOpacity() doesn't output console commands sometimes and often doesn't return a value
-			console.log("-------- update colors --------")			
-			console.log("window: " wOpacity ", " ", " opacityBase ", " 16)
-			wOpacity := this.ValidateOpacity(wOpacity, , opacityBase, "16")
-			console.log("border: " bOpacity ", " ", " opacityBase ", " 16)
-			bOpacity := this.ValidateOpacity(bOpacity, , opacityBase, "16")
-			console.log("text: " tOpacity ", " ", " opacityBase ", " 16)
-			tOpacity := this.ValidateOpacity(tOpacity, , opacityBase, "16")
-			console.log("result: " wOpacity ", " bOpacity ", " tOpacity)
+			console.log("-------- update colors --------")	
+			wOpacity := this.ValidateOpacity(wOpacity, "", opacityBase, "16")
+			bOpacity := this.ValidateOpacity(bOpacity, "", opacityBase, "16")
+			tOpacity := this.ValidateOpacity(tOpacity, "", opacityBase, "16")
 		}
 		;console.clear()
-		
-		; todo: remove this fallback
-		wOpacity := not StrLen(wOpacity) ? 230 : wOpacity
-		bOpacity := not StrLen(bOpacity) ? 230 : bOpacity
-		tOpacity := not StrLen(tOpacity) ? 230 : tOpacity
 		
 		this.fillBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([wOpacity, wColor]))
 		this.borderBrush	:= new gdip.Brush(this.ConvertColorToARGBhex([bOpacity, bColor]))	
 		this.fontBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([tOpacity, tColor]))
 		
-		/*
-		this.AssembleHexARGBColors(wColor, wOpactiy, bColor, bOpacity, tColor, tOpacity)
-		this.fillBrush		:= new gdip.Brush(wColor)
-		this.borderBrush	:= new gdip.Brush(bColor)
-		this.fontBrush		:= new gdip.Brush(tColor)
-		*/
 		this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
 	}
-	
-	/*
-	AssembleHexARGBColors(Opts, ByRef wColor, ByRef bColor, ByRef tColor) {
-		_windowOpacity	:= this.PercentToHex(Opts.GDIWindowOpacity)
-		_borderOpacity	:= this.PercentToHex(Opts.GDIBorderOpacity)
-		_textOpacity	:= this.PercentToHex(Opts.GDITextOpacity)
-		
-		wColor	:= _windowOpacity . Opts.GDIWindowColor
-		bColor	:= _borderOpacity . Opts.GDIBorderColor
-		tColor	:= _textOpacity   . Opts.GDITextColor
-	}
-	*/
 	
 	ValidateRGBColor(Color, Default, hasOpacity = false) {
 		; hex RGB = 0xFFFFFF or FFFFFF
@@ -315,15 +287,6 @@ class GdipTooltip
 		console.log("return: " Opacity)
 		Return Opacity
 	}
-	
-	/*
-	PercentToHex(percent) {
-		percToHex := (percent / 100) * 255
-		hex		:= this.FHex(percToHex)		
-		
-		Return hex
-	}
-	*/
 	
 	FHex( int, pad=0 ) {	; Function by [VxE]. Formats an integer (decimals are truncated) as hex.
 						; "Pad" may be the minimum number of digits that should appear on the right of the "0x".
@@ -411,19 +374,19 @@ class GdipTooltip
 	}
 	
 	Min(x,x1="",x2="",x3="",x4="",x5="",x6="",x7="",x8="",x9="") { 
-	   Loop 
-		 IfEqual x%A_Index%,,Break 
-		 Else If (x  > x%A_Index%) 
+		Loop 
+			IfEqual x%A_Index%,,Break 
+			Else If (x  > x%A_Index%) 
 				x := x%A_Index% 
-	   Return x 
+		Return x 
 	}
 	
 	Max(x,x1="",x2="",x3="",x4="",x5="",x6="",x7="",x8="",x9="") { 
-	   Loop 
-		 IfEqual x%A_Index%,,Break 
-		 Else If (x  < x%A_Index%) 
+		Loop 
+			IfEqual x%A_Index%,,Break 
+			Else If (x  < x%A_Index%) 
 				x := x%A_Index% 
-	   Return x 
+		Return x 
 	}
 	
 	GetActiveMonitorInfo(ByRef X, ByRef Y, ByRef Width, ByRef Height) {
