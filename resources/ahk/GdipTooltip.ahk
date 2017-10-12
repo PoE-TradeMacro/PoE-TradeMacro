@@ -26,19 +26,17 @@ class GdipTooltip
 		If (c > 10) {
 			throw "Too many parameters passed to GdipTooltip.New()"
 		}
-		
 		; set defaults
-		boSize	:= params[1] = "" ? params[1] : 2
-		padding	:= params[2] = "" ? params[2] : 5
-		w		:= params[3] = "" ? params[3] : 800
-		h		:= params[4] = "" ? params[4] : 600
-		wColor	:= params[5] = "" ? 0xE5000000 : this.ConvertColorToARGBhex(params[5])
-		bColor	:= params[6] = "" ? 0xE57A7A7A : this.ConvertColorToARGBhex(params[6])
-		fColor	:= params[7] = "" ? 0xFFFFFFFF : this.ConvertColorToARGBhex(params[7])
-		innerBorder		:= params[8] = "" ? false : params[8]
-		renderingHack		:= params[9] = "" ? true : params[9]
-		luminosityFactor	:= params[10] = "" ? 0 : params[10]		
-		;console.log(boSize "," padding "," w "," h "," wColor "," bColor "," fColor "," innerBorder "," renderingHack "," luminosityFactor)		
+		boSize	:= (params[1] = "" or not params[1]) ? 2 : params[1]
+		padding	:= (params[2] = "" or not params[2]) ? 5 : params[2]
+		w		:= (params[3] = "" or not params[3]) ? 800 : params[3]
+		h		:= (params[4] = "" or not params[4]) ? 600 : params[4]
+		wColor	:= (params[5] = "" or not params[5]) ? 0xE5000000 : this.ConvertColorToARGBhex(params[5])
+		bColor	:= (params[6] = "" or not params[6]) ? 0xE57A7A7A : this.ConvertColorToARGBhex(params[6])
+		fColor	:= (params[7] = "" or not params[7]) ? 0xFFFFFFFF : this.ConvertColorToARGBhex(params[7])
+		innerBorder		:= (params[8] = "" or not params[8]) ? false : params[8]
+		renderingHack		:= (params[9] = "" or not params[9]) ? true : params[9]
+		luminosityFactor	:= (params[10] = "" or not params[10]) ? 0 : params[10]		
 		
 		; Initialize Gdip
 		this.gdip				:= new Gdip()
@@ -119,13 +117,7 @@ class GdipTooltip
 		YCoord	:= ttBottomY > screenHeight ? YCoord - (Abs(ttBottomY - screenHeight)) : YCoord 
 
 		this.window.WriteText(String, options)
-		this.window.Update({ x: Round(XCoord, 5), y: Round(YCoord, 5)})		
-		
-		console.clear()
-		console.log(options)
-		console.log(this.fillBrush.color)
-		console.log(this.borderBrush.color)
-		console.log(this.window)
+		this.window.Update({ x: Round(XCoord, 5), y: Round(YCoord, 5)})
 	}
 	
 	SetInnerBorder(state = true, luminosityFactor = 0, autoColor = true, argbColorHex = "") {
@@ -217,12 +209,25 @@ class GdipTooltip
 
 		; validate opacity and convert to hex values (in decimal)
 		If (opacityBase == 10) {
-			wOpacity := this.ValidateOpacity(wOpacity, , opacityBase)
-			bOpacity := this.ValidateOpacity(bOpacity, , opacityBase)
-			tOpacity := this.ValidateOpacity(tOpacity, , opacityBase)
+			; todo: ValidateOpacity() doesn't output console commands sometimes and often doesn't return a value
+			console.log("-------- update colors --------")			
+			console.log("window: " wOpacity ", " ", " opacityBase ", " 16)
+			wOpacity := this.ValidateOpacity(wOpacity, , opacityBase, "16")
+			console.log("border: " bOpacity ", " ", " opacityBase ", " 16)
+			bOpacity := this.ValidateOpacity(bOpacity, , opacityBase, "16")
+			console.log("text: " tOpacity ", " ", " opacityBase ", " 16)
+			tOpacity := this.ValidateOpacity(tOpacity, , opacityBase, "16")
+			console.log("result: " wOpacity ", " bOpacity ", " tOpacity)
 		}
-		this.fillBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([wOpacity, wColor]))	
-		this.borderBrush	:= new gdip.Brush(this.ConvertColorToARGBhex([bOpacity, bColor]))		
+		;console.clear()
+		
+		; todo: remove this fallback
+		wOpacity := not StrLen(wOpacity) ? 230 : wOpacity
+		bOpacity := not StrLen(bOpacity) ? 230 : bOpacity
+		tOpacity := not StrLen(tOpacity) ? 230 : tOpacity
+		
+		this.fillBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([wOpacity, wColor]))
+		this.borderBrush	:= new gdip.Brush(this.ConvertColorToARGBhex([bOpacity, bColor]))	
 		this.fontBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([tOpacity, tColor]))
 		
 		/*
@@ -260,20 +265,26 @@ class GdipTooltip
 	}
 	
 	ValidateOpacity(Opacity, Default, inBase = 16, outBase = 16) {
+		console.log("---------Opacity: " Opacity)
+		console.log("out: " outBase ", in: " inBase)
 		; inBase/outBase = 10 or 16
 		; valid opacity = (0x00 - 0xFF) or (0-255)		
-		Opacity := Opacity + 0		; convert string to int
-		returnBase := returnBase + 0	; convert string to int
+		Opacity	:= Opacity + 0	; convert string to int
+		outBase	:= outBase + 0	; convert string to int
+		inBase	:= inBase + 0	; convert string to int
 		
 		If (not RegExMatch(Opacity, "i)[0-9]+")) {
+			console.log("wrong format | default: " Default)
 			Opacity := Default
 		}
-		
-		If (inBase == 16) {
-			RegExMatch(Trim(Opacity), "i)(^0x([0-9A-F]{2})$)", Opacity)
-			If (Opacity1) {
-				Return Opacity
+
+		If (inBase == 16) {			
+			RegExMatch(Trim(Opacity), "i)^0x([0-9A-F]{2})$", match)
+			If (match1) {
+				console.log("hex in | opacity: " Opacity)
+				Return match1
 			} Else {
+				console.log("hex in | default: " Default)
 				Return Default
 			}
 		}
@@ -285,15 +296,23 @@ class GdipTooltip
 		}
 		
 		If ((outBase == 16 and inBase == 16) or (outBase == 10 and inBase == 10)) {
+			If (outBase == 10) {
+				console.log("1 (dec in, dec out): " Opacity)	
+			} Else {
+				console.log("1 (hex in, hex out): " Opacity)
+			}			
 			Return Opacity
 		}
 		Else If (outBase == 16 and inBase == 10) {
+			console.log("2 (dec in, hex out): " Round(Opacity / 100 * 255))
 			Return Round(Opacity / 100 * 255)
 		}
 		Else If (outBase == 10 and inBase 16) {
+			console.log("3 (hex in, dec out): " Round(Opacity / 255 * 100))
 			Return Round(Opacity / 255 * 100)
 		}
 		
+		console.log("return: " Opacity)
 		Return Opacity
 	}
 	

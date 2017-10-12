@@ -9589,12 +9589,12 @@ UpdateSettingsUI()
 	console.log("Update Settings: " Opts["GDIWindowOpacityDefault"] " , " Opts["GDIBorderOpacityDefault"] " , " Opts["GDITextOpacityDefault"])	
 	
 	GuiControl,, GDIWindowColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, Opts.GDIWindowColorDefault)
-	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIWindowOpacity, Opts.GDIWindowOpacityDefault, 10, 10)
+	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIWindowOpacity, Opts.GDIWindowOpacityDefault, "10", "10")
 	GuiControl,, GDIBorderColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIBorderColor, Opts.GDIBorderColorDefault)
-	GuiControl,, GDIBorderOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIBorderOpacity, Opts.GDIBorderOpacityDefault, 10, 10)
+	GuiControl,, GDIBorderOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIBorderOpacity, Opts.GDIBorderOpacityDefault, "10", "10")
 	GuiControl,, GDITextColor	, % gdipTooltip.ValidateRGBColor(Opts.GDITextColor, Opts.GDITextColorDefault)
-	GuiControl,, GDITextOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDITextOpacity, Opts.GDITextOpacityDefault, 10, 10)
-	gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity)
+	GuiControl,, GDITextOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDITextOpacity, Opts.GDITextOpacityDefault, "10", "10")
+	gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity, 10, 16)
 	
 	If (Opts.UseGDI == False)
 	{
@@ -9784,7 +9784,7 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 		Opts.GDITextColorDefault		:= IniRead(ConfigPath, "GDI", "TextColorDefault", Opts.GDITextColorDefault)
 		Opts.GDITextOpacity			:= IniRead(ConfigPath, "GDI", "TextOpacity", Opts.GDITextOpacity)
 		Opts.GDITextOpacityDefault	:= IniRead(ConfigPath, "GDI", "TextOpacityDefault", Opts.GDITextOpacityDefault)
-		gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity)
+		gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity, "10", "16")
 	}
 }
 
@@ -10603,7 +10603,7 @@ SettingsUI_BtnGDIPreviewTooltip:
 	GuiControlGet, _tempGDITextOpacity , , % GDITextOpacityH
 	GuiControlGet, _tempGDIRenderingFix , , % GDIRenderingFixH
 	gdipTooltip.SetRenderingFix(_tempGDIRenderingFix)
-	gdipTooltip.UpdateColors(_tempGDIWindowColor, _tempGDIWindowOpacity, _tempGDIBorderColor, _tempGDIBorderOpacity, _tempGDITextColor, _tempGDITextOpacity)
+	gdipTooltip.UpdateColors(_tempGDIWindowColor, _tempGDIWindowOpacity, _tempGDIBorderColor, _tempGDIBorderOpacity, _tempGDITextColor, _tempGDITextOpacity, "10", "16")
 	_testString =
 	(
 		TOOLIP Preview Window
@@ -10625,7 +10625,7 @@ SettingsUI_BtnGDIPreviewTooltip:
 	Opts.UseGDI := _tempGDIState
 	Opts.GDIRenderingFix := _tempGDIRenderingFixState
 	gdipTooltip.SetRenderingFix(Opts.GDIRenderingFix)
-	gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity)
+	gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity, "10", "16")
 	return
 
 SettingsUI_BtnGDIDefaults:
