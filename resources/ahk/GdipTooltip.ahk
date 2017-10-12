@@ -19,10 +19,30 @@
 
 class GdipTooltip
 {
-	__New(boSize = 2, padding = 5, w = 800, h = 600, wColor = "0xE5000000", bColor = "0xE57A7A7A", fColor = "0xFFFFFFFF", innerBorder = false, renderingHack = true, luminosityFactor = 0) 
+	;__New(boSize = 2, padding = 5, w = 800, h = 600, wColor = "0xE5000000", bColor = "0xE57A7A7A", fColor = "0xFFFFFFFF", innerBorder = false, renderingHack = true, luminosityFactor = 0) 
+	__New(params*)
 	{
+		c := params.MaxIndex()
+		If (c > 10) {
+			throw "Too many parameters passed to GdipTooltip.New()"
+		}
+		
+		; set defaults
+		boSize	:= params[1] = "" ? params[1] : 2
+		padding	:= params[2] = "" ? params[2] : 5
+		w		:= params[3] = "" ? params[3] : 800
+		h		:= params[4] = "" ? params[4] : 600
+		wColor	:= params[5] = "" ? 0xE5000000 : this.ConvertColorToARGBhex(params[5])
+		bColor	:= params[6] = "" ? 0xE57A7A7A : this.ConvertColorToARGBhex(params[6])
+		fColor	:= params[7] = "" ? 0xFFFFFFFF : this.ConvertColorToARGBhex(params[7])
+		innerBorder		:= params[8] = "" ? false : params[8]
+		renderingHack		:= params[9] = "" ? true : params[9]
+		luminosityFactor	:= params[10] = "" ? 0 : params[10]		
+		;console.log(boSize "," padding "," w "," h "," wColor "," bColor "," fColor "," innerBorder "," renderingHack "," luminosityFactor)		
+		
 		; Initialize Gdip
 		this.gdip				:= new Gdip()
+		this.parentWindowHwnd	:= ""
 		this.window			:= new gdip.Window(new gdip.Size(w, h))
 		this.fillBrush			:= new gdip.Brush(wColor)
 		this.borderBrush 		:= new gdip.Brush(bColor)
@@ -35,11 +55,12 @@ class GdipTooltip
 		this.padding		:= new this.gdip.Size(padding, padding)
 		this.renderingHack	:= renderingHack
 		
+		;this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
 		; Start off with a clear window
 		this.HideGdiTooltip()
 	}
 
-	ShowGdiTooltip(fontSize, String, XCoord, YCoord, debug = false)
+	ShowGdiTooltip(fontSize, String, XCoord, YCoord, debug = false, parentWindowHwnd = "")
 	{
 		; Ignore empty strings
 		If (String == "")
@@ -55,10 +76,10 @@ class GdipTooltip
 		textAreaHeight	:= ttHeight + (2 * this.padding.height) + renderingOffset
 
 		this.window.Clear()
-		this.window.size.width	:= textAreaWidth  + this.borderSize.width
-		this.window.size.height	:= textAreaHeight + this.borderSize.height
+		this.window.size.width	:= Round(textAreaWidth  + this.borderSize.width, 5)
+		this.window.size.height	:= Round(textAreaHeight + this.borderSize.height, 5)
 		this.window.FillRectangle(this.fillBrush, new this.gdip.Point(this.borderSize.width, this.borderSize.height), new this.gdip.Size(textAreaWidth-(this.borderSize.width*2), textAreaHeight-(this.borderSize.height*2)))
-
+		
 		; optional inner border - default = false
 		If (this.innerBorder) {
 			this.window.FillRectangle(this.borderBrushInner, new this.gdip.Point(this.borderSize.width + renderingOffset, this.borderSize.height + renderingOffset), new this.gdip.Size(this.borderSize.width, textAreaHeight - this.borderSize.height - renderingOffset))
@@ -82,25 +103,43 @@ class GdipTooltip
 		options.width	:= ttWidth
 		options.height	:= ttHeight
 		options.size	:= fontSize
-		options.left	:= this.padding.width  + renderingOffset
-		options.top	:= this.padding.height + renderingOffset
+		options.left	:= Round(this.padding.width  + renderingOffset, 5)
+		options.top	:= Round(this.padding.height + renderingOffset, 5)
+		
+		If (not StrLen(parentWindowHwnd)) {
+			this.GetActiveMonitorInfo(screenX, screenY, screenWidth, screenHeight)
+		} Else {
+			WinGetPos, screenX, screenY, screenWidth, screenHeight, % parentWindowHwnd
+		}
+		
+		; make sure that the tooltip is completely visible on screen/window
+		ttRightX	:= XCoord + this.window.size.width 
+		ttBottomY	:= YCoord + this.window.size.height
+		XCoord	:= ttRightX  > screenWidth  ? XCoord - (Abs(ttRightX  - screenWidth))  : XCoord 
+		YCoord	:= ttBottomY > screenHeight ? YCoord - (Abs(ttBottomY - screenHeight)) : YCoord 
 
 		this.window.WriteText(String, options)
-		this.window.Update({ x: XCoord, y: YCoord})
+		this.window.Update({ x: Round(XCoord, 5), y: Round(YCoord, 5)})		
+		
+		console.clear()
+		console.log(options)
+		console.log(this.fillBrush.color)
+		console.log(this.borderBrush.color)
+		console.log(this.window)
 	}
 	
-	SetInnerBorder(state = true, luminosityFactor = 0, argbColorHex = "") {
+	SetInnerBorder(state = true, luminosityFactor = 0, autoColor = true, argbColorHex = "") {
 		this.innerBorder := state
 		luminosityFactor := luminosityFactor == 0 ? this.luminosityFactor : luminosityFactor
 		
 		; use passed color 
 		argbColorHex := RegExReplace(Trim(argbColorHex), "i)^0x")
-		If (StrLen(argbColorHex)) {
+		If (StrLen(argbColorHex) and not autoColor) {
 			argbColorHex := "0x" this.ValidateRGBColor(argbColorHex, "E5FFFFFF", true)
 			this.borderBrushInner := new gdip.Brush(argbColorHex)
 		} 
 		; darken/lighten the default borders color
-		Else If (luminosityFactor > 0 or luminosityFactor < 0) {
+		Else {
 			_r := this.ChangeLuminosity(this.borderBrush.Color.r, luminosityFactor)
 			_g := this.ChangeLuminosity(this.borderBrush.Color.g, luminosityFactor)
 			_b := this.ChangeLuminosity(this.borderBrush.Color.b, luminosityFactor)
@@ -170,26 +209,47 @@ class GdipTooltip
 		Return Size
 	}	
 
-	UpdateFromOptions(Opts)
-	{		
-		this.AssembleHexARGBColors(Opts, wColor, bColor, tColor)
+	UpdateColors(wColor, wOpacity, bColor, bOpacity, tColor, tOpacity, opacityBase = 16, colorBase = 16)
+	{
+		; valid color formats -> see this.ConvertColorToARGBhex()
+		; valid opacity formats = decimal (0-100) or hex (0-255)
+		; opacityBase/colorBase = 10 or 16
+
+		; validate opacity and convert to hex values (in decimal)
+		If (opacityBase == 10) {
+			wOpacity := this.ValidateOpacity(wOpacity, , opacityBase)
+			bOpacity := this.ValidateOpacity(bOpacity, , opacityBase)
+			tOpacity := this.ValidateOpacity(tOpacity, , opacityBase)
+		}
+		this.fillBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([wOpacity, wColor]))	
+		this.borderBrush	:= new gdip.Brush(this.ConvertColorToARGBhex([bOpacity, bColor]))		
+		this.fontBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([tOpacity, tColor]))
+		
+		/*
+		this.AssembleHexARGBColors(wColor, wOpactiy, bColor, bOpacity, tColor, tOpacity)
 		this.fillBrush		:= new gdip.Brush(wColor)
 		this.borderBrush	:= new gdip.Brush(bColor)
 		this.fontBrush		:= new gdip.Brush(tColor)
+		*/
 		this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
 	}
 	
+	/*
 	AssembleHexARGBColors(Opts, ByRef wColor, ByRef bColor, ByRef tColor) {
-		_windowOpacity	:= this.ConvertOpacityFromPercentToHex(Opts.GDIWindowOpacity)
-		_borderOpacity	:= this.ConvertOpacityFromPercentToHex(Opts.GDIBorderOpacity)
-		_textOpacity	:= this.ConvertOpacityFromPercentToHex(Opts.GDITextOpacity)
+		_windowOpacity	:= this.PercentToHex(Opts.GDIWindowOpacity)
+		_borderOpacity	:= this.PercentToHex(Opts.GDIBorderOpacity)
+		_textOpacity	:= this.PercentToHex(Opts.GDITextOpacity)
 		
 		wColor	:= _windowOpacity . Opts.GDIWindowColor
 		bColor	:= _borderOpacity . Opts.GDIBorderColor
 		tColor	:= _textOpacity   . Opts.GDITextColor
 	}
+	*/
 	
 	ValidateRGBColor(Color, Default, hasOpacity = false) {
+		; hex RGB = 0xFFFFFF or FFFFFF
+		; hex ARGB = 0xFFFFFFFF or FFFFFFFF
+		Color := RegExReplace(Color, "i)^0x")
 		StringUpper, Color, Color
 		If (hasOpacity) {
 			RegExMatch(Trim(Color), "i)(^[0-9A-F]{8}$)", hex)	
@@ -199,26 +259,52 @@ class GdipTooltip
 		Return StrLen(hex) ? hex : Default
 	}
 	
-	ValidateOpacity(Opacity, Default) {
-		Opacity := Opacity + 0	; convert string to int
+	ValidateOpacity(Opacity, Default, inBase = 16, outBase = 16) {
+		; inBase/outBase = 10 or 16
+		; valid opacity = (0x00 - 0xFF) or (0-255)		
+		Opacity := Opacity + 0		; convert string to int
+		returnBase := returnBase + 0	; convert string to int
+		
 		If (not RegExMatch(Opacity, "i)[0-9]+")) {
 			Opacity := Default
 		}
 		
-		If (Opacity > 100) {
-			Opacity := 100
+		If (inBase == 16) {
+			RegExMatch(Trim(Opacity), "i)(^0x([0-9A-F]{2})$)", Opacity)
+			If (Opacity1) {
+				Return Opacity
+			} Else {
+				Return Default
+			}
+		}
+		
+		If (Opacity > (inBase == 16 ? 255 : 100)) {
+			Opacity := (inBase == 16 ? 255 : 100)
 		} Else If (Opacity < 0) {
 			Opacity := 0
 		}
+		
+		If ((outBase == 16 and inBase == 16) or (outBase == 10 and inBase == 10)) {
+			Return Opacity
+		}
+		Else If (outBase == 16 and inBase == 10) {
+			Return Round(Opacity / 100 * 255)
+		}
+		Else If (outBase == 10 and inBase 16) {
+			Return Round(Opacity / 255 * 100)
+		}
+		
 		Return Opacity
 	}
 	
-	ConvertOpacityFromPercentToHex(Opacity) {
-		percToHex := (Opacity / 100) * 255
+	/*
+	PercentToHex(percent) {
+		percToHex := (percent / 100) * 255
 		hex		:= this.FHex(percToHex)		
 		
 		Return hex
 	}
+	*/
 	
 	FHex( int, pad=0 ) {	; Function by [VxE]. Formats an integer (decimals are truncated) as hex.
 						; "Pad" may be the minimum number of digits that should appear on the right of the "0x".
@@ -231,6 +317,63 @@ class GdipTooltip
 		Loop % s
 			NumPut( *( &hx + ( ( int & 15 ) << u ) ), h, pad - A_Index << u, "UChar" ), int >>= 4
 		Return h
+	}
+	
+	ConvertColorToARGBhex(param) {
+		If (StrLen(param)) {
+			If (not RegExMatch(param, "i)^0x")) {
+				param := "0x" param 
+			}
+			Return ARGB
+		}
+		Else If (c := param.MaxIndex()) {
+			OldMode := A_FormatInteger
+			; ARGB = (0xFFFFFFFF) or (FFFFFFFF)
+			; A, RGB hex = (128, 0xFFFFFF) or (128, FFFFFF)
+			; R, G, B = (255, 255, 255)
+			; A, R, G, B = (128, 255, 255, 255)
+			If (c = 1)
+			{				
+				ARGB := param[1]
+				;console.log("1: " ARGB)
+			}
+			Else If (c = 2)
+			{	
+				If (not RegExMatch(param[2], "i)^0x")) {
+					param[2] := "0x" param[2] 
+				}
+				A := param[1]
+				R := ((param[2] & 0xFF0000) >> 16)
+				G := ((param[2] & 0xFF00) >> 8)
+				B := (param[2] & 0xFF)
+				
+				SetFormat, Integer, Hex
+				ARGB := (A << 24) | (R << 16) | (G << 8) | B
+				;console.log("2: " ARGB)
+			}
+			Else If (c = 3)
+			{
+				SetFormat, Integer, Hex
+				ARGB := (255 << 24) | (param[1] << 16) | (param[2] << 8) | param[3]
+				;console.log("3: " ARGB)
+			}
+			Else If (c = 4)
+			{
+				SetFormat, Integer, Hex
+				ARGB := (param[1] << 24) | (param[2] << 16) | (param[3] << 8) | param[4]
+				;console.log("4: " ARGB)
+			}
+			Else
+				Throw "Incorrect number of parameters for GdipTooltip.ConvertColorToARGB()"
+			
+			SetFormat, Integer, % OldMode
+			A := (0xff000000 & ARGB) >> 24
+			R := not StrLen(R) ? (0x00ff0000 & ARGB) >> 16 : R
+			G := not StrLen(G) ? (0x0000ff00 & ARGB) >> 8 : G
+			B := not StrLen(B) ? 0x000000ff & ARGB : B
+		}
+		
+		Return ARGB
 	}
 	
 	ChangeLuminosity(c, l = 0) {
@@ -262,5 +405,23 @@ class GdipTooltip
 		 Else If (x  < x%A_Index%) 
 				x := x%A_Index% 
 	   Return x 
+	}
+	
+	GetActiveMonitorInfo(ByRef X, ByRef Y, ByRef Width, ByRef Height) {
+		; retrieves the size of the monitor, the mouse is on	
+		CoordMode, Mouse, Screen
+		MouseGetPos, mouseX , mouseY
+		SysGet, monCount, MonitorCount
+		Loop %monCount%
+		{ 	SysGet, curMon, Monitor, %a_index%
+			If ( mouseX >= curMonLeft and mouseX <= curMonRight and mouseY >= curMonTop and mouseY <= curMonBottom )
+			{
+				X      := curMonTop
+				y      := curMonLeft
+				Height := curMonBottom - curMonTop
+				Width  := curMonRight  - curMonLeft
+				Return
+			}
+		}
 	}
 }
