@@ -10479,7 +10479,7 @@ ToolTipTimer:
 	If (MouseMoved or ((UseTooltipTimeout == 1) and (ToolTipTimeout >= Opts.ToolTipTimeoutTicks)))
 	{
 		SetTimer, ToolTipTimer, Off
-		If (Opts.UseGDI) 
+		If (Opts.UseGDI or gdipTooltip.GetVisibility()) 
 		{
 			gdipTooltip.HideGdiTooltip(true)
 		}

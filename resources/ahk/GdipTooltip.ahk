@@ -51,6 +51,7 @@ class GdipTooltip
 		this.borderSize	:= new this.gdip.Size(boSize, boSize)
 		this.padding		:= new this.gdip.Size(padding, padding)
 		this.renderingHack	:= renderingHack
+		this.isVisible		:= false
 		
 		;this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
 		; Start off with a clear window
@@ -123,6 +124,7 @@ class GdipTooltip
 		
 		this.window.WriteText(String, options)
 		this.window.Update({ x: Round(XCoord, 5), y: Round(YCoord, 5)})
+		this.isVisible := true
 	}
 	
 	SetInnerBorder(state = true, luminosityFactor = 0, autoColor = true, argbColorHex = "") {
@@ -148,17 +150,24 @@ class GdipTooltip
 	SetRenderingFix(state) {
 		this.renderingHack := state
 	}
+	
 	SetBorderSize(w, h) {
 		this.borderSize := new this.gdip.Size(w, h)
 	}
+	
 	SetPadding(w, h) {
 		this.padding := new this.gdip.Size(w, h)
 	}
 
 	HideGdiTooltip(debug = false)
 	{
+		this.isVisible := false
 		this.window.Clear()
 		this.window.Update()
+	}
+	
+	GetVisibility() {
+		Return this.isVisible
 	}
 	
 	CalculateToolTipDimensions(String, fontSize, ByRef ttWidth, ByRef ttLineHeight, ByRef ttHeight) {
