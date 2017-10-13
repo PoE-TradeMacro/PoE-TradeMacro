@@ -331,7 +331,7 @@ class GdipTooltip
 		color := 
 		op := 
 		If (c = 1) {
-			color := params[1]			
+			color := params[1]
 		} Else If (StrLen(params)) {
 			color := params
 		} Else If (c > 1) {
@@ -345,29 +345,32 @@ class GdipTooltip
 		}
 		
 		inV := RegExReplace(color, "i)^0x")
-		If (not op) {
+		r :=
+		If (not op) {			
 			If (RegExMatch(Trim(inV), "i)(^[0-9A-F]{8}$)")) {
-				r := inV	
+				r := "0x" inV
 			}		
 		} Else If (RegExMatch(Trim(inV), "i)(^[0-9A-F]{6}$)")) {
-			r := "FF" inV
+			r := inV
 		} Else {
 			Throw "Invalid color value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
 		}
 		
 		If (op and InStr(op, "0x")) {
-			RegExMatch(Trim(op), "i)(^0x([0-9A-F]{2})$)", hex)
+			RegExMatch(Trim(op), "i)^0x([0-9A-F]{2})$", hex)
 			If (not hex1) {
 				Throw "Invalid opacity value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
 			}
-			Return r := "0x" hex1 . r
+			r := "0x" hex1 . r
 		} Else If (op) {
 			op := base = 16 ? op : Round(op / 100 * 255)
 			If (op < 0 or op > 255) {
 				Throw "Invalid opacity value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
-			}			
-			Return r := [op, r]
+			}
+			r := [op, r]
 		}
+		
+		Return r
 	}
 	
 	FHex( int, pad=0 ) {	; Function by [VxE]. Formats an integer (decimals are truncated) as hex.
@@ -388,7 +391,7 @@ class GdipTooltip
 			If (not RegExMatch(param, "i)^0x")) {
 				param := "0x" param 
 			}
-			Return ARGB
+			Return ARGB := param
 		}
 		Else If (c := param.MaxIndex()) {
 			OldMode := A_FormatInteger
