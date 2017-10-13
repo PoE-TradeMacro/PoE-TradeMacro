@@ -18,8 +18,7 @@
 #Include, %A_ScriptDir%\lib\Gdip2.ahk
 
 class GdipTooltip
-{
-	;__New(boSize = 2, padding = 5, w = 800, h = 600, wColor = "0xE5000000", bColor = "0xE57A7A7A", fColor = "0xFFFFFFFF", innerBorder = false, renderingHack = true, luminosityFactor = 0) 
+{	
 	__New(params*)
 	{
 		c := params.MaxIndex()
@@ -58,14 +57,14 @@ class GdipTooltip
 		this.HideGdiTooltip()
 	}
 
-	ShowGdiTooltip(fontSize, String, XCoord, YCoord, debug = false, parentWindowHwnd = "")
+	ShowGdiTooltip(fontSize, String, XCoord, YCoord, relativeCoords = true, parentWindowHwnd = "", fixedCoords = false)
 	{
 		; Ignore empty strings
 		If (String == "")
-			return
+			Return
 		
 		position := new this.gdip.Point(XCoord, YCoord)
-		fontSize := fontSize + 3	
+		fontSize := fontSize + 3
 
 		this.CalculateToolTipDimensions(String, fontSize, ttWidth, ttLineHeight, ttheight)
 		
@@ -103,19 +102,25 @@ class GdipTooltip
 		options.size	:= fontSize
 		options.left	:= Round(this.padding.width  + renderingOffset, 5)
 		options.top	:= Round(this.padding.height + renderingOffset, 5)
-		
-		If (not StrLen(parentWindowHwnd)) {
+
+		If (not StrLen(parentWindowHwnd) or not WinActive("ahk_id" parentWindowHwnd) or fixedCoords) {
 			this.GetActiveMonitorInfo(screenX, screenY, screenWidth, screenHeight)
 		} Else {
-			WinGetPos, screenX, screenY, screenWidth, screenHeight, % parentWindowHwnd
+			WinGetPos, screenX, screenY, screenWidth, screenHeight, ahk_id %parentWindowHwnd%
+			If (relativeCoords) {
+				XCoord := XCoord + screenX
+				YCoord := YCoord + screenY
+				screenWidth := screenWidth + screenX
+				screenHeight := screenHeight + screenY
+			}
 		}
 		
 		; make sure that the tooltip is completely visible on screen/window
-		ttRightX	:= XCoord + this.window.size.width 
-		ttBottomY	:= YCoord + this.window.size.height
-		XCoord	:= ttRightX  > screenWidth  ? XCoord - (Abs(ttRightX  - screenWidth))  : XCoord 
-		YCoord	:= ttBottomY > screenHeight ? YCoord - (Abs(ttBottomY - screenHeight)) : YCoord 
-
+		ttRightX	:= Round(XCoord + this.window.size.width, 5)
+		ttBottomY	:= Round(YCoord + this.window.size.height, 5)
+		XCoord	:= ttRightX  > screenWidth  ? XCoord - (Abs(ttRightX  - screenWidth))  : XCoord
+		YCoord	:= ttBottomY > screenHeight ? YCoord - (Abs(ttBottomY - screenHeight)) : YCoord
+		
 		this.window.WriteText(String, options)
 		this.window.Update({ x: Round(XCoord, 5), y: Round(YCoord, 5)})
 	}
@@ -129,13 +134,13 @@ class GdipTooltip
 		If (StrLen(argbColorHex) and not autoColor) {
 			argbColorHex := "0x" this.ValidateRGBColor(argbColorHex, "E5FFFFFF", true)
 			this.borderBrushInner := new gdip.Brush(argbColorHex)
-		} 
+		}
 		; darken/lighten the default borders color
 		Else {
 			_r := this.ChangeLuminosity(this.borderBrush.Color.r, luminosityFactor)
 			_g := this.ChangeLuminosity(this.borderBrush.Color.g, luminosityFactor)
 			_b := this.ChangeLuminosity(this.borderBrush.Color.b, luminosityFactor)
-			_a := this.borderBrush.Color.a	
+			_a := this.borderBrush.Color.a
 			this.borderBrushInner := new gdip.Brush(_a, _r, _g, _b)			
 		}
 	}	
@@ -209,7 +214,7 @@ class GdipTooltip
 
 		; validate opacity and convert to hex values (in decimal)
 		If (opacityBase == 10) {
-			console.log("-------- update colors --------")	
+			;console.log("-------- update colors --------")	
 			wOpacity := this.ValidateOpacity(wOpacity, "", opacityBase, "16")
 			bOpacity := this.ValidateOpacity(bOpacity, "", opacityBase, "16")
 			tOpacity := this.ValidateOpacity(tOpacity, "", opacityBase, "16")
@@ -237,8 +242,8 @@ class GdipTooltip
 	}
 	
 	ValidateOpacity(Opacity, Default, inBase = 16, outBase = 16) {
-		console.log("---------Opacity: " Opacity)
-		console.log("out: " outBase ", in: " inBase)
+		;console.log("---------Opacity: " Opacity)
+		;console.log("out: " outBase ", in: " inBase)
 		; inBase/outBase = 10 or 16
 		; valid opacity = (0x00 - 0xFF) or (0-255)		
 		Opacity	:= Opacity + 0	; convert string to int
@@ -246,17 +251,17 @@ class GdipTooltip
 		inBase	:= inBase + 0	; convert string to int
 		
 		If (not RegExMatch(Opacity, "i)[0-9]+")) {
-			console.log("wrong format | default: " Default)
+			;console.log("wrong format | default: " Default)
 			Opacity := Default
 		}
 
 		If (inBase == 16) {			
 			RegExMatch(Trim(Opacity), "i)^0x([0-9A-F]{2})$", match)
 			If (match1) {
-				console.log("hex in | opacity: " Opacity)
+				;console.log("hex in | opacity: " Opacity)
 				Return match1
 			} Else {
-				console.log("hex in | default: " Default)
+				;console.log("hex in | default: " Default)
 				Return Default
 			}
 		}
@@ -269,22 +274,22 @@ class GdipTooltip
 		
 		If ((outBase == 16 and inBase == 16) or (outBase == 10 and inBase == 10)) {
 			If (outBase == 10) {
-				console.log("1 (dec in, dec out): " Opacity)	
+				;console.log("1 (dec in, dec out): " Opacity)	
 			} Else {
-				console.log("1 (hex in, hex out): " Opacity)
+				;console.log("1 (hex in, hex out): " Opacity)
 			}			
 			Return Opacity
 		}
 		Else If (outBase == 16 and inBase == 10) {
-			console.log("2 (dec in, hex out): " Round(Opacity / 100 * 255))
+			;console.log("2 (dec in, hex out): " Round(Opacity / 100 * 255))
 			Return Round(Opacity / 100 * 255)
 		}
 		Else If (outBase == 10 and inBase 16) {
-			console.log("3 (hex in, dec out): " Round(Opacity / 255 * 100))
+			;console.log("3 (hex in, dec out): " Round(Opacity / 255 * 100))
 			Return Round(Opacity / 255 * 100)
 		}
 		
-		console.log("return: " Opacity)
+		;console.log("return: " Opacity)
 		Return Opacity
 	}
 	

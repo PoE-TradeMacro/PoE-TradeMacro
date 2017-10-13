@@ -9014,7 +9014,14 @@ ShowToolTip(String, Centered = false)
 
 	; Get position of mouse cursor
 	MouseGetPos, X, Y
-
+	WinGet, PoEWindowHwnd, ID, ahk_group PoEexe
+	RelativeToActiveWindow := true	; default tooltip behaviour 
+	
+	If (not RelativeToActiveWindow) {
+		OldCoordMode := A_CoordModeToolTip
+		CoordMode, Tooltip, Screen
+	}
+	
 	If (Not Opts.DisplayToolTipAtFixedCoords)
 	{
 		If (Centered)
@@ -9027,7 +9034,7 @@ ShowToolTip(String, Centered = false)
 
 			If (Opts.UseGDI)
 			{
-				gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord)
+				gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord, RelativeToActiveWindow, PoEWindowHwnd)
 			}
 			Else
 			{
@@ -9043,7 +9050,7 @@ ShowToolTip(String, Centered = false)
 			
 			If (Opts.UseGDI) 
 			{
-				gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord)
+				gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord, RelativeToActiveWindow, PoEWindowHwnd)
 			}
 			Else
 			{
@@ -9068,9 +9075,9 @@ ShowToolTip(String, Centered = false)
 		XCoord := 0 + ScreenOffsetX
 		YCoord := 0 + ScreenOffsetY
 
-		If (Opts.UseGDI) 
+		If (Opts.UseGDI)
 		{
-			gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord)
+			gdipTooltip.ShowGdiTooltip(Opts.FontSize, String, XCoord, YCoord, RelativeToActiveWindow, PoEWindowHwnd, true)
 		}
 		Else
 		{
@@ -9084,6 +9091,10 @@ ShowToolTip(String, Centered = false)
 	; Set up count variable and start timer for tooltip timeout
 	ToolTipTimeout := 0
 	SetTimer, ToolTipTimer, 100
+	
+	If (OldCoordMode) {
+		CoordMode, Tooltip, % OldCoordMode
+	}
 }
 
 ; ############ GUI #############
@@ -9586,7 +9597,7 @@ UpdateSettingsUI()
 	Opts.GDIBorderOpacityDefault	:= IniRead(ConfigPath, "GDI", "BorderOpacityDefault", Opts.GDIBorderOpacityDefault)	
 	Opts.GDITextColorDefault		:= IniRead(ConfigPath, "GDI", "TextColorDefault", Opts.GDITextColorDefault)	
 	Opts.GDITextOpacityDefault	:= IniRead(ConfigPath, "GDI", "TextOpacityDefault", Opts.GDITextOpacityDefault)
-	console.log("Update Settings: " Opts["GDIWindowOpacityDefault"] " , " Opts["GDIBorderOpacityDefault"] " , " Opts["GDITextOpacityDefault"])	
+	console.log("Update Settings: " Opts["GDIWindowOpacityDefault"] " , " Opts["GDIBorderOpacityDefault"] " , " Opts["GDITextOpacityDefault"])
 	
 	GuiControl,, GDIWindowColor	, % gdipTooltip.ValidateRGBColor(Opts.GDIWindowColor, Opts.GDIWindowColorDefault)
 	GuiControl,, GDIWindowOpacity	, % gdipTooltip.ValidateOpacity(Opts.GDIWindowOpacity, Opts.GDIWindowOpacityDefault, "10", "10")
