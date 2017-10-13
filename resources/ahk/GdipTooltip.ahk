@@ -6,14 +6,23 @@
 ; Class Function:
 ;	GDI+ Tooltip
 ;	
-; Functions need the following arguments to set color options:
-;	- Window/Border/Font Color in RBG ("000000" - "FFFFFF").
-;	- Window/Border/Font Opacity in percent (0 - 100).
 ;
-; Other optional arguments:
+; Arguments:
+;	boSize			Border size in pixel: string or array (w, h)
+;	padding			Padding in pixel: string or array (left/right, top/bottom)
+;	w				Init window width in pixel, will get changed to actual tooltip size later
+;	h				Init window height in pixel, will get changed to actual tooltip size later
+;
+;	wColor			Array or String, possible values:
+;	bColor				"0xFFFFFFFF" or "FFFFFFFF"
+;	fColor				["0xFF", "0xFFFFFF"] or ["0xFF", "FFFFFF"]
+;						[255, "FFFFFF"] (decimal opacity value in hex base)
+;						[100, "FFFFFF", 10] (decimal opacity value, specifying the decimal base)
+;
 ;	innerBorder		Renders a second inner border, using the default color or a color set by SetInnerBorder()
-;	renderingHack		For some reason all graphics where rendered "blurry", while their starting coordinates where whole pixels
-;					they needed an offset of (about) 0.3999 to render correctly and sharp.
+;	renderingHack		For some reason all graphics are rendered "blurry" (shifted), despite their starting coordinates being whole pixels.
+;					They need an offset of (about) 0.4 to render correctly and sharp.
+;	luminosityFactor	Positive or negative luminosity change for the inner border (+/- 0-1).
 
 #Include, %A_ScriptDir%\lib\Gdip2.ahk
 
@@ -25,14 +34,15 @@ class GdipTooltip
 		If (c > 10) {
 			throw "Too many parameters passed to GdipTooltip.New()"
 		}
+		
 		; set defaults
 		boSize	:= (params[1] = "" or not params[1]) ? 2 : params[1]
 		padding	:= (params[2] = "" or not params[2]) ? 5 : params[2]
 		w		:= (params[3] = "" or not params[3]) ? 800 : params[3]
 		h		:= (params[4] = "" or not params[4]) ? 600 : params[4]
-		wColor	:= (params[5] = "" or not params[5]) ? 0xE5000000 : this.ConvertColorToARGBhex(params[5])
-		bColor	:= (params[6] = "" or not params[6]) ? 0xE57A7A7A : this.ConvertColorToARGBhex(params[6])
-		fColor	:= (params[7] = "" or not params[7]) ? 0xFFFFFFFF : this.ConvertColorToARGBhex(params[7])
+		wColor	:= (params[5] = "" or not params[5]) ? 0xE5000000 : this.ConvertColorToARGBhex(this.ValidateInitColors(params[5]))
+		bColor	:= (params[6] = "" or not params[6]) ? 0xE57A7A7A : this.ConvertColorToARGBhex(this.ValidateInitColors(params[6]))
+		fColor	:= (params[7] = "" or not params[7]) ? 0xFFFFFFFF : this.ConvertColorToARGBhex(this.ValidateInitColors(params[7]))
 		innerBorder		:= (params[8] = "" or not params[8]) ? false : params[8]
 		renderingHack		:= (params[9] = "" or not params[9]) ? true : params[9]
 		luminosityFactor	:= (params[10] = "" or not params[10]) ? 0 : params[10]		
@@ -45,15 +55,15 @@ class GdipTooltip
 		this.borderBrush 		:= new gdip.Brush(bColor)
 		this.borderBrushInner	:= new gdip.Brush(0xE50000FF)
 		this.fontBrush			:= new gdip.Brush(fColor)
-		
+
 		this.innerBorder	:= innerBorder
 		this.luminosityFactor := luminosityFactor
-		this.borderSize	:= new this.gdip.Size(boSize, boSize)
-		this.padding		:= new this.gdip.Size(padding, padding)
+		this.borderSize	:= StrLen(boSize) ? new this.gdip.Size(boSize, boSize) : new this.gdip.Size(boSize)
+		this.padding		:= StrLen(padding) ? new this.gdip.Size(padding, padding) : new this.gdip.Size(padding)
 		this.renderingHack	:= renderingHack
 		this.isVisible		:= false
 		
-		;this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
+		this.SetInnerBorder(this.innerBorder, this.luminosityFactor)
 		; Start off with a clear window
 		this.HideGdiTooltip()
 	}
@@ -223,13 +233,10 @@ class GdipTooltip
 
 		; validate opacity and convert to hex values (in decimal)
 		If (opacityBase == 10) {
-			;console.log("-------- update colors --------")	
 			wOpacity := this.ValidateOpacity(wOpacity, "", opacityBase, "16")
 			bOpacity := this.ValidateOpacity(bOpacity, "", opacityBase, "16")
 			tOpacity := this.ValidateOpacity(tOpacity, "", opacityBase, "16")
 		}
-		;console.clear()
-		
 		this.fillBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([wOpacity, wColor]))
 		this.borderBrush	:= new gdip.Brush(this.ConvertColorToARGBhex([bOpacity, bColor]))	
 		this.fontBrush		:= new gdip.Brush(this.ConvertColorToARGBhex([tOpacity, tColor]))
@@ -300,6 +307,67 @@ class GdipTooltip
 		
 		;console.log("return: " Opacity)
 		Return Opacity
+	}
+	
+	ValidateInitColors(params) {
+		; opacity (dec/hex), color (hex), opacityBase (10/16)
+		; ARGB hex
+		; A dec (dec/hex base), RGB hex 
+		c := params.MaxIndex()
+		If ((c < 1 and c > 3 and not StrLen(params))) {
+			Throw "Incorrect number of parameters for GdipTooltip.__New() -> ValidateInitColors()"
+		}
+		
+		debugStr := ""
+		If (c) {
+			Loop, % c
+			{
+				debugStr .= A_Index = c ? params[A_Index] : params[A_Index] ", "
+			}
+		} Else {
+			debugStr := params
+		}
+		
+		color := 
+		op := 
+		If (c = 1) {
+			color := params[1]			
+		} Else If (StrLen(params)) {
+			color := params
+		} Else If (c > 1) {
+			color := params[2]
+			op := params[1]
+		}
+		If (c = 3) {
+			base := params[3]
+		} Else {
+			base := 16
+		}
+		
+		inV := RegExReplace(color, "i)^0x")
+		If (not op) {
+			If (RegExMatch(Trim(inV), "i)(^[0-9A-F]{8}$)")) {
+				r := inV	
+			}		
+		} Else If (RegExMatch(Trim(inV), "i)(^[0-9A-F]{6}$)")) {
+			r := "FF" inV
+		} Else {
+			Throw "Invalid color value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
+		}
+		
+		If (op and InStr(op, "0x")) {
+			RegExMatch(Trim(op), "i)(^0x([0-9A-F]{2})$)", hex)
+			If (not hex1) {
+				Throw "Invalid opacity value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
+			}
+			Return r := "0x" hex1 . r
+		} Else If (op) {
+			op := base = 16 ? op : Round(op / 100 * 255)
+			If (op < 0 or op > 255) {
+				Throw "Invalid opacity value for GdipTooltip.__New() -> ValidateInitColors(" debugStr ")"
+			}			
+			Return r := [op, r]
+		}
 	}
 	
 	FHex( int, pad=0 ) {	; Function by [VxE]. Formats an integer (decimals are truncated) as hex.

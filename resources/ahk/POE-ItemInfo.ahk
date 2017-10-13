@@ -439,7 +439,7 @@ Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-bw.ico
 
 ReadConfig()
 Sleep, 100
-global gdipTooltip = new GdipTooltip(2, 5,,,[90, "0xFFFFFF"],[90, 255, 255, 255],[90, 255, 255, 255],true, Opts.RenderingFix, -0.3)
+global gdipTooltip = new GdipTooltip(2, 8,,,[Opts.GDIWindowOpacity, Opts.GDIWindowColor, 10],[Opts.GDIBorderOpacity, Opts.GDIBorderColor, 10],[Opts.GDITextOpacity, Opts.GDITextColor, 10],true, Opts.RenderingFix, -0.3)
 
 ; Use some variables to skip the update check or enable/disable update check feedback.
 ; The first call on script start shouldn't have any feedback and including ItemInfo in other scripts should call the update once from that other script.
