@@ -9057,6 +9057,29 @@ CreateSettingsUI()
 		Gui, Tab, 2
 	}
 	
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w495 h550")
+	
+	If (not AM_Opts) {
+		GoSub, AM_Init
+	}
+
+	For section, keys in AM_ConfigObj {
+		sectionName := RegExReplace(section, "i)^(AM_)?")
+		
+		If (sectionName != "General") {			
+			CheckBoxID := sectionName "_State"
+			GuiAddCheckbox(sectionName ":", "x17 yp+28 w130 h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
+			
+			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
+			{
+				HotKeyID := sectionName "_HotKeys_" A_Index	
+				
+				GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w160 h20", HotKeyID, HotKeyID "H")
+				AddToolTip(%HotKeyID%H, "Press key/key combination.`nDefault: MISSING.")
+			}
+		}
+	}
+
 	; close tabs
 	Gui, Tab
 }

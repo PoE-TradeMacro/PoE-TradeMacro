@@ -31,7 +31,7 @@
 ;#     https://github.com/PoE-TradeMacro/POE-TradeMacro/wiki/AdditionalMacros            #
 ;###########-------------------------------------------------------------------###########
 
-AM_AssignHotkeys:
+AM_Init:
 	class AM_Options extends UserOptions {
 		
 	}	
@@ -41,6 +41,12 @@ AM_AssignHotkeys:
 	Sleep, 200
 	
 	global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
+Return
+
+AM_AssignHotkeys:
+	If (not AM_Opts) {
+		GoSub, AM_Init
+	}
 	global AM_CharacterName		:= AM_Config["AM_KickYourself"].CharacterName
 	global AM_ChannelName		:= AM_Config["AM_JoinChannel"].ChannelName
 	global AM_HighlightArg1		:= AM_Config["AM_HighlightItems"].Arg1
@@ -188,7 +194,14 @@ AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 		For section, keys in AM_ConfigObj {
 			For key, val in keys {
 				sectionName := RegExReplace(section, "i)^(AM_)?")
-				AM_Opts[sectionName "_" key] := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
+				_val := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
+				If (key = "Hotkeys") {
+					_val := RegExReplace(_val, "(\s+)?,(\s+)?", ",")
+					HotKeys := StrSplit(_val, ",")
+					AM_Opts[sectionName "_" key] := HotKeys
+				} Else {
+					AM_Opts[sectionName "_" key] := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
+				}				
 			}
 		}
 	}
@@ -210,7 +223,18 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 	For key, val in AM_Opts {
 		section := "AM_" RegExReplace(key, "i)(.*)_.*", "$1")
 		keyName := RegExReplace(key, "i).*_(.*)", "$1")
-		IniWrite(AM_Opts[key], section, keyName, AM_ConfigObj)	
+		value := ""
+		If (keyName = "Hotkeys" and AM_Opts[key].MaxIndex()) {
+			
+			For k, v in AM_Opts[key] {
+				value .= ", " . v
+			}
+			value := SubStr(value, 1 + StrLen(", "))
+		} Else {
+			value := AM_Opts[key]
+		}
+		
+		IniWrite(value, section, keyName, AM_ConfigObj)	
 	}	
 	
 	AM_ConfigObj.Save(ConfigPath)
