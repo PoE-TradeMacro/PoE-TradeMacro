@@ -1,4 +1,4 @@
-;_______________________ Hotkey() _______________________
+ï»¿;_______________________ Hotkey() _______________________
 ;____ Date: June 2006
 ;____ AHK version: 1.0.44.06
 ;____ Platform: WinXP
@@ -197,7 +197,7 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 	;the main key list. Add (or delete) keys to suit your needs
 	Hotkey_keyList =
 	( Join
-	#|.|,|-|<|+|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|ü|ö|ä|ß|1|2|3|4|5|6|7|8|9|0
+	#|.|,|-|<|+|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|ï¿½|ï¿½ï¿½1|2|3|4|5|6|7|8|9|0
 	|Numpad0|Numpad1|Numpad2|Numpad3|Numpad4|Numpad5|Numpad6|Numpad7|Numpad8|Numpad9
 	|NumpadClear|Right|Left|Up|Down|NumpadDot|Space|Tab|Escape|Backspace|Delete|Insert|Home
 	|End|PgUp|PgDn|ScrollLock|CapsLock|NumLock|NumpadDiv|NumpadMult|NumpadAdd|NumpadSub

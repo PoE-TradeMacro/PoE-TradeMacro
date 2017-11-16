@@ -23,6 +23,7 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 #Include, %A_ScriptDir%\lib\ConvertKeyToKeyCode.ahk
 #Include, %A_ScriptDir%\lib\Class_GdipTooltip.ahk
 #Include, %A_ScriptDir%\lib\Class_ColorPicker.ahk
+#Include, %A_ScriptDir%\lib\AdvancedHotkey.ahk
 IfNotExist, %A_ScriptDir%\temp
 FileCreateDir, %A_ScriptDir%\temp
 
@@ -8738,6 +8739,9 @@ GuiAdd(ControlType, Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabe
 		Gui, Font, cDA4F49
 		Options := Param4
 	}
+	Else If (ControlType = "ListView") {
+		Options := Param4
+	}
 	Else {
 		Options := Param4 . " BackgroundTrans "
 	}
@@ -8745,6 +8749,11 @@ GuiAdd(ControlType, Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabe
 	GuiName := (StrLen(GuiName) > 0) ? Trim(GuiName) . ":Add" : "Add"
 	Gui, %GuiName%, %ControlType%, %PositionInfo% %av% %al% %ah% %Options%, %Contents%
 	Gui, Font
+}
+
+GuiAddListView(ColumnHeaders, PositionInfo, AssocVar="", AssocHwnd="", AssocLabel="", Options="", GuiName="")
+{	
+	GuiAdd("ListView", ColumnHeaders, PositionInfo, AssocVar, AssocHwnd, AssocLabel, Options, GuiName)
 }
 
 GuiAddButton(Contents, PositionInfo, AssocLabel="", AssocVar="", AssocHwnd="", Options="", GuiName="")
@@ -9057,7 +9066,8 @@ CreateSettingsUI()
 		Gui, Tab, 2
 	}
 	
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w515 h590")
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w515 h590")	
+	;Gui, Add, Text, w500 x17 y+28, Note: Double-click on the Edit fields to select your hotkey.
 	
 	If (not AM_Opts) {
 		GoSub, AM_Init
@@ -9067,17 +9077,27 @@ CreateSettingsUI()
 		sectionName := RegExReplace(section, "i)^(AM_)?")
 		chkBoxWidth := 130
 		chkBoxShiftY := 28
-		console.log(keys)
+		
 		If (sectionName != "General") {			
 			CheckBoxID := sectionName "_State"
 			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
 			
 			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
 			{
-				HotKeyID := sectionName "_HotKeys_" A_Index	
+				HotKeyID := sectionName "_HotKeys_" A_Index
 				
-				GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w170 h20", HotKeyID, HotKeyID "H")
-				AddToolTip(%HotKeyID%H, "Press key/key combination.`nDefault: MISSING.")
+				;GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w170 h20", HotKeyID, HotKeyID "H")				
+				;AddToolTip(%HotKeyID%H, "Press key/key combination.`nDefault: MISSING.")
+				
+				LVWidth := 170
+				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "LV_DblClick", "r1 -Hdr -LV0x20 r1")
+				LV_ModifyCol(1, 0)
+				LV_ModifyCol(2, LVWidth - 5)
+				LV_Add("","", AM_Opts[sectionName "_HotKeys"][A_Index])
+				
+				;Gui, ListView, Hotkey_Hotkey2
+				;LV_Delete(1)
+				;LV_Add("","",KeysToSymbols(keys))
 			}
 			
 			For k, v in keys {
@@ -9085,7 +9105,7 @@ CreateSettingsUI()
 					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
 						If (k = "Arg2") {
 							ChkBoxID := sectionName "_Arg2"
-							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
+							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, "Checked" AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
 						}			
 					} 
 					Else {
@@ -9097,7 +9117,7 @@ CreateSettingsUI()
 			}
 		}
 	}
-
+	
 	; close tabs
 	Gui, Tab
 }
@@ -10064,6 +10084,15 @@ ChangedUserFilesWindow_OpenFolder:
 	Gui, ChangedUserFiles:Cancel
 	GoSub, EditOpenUserSettings
 	return
+
+LV_DblClick:
+	msgbox % A_GuiControlEvent
+	If A_GuiControlEvent <> DoubleClick
+		Return
+	Gui, ListView, %A_GuiControl%
+	LV_Delete(1)
+	LV_Add("","",Hotkey("+Tooltips", "Please hold down the keys you want to turn into a hotkey:", "Choose a Hotkey"))
+Return
 
 ShowSettingsUI:
 	ReadConfig()

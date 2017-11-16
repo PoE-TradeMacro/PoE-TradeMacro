@@ -62,8 +62,7 @@ AM_AssignHotkeys:
 			If (labelName != "AM_General") {
 				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
 					If (labelKeyName and labelKeyName != A_Space) {
-						AM_Config[labelName].State := AM_Config[labelName].State = "on" ? 1 : AM_Config[labelName].State
-						AM_Config[labelName].State := AM_Config[labelName].State = "off" ? 0 : AM_Config[labelName].State
+						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
 						stateValue := AM_Config[labelName].State ? "on" : "off"
 						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
 					}
@@ -202,6 +201,8 @@ AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 					_val := RegExReplace(_val, "(\s+)?,(\s+)?", ",")
 					HotKeys := StrSplit(_val, ",")
 					AM_Opts[sectionName "_" key] := HotKeys
+				} Else If (key = "State") {					
+					AM_Opts[sectionName "_" key] := AM_ConvertState(IniRead(section, key, AM_Opts[key], AM_ConfigObj))
 				} Else {
 					AM_Opts[sectionName "_" key] := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
 				}				
@@ -233,6 +234,8 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 				value .= ", " . v
 			}
 			value := SubStr(value, 1 + StrLen(", "))
+		} Else If (keyName = "State") {
+			value := AM_ConvertState(AM_Opts[key], true)
 		} Else {
 			value := AM_Opts[key]
 		}
@@ -241,4 +244,15 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 	}	
 	
 	AM_ConfigObj.Save(ConfigPath)
+}
+
+AM_ConvertState(state, reverse = false) {
+	If (reverse) {
+		state := state = 1 ? "on" : state
+		state := state = 0 ? "off" : state	
+	} Else {
+		state := state = "on" ? 1 : state
+		state := state = "off" ? 0 : state	
+	}	
+	Return state
 }
