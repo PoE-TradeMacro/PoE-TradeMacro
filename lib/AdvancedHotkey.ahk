@@ -6,19 +6,32 @@
 
 
 ;#################### Example Gui ########################
+/*
 #SingleInstance, force
 
 Gui, Margin, 5, 5
-
-Loop, 5
-{	
-	Gui, Add, ListView, vHotKeyValue%a_index% r1 -Hdr -LV0x20 r1 w200 gLV_DblClick, 1|2
-	LV_ModifyCol(1, 0)
-	LV_ModifyCol(2, 195)
-}
-
+Gui, Add, Text,, Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 Gui, Font, s10
-Gui, Add, Text, w500, Note: Double-click on the Edit field to select your hotkey.
+Gui, Add, Text, w500
+,Options:`n-Keynames/-Symbols -LR -~ -* -UP -Joystick -Mouse -Mods -&& +Default1/2 +OwnerN -Owner -Modal +ReturnKeynames +Tooltips
+
+E1 = Hotkey()
+E2 = Hotkey("+Default1 -LR -UP","Please hold down the keys you want to turn into a hotkey:")
+E3 = Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","Hotkey configuration")
+E4 = Hotkey("+Default2 -Mouse -Keynames -Modal -LR","Note that you're able to interact with the owner")
+E5 = Hotkey("-~ -* -Up -LR +Owner2","This window has no owner, since a non-existen owner (Gui2) was specified")
+
+Gui, Font, s8
+Loop, 5
+	{
+		Gui, Add, Text, w500, % E%a_index% ":"
+		Gui, Add, ListView
+		, v%a_index% r1 -Hdr -LV0x20 r1 w200 cGreen BackgroundFFFACD gLV_DblClick, 1|2
+		LV_ModifyCol(1, 0)
+		LV_ModifyCol(2, 195)
+	}
+Gui, Font, s10
+Gui, Add, Text, w500, Note: Double-click on one on one of the ListViews to test the Hotkey dialogue.
 Gui, Show, x100 y100 Autosize, Hotkey()	
 Return
 
@@ -26,25 +39,22 @@ GuiClose:
 ExitApp
 
 LV_DblClick:
-	If A_GuiControlEvent <> DoubleClick
-		Return
-	Gui, ListView, %A_GuiControl%
-	LV_Delete(1)
-	LV_Add("","",Hotkey())
-	
-	/*
-	If a_guicontrol = 1
-			LV_Add("","",Hotkey())
-	Else If a_guicontrol = 2
-			LV_Add("","",Hotkey("+Default1 -LR -UP","Please hold down the keys you want to turn into a hotkey:"))
-	Else If a_guicontrol = 3
-			LV_Add("","",Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","Hotkey configuration"))
-	Else If a_guicontrol = 4
-			LV_Add("","",Hotkey("+Default2 -Mouse -Keynames -Modal -LR","Note that you're able to interact with the owner"))
-	Else If a_guicontrol = 5
-			LV_Add("","",Hotkey("-~ -* -Up -LR +Owner2","This window has no owner, since a non-existen owner (Gui2) was specified"))
-			*/
-Return
+If a_guicontrolevent <> DoubleClick
+	return
+Gui, ListView, %a_guicontrol%
+LV_Delete(1)
+If a_guicontrol = 1
+		LV_Add("","",Hotkey())
+else if a_guicontrol = 2
+		LV_Add("","",Hotkey("+Default1 -LR -UP","Please hold down the keys you want to turn into a hotkey:"))
+else if a_guicontrol = 3
+		LV_Add("","",Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","Hotkey configuration"))
+else if a_guicontrol = 4
+		LV_Add("","",Hotkey("+Default2 -Mouse -Keynames -Modal -LR","Note that you're able to interact with the owner"))
+else if a_guicontrol = 5
+		LV_Add("","",Hotkey("-~ -* -Up -LR +Owner2","This window has no owner, since a non-existen owner (Gui2) was specified"))
+return
+*/
 
 /*
 #############################################################################
@@ -112,7 +122,7 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 				,Hotkey_ButtonSubmit,Hotkey_ButtonCancel,Hotkey_DefaultButton,Hotkey_keyList,Hotkey_modList_left_right
 				,Hotkey_modList_normal,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
 
-	batch_lines = %a_batchlines%
+	batch_lines = %A_BatchLines%
 	SetBatchLines -1		;this speeds things up a bit (we reset it after the Gui is shown)
 
 	;change these to suit your needs:
@@ -622,37 +632,37 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 ;can't be present in the same hotkey
 AddPrefixSymbols(keys)
 {
-global Hotkey_JoystickButtons,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_numGui
+	global Hotkey_JoystickButtons,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_numGui
 
-Gui, %Hotkey_numGui%:Submit, NoHide
+	Gui, %Hotkey_numGui%:Submit, NoHide
 
-;joystick buttons can't have prefix keys, therefore uncheck all the checkboxes
-If keys in %Hotkey_JoystickButtons%	
-	{
-		GuiControl,, Hotkey_Tilde, 0
-		GuiControl,, Hotkey_Wildcard, 0
-		GuiControl,, Hotkey_UP, 0
-	}
-Else
-	{
-If Hotkey_Tilde = 1
-	keys = ~%keys%
-If Hotkey_Wildcard = 1
-	{
-		;the wildcard can't be present together with the ampersand
-		If (InStr(KeysToSymbols(keys), "&") = 0)
-			keys = *%keys%
-		Else
-			{
+	;joystick buttons can't have prefix keys, therefore uncheck all the checkboxes
+	If keys in %Hotkey_JoystickButtons%	
+		{
+			GuiControl,, Hotkey_Tilde, 0
 			GuiControl,, Hotkey_Wildcard, 0
-			Tooltip, The * prefix is not allowed in hotkeys`nthat use the ampersand (&).
-			SetTimer, Hotkey_RemoveTooltip, 5000
-			}
+			GuiControl,, Hotkey_UP, 0
+		}
+	Else
+		{
+	If Hotkey_Tilde = 1
+		keys = ~%keys%
+	If Hotkey_Wildcard = 1
+		{
+			;the wildcard can't be present together with the ampersand
+			If (InStr(KeysToSymbols(keys), "&") = 0)
+				keys = *%keys%
+			Else
+				{
+				GuiControl,, Hotkey_Wildcard, 0
+				Tooltip, The * prefix is not allowed in hotkeys`nthat use the ampersand (&).
+				SetTimer, Hotkey_RemoveTooltip, 5000
+				}
+		}
+	If Hotkey_UP = 1
+		keys = %keys%%a_space%UP
 	}
-If Hotkey_UP = 1
-	keys = %keys%%a_space%UP
-}
-Return keys
+	Return keys
 }
 
 ;________________________________________________________
@@ -662,119 +672,119 @@ Return keys
 ;convert to hotkey symbols later using this funtion
 KeysToSymbols(s)
 {
-global Hotkey_modList_left_right,Hotkey_modList_normal,Hotkey_LeftRightMods,Hotkey_numGui
+	global Hotkey_modList_left_right,Hotkey_modList_normal,Hotkey_LeftRightMods,Hotkey_numGui
 
-Gui, %Hotkey_numGui%:Submit, NoHide
-;grab the correct modList
-If Hotkey_LeftRightMods = 1
-	modList = %Hotkey_modList_left_right%
-Else
-	modList = %Hotkey_modList_normal%
+	Gui, %Hotkey_numGui%:Submit, NoHide
+	;grab the correct modList
+	If Hotkey_LeftRightMods = 1
+		modList = %Hotkey_modList_left_right%
+	Else
+		modList = %Hotkey_modList_normal%
 
-;If the keys don't contain a modifier, it has to be something
-;like "a+b", so turn it into "a & b" and Return
-If s not contains %modList%,Win
-		{
-					StringReplace, s, s, +, %a_space%&%a_space%
-					Return s
-		}
-;Else, replace the keynames with the appropriate symbols
-StringReplace, s, s, LControl+, <^
-StringReplace, s, s, RControl+, >^
-StringReplace, s, s, Control+, ^
-StringReplace, s, s, LAlt+, <!
-StringReplace, s, s, RAlt+, >!
-StringReplace, s, s, Alt+, !
-StringReplace, s, s, LShift+, <+
-StringReplace, s, s, RShift+, >+
-StringReplace, s, s, Shift+, +
-StringReplace, s, s, LWin+, <#
-StringReplace, s, s, RWin+, >#
-StringReplace, s, s, Win+, #
-Return s
+	;If the keys don't contain a modifier, it has to be something
+	;like "a+b", so turn it into "a & b" and Return
+	If s not contains %modList%,Win
+			{
+						StringReplace, s, s, +, %a_space%&%a_space%
+						Return s
+			}
+	;Else, replace the keynames with the appropriate symbols
+	StringReplace, s, s, LControl+, <^
+	StringReplace, s, s, RControl+, >^
+	StringReplace, s, s, Control+, ^
+	StringReplace, s, s, LAlt+, <!
+	StringReplace, s, s, RAlt+, >!
+	StringReplace, s, s, Alt+, !
+	StringReplace, s, s, LShift+, <+
+	StringReplace, s, s, RShift+, >+
+	StringReplace, s, s, Shift+, +
+	StringReplace, s, s, LWin+, <#
+	StringReplace, s, s, RWin+, >#
+	StringReplace, s, s, Win+, #
+	Return s
 }
 
 ;__________________________________________________
 
-;this funtion checks which keys are beeing held down using the correct modList 
+;this function checks which keys are beeing held down using the correct modList 
 Keys()
 {
-global Hotkey_keyList,Hotkey_modList_left_right,Hotkey_modList_normal,Hotkey_LeftRightMods
-				,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
+	global Hotkey_keyList,Hotkey_modList_left_right,Hotkey_modList_normal,Hotkey_LeftRightMods
+					,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
 
-Gui, %Hotkey_numGui%:Submit, NoHide
+	Gui, %Hotkey_numGui%:Submit, NoHide
 
-;grab the correct modList
-If Hotkey_LeftRightMods = 1
-	modList = %Hotkey_modList_left_right%
-Else
-	modList = %Hotkey_modList_normal%
+	;grab the correct modList
+	If Hotkey_LeftRightMods = 1
+		modList = %Hotkey_modList_left_right%
+	Else
+		modList = %Hotkey_modList_normal%
 
-;If we don't want modifiers, just make it blank
-IfInString, Hotkey_OptionsGlobal, -mods
-	modList =
+	;If we don't want modifiers, just make it blank
+	IfInString, Hotkey_OptionsGlobal, -mods
+		modList =
 
-;check joystick buttons first, since we can have only one
-;and no modifiers. If we find one, just Return it, nothing Else
-Loop, Parse, Hotkey_JoystickButtons, `,
-	{
-		If GetKeyState(a_loopfield, "P") = 1
-			Return a_loopfield
-	}
+	;check joystick buttons first, since we can have only one
+	;and no modifiers. If we find one, just Return it, nothing Else
+	Loop, Parse, Hotkey_JoystickButtons, `,
+		{
+			If GetKeyState(a_loopfield, "P") = 1
+				Return a_loopfield
+		}
 
-;check for modifiers
-Loop, Parse, modList, `,
-	{
-		If GetKeyState(a_loopfield,"P") <> 1
-			continue
-		mods = %mods%%a_loopfield%+
-	}
+	;check for modifiers
+	Loop, Parse, modList, `,
+		{
+			If GetKeyState(a_loopfield,"P") <> 1
+				continue
+			mods = %mods%%a_loopfield%+
+		}
 
-;GetKeyState("Win") doesn't work, which is why both modLists include 
-;both variants. So replace L/RWin with Win here If needed
-If Hotkey_LeftRightMods <> 1
-	{
-		StringReplace, mods, mods, LWin, Win
-		StringReplace, mods, mods, RWin, Win
-	}
+	;GetKeyState("Win") doesn't work, which is why both modLists include 
+	;both variants. So replace L/RWin with Win here If needed
+	If Hotkey_LeftRightMods <> 1
+		{
+			StringReplace, mods, mods, LWin, Win
+			StringReplace, mods, mods, RWin, Win
+		}
 
-;check If other keys are beeing held down
-Loop, Parse, Hotkey_keyList, |
-	{
-		If GetKeyState(a_loopfield,"P") <> 1
-			continue
-		;If ithe left mouse button is down, check If the user is clicking a control
-		;(and ignore it If that's the case)
-		If a_loopfield = LButton
-			{
-				MouseGetPos,,,,ctrl
-				If (ctrl <> "" AND InStr(ctrl, "SysListView") = 0)
-					continue
-			}
-		;If we don't want the ampersand (either because specified in options, or
-		;because we're on Win95/98/ME, just Return the first key we find (plus mods)
-		IfInString, OptionsGlobal, -&
-			{
-			keys = %mods%%a_loopfield%
-			Return keys
-			}
-		;If this is the second time we get to this point in the loop...
-		;we must already have a key -> the user is holding down two keys
-		;in this case, ignore any modifiers and just Return our two keys
-		If keys <>
-			{
-			keys = %keys%+%a_loopfield%
-			Return keys
-			}		
-		;Else If keys is still blank, take this key
-		keys = %a_loopfield%
-	}
+	;check If other keys are beeing held down
+	Loop, Parse, Hotkey_keyList, |
+		{
+			If GetKeyState(a_loopfield,"P") <> 1
+				continue
+			;If ithe left mouse button is down, check If the user is clicking a control
+			;(and ignore it If that's the case)
+			If a_loopfield = LButton
+				{
+					MouseGetPos,,,,ctrl
+					If (ctrl <> "" AND InStr(ctrl, "SysListView") = 0)
+						continue
+				}
+			;If we don't want the ampersand (either because specified in options, or
+			;because we're on Win95/98/ME, just Return the first key we find (plus mods)
+			IfInString, OptionsGlobal, -&
+				{
+				keys = %mods%%a_loopfield%
+				Return keys
+				}
+			;If this is the second time we get to this point in the loop...
+			;we must already have a key -> the user is holding down two keys
+			;in this case, ignore any modifiers and just Return our two keys
+			If keys <>
+				{
+				keys = %keys%+%a_loopfield%
+				Return keys
+				}		
+			;Else If keys is still blank, take this key
+			keys = %a_loopfield%
+		}
 
-;If we get to this point, the user is holding down only one key (from the keyList)
-;so we can add the modifiers, If we found some
-If mods <>
-	keys = %mods%%keys%
-Return %keys%
+	;If we get to this point, the user is holding down only one key (from the keyList)
+	;so we can add the modifiers, If we found some
+	If mods <>
+		keys = %mods%%keys%
+	Return %keys%
 }
 
 ;_______________________________________________________________
@@ -782,90 +792,90 @@ Return %keys%
 ;this funtion gets called everytime the user clicks one of the checkboxes
 ToggleOperator(p)
 {
-global Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_JoystickButtons,Hotkey_numGui
+	global Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_JoystickButtons,Hotkey_numGui
 
-;we need to turn on CaseSense because we could have, say, Up UP :)
-StringCaseSense On	
-AutoTrim Off		;because of the space between the keys and the UP symbol
+	;we need to turn on CaseSense because we could have, say, Up UP :)
+	StringCaseSense On	
+	AutoTrim Off		;because of the space between the keys and the UP symbol
 
-Gui, %Hotkey_numGui%:Submit, NoHide
+	Gui, %Hotkey_numGui%:Submit, NoHide
 
-;this is kinda confusing, but I'm not changing it now...
-ctrl = %p%
+	;this is kinda confusing, but I'm not changing it now...
+	ctrl = %p%
 
-;"p" is a_guicontrol btw...
-If p = Hotkey_Tilde
-	p = ~
-Else If p = Hotkey_Wildcard
-	p = *
-Else If p = Hotkey_UP
-	p = %a_space%UP
+	;"p" is a_guicontrol btw...
+	If p = Hotkey_Tilde
+		p = ~
+	Else If p = Hotkey_Wildcard
+		p = *
+	Else If p = Hotkey_UP
+		p = %a_space%UP
 
-Loop 2
-	{
-		Gui, ListView, Hotkey_Hotkey%a_index%
-		LV_GetText(k%a_index%,1,2)
-	}
-
-;If it's a joytick button, we can't have any special operators
-If Hotkey_JoystickButtons <>
-	{
-		If k1 in %Hotkey_JoystickButtons%
-			{
-				GuiControl,, %ctrl%, 0
-				Tooltip, This operator is not supported`nfor joystick buttons.
-				SetTimer, Hotkey_RemoveTooltip, 5000
-				Return
-			}
-	}
-
-;If a_guicontrol is not checked (i.e. is was unchecked), 
-;remove the prefix, edit the Listviews and Return
-If %ctrl% <> 1
-	{
-		StringReplace, k1, k1, %p%
-		StringReplace, k2, k2, %p%
-		Loop 2
-			{
-				Gui, ListView, Hotkey_Hotkey%a_index%
-				LV_Delete(1)
-				LV_Add("","", k%a_index%)
-			}
-		Return
-	}
-
-
-If p = ~
-	{
-		k1 = ~%k1%
-		k2 = ~%k2%
-	}
-Else If p = *
-	{
-		IfNotInString, k2, &			;we can't have both " * " and "&" 
-			{
-				k1 = *%k1%
-				k2 = *%k2%
-			}
-		Else
+	Loop 2
 		{
-			GuiControl,, Hotkey_Wildcard, 0
-			Tooltip, The * prefix is not allowed in hotkeys`nthat use the ampersand (&).
-			SetTimer, Hotkey_RemoveTooltip, 5000
+			Gui, ListView, Hotkey_Hotkey%a_index%
+			LV_GetText(k%a_index%,1,2)
 		}
-	}
-Else If p contains UP			
-	{
-		k1 = %k1%%p%
-		k2 = %k2%%p%
-	}		
-;edit the ListViews
-Loop 2
-	{
-		Gui, ListView, Hotkey_Hotkey%a_index%
-		LV_Delete(1)
-		LV_Add("","", k%a_index%)
-	}
+
+	;If it's a joytick button, we can't have any special operators
+	If Hotkey_JoystickButtons <>
+		{
+			If k1 in %Hotkey_JoystickButtons%
+				{
+					GuiControl,, %ctrl%, 0
+					Tooltip, This operator is not supported`nfor joystick buttons.
+					SetTimer, Hotkey_RemoveTooltip, 5000
+					Return
+				}
+		}
+
+	;If a_guicontrol is not checked (i.e. is was unchecked), 
+	;remove the prefix, edit the Listviews and Return
+	If %ctrl% <> 1
+		{
+			StringReplace, k1, k1, %p%
+			StringReplace, k2, k2, %p%
+			Loop 2
+				{
+					Gui, ListView, Hotkey_Hotkey%a_index%
+					LV_Delete(1)
+					LV_Add("","", k%a_index%)
+				}
+			Return
+		}
+
+
+	If p = ~
+		{
+			k1 = ~%k1%
+			k2 = ~%k2%
+		}
+	Else If p = *
+		{
+			IfNotInString, k2, &			;we can't have both " * " and "&" 
+				{
+					k1 = *%k1%
+					k2 = *%k2%
+				}
+			Else
+			{
+				GuiControl,, Hotkey_Wildcard, 0
+				Tooltip, The * prefix is not allowed in hotkeys`nthat use the ampersand (&).
+				SetTimer, Hotkey_RemoveTooltip, 5000
+			}
+		}
+	Else If p contains UP			
+		{
+			k1 = %k1%%p%
+			k2 = %k2%%p%
+		}		
+	;edit the ListViews
+	Loop 2
+		{
+			Gui, ListView, Hotkey_Hotkey%a_index%
+			LV_Delete(1)
+			LV_Add("","", k%a_index%)
+		}
 }
 
 ;_____________________________________________________
@@ -875,51 +885,50 @@ Loop 2
 ;If it's not, the funtion Returns -1, Else it Returns 1
 IsHotkeyValid(k)
 {
+	If k =
+		Return -1
+		
+	;If UP is checked we could have "Ctrl+Alt+ UP", so get rid of the UP
+	StringReplace, k, k, %a_space%UP		
+	;If the right-most char is a "+" but we don't have "++" (e.g. "Ctrl+Alt++"),
+	;it's not a "real" hotkey - most likely the user clicked okay while 
+	;holding down some modifiers. We can't have that...
+	If (InStr(k, "+","",0) = StrLen(k) AND InStr(k, "++") = 0)
+		Return -1
+		
+	;these are all valid hotkeys, but we don't really want these either
+	If k in ,*,~, UP,*~,~*,* UP,~ UP,*~ UP
+		Return -1
 
-If k =
-	Return -1
-	
-;If UP is checked we could have "Ctrl+Alt+ UP", so get rid of the UP
-StringReplace, k, k, %a_space%UP		
-;If the right-most char is a "+" but we don't have "++" (e.g. "Ctrl+Alt++"),
-;it's not a "real" hotkey - most likely the user clicked okay while 
-;holding down some modifiers. We can't have that...
-If (InStr(k, "+","",0) = StrLen(k) AND InStr(k, "++") = 0)
-	Return -1
-	
-;these are all valid hotkeys, but we don't really want these either
-If k in ,*,~, UP,*~,~*,* UP,~ UP,*~ UP
-	Return -1
+	;turn it into a hotkey to check ErrorLevel. 
+	;convert to symbols before we do this
 
-;turn it into a hotkey to check ErrorLevel. 
-;convert to symbols before we do this
+	k := KeysToSymbols(k)
 
-k := KeysToSymbols(k)
-
-Hotkey, %k%, Return, UseErrorLevel
-If ErrorLevel <> 0
-	{
-		;Joystick buttons cause an incorrect ErrorLevel on WinXP (see my post in Bug Reports)
-		;so ignore it
-		If (A_OSType <> "WIN32_WINDOWS" AND ErrorLevel = 51 AND InStr(k, "Joy") <> 0)
-			{
-				Hotkey, %k%, Return, Off
-				Return 1
-			}
-		Else		;notify user
-			{
-				ErrorMessage =
-					(LTrim
-					Sorry, this hotkey (%k%) is invalid.
-					To find out why, please look up Error #%ErrorLevel% under the "Hotkey" command in the AHK command list.
-					Also, please report this Error to the author of this script so that the bug can be fixed.
-					(Note: Press Ctrl+C to copy this message to the clipboard).
-					)
-				Gui, +OwnDialogs
-				Msgbox, 8208, Invalid Hotkey, %ErrorMessage%
-				Return -1
-			}
-	}
-Else		
-	Return 1
+	Hotkey, %k%, Return, UseErrorLevel
+	If ErrorLevel <> 0
+		{
+			;Joystick buttons cause an incorrect ErrorLevel on WinXP (see my post in Bug Reports)
+			;so ignore it
+			If (A_OSType <> "WIN32_WINDOWS" AND ErrorLevel = 51 AND InStr(k, "Joy") <> 0)
+				{
+					Hotkey, %k%, Return, Off
+					Return 1
+				}
+			Else		;notify user
+				{
+					ErrorMessage =
+						(LTrim
+						Sorry, this hotkey (%k%) is invalid.
+						To find out why, please look up Error #%ErrorLevel% under the "Hotkey" command in the AHK command list.
+						Also, please report this Error to the author of this script so that the bug can be fixed.
+						(Note: Press Ctrl+C to copy this message to the clipboard).
+						)
+					Gui, +OwnDialogs
+					Msgbox, 8208, Invalid Hotkey, %ErrorMessage%
+					Return -1
+				}
+		}
+	Else		
+		Return 1
 }
