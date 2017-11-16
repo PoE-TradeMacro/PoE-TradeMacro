@@ -9057,7 +9057,7 @@ CreateSettingsUI()
 		Gui, Tab, 2
 	}
 	
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w495 h550")
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w515 h590")
 	
 	If (not AM_Opts) {
 		GoSub, AM_Init
@@ -9065,17 +9065,35 @@ CreateSettingsUI()
 
 	For section, keys in AM_ConfigObj {
 		sectionName := RegExReplace(section, "i)^(AM_)?")
-		
+		chkBoxWidth := 130
+		chkBoxShiftY := 28
+		console.log(keys)
 		If (sectionName != "General") {			
 			CheckBoxID := sectionName "_State"
-			GuiAddCheckbox(sectionName ":", "x17 yp+28 w130 h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
+			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
 			
 			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
 			{
 				HotKeyID := sectionName "_HotKeys_" A_Index	
 				
-				GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w160 h20", HotKeyID, HotKeyID "H")
+				GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w170 h20", HotKeyID, HotKeyID "H")
 				AddToolTip(%HotKeyID%H, "Press key/key combination.`nDefault: MISSING.")
+			}
+			
+			For k, v in keys {
+				If (not RegExMatch(k, "i)State|Hotkeys")) {
+					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
+						If (k = "Arg2") {
+							ChkBoxID := sectionName "_Arg2"
+							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
+						}			
+					} 
+					Else {
+						EditID := sectionName "_" k
+						GuiAddText(k ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
+						GuiAddEdit(AM_Opts[EditID], "x+0 yp-2 w85 h20", EditID)
+					}					
+				}
 			}
 		}
 	}

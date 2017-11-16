@@ -58,11 +58,14 @@ AM_AssignHotkeys:
 	; This option can be set in the settings menu (ItemInfo tab) to completely disable assigning
 	; AdditionalMacros hotkeys.
 	If (AM_Opts.General_Enable) {
-		for labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
-			if (labelName != "AM_General") {
-				for labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
-					if (labelKeyName and labelKeyName != A_Space) {
-						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % AM_Config[labelName].State
+		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
+			If (labelName != "AM_General") {
+				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
+					If (labelKeyName and labelKeyName != A_Space) {
+						AM_Config[labelName].State := AM_Config[labelName].State = "on" ? 1 : AM_Config[labelName].State
+						AM_Config[labelName].State := AM_Config[labelName].State = "off" ? 0 : AM_Config[labelName].State
+						stateValue := AM_Config[labelName].State ? "on" : "off"
+						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
 					}
 				}
 			}
