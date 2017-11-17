@@ -222,14 +222,17 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 	
 	AM_ConfigObj := class_EasyIni(ConfigPath)
 	
-	AM_Opts.ScanUI()
-	
+	AM_ScanUI()
+	; TODO: Refactor, especially the the General section exceptions
 	For key, val in AM_Opts {
 		section := "AM_" RegExReplace(key, "i)(.*)_.*", "$1")
 		keyName := RegExReplace(key, "i).*_(.*)", "$1")
 		value := ""
-		If (keyName = "Hotkeys" and AM_Opts[key].MaxIndex()) {
-			
+		
+		If (keyName = "Enable" or keyName = "KeyToSCState") {
+			section := "AM_General"
+		}
+		If (keyName = "Hotkeys" and AM_Opts[key].MaxIndex()) {			
 			For k, v in AM_Opts[key] {
 				value .= ", " . v
 			}
@@ -246,6 +249,50 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 	AM_ConfigObj.Save(ConfigPath)
 }
 
+AM_ScanUI() {
+	Global AM_Opts, AM_ConfigObj
+
+	; the inherited AM_Opts.ScanUI() doesn't work here (ListViews, hotkey arrays)
+	; TODO: Refactor this shit
+	For section, keys in AM_ConfigObj {		
+		sectionName := RegExReplace(section, "i)^(AM_)?")
+		If (not sectionName = "General") {
+			CheckBoxID := sectionName "_State"
+			
+			_get := GuiGet(CheckBoxID, "", Error)
+			If (not Error) {
+				AM_Opts[CheckBoxID] := _get
+			}			
+			
+			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
+			{
+				HotKeyID := sectionName "_HotKeys_" A_Index
+				AM_Opts[sectionName "_Hotkeys"][A_Index] := AM_GetHotkeyListViewValue(HotKeyID)
+			}
+			
+			For k, v in keys {
+				If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
+					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
+						If (k = "Arg2") {						
+							ChkBoxID := sectionName "_Arg2"
+							_get := GuiGet(ChkBoxID, "", Error)
+							AM_Opts[ChkBoxID] := not Error ? _get : AM_Opts[ChkBoxID]						
+						}			
+					}
+					Else {
+						EditID := sectionName "_" k
+						_get := GuiGet(EditID, "", Error)
+						AM_Opts[EditID] := not Error ? _get : AM_Opts[EditID]
+					}					
+				}
+			}
+		}
+	}
+	
+	_get := GuiGet("EnableAdditionalMacros", "", Error)
+	AM_Opts.General_Enable := not Error ? _get : AM_Opts[General_Enable]	
+}
+
 AM_ConvertState(state, reverse = false) {
 	If (reverse) {
 		state := state = 1 ? "on" : state
@@ -255,4 +302,48 @@ AM_ConvertState(state, reverse = false) {
 		state := state = "off" ? 0 : state	
 	}	
 	Return state
+}
+
+AM_UpdateSettingsUI() {
+	Global AM_Opts, AM_ConfigObj
+	
+	For section, keys in AM_ConfigObj {
+		sectionName := RegExReplace(section, "i)^(AM_)?")
+		CheckBoxID := sectionName "_State"
+		GuiControl,, %CheckBoxID%, % AM_Opts[CheckBoxID]	
+		
+		Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
+		{
+			HotKeyID := sectionName "_HotKeys_" A_Index
+			AM_UpdateHotkeyListView(HotKeyID, AM_Opts[sectionName "_Hotkeys"][A_Index])
+		}
+		
+		For k, v in keys {
+			If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
+				If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
+					If (k = "Arg2") {						
+						ChkBoxID := sectionName "_Arg2"
+						GuiControl,, %ChkBoxID%, % AM_Opts[ChkBoxID]						
+					}			
+				}
+				Else {
+					EditID := sectionName "_" k
+					GuiControl,, %EditID%, % AM_Opts[EditID]
+				}					
+			}
+		}
+	}
+	GuiControl,, EnableAdditionalMacros, % AM_Opts.General_Enable
+}
+
+AM_UpdateHotkeyListView(controlID, value) {
+	Gui, ListView, %controlID%
+	LV_Delete(1)
+	LV_Add("","",value)
+}
+
+AM_GetHotkeyListViewValue(controlID) {
+	Gui, ListView, %controlID%
+	LV_GetText(value, 1, 2)
+	Return value
 }

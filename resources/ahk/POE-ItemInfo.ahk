@@ -94,7 +94,7 @@ class ItemInfoOptions extends UserOptions {
 	UpdateSkipBackup := 0
 	
 	; Enable/disable the entire AdditionalMacros. The individual settings are in the AdditionalMacros.ini
-	EnableAdditionalMacros := 1
+	;EnableAdditionalMacros := 1
 	; Enable/disable the entire MapModWarnings functionality. The individual settings are in the MapModWarnings.ini
 	EnableMapModWarnings := 1
 	
@@ -9116,7 +9116,7 @@ CreateSettingsUI()
 	
 	GuiAddGroupBox("[AdditionalMacros] General", "x547 y35 w260 h60")
 	
-	GuiAddCheckbox("Enable Additional Macros", "xp+10 yp+20 w210 h30", AM_Opts.Enable, "EnableAdditionalMacros", "EnableAdditionalMacrosH")
+	GuiAddCheckbox("Enable Additional Macros", "xp+10 yp+20 w210 h30", AM_Opts.General_Enable, "EnableAdditionalMacros", "EnableAdditionalMacrosH")
 	AddToolTip(EnableAdditionalMacrosH, "Enables or disables the entire 'AdditionalMacros.ahk' file.`nNeeds a script reload to take effect.")
 	
 	; AM Buttons
@@ -9143,7 +9143,7 @@ UpdateSettingsUI()
 	;GuiControl,, ParseItemHotKey, % Opts.ParseItemHotKey
 	GuiControl,, OnlyActiveIfPOEIsFront, % Opts.OnlyActiveIfPOEIsFront
 	GuiControl,, PutResultsOnClipboard, % Opts.PutResultsOnClipboard
-	GuiControl,, EnableAdditionalMacros, % Opts.EnableAdditionalMacros
+	;GuiControl,, EnableAdditionalMacros, % Opts.EnableAdditionalMacros
 	GuiControl,, EnableMapModWarnings, % Opts.EnableMapModWarnings
 	If (!SkipItemInfoUpdateCall) {
 		GuiControl,, ShowUpdateNotifications, % Opts.ShowUpdateNotifications
@@ -9246,6 +9246,9 @@ UpdateSettingsUI()
 		GuiControl, Enable, GDIRenderingFix
 		GuiControl, Enable, GDIConditionalColors
 	}		
+	
+	; AdditionalMacros 
+	AM_UpdateSettingsUI()
 }
 
 ShowSettingsUI()
@@ -9356,7 +9359,7 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 		;Opts.ParseItemHotKey := IniRead("General", "ParseItemHotKey", Opts.ParseItemHotKey)
 		Opts.OnlyActiveIfPOEIsFront	:= IniRead("General", "OnlyActiveIfPOEIsFront", Opts.OnlyActiveIfPOEIsFront, ItemInfoConfigObj)
 		Opts.PutResultsOnClipboard	:= IniRead("General", "PutResultsOnClipboard", Opts.PutResultsOnClipboard, ItemInfoConfigObj)
-		Opts.EnableAdditionalMacros	:= IniRead("General", "EnableAdditionalMacros", Opts.EnableAdditionalMacros, ItemInfoConfigObj)
+		;Opts.EnableAdditionalMacros	:= IniRead("General", "EnableAdditionalMacros", Opts.EnableAdditionalMacros, ItemInfoConfigObj)
 		Opts.EnableMapModWarnings	:= IniRead("General", "EnableMapModWarnings", Opts.EnableMapModWarnings, ItemInfoConfigObj)
 		Opts.ShowUpdateNotifications	:= IniRead("General", "ShowUpdateNotifications", Opts.ShowUpdateNotifications, ItemInfoConfigObj)
 		Opts.UpdateSkipSelection		:= IniRead("General", "UpdateSkipSelection", Opts.UpdateSkipSelection, ItemInfoConfigObj)
@@ -9418,7 +9421,7 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 	;IniWrite(Opts.ParseItemHotKey, "General", "ParseItemHotKey")
 	IniWrite(Opts.OnlyActiveIfPOEIsFront, "General", "OnlyActiveIfPOEIsFront", ItemInfoConfigObj)
 	IniWrite(Opts.PutResultsOnClipboard, "General", "PutResultsOnClipboard", ItemInfoConfigObj)
-	IniWrite(Opts.EnableAdditionalMacros, "General", "EnableAdditionalMacros", ItemInfoConfigObj)
+	;IniWrite(Opts.EnableAdditionalMacros, "General", "EnableAdditionalMacros", ItemInfoConfigObj)
 	IniWrite(Opts.EnableMapModWarnings, "General", "EnableMapModWarnings", ItemInfoConfigObj)
 	IniWrite(Opts.ShowUpdateNotifications, "General", "ShowUpdateNotifications", ItemInfoConfigObj)
 	IniWrite(Opts.UpdateSkipSelection, "General", "UpdateSkipSelection", ItemInfoConfigObj)
@@ -10131,6 +10134,7 @@ SettingsUI_BtnOK:
 	Gui, Submit
 	Sleep, 50
 	WriteConfig()
+	AM_WriteConfig()
 	UpdateSettingsUI()
 	Fonts.SetFixedFont(GuiGet("FontSize", Opts.FontSize))
 	return
@@ -10159,6 +10163,7 @@ SettingsUI_AM_BtnDefaults:
 	Sleep, 75
 	AM_ReadConfig()
 	Sleep, 75
+	global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 	UpdateSettingsUI()
 	ShowSettingsUI()
 	Return
