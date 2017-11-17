@@ -10166,6 +10166,7 @@ SettingsUI_AM_BtnDefaults:
 	global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 	UpdateSettingsUI()
 	ShowSettingsUI()
+	AM_SetHotkeys()
 	Return
 
 InitGDITooltip:

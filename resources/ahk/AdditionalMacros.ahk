@@ -40,36 +40,24 @@ AM_Init:
 	AM_ReadConfig()
 	Sleep, 200
 	
-	global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
+	;global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 Return
 
 AM_AssignHotkeys:
 	If (not AM_Opts) {
 		GoSub, AM_Init
 	}
-	global AM_CharacterName		:= AM_Config["AM_KickYourself"].CharacterName
-	global AM_ChannelName		:= AM_Config["AM_JoinChannel"].ChannelName
-	global AM_HighlightArg1		:= AM_Config["AM_HighlightItems"].Arg1
-	global AM_HighlightArg2		:= AM_Config["AM_HighlightItems"].Arg2
-	global AM_HighlightAltArg1	:= AM_Config["AM_HighlightItemsAlt"].Arg1
-	global AM_HighlightAltArg2	:= AM_Config["AM_HighlightItemsAlt"].Arg2
-	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_Config["AM_General"].General_KeyToSCState
+	; TODO: Refactor
+	global AM_CharacterName		:= AM_ConfigObj["AM_KickYourself"].Character
+	global AM_ChannelName		:= AM_ConfigObj["AM_JoinChannel"].Channel
+	global AM_HighlightArg1		:= AM_ConfigObj["AM_HighlightItems"].Arg1
+	global AM_HighlightArg2		:= AM_ConfigObj["AM_HighlightItems"].Arg2
+	global AM_HighlightAltArg1	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg1
+	global AM_HighlightAltArg2	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg2
+	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_ConfigObj["AM_General"].General_KeyToSCState
 
-	; This option can be set in the settings menu (ItemInfo tab) to completely disable assigning
 	; AdditionalMacros hotkeys.
-	If (AM_Opts.General_Enable) {
-		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
-			If (labelName != "AM_General") {
-				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
-					If (labelKeyName and labelKeyName != A_Space) {
-						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
-						stateValue := AM_Config[labelName].State ? "on" : "off"
-						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
-					}
-				}
-			}
-		}
-	}
+	AM_SetHotkeys()
 
 	GoSub, CM_ExecuteCustomMacrosCode_Label
 Return
@@ -180,6 +168,30 @@ setAfkMessage(){
 	}
 }
 
+AM_SetHotkeys() {
+	Global AM_Opts, AM_ConfigObj
+	
+	console.clear()
+	debugprintarray(AM_ConfigObj)
+	
+	If (AM_Opts.General_Enable) {
+		For labelIndex, labelName in StrSplit(AM_ConfigObj.GetSections("|", "C"), "|") {
+			If (labelName != "AM_General") {
+				For labelKeyIndex, labelKeyName in StrSplit(AM_ConfigObj[labelName].Hotkeys, ", ") {
+					If (labelKeyName and labelKeyName != A_Space) {
+						AM_ConfigObj[labelName].State := AM_ConvertState(AM_ConfigObj[labelName].State)						
+						stateValue := AM_ConfigObj[labelName].State ? "on" : "off"
+						
+						; TODO: Fix hotkeys not being correctly set without restart
+						console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " labelName "_HKey, " stateValue)
+						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
+					}
+				}
+			}
+		}
+	}
+}
+
 AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 {
 	Global AM_Opts, AM_ConfigObj
@@ -213,7 +225,7 @@ AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 
 AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 {
-	Global AM_Opts, AM_ConfigObj
+	Global AM_Opts, AM_ConfigObj, AM_Config
 	
 	If (StrLen(ConfigDir) < 1) {
 		ConfigDir := userDirectory
@@ -247,6 +259,7 @@ AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 	}	
 	
 	AM_ConfigObj.Save(ConfigPath)
+	AM_SetHotkeys()
 }
 
 AM_ScanUI() {
