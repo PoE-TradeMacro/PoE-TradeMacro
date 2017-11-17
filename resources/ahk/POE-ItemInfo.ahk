@@ -9066,8 +9066,7 @@ CreateSettingsUI()
 		Gui, Tab, 2
 	}
 	
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w515 h590")	
-	;Gui, Add, Text, w500 x17 y+28, Note: Double-click on the Edit fields to select your hotkey.
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w560 h590")	
 	
 	If (not AM_Opts) {
 		GoSub, AM_Init
@@ -9086,18 +9085,15 @@ CreateSettingsUI()
 			{
 				HotKeyID := sectionName "_HotKeys_" A_Index
 				
-				;GuiAddHotkey(AM_Opts[sectionName "_HotKeys"][A_Index], "x+10 yp+0 w170 h20", HotKeyID, HotKeyID "H")				
-				;AddToolTip(%HotKeyID%H, "Press key/key combination.`nDefault: MISSING.")
-				
 				LVWidth := 170
-				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "LV_DblClick", "r1 -Hdr -LV0x20 r1")
+				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1")			
 				LV_ModifyCol(1, 0)
 				LV_ModifyCol(2, LVWidth - 5)
-				LV_Add("","", AM_Opts[sectionName "_HotKeys"][A_Index])
+				LV_Delete(1)
+				LV_Add("","", AM_Opts[sectionName "_HotKeys"][A_Index])				
 				
-				;Gui, ListView, Hotkey_Hotkey2
-				;LV_Delete(1)
-				;LV_Add("","",KeysToSymbols(keys))
+				GuiAddButton("Edit", "xp+" LVWidth " yp-1 w25 h22 v" HotKeyID "_Trigger", "LV_HotkeyEdit")
+				;Gui, Add, Picture, w20 h-1 x+2 yp+0 gLV_HotkeyEdit v%HotKeyID%_Trigger, %A_ScriptDir%\resources\images\edit_btn.png
 			}
 			
 			For k, v in keys {
@@ -9105,7 +9101,7 @@ CreateSettingsUI()
 					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
 						If (k = "Arg2") {
 							ChkBoxID := sectionName "_Arg2"
-							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, "Checked" AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
+							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
 						}			
 					} 
 					Else {
@@ -9117,7 +9113,6 @@ CreateSettingsUI()
 			}
 		}
 	}
-	
 	; close tabs
 	Gui, Tab
 }
@@ -10085,13 +10080,24 @@ ChangedUserFilesWindow_OpenFolder:
 	GoSub, EditOpenUserSettings
 	return
 
-LV_DblClick:
-	msgbox % A_GuiControlEvent
-	If A_GuiControlEvent <> DoubleClick
+LV_HotkeyEdit:
+	If (not RegexMatch(A_GuiControlEvent, "Normal|DoubleClick")) {
 		Return
-	Gui, ListView, %A_GuiControl%
-	LV_Delete(1)
-	LV_Add("","",Hotkey("+Tooltips", "Please hold down the keys you want to turn into a hotkey:", "Choose a Hotkey"))
+	}
+	If (RegExMatch(A_GuiControl, "i).*_Trigger$")) {
+		_LVID := RegExReplace(A_GuiControl, "i)(.*)_Trigger$", "$1")
+	} Else {
+		_LVID := A_GuiControl
+	}
+	
+	Gui, ListView, %_LVID%
+	LV_GetText(_oV, 1, 2)
+	_nV := Hotkey("+Tooltips", "Please hold down the keys you want to turn into a hotkey:", "Choose a Hotkey")
+	LV_Delete(1)	
+	If (not StrLen(_nV)) {
+		_nV := _oV
+	}
+	LV_Add("","",_nV)
 Return
 
 ShowSettingsUI:
