@@ -46,8 +46,8 @@ class Globals {
 Globals.Set("AHKVersionRequired", AHKVersionRequired)
 Globals.Set("ReleaseVersion", ReleaseVersion)
 Globals.Set("DataDir", A_ScriptDir . "\data")
-Globals.Set("SettingsUIWidth", 545)
-Globals.Set("SettingsUIHeight", 615)
+Globals.Set("SettingsUIWidth", 813)
+Globals.Set("SettingsUIHeight", 665)
 Globals.Set("AboutWindowHeight", 340)
 Globals.Set("AboutWindowWidth", 435)
 Globals.Set("SettingsUITitle", "PoE ItemInfo Settings")
@@ -8946,9 +8946,6 @@ CreateSettingsUI()
 	GuiAddCheckbox("Put tooltip results on clipboard", "xs10 yp+30 w210 h30", Opts.PutResultsOnClipboard, "PutResultsOnClipboard", "PutResultsOnClipboardH")
 	AddToolTip(PutResultsOnClipboardH, "Put tooltip result text into the system clipboard`n(overwriting the raw text PoE itself put there to begin with)")
 	
-	GuiAddCheckbox("Enable Additional Macros", "xs10 yp+30 w210 h30", Opts.EnableAdditionalMacros, "EnableAdditionalMacros", "EnableAdditionalMacrosH")
-	AddToolTip(EnableAdditionalMacrosH, "Enables or disables the entire 'AdditionalMacros.ahk' file.`nNeeds a script reload to take effect.")
-	
 	GuiAddCheckbox("Enable Map Mod Warnings", "xs10 yp+30 w210 h30", Opts.EnableMapModWarnings, "EnableMapModWarnings", "EnableMapModWarningsH")
 	AddToolTip(EnableMapModWarningsH, "Enables or disables the entire Map Mod Warnings function.")
 	
@@ -9046,16 +9043,15 @@ CreateSettingsUI()
 	GuiAddText("Font Size:", "xs10 yp+3 w130 h20 0x0100")
 
 	; Buttons
-	ButtonsShiftX := SkipItemInfoUpdateCall ? "x557 " : "xs10 yp+35 "
-	ButtonsShiftY := SkipItemInfoUpdateCall ? "y40 " : "yp+35 "
-	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX ButtonsShiftY "w240 h30 0x0100")
+	ButtonsShiftX := "x557 "
+	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "y40 w240 h30 0x0100")
 	
-	GuiAddButton("Defaults", "xp+0 y+8 w75 h23", "SettingsUI_BtnDefaults")
+	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_BtnDefaults")
 	GuiAddButton("OK", "Default x+5 yp+0 w75 h23", "SettingsUI_BtnOK")
-	GuiAddButton("Cancel", "x+5 yp+0 w75 h23", "SettingsUI_BtnCancel")	
+	GuiAddButton("Cancel", "x+5 yp+0 w80 h23", "SettingsUI_BtnCancel")	
 	
 	If (SkipItemInfoUpdateCall) {
-		GuiAddText("Use these buttons to change ItemInfo settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
+		GuiAddText("Use these buttons to change ItemInfo/AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
 		GuiAddText("", "x10 y10 w250 h10")
 	}	
 	
@@ -9066,7 +9062,8 @@ CreateSettingsUI()
 		Gui, Tab, 2
 	}
 	
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w560 h590")	
+	; AM Hotkeys
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w530 h625")	
 	
 	If (not AM_Opts) {
 		GoSub, AM_Init
@@ -9080,13 +9077,14 @@ CreateSettingsUI()
 		If (sectionName != "General") {			
 			CheckBoxID := sectionName "_State"
 			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
+			AddToolTip(%CheckBoxID%H, RegExReplace(AM_ConfigObj[section].Description, "i)(\(Default = .*\))", "`n$1"))			
 			
 			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
 			{
 				HotKeyID := sectionName "_HotKeys_" A_Index
 				
-				LVWidth := 170
-				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1")			
+				LVWidth := 155
+				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1 C454444 Backgroundf0f0f0")			
 				LV_ModifyCol(1, 0)
 				LV_ModifyCol(2, LVWidth - 5)
 				LV_Delete(1)
@@ -9097,22 +9095,42 @@ CreateSettingsUI()
 			}
 			
 			For k, v in keys {
-				If (not RegExMatch(k, "i)State|Hotkeys")) {
+				If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
 					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
 						If (k = "Arg2") {
 							ChkBoxID := sectionName "_Arg2"
 							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
 						}			
-					} 
+					}
 					Else {
 						EditID := sectionName "_" k
 						GuiAddText(k ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
-						GuiAddEdit(AM_Opts[EditID], "x+0 yp-2 w85 h20", EditID)
+						GuiAddEdit(AM_Opts[EditID], "x+0 yp-2 w94 h20", EditID)
 					}					
 				}
 			}
 		}
 	}
+	
+	; AM General
+	
+	GuiAddGroupBox("[AdditionalMacros] General", "x547 y35 w260 h60")
+	
+	GuiAddCheckbox("Enable Additional Macros", "xp+10 yp+20 w210 h30", AM_Opts.Enable, "EnableAdditionalMacros", "EnableAdditionalMacrosH")
+	AddToolTip(EnableAdditionalMacrosH, "Enables or disables the entire 'AdditionalMacros.ahk' file.`nNeeds a script reload to take effect.")
+	
+	; AM Buttons
+	
+	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "yp+60 w240 h30 0x0100")	
+	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_AM_BtnDefaults")
+	GuiAddButton("OK", "Default x+5 yp+0 w75 h23", "SettingsUI_BtnOK")
+	GuiAddButton("Cancel", "x+5 yp+0 w80 h23", "SettingsUI_BtnCancel")
+	
+	If (SkipItemInfoUpdateCall) {
+		GuiAddText("Use these buttons to change ItemInfo/AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
+		GuiAddText("", "x10 y10 w250 h10")
+	}	
+	
 	; close tabs
 	Gui, Tab
 }
@@ -9439,14 +9457,14 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 	ItemInfoConfigObj.Save(ConfigPath)
 }
 
-CopyDefaultConfig()
+CopyDefaultConfig(config = "config.ini")
 {
-	FileCopy, %A_ScriptDir%\resources\default_UserFiles\config.ini, %userDirectory%\config.ini
+	FileCopy, %A_ScriptDir%\resources\default_UserFiles\%config%, %userDirectory%\%config%
 }
 
-RemoveConfig()
+RemoveConfig(config = "config.ini")
 {
-	FileDelete, %userDirectory%\config.ini
+	FileDelete, %userDirectory%\%config%
 }
 
 StdOutStream(sCmd, Callback = "") {
@@ -10132,6 +10150,18 @@ SettingsUI_BtnDefaults:
 	UpdateSettingsUI()
 	ShowSettingsUI()
 	return
+	
+SettingsUI_AM_BtnDefaults:
+	Gui, Cancel
+	RemoveConfig("AdditionalMacros.ini")
+	Sleep, 75
+	CopyDefaultConfig("AdditionalMacros.ini")
+	Sleep, 75
+	AM_ReadConfig()
+	Sleep, 75
+	UpdateSettingsUI()
+	ShowSettingsUI()
+	Return
 
 InitGDITooltip:
 	Global Opts
