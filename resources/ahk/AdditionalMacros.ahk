@@ -32,29 +32,32 @@
 ;###########-------------------------------------------------------------------###########
 
 AM_Init:
+
 	class AM_Options extends UserOptions {
 		
 	}	
 	global AM_Opts := new AM_Options()
 	
-	AM_ReadConfig()
-	Sleep, 200
+	AM_Config := {}
+	AM_ConfigDefault := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\AdditionalMacros.ini")
+	AM_ReadConfig(AM_Config)
+	Sleep, 150
 	
 	;global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 Return
 
 AM_AssignHotkeys:
-	If (not AM_Opts) {
+	If (not AM_Config) {
 		GoSub, AM_Init
 	}
 	; TODO: Refactor
-	global AM_CharacterName		:= AM_ConfigObj["AM_KickYourself"].Character
-	global AM_ChannelName		:= AM_ConfigObj["AM_JoinChannel"].Channel
-	global AM_HighlightArg1		:= AM_ConfigObj["AM_HighlightItems"].Arg1
-	global AM_HighlightArg2		:= AM_ConfigObj["AM_HighlightItems"].Arg2
-	global AM_HighlightAltArg1	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg1
-	global AM_HighlightAltArg2	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg2
-	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_ConfigObj["AM_General"].General_KeyToSCState
+	global AM_CharacterName		:= AM_Config["KickYourself"].Character
+	global AM_ChannelName		:= AM_Config["JoinChannel"].Channel
+	global AM_HighlightArg1		:= AM_Config["HighlightItems"].Arg1
+	global AM_HighlightArg2		:= AM_Config["HighlightItems"].Arg2
+	global AM_HighlightAltArg1	:= AM_Config["HighlightItemsAlt"].Arg1
+	global AM_HighlightAltArg2	:= AM_Config["HighlightItemsAlt"].Arg2
+	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_Config["General"].General_KeyToSCState
 
 	; AdditionalMacros hotkeys.
 	AM_SetHotkeys()
@@ -169,22 +172,21 @@ setAfkMessage(){
 }
 
 AM_SetHotkeys() {
-	Global AM_Opts, AM_ConfigObj
+	Global AM_Opts, AM_Config
 	
-	console.clear()
-	debugprintarray(AM_ConfigObj)
-	
-	If (AM_Opts.General_Enable) {
-		For labelIndex, labelName in StrSplit(AM_ConfigObj.GetSections("|", "C"), "|") {
-			If (labelName != "AM_General") {
-				For labelKeyIndex, labelKeyName in StrSplit(AM_ConfigObj[labelName].Hotkeys, ", ") {
+	;console.clear()
+	;debugprintarray(AM_ConfigObj)
+	If (AM_Config.General.Enable) {
+		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
+			If (labelName != "General") {
+				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
 					If (labelKeyName and labelKeyName != A_Space) {
-						AM_ConfigObj[labelName].State := AM_ConvertState(AM_ConfigObj[labelName].State)						
-						stateValue := AM_ConfigObj[labelName].State ? "on" : "off"
+						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
+						stateValue := AM_Config[labelName].State ? "on" : "off"
 						
 						; TODO: Fix hotkeys not being correctly set without restart
-						console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " labelName "_HKey, " stateValue)
-						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
+						;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " labelName "_HKey, " stateValue)
+						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue
 					}
 				}
 			}
@@ -192,35 +194,15 @@ AM_SetHotkeys() {
 	}
 }
 
-AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
+AM_ReadConfig(ByRef ConfigObj, ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 {
-	Global AM_Opts, AM_ConfigObj
+	defaultFile := A_ScriptDir . "\resources\default_UserFiles\" . ConfigFile
+	ConfigDir  := StrLen(ConfigDir) < 1 ? userDirectory : ConfigDir	; userDirectory is global
+	ConfigPath := StrLen(ConfigDir) > 0 ? ConfigDir . "\" . ConfigFile : defaultFile
 	
-	If (StrLen(ConfigDir) < 1) {
-		ConfigDir := userDirectory
-	}
-	ConfigPath := StrLen(ConfigDir) > 0 ? ConfigDir . "\" . ConfigFile : ConfigFile
-	
-	AM_ConfigObj := class_EasyIni(ConfigPath)
-	
-	IfExist, %ConfigPath%
-	{		
-		For section, keys in AM_ConfigObj {
-			For key, val in keys {
-				sectionName := RegExReplace(section, "i)^(AM_)?")
-				_val := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
-				If (key = "Hotkeys") {
-					_val := RegExReplace(_val, "(\s+)?,(\s+)?", ",")
-					HotKeys := StrSplit(_val, ",")
-					AM_Opts[sectionName "_" key] := HotKeys
-				} Else If (key = "State") {					
-					AM_Opts[sectionName "_" key] := AM_ConvertState(IniRead(section, key, AM_Opts[key], AM_ConfigObj))
-				} Else {
-					AM_Opts[sectionName "_" key] := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
-				}				
-			}
-		}
-	}
+	ConfigObj  := class_EasyIni(ConfigPath)
+	ConfigObj.Update(defaultFile)
+	debugprintarray(ConfigObj)
 }
 
 AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
@@ -267,6 +249,7 @@ AM_ScanUI() {
 
 	; the inherited AM_Opts.ScanUI() doesn't work here (ListViews, hotkey arrays)
 	; TODO: Refactor this shit
+	/*
 	For section, keys in AM_ConfigObj {		
 		sectionName := RegExReplace(section, "i)^(AM_)?")
 		If (not sectionName = "General") {
@@ -303,7 +286,8 @@ AM_ScanUI() {
 	}
 	
 	_get := GuiGet("EnableAdditionalMacros", "", Error)
-	AM_Opts.General_Enable := not Error ? _get : AM_Opts[General_Enable]	
+	AM_Opts.General_Enable := not Error ? _get : AM_Opts[General_Enable]
+	*/
 }
 
 AM_ConvertState(state, reverse = false) {
@@ -319,7 +303,7 @@ AM_ConvertState(state, reverse = false) {
 
 AM_UpdateSettingsUI() {
 	Global AM_Opts, AM_ConfigObj
-	
+	/*
 	For section, keys in AM_ConfigObj {
 		sectionName := RegExReplace(section, "i)^(AM_)?")
 		CheckBoxID := sectionName "_State"
@@ -347,6 +331,7 @@ AM_UpdateSettingsUI() {
 		}
 	}
 	GuiControl,, EnableAdditionalMacros, % AM_Opts.General_Enable
+	*/
 }
 
 AM_UpdateHotkeyListView(controlID, value) {

@@ -9065,59 +9065,70 @@ CreateSettingsUI()
 	; AM Hotkeys
 	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w530 h625")	
 	
-	If (not AM_Opts) {
+	If (not AM_Config) {
 		GoSub, AM_Init
 	}
-
-	For section, keys in AM_ConfigObj {
-		sectionName := RegExReplace(section, "i)^(AM_)?")
-		chkBoxWidth := 130
-		chkBoxShiftY := 28
-		
-		If (sectionName != "General") {			
-			CheckBoxID := sectionName "_State"
-			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Opts[CheckBoxID], CheckBoxID, CheckBoxID "H")
-			AddToolTip(%CheckBoxID%H, RegExReplace(AM_ConfigObj[section].Description, "i)(\(Default = .*\))", "`n$1"))			
+	
+	chkBoxWidth := 130
+	chkBoxShiftY := 28
+	LVWidth := 155
+	
+	_AM_sections := StrSplit(AM_Config.GetSections("|", "C"), "|")
+	For sectionIndex, sectionName in _AM_sections {	; this enables section sorting		
+		If (sectionName != "General") {
+			; hotkey checkboxes (enable/disable)
+			HKCheckBoxID := "AM_" sectionName "_State"
+			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Config[sectionName].State, HKCheckBoxID, HKCheckBoxID "H")
+			AddToolTip(%HKCheckBoxID%H, RegExReplace(AM_ConfigDefault[sectionName].Description, "i)(\(Default = .*\))", "`n$1"))	; read description from default config
 			
-			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
-			{
-				HotKeyID := sectionName "_HotKeys_" A_Index
+			For keyIndex, keyValue in StrSplit(AM_Config[sectionName].Hotkeys, ", ") {	
+				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex				
 				
-				LVWidth := 155
 				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1 C454444 Backgroundf0f0f0")			
 				LV_ModifyCol(1, 0)
 				LV_ModifyCol(2, LVWidth - 5)
 				LV_Delete(1)
-				LV_Add("","", AM_Opts[sectionName "_HotKeys"][A_Index])				
-				
+				LV_Add("","", keyValue)			
+
 				GuiAddButton("Edit", "xp+" LVWidth " yp-1 w25 h22 v" HotKeyID "_Trigger", "LV_HotkeyEdit")
-				;Gui, Add, Picture, w20 h-1 x+2 yp+0 gLV_HotkeyEdit v%HotKeyID%_Trigger, %A_ScriptDir%\resources\images\edit_btn.png
 			}
 			
-			For k, v in keys {
-				If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
+			For keyIndex, keyValue in AM_Config[sectionName] {
+				If (not RegExMatch(keyIndex, "i)State|Hotkeys|Description")) {
 					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
-						If (k = "Arg2") {
-							ChkBoxID := sectionName "_Arg2"
-							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, AM_Opts[ChkBoxID], ChkBoxID, ChkBoxID "H")
+						If (keyIndex = "Arg2") {
+							CheckBoxID := "AM_" sectionName "_Arg2"
+							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, keyValue, CheckBoxID, CheckBoxID "H")
 						}			
 					}
 					Else {
-						EditID := sectionName "_" k
-						GuiAddText(k ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
-						GuiAddEdit(AM_Opts[EditID], "x+0 yp-2 w94 h20", EditID)
+						EditID := "AM_" sectionName "_" keyIndex
+						GuiAddText(keyIndex ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
+						GuiAddEdit(keyValue, "x+0 yp-2 w94 h20", EditID)
 					}					
 				}
 			}
 		}
-	}
+	}	
 	
 	; AM General
-	
+
 	GuiAddGroupBox("[AdditionalMacros] General", "x547 y35 w260 h60")
 	
-	GuiAddCheckbox("Enable Additional Macros", "xp+10 yp+20 w210 h30", AM_Opts.General_Enable, "EnableAdditionalMacros", "EnableAdditionalMacrosH")
-	AddToolTip(EnableAdditionalMacrosH, "Enables or disables the entire 'AdditionalMacros.ahk' file.`nNeeds a script reload to take effect.")
+	_i := 0
+	For keyIndex, keyValue in AM_Config.General {
+		If (not RegExMatch(keyIndex, ".*_Description$")) {
+			elementYPos := _i > 0 ? 20 : 30
+			
+			If (RegExMatch(keyIndex, ".*State$") and not (InStr(keyIndex, "KeyToSC", 0))) {
+				RegExMatch(AM_ConfigDefault.General[keyIndex "_Description"], ".*Short\$(.*)Long\$(.*)""", _description)		; read description from default config
+				ControlID := "AM_General_" keyIndex
+				GuiAddCheckbox(Trim(_description1), "x557 yp+" elementYPos " w210 h30", AM_Config.General[keyIndex], ControlID, ControlID "H")
+				AddToolTip(%ControlID%H, Trim(_description2))
+			}
+			_i++
+		}	
+	}
 	
 	; AM Buttons
 	
@@ -10161,9 +10172,8 @@ SettingsUI_AM_BtnDefaults:
 	Sleep, 75
 	CopyDefaultConfig("AdditionalMacros.ini")
 	Sleep, 75
-	AM_ReadConfig()
+	AM_ReadConfig(AM_Config)
 	Sleep, 75
-	global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 	UpdateSettingsUI()
 	ShowSettingsUI()
 	AM_SetHotkeys()
