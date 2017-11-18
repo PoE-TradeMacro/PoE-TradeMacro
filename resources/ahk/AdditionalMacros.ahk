@@ -42,8 +42,6 @@ AM_Init:
 	AM_ConfigDefault := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\AdditionalMacros.ini")
 	AM_ReadConfig(AM_Config)
 	Sleep, 150
-	
-	;global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
 Return
 
 AM_AssignHotkeys:
@@ -172,11 +170,9 @@ setAfkMessage(){
 }
 
 AM_SetHotkeys() {
-	Global AM_Opts, AM_Config
+	Global AM_Config
 	
-	;console.clear()
-	;debugprintarray(AM_ConfigObj)
-	If (AM_Config.General.Enable) {
+	If (AM_Config.General.EnableState) {
 		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
 			If (labelName != "General") {
 				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
@@ -184,9 +180,9 @@ AM_SetHotkeys() {
 						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
 						stateValue := AM_Config[labelName].State ? "on" : "off"
 						
-						; TODO: Fix hotkeys not being correctly set without restart
-						;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " labelName "_HKey, " stateValue)
+						; TODO: Fix hotkeys not being set without restart						
 						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue
+						;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " "AM_" labelName "_HKey, " stateValue ", " ErrorLevel)
 					}
 				}
 			}

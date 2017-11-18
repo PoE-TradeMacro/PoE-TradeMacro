@@ -118,7 +118,7 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 				,Hotkey_modList_normal,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
 
 	;these are all cleared again before the funtion Returns, to be on the safe side
-	globals = Hotkey_LeftRightMods,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_Hotkey1,Hotkey_Hotkey2
+	HotKey_globals = Hotkey_LeftRightMods,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_Hotkey1,Hotkey_Hotkey2
 				,Hotkey_ButtonSubmit,Hotkey_ButtonCancel,Hotkey_DefaultButton,Hotkey_keyList,Hotkey_modList_left_right
 				,Hotkey_modList_normal,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
 
@@ -382,7 +382,7 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 	Tooltip,,,,2
 
 	;free all the globals, to be on the safe side:
-	Loop, Parse, globals, `,
+	Loop, Parse, HotKey_globals, `,
 		%a_loopfield% =
 
 	;reset the default Gui
