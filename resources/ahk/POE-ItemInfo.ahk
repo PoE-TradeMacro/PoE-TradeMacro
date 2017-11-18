@@ -10122,9 +10122,40 @@ LV_HotkeyEdit:
 		_LVID := A_GuiControl
 	}
 	
+	; check keyboard layout = eng_US and switch to if not, quick and dirty workaround
+	; to support non-latin layouts (russian etc)
+	; TODO: remove later
+	_ENG_US := 0x4090409
+	_Defaultlayout := GetCurrentLayout()
+	If (GetKeySC("d") = 0 and _Defaultlayout != _ENG_US) {	 
+	;If (_Defaultlayout != _ENG_US) {
+		console.log("change layout")
+		SwitchLayoutStart := A_TickCount
+		SwitchLayoutElapsed := 0
+		While (GetCurrentLayout() != _ENG_US and SwitchLayoutElapsed < 120) {
+			SwitchLayout(_ENG_US)
+			Sleep, 50
+			SwitchLayoutElapsed := (A_TickCount - SwitchLayoutStart) / 1000
+		}
+		_switched := true		
+	}
+	
 	Gui, ListView, %_LVID%
 	LV_GetText(_oV, 1, 2)
-	_nV := Hotkey("+Tooltips", "Please hold down the keys you want to turn into a hotkey:", "Choose a Hotkey")
+	
+	_prompt := "Please hold down the keys or mousebuttons you want to turn into a hotkey:"
+	_note := "The majority of common keys from latin keyboard layouts should work."
+	If (_switched) {
+		_note := "`n" . "Forcibly switched to en_US layout because your layout seems to be unsupported."
+	}
+	_nV := Hotkey("+Tooltips", _prompt, _note, "Choose a Hotkey")
+	
+	; TODO: remove later
+	If (_switched) {
+		SwitchLayout(_Defaultlayout)
+		console.log("changed layout back")
+	}	
+	
 	LV_Delete(1)	
 	If (not StrLen(_nV)) {
 		_nV := _oV

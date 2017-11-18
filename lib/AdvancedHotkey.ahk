@@ -17,7 +17,7 @@ Gui, Add, Text, w500
 
 E1 = Hotkey()
 E2 = Hotkey("+Default1 -LR -UP","Please hold down the keys you want to turn into a hotkey:")
-E3 = Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","Hotkey configuration")
+E3 = Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","","Hotkey configuration")
 E4 = Hotkey("+Default2 -Mouse -Keynames -Modal -LR","Note that you're able to interact with the owner")
 E5 = Hotkey("-~ -* -Up -LR +Owner2","This window has no owner, since a non-existen owner (Gui2) was specified")
 
@@ -48,7 +48,7 @@ If a_guicontrol = 1
 else if a_guicontrol = 2
 		LV_Add("","",Hotkey("+Default1 -LR -UP","Please hold down the keys you want to turn into a hotkey:"))
 else if a_guicontrol = 3
-		LV_Add("","",Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","Hotkey configuration"))
+		LV_Add("","",Hotkey("+Default1 -Symbols +ReturnKeynames +Tooltips","","","Hotkey configuration"))
 else if a_guicontrol = 4
 		LV_Add("","",Hotkey("+Default2 -Mouse -Keynames -Modal -LR","Note that you're able to interact with the owner"))
 else if a_guicontrol = 5
@@ -82,7 +82,7 @@ return
 Note: The following funtions must all be present (they are included here, but I thought 
         I had better mention it):
         
-Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
+Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 AddPrefixSymbols(keys)
 KeysToSymbols(s)
 Keys()
@@ -111,7 +111,7 @@ i.e. "-~-*+Default2" is valid. -/+ are NOT optional, though. I.e. "Owner3" is in
 
 ;this funtion will Return a (hopfully) valid key combination, either
 ;as symbols (^!+..) or as keynames (Control+Alt+Shift+Space...)
-Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
+Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 {
 	global Hotkey_LeftRightMods,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_Hotkey1,Hotkey_Hotkey2
 				,Hotkey_ButtonSubmit,Hotkey_ButtonCancel,Hotkey_DefaultButton,Hotkey_keyList,Hotkey_modList_left_right
@@ -197,7 +197,7 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 	;the main key list. Add (or delete) keys to suit your needs
 	Hotkey_keyList =
 	( Join
-	#|.|,|-|<|+|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|�|��1|2|3|4|5|6|7|8|9|0
+	#|.|,|-|<|+|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|ü|ä|ö|ß|1|2|3|4|5|6|7|8|9|0
 	|Numpad0|Numpad1|Numpad2|Numpad3|Numpad4|Numpad5|Numpad6|Numpad7|Numpad8|Numpad9
 	|NumpadClear|Right|Left|Up|Down|NumpadDot|Space|Tab|Escape|Backspace|Delete|Insert|Home
 	|End|PgUp|PgDn|ScrollLock|CapsLock|NumLock|NumpadDiv|NumpadMult|NumpadAdd|NumpadSub
@@ -318,8 +318,9 @@ Hotkey(Options="",Prompt="",Title="",GuiNumber=77)
 	Gui, %Hotkey_numGui%:Font, norm
 	Gui, %Hotkey_numGui%:Add, Button, vHotkey_ButtonSubmit x62.5 Section w50 h20 gHotkey_Submit, Submit
 	Gui, %Hotkey_numGui%:Add, Button, vHotkey_ButtonCancel h20 ys w50 gHotkey_Cancel, Cancel
+	Gui, %Hotkey_numGui%:Add, Text, x5 y+10 w220, % BottomInfo
 	;the Timer sets focus to this button all the time to avoid key combinations triggering a focused checkbox
-	Gui, %Hotkey_numGui%:Add, Button, vHotkey_DefaultButton x0 y0 w0 h0 	
+	Gui, %Hotkey_numGui%:Add, Button, vHotkey_DefaultButton x0 y0 w0 h0
 
 	;set the default button If called for
 	IfInString, Options, +Default
