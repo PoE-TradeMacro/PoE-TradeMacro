@@ -10137,7 +10137,7 @@ LV_HotkeyEdit:
 			Sleep, 50
 			SwitchLayoutElapsed := (A_TickCount - SwitchLayoutStart) / 1000
 		}
-		_switched := true		
+		_switched := (GetCurrentLayout() != _Defaultlayout) ? true : false
 	}
 	
 	Gui, ListView, %_LVID%
@@ -10146,7 +10146,7 @@ LV_HotkeyEdit:
 	_prompt := "Please hold down the keys or mousebuttons you want to turn into a hotkey:"
 	_note := "The majority of common keys from latin keyboard layouts should work."
 	If (_switched) {
-		_note := "`n" . "Forcibly switched to en_US layout because your layout seems to be unsupported."
+		_note := "`n`n" . "Forcibly switched to en_US layout because your layout seems to be unsupported."
 	}
 	_nV := Hotkey("+Tooltips", _prompt, _note, "Choose a Hotkey")
 	
