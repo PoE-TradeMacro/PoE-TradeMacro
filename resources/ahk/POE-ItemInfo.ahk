@@ -8722,7 +8722,7 @@ GuiGet(ControlID, DefaultValue="", ByRef Error = false)
 {
 	curVal =
 	ErrorLevel := 0
-	GuiControlGet, curVal,, %ControlID%, %DefaultValue%	
+	GuiControlGet, curVal,, %ControlID%, %DefaultValue%
 	Error := ErrorLevel	
 	return curVal
 }
@@ -9082,8 +9082,8 @@ CreateSettingsUI()
 			AddToolTip(%HKCheckBoxID%H, RegExReplace(AM_ConfigDefault[sectionName].Description, "i)(\(Default = .*\))", "`n$1"))	; read description from default config
 			
 			For keyIndex, keyValue in StrSplit(AM_Config[sectionName].Hotkeys, ", ") {	
-				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex				
-				
+				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex
+			
 				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1 C454444 Backgroundf0f0f0")			
 				LV_ModifyCol(1, 0)
 				LV_ModifyCol(2, LVWidth - 5)
@@ -9099,7 +9099,7 @@ CreateSettingsUI()
 						If (keyIndex = "Arg2") {
 							CheckBoxID := "AM_" sectionName "_Arg2"
 							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, keyValue, CheckBoxID, CheckBoxID "H")
-						}			
+						}
 					}
 					Else {
 						EditID := "AM_" sectionName "_" keyIndex
