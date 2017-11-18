@@ -32,29 +32,30 @@
 ;###########-------------------------------------------------------------------###########
 
 AM_Init:
+
 	class AM_Options extends UserOptions {
 		
 	}	
 	global AM_Opts := new AM_Options()
 	
-	AM_ReadConfig()
-	Sleep, 200
-	
-	;global AM_Config := class_EasyIni(argumentUserDirectory "\AdditionalMacros.ini")
+	AM_Config := {}
+	AM_ConfigDefault := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\AdditionalMacros.ini")
+	AM_ReadConfig(AM_Config)
+	Sleep, 150
 Return
 
 AM_AssignHotkeys:
-	If (not AM_Opts) {
+	If (not AM_Config) {
 		GoSub, AM_Init
 	}
 	; TODO: Refactor
-	global AM_CharacterName		:= AM_ConfigObj["AM_KickYourself"].Character
-	global AM_ChannelName		:= AM_ConfigObj["AM_JoinChannel"].Channel
-	global AM_HighlightArg1		:= AM_ConfigObj["AM_HighlightItems"].Arg1
-	global AM_HighlightArg2		:= AM_ConfigObj["AM_HighlightItems"].Arg2
-	global AM_HighlightAltArg1	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg1
-	global AM_HighlightAltArg2	:= AM_ConfigObj["AM_HighlightItemsAlt"].Arg2
-	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_ConfigObj["AM_General"].General_KeyToSCState
+	global AM_CharacterName		:= AM_Config["KickYourself"].Character
+	global AM_ChannelName		:= AM_Config["JoinChannel"].Channel
+	global AM_HighlightArg1		:= AM_Config["HighlightItems"].Arg1
+	global AM_HighlightArg2		:= AM_Config["HighlightItems"].Arg2
+	global AM_HighlightAltArg1	:= AM_Config["HighlightItemsAlt"].Arg1
+	global AM_HighlightAltArg2	:= AM_Config["HighlightItemsAlt"].Arg2
+	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_Config["General"].General_KeyToSCState
 
 	; AdditionalMacros hotkeys.
 	AM_SetHotkeys()
@@ -169,22 +170,19 @@ setAfkMessage(){
 }
 
 AM_SetHotkeys() {
-	Global AM_Opts, AM_ConfigObj
+	Global AM_Config
 	
-	console.clear()
-	debugprintarray(AM_ConfigObj)
-	
-	If (AM_Opts.General_Enable) {
-		For labelIndex, labelName in StrSplit(AM_ConfigObj.GetSections("|", "C"), "|") {
-			If (labelName != "AM_General") {
-				For labelKeyIndex, labelKeyName in StrSplit(AM_ConfigObj[labelName].Hotkeys, ", ") {
+	If (AM_Config.General.EnableState) {
+		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
+			If (labelName != "General") {
+				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
 					If (labelKeyName and labelKeyName != A_Space) {
-						AM_ConfigObj[labelName].State := AM_ConvertState(AM_ConfigObj[labelName].State)						
-						stateValue := AM_ConfigObj[labelName].State ? "on" : "off"
+						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
+						stateValue := AM_Config[labelName].State ? "on" : "off"
 						
-						; TODO: Fix hotkeys not being correctly set without restart
-						console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " labelName "_HKey, " stateValue)
-						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), %labelName%_HKey, % stateValue
+						; TODO: Fix hotkeys not being set without restart						
+						Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue
+						;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " "AM_" labelName "_HKey, " stateValue ", " ErrorLevel)
 					}
 				}
 			}
@@ -192,118 +190,55 @@ AM_SetHotkeys() {
 	}
 }
 
-AM_ReadConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
+AM_ReadConfig(ByRef ConfigObj, ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 {
-	Global AM_Opts, AM_ConfigObj
+	defaultFile := A_ScriptDir . "\resources\default_UserFiles\" . ConfigFile
+	ConfigDir  := StrLen(ConfigDir) < 1 ? userDirectory : ConfigDir	; userDirectory is global
+	ConfigPath := StrLen(ConfigDir) > 0 ? ConfigDir . "\" . ConfigFile : defaultFile
 	
-	If (StrLen(ConfigDir) < 1) {
-		ConfigDir := userDirectory
-	}
-	ConfigPath := StrLen(ConfigDir) > 0 ? ConfigDir . "\" . ConfigFile : ConfigFile
-	
-	AM_ConfigObj := class_EasyIni(ConfigPath)
-	
-	IfExist, %ConfigPath%
-	{		
-		For section, keys in AM_ConfigObj {
-			For key, val in keys {
-				sectionName := RegExReplace(section, "i)^(AM_)?")
-				_val := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
-				If (key = "Hotkeys") {
-					_val := RegExReplace(_val, "(\s+)?,(\s+)?", ",")
-					HotKeys := StrSplit(_val, ",")
-					AM_Opts[sectionName "_" key] := HotKeys
-				} Else If (key = "State") {					
-					AM_Opts[sectionName "_" key] := AM_ConvertState(IniRead(section, key, AM_Opts[key], AM_ConfigObj))
-				} Else {
-					AM_Opts[sectionName "_" key] := IniRead(section, key, AM_Opts[key], AM_ConfigObj)
-				}				
-			}
-		}
-	}
+	ConfigObj  := class_EasyIni(ConfigPath)
+	ConfigObj.Update(defaultFile)
 }
 
 AM_WriteConfig(ConfigDir = "", ConfigFile = "AdditionalMacros.ini")
 {
-	Global AM_Opts, AM_ConfigObj, AM_Config
+	Global AM_Config, AM_ConfigDefault
 	
-	If (StrLen(ConfigDir) < 1) {
-		ConfigDir := userDirectory
-	}
-	ConfigPath := StrLen(ConfigDir) > 0 ? ConfigDir . "\" . ConfigFile : ConfigFile
+	ConfigDir  := StrLen(ConfigDir) < 1 ? userDirectory : ConfigDir	; userDirectory is global
+	ConfigPath := ConfigDir . "\" . ConfigFile
 	
-	AM_ConfigObj := class_EasyIni(ConfigPath)
-	
-	AM_ScanUI()
-	; TODO: Refactor, especially the the General section exceptions
-	For key, val in AM_Opts {
-		section := "AM_" RegExReplace(key, "i)(.*)_.*", "$1")
-		keyName := RegExReplace(key, "i).*_(.*)", "$1")
-		value := ""
-		
-		If (keyName = "Enable" or keyName = "KeyToSCState") {
-			section := "AM_General"
-		}
-		If (keyName = "Hotkeys" and AM_Opts[key].MaxIndex()) {			
-			For k, v in AM_Opts[key] {
-				value .= ", " . v
-			}
-			value := SubStr(value, 1 + StrLen(", "))
-		} Else If (keyName = "State") {
-			value := AM_ConvertState(AM_Opts[key], true)
-		} Else {
-			value := AM_Opts[key]
-		}
-		
-		IniWrite(value, section, keyName, AM_ConfigObj)	
-	}	
-	
-	AM_ConfigObj.Save(ConfigPath)
+	AM_UpdateConfigFromGui(AM_Config, "AM_")
+	AM_Config.Save(ConfigPath)
 	AM_SetHotkeys()
 }
 
-AM_ScanUI() {
-	Global AM_Opts, AM_ConfigObj
+AM_UpdateConfigKeyFromGuiControl(key, controlID) {
+	_get := GuiGet(controlID, "", Error)
+	return (not Error ? _get : key)
+}
 
-	; the inherited AM_Opts.ScanUI() doesn't work here (ListViews, hotkey arrays)
-	; TODO: Refactor this shit
-	For section, keys in AM_ConfigObj {		
-		sectionName := RegExReplace(section, "i)^(AM_)?")
-		If (not sectionName = "General") {
-			CheckBoxID := sectionName "_State"
-			
-			_get := GuiGet(CheckBoxID, "", Error)
-			If (not Error) {
-				AM_Opts[CheckBoxID] := _get
-			}			
-			
-			Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
-			{
-				HotKeyID := sectionName "_HotKeys_" A_Index
-				AM_Opts[sectionName "_Hotkeys"][A_Index] := AM_GetHotkeyListViewValue(HotKeyID)
-			}
-			
-			For k, v in keys {
-				If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
-					If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
-						If (k = "Arg2") {						
-							ChkBoxID := sectionName "_Arg2"
-							_get := GuiGet(ChkBoxID, "", Error)
-							AM_Opts[ChkBoxID] := not Error ? _get : AM_Opts[ChkBoxID]						
-						}			
-					}
-					Else {
-						EditID := sectionName "_" k
-						_get := GuiGet(EditID, "", Error)
-						AM_Opts[EditID] := not Error ? _get : AM_Opts[EditID]
+AM_UpdateConfigFromGui(ByRef Config, prefix) {
+	For section, keys in Config {
+		For key, val in keys {			
+			controlID := prefix . section "_" key
+			If (key = "Hotkeys") {
+				_value := ""
+				Loop {
+					_get := AM_GetHotkeyListViewValue(controlID "_" A_Index, Error)
+					If (not Error) {
+						_value .= _get ", "
+					} Else {
+						Break
 					}					
 				}
+				Config.SetKeyVal(section, key, RegExReplace(Trim(_value), "(.*)(,$)", "$1"))
 			}
-		}
+			; descriptions come from the default config file, we don't need to save them in the user config
+			Else If (not RegExMatch(key, "i).*_Description$|^Description$")) {				
+				Config.SetKeyVal(section, key, AM_UpdateConfigKeyFromGuiControl(Config[section][key], controlID))
+			}			
+		}	
 	}
-	
-	_get := GuiGet("EnableAdditionalMacros", "", Error)
-	AM_Opts.General_Enable := not Error ? _get : AM_Opts[General_Enable]	
 }
 
 AM_ConvertState(state, reverse = false) {
@@ -318,35 +253,23 @@ AM_ConvertState(state, reverse = false) {
 }
 
 AM_UpdateSettingsUI() {
-	Global AM_Opts, AM_ConfigObj
+	Global AM_Config
 	
-	For section, keys in AM_ConfigObj {
-		sectionName := RegExReplace(section, "i)^(AM_)?")
-		CheckBoxID := sectionName "_State"
-		GuiControl,, %CheckBoxID%, % AM_Opts[CheckBoxID]	
-		
-		Loop, % AM_Opts[sectionName "_Hotkeys"].MaxIndex()
-		{
-			HotKeyID := sectionName "_HotKeys_" A_Index
-			AM_UpdateHotkeyListView(HotKeyID, AM_Opts[sectionName "_Hotkeys"][A_Index])
+	_AM_sections := StrSplit(AM_Config.GetSections("|", "C"), "|")
+	For sectionIndex, sectionName in _AM_sections {	; this enables section sorting		
+		If (sectionName != "General") {
+			For keyIndex, keyValue in StrSplit(AM_Config[sectionName].Hotkeys, ", ") {	
+				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex
+				AM_UpdateHotkeyListView(HotKeyID, keyValue)
+			}
 		}
-		
-		For k, v in keys {
-			If (not RegExMatch(k, "i)State|Hotkeys|Description")) {
-				If (RegExMatch(sectionName, "i)HighlightItems|HighlightItemsAlt")) {
-					If (k = "Arg2") {						
-						ChkBoxID := sectionName "_Arg2"
-						GuiControl,, %ChkBoxID%, % AM_Opts[ChkBoxID]						
-					}			
-				}
-				Else {
-					EditID := sectionName "_" k
-					GuiControl,, %EditID%, % AM_Opts[EditID]
-				}					
+		For keyIndex, keyValue in AM_Config[sectionName] {
+			If (not RegExMatch(keyIndex, "i)^Hotkeys$|^Description$|.*_Description$")) {
+				ControlID := "AM_" sectionName "_" keyIndex
+				GuiControl,, %ControlID%, % AM_Config[sectionName][keyIndex]
 			}
 		}
 	}
-	GuiControl,, EnableAdditionalMacros, % AM_Opts.General_Enable
 }
 
 AM_UpdateHotkeyListView(controlID, value) {
@@ -355,7 +278,9 @@ AM_UpdateHotkeyListView(controlID, value) {
 	LV_Add("","",value)
 }
 
-AM_GetHotkeyListViewValue(controlID) {
+AM_GetHotkeyListViewValue(controlID, ByRef Error = false) {
+	GuiControlGet, _g, , %controlID%
+	Error := ErrorLevel ? true : false
 	Gui, ListView, %controlID%
 	LV_GetText(value, 1, 2)
 	Return value
