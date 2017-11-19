@@ -423,6 +423,13 @@ Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-bw.ico
 ReadConfig()
 Sleep, 100
 
+; Todo: remove test code
+If (TradeOpts.Debug) {
+	currentLocaleTest := "de"		; read from production.ini
+	PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
+}
+
+
 ; Use some variables to skip the update check or enable/disable update check feedback.
 ; The first call on script start shouldn't have any feedback and including ItemInfo in other scripts should call the update once from that other script.
 ; Under no circumstance set the variable "SkipItemInfoUpdateCall" in this script.
