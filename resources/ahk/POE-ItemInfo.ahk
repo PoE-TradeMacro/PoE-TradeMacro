@@ -423,12 +423,6 @@ Menu, Tray, Icon, %A_ScriptDir%\resources\images\poe-bw.ico
 ReadConfig()
 Sleep, 100
 
-; Todo: remove test code
-If (TradeOpts.Debug) {
-	currentLocale := ""
-	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...")
-}
-
 ; Use some variables to skip the update check or enable/disable update check feedback.
 ; The first call on script start shouldn't have any feedback and including ItemInfo in other scripts should call the update once from that other script.
 ; Under no circumstance set the variable "SkipItemInfoUpdateCall" in this script.
@@ -447,6 +441,13 @@ If (StrLen(overwrittenUserFiles)) {
 GoSub, AM_AssignHotkeys
 GoSub, FetchCurrencyData
 GoSub, InitGDITooltip
+
+; Todo: remove test/debug code
+If (true) {
+	currentLocale := ""
+	_Debug := true
+	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...", _Debug)
+}
 
 Menu, TextFiles, Add, Additional Macros Settings, EditAdditionalMacrosSettings
 Menu, TextFiles, Add, Map Mod Warnings, EditMapModWarningsConfig
