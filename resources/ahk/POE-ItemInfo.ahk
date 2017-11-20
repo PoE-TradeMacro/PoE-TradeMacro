@@ -425,10 +425,8 @@ Sleep, 100
 
 ; Todo: remove test code
 If (TradeOpts.Debug) {
-	SplashTextOn, 300, 20, PoE-ItemInfo, Updating and parsing language files...
-	currentLocaleTest := "de"		; read from production.ini
-	global translationData := PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
-	SplashTextOff
+	currentLocale := ""
+	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...")
 }
 
 ; Use some variables to skip the update check or enable/disable update check feedback.

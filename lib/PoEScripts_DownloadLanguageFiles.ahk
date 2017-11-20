@@ -1,4 +1,11 @@
-PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false) {
+PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false, SplashTitle = "", SplashText = "") {
+	currentLocale := PoEScripts_GetClientLanguage()
+	If (currentLocale = "en" or not currentLocale) {
+		Return
+	}
+	
+	SplashTextOn, 300, 20, %SplashTitle%, %SplashText%
+	
 	lang := PoEScripts_ParseAvailableLanguages()
 	translationData := {}
 
@@ -10,9 +17,35 @@ PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false) {
 		translationData.currentLocale := currentLocale
 		translationData.localized	:= PoEScripts_DownloadFileSet(currentLocale, lang[currentLocale])
 		translationData.default	 	:= PoEScripts_DownloadFileSet("en", lang["en"])
+	}	
+	
+	SplashTextOff
+	Return translationData
+}
+
+PoEScripts_GetClientLanguage() {
+	iniPath		:= A_MyDocuments . "\My Games\Path of Exile\"
+	configs 		:= []
+	productionIni	:= iniPath . "production_Config.ini"
+	betaIni		:= iniPath . "beta_Config.ini"	
+	
+	configs.push(productionIni)
+	configs.push(betaIni)
+	If (not FileExist(productionIni) and not FileExist(betaIni)) {
+		Loop %iniPath%\*.ini
+		{
+			configs.push(iniPath . A_LoopFileName)		
+		}	
 	}
 	
-	Return translationData
+	readFile	:= ""
+	For key, val in configs {
+		IniRead, language, %val%, LANGUAGE, language
+		If (language != "ERROR") {
+			Return language
+		}
+	}
+	Return false
 }
 
 PoEScripts_DownloadFileSet(short, long) {
