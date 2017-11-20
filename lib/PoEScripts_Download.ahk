@@ -127,7 +127,7 @@
 	Else If (not e.what) {
 		; check returned request headers
 		ioHdr := ParseReturnedHeaders(ioHdr)
-
+		
 		goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
 		If (not goodStatusCode) {
 			MsgBox, 16,, % "Error downloading file to " SavePath
@@ -136,11 +136,24 @@
 		
 		; compare file sizes
 		FileGetSize, sizeOnDisk, %SavePath%
-		RegExMatch(ioHdr, "i)Content-Length:\s(\d+)", size)
-		size := size1
-		If (size != sizeOnDisk) {
-			html := "Error: Different Size"
-		}
+		RegExMatch(ioHdr, "i)Content-Length:\s(\d+)(k|m)?", size)
+		size := Trim(size1)
+		If (Strlen(size2)) {
+			size := size2 = "k" ? size * 1024 : size * 1024 * 1024
+			sizeVariation := Round(size * 99.8 / 100) - size
+		}		
+		
+		; give the comparison some leeway in case of the extracted filesize from the response headers being 
+		; imprecise (shown in kilobyte/megabyte)
+		If (sizeVariation) {
+			If (not (sizeOnDisk > (size - sizeVariation) and sizeOnDisk < (size + sizeVariation))) {
+				html := "Error: Different Size"
+			}
+		} Else {
+			If (size != sizeOnDisk) {
+				html := "Error: Different Size"
+			}
+		}		
 	} Else {
 		ThrowError(e, false, ioHdr, PreventErrorMsg)
 	}

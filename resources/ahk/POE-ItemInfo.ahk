@@ -426,7 +426,7 @@ Sleep, 100
 ; Todo: remove test code
 If (TradeOpts.Debug) {
 	currentLocaleTest := "de"		; read from production.ini
-	PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
+	global translationData := PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
 }
 
 

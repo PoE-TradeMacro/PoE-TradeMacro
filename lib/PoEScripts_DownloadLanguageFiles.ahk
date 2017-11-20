@@ -1,40 +1,47 @@
-;#SingleInstance, force
-;#Include, %A_ScriptDir%\PoEScripts_Download.ahk
-;#Include, %A_ScriptDir%\DebugPrintArray.ahk
-
 PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false) {
-	lang := ParseAvailableLanguages()
+	lang := PoEScripts_ParseAvailableLanguages()
+	translationData := {}
 	
 	If (dlAll) {
 		For key, l in lang {
-			DownloadFileSet(key, l)
+			translationData := PoEScripts_DownloadFileSet(key, l)
 		}
 	} Else If (not currentLocale = "en" and currentLocale) {
-		DownloadFileSet(currentLocale, lang[currentLocale])
+		translationData.currentLocale := currentLocale
+		translationData["localized"]	:= PoEScripts_DownloadFileSet(currentLocale, lang[currentLocale])
+		translationData["default"] 	:= PoEScripts_DownloadFileSet("en", lang["en"])
 	}
 	
-	;msgbox done
+	
+	For key, val in translationData {
+		console.log(key)	
+		If (translationData[key]) {
+			console.log(val)
+		}		
+	}
+	
+	
+	
+	Return translationData
 }
 
-DownloadFileSet(short, long) {
-	prefix := short = "en" ? "www" : short	
-	
-	options	:= ""
+PoEScripts_DownloadFileSet(short, long) {
+	returnObj := {}
+	prefix := short = "en" ? "www" : short
 
 	files := []
-	files.push(["https://" prefix ".pathofexile.com/api/trade/data/stats", short "_stats.json"])
-	files.push(["https://" prefix ".pathofexile.com/api/trade/data/static", short "_static.json"])
-	files.push(["https://" prefix ".pathofexile.com/api/trade/data/items", short "_items.json"])
-	If (short != "en") {		
-		files.push(["http://web.poecdn.com/js/translate." long ".js", short "_basic.json"])
+	For key, val in ["stats", "static", "items"] {
+		files.push(["https://" prefix ".pathofexile.com/api/trade/data/" val, short "_" val ".json", val])
+		;files.push(["https://" prefix ".pathofexile.com/api/trade/data/" static, short "_" key ".json", "static"])
+		;files.push(["https://" prefix ".pathofexile.com/api/trade/data/" items, short "_" key ".json", "item"])	
+	}	
+	If (short != "en") {
+		files.push(["http://web.poecdn.com/js/translate." long ".js", short "_basic.json", "basic"])
 	}
-
-	; disabled while using debug mode
-	dir		= %A_ScriptDir%\data\lang
-	bakDir	= %A_ScriptDir%\data\lang\old_data_files
 
 	; download (overwrite) data files
 	; if downloaded files have a size rename them, overwriting the ones already existing
+	dir = %A_ScriptDir%\data\lang
 	If (not FileExist(dir)) {
 		FileCreateDir, %dir%
 	}
@@ -55,23 +62,44 @@ DownloadFileSet(short, long) {
 		If (InStr(url, "web.poecdn.com")) {
 			ioHdr.push("Host: web.poecdn.com")
 		} Else {
-			ioHdr.push("Host: " short ".pathofexile.com")
-		}	
-
-		options := "SaveAs: " filePath "_temp"
-		output :=  PoEScripts_Download(url, postData := "", ioHdr := reqHeaders, options, true, false, true)
-		options := ""
+			ioHdr.push("Host: " prefix ".pathofexile.com")
+		}
+		console.log(url)
+		output :=  PoEScripts_Download(url, postData := "", ioHdr := reqHeaders, "SaveAs: " filePath "_temp", true, false, true)		
 		
 		FileGetSize, sizeOnDisk, %filePath%_temp
 		If (sizeOnDisk) {
 			FileDelete, %filePath%
-			FileMove, %filePath%_temp, %filePath%
+			If (RegExMatch(url, ".*\.js$")) {
+				FileRead, jsFile, %filepath%_temp
+				JSON := PoEScripts_ConvertJSVariableFileToJSON(jsFile)				
+				FileAppend, %JSON%, %filePath%, utf-8
+			} Else {				
+				FileMove, %filePath%_temp, %filePath%
+			}
 		}
 		FileDelete, %filePath%_temp
-	}	
+		
+		returnObj := {}
+		If (sizeOnDisk) {
+			FileRead, JSONFile, %filePath%
+			Try {
+				parsedJSON := JSON.Load(JSONFile)
+				returnObj[files[A_Index][3]] := parsedJSON.result
+			} Catch e {
+				MsgBox, % "Failed to parse: " filePath 
+			}
+		}
+	}
+
+	Return returnObj
 }
 
-ParseAvailableLanguages() {
+PoEScripts_ConvertJSVariableFileToJSON(file) {
+	return file
+}
+
+PoEScripts_ParseAvailableLanguages() {
 	url 	:= "https://www.pathofexile.com/trade"
 	options	:= ""
 
