@@ -12,24 +12,6 @@ PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false) {
 		translationData.default	 	:= PoEScripts_DownloadFileSet("en", lang["en"])
 	}
 	
-	k1 := ""
-	For key, val in translationData {
-		k1 .= key ", "
-	}
-	console.log(k1)
-	
-	k2 := ""
-	For key, val in translationData.localized {
-		k2 .= key ", "
-	}
-	console.log(k2)
-	
-	k3 := ""
-	For key, val in translationData.localized.items {
-		k3 .= key ", "
-	}
-	console.log(k3)
-	
 	Return translationData
 }
 

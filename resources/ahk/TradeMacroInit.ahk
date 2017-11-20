@@ -145,12 +145,6 @@ If (TradeOpts.DownloadDataFiles and not TradeOpts.Debug) {
 	TradeFunc_DownloadDataFiles()
 }
 
-If (TradeOpts.Debug) {
-	SplashTextOn, , 20, PoE-TradeMacro, Updating and parsing language files...
-	currentLocaleTest := "de" ; read from production.ini
-	global translationData := PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
-}
-
 CreateTradeSettingsUI()
 TradeFunc_StopSplashScreen()
 

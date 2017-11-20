@@ -424,13 +424,12 @@ ReadConfig()
 Sleep, 100
 
 ; Todo: remove test code
-If (TradeOpts.Debug and not SkipItemInfoUpdateCall) {
-	SplashTextOn, , 20, PoE-ItemInfo, Updating and parsing language files...
+If (TradeOpts.Debug) {
+	SplashTextOn, 300, 20, PoE-ItemInfo, Updating and parsing language files...
 	currentLocaleTest := "de"		; read from production.ini
 	global translationData := PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
 	SplashTextOff
 }
-
 
 ; Use some variables to skip the update check or enable/disable update check feedback.
 ; The first call on script start shouldn't have any feedback and including ItemInfo in other scripts should call the update once from that other script.
