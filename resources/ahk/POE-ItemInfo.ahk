@@ -424,9 +424,11 @@ ReadConfig()
 Sleep, 100
 
 ; Todo: remove test code
-If (TradeOpts.Debug) {
+If (TradeOpts.Debug and not SkipItemInfoUpdateCall) {
+	SplashTextOn, , 20, PoE-ItemInfo, Updating and parsing language files...
 	currentLocaleTest := "de"		; read from production.ini
 	global translationData := PoEScripts_DownloadLanguageFiles(currentLocaleTest, false)
+	SplashTextOff
 }
 
 

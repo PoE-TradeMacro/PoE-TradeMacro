@@ -1,26 +1,34 @@
 PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false) {
 	lang := PoEScripts_ParseAvailableLanguages()
 	translationData := {}
-	
+
 	If (dlAll) {
 		For key, l in lang {
 			translationData := PoEScripts_DownloadFileSet(key, l)
 		}
 	} Else If (not currentLocale = "en" and currentLocale) {
 		translationData.currentLocale := currentLocale
-		translationData["localized"]	:= PoEScripts_DownloadFileSet(currentLocale, lang[currentLocale])
-		translationData["default"] 	:= PoEScripts_DownloadFileSet("en", lang["en"])
+		translationData.localized	:= PoEScripts_DownloadFileSet(currentLocale, lang[currentLocale])
+		translationData.default	 	:= PoEScripts_DownloadFileSet("en", lang["en"])
 	}
 	
-	
+	k1 := ""
 	For key, val in translationData {
-		console.log(key)	
-		If (translationData[key]) {
-			console.log(val)
-		}		
+		k1 .= key ", "
 	}
+	console.log(k1)
 	
+	k2 := ""
+	For key, val in translationData.localized {
+		k2 .= key ", "
+	}
+	console.log(k2)
 	
+	k3 := ""
+	For key, val in translationData.localized.items {
+		k3 .= key ", "
+	}
+	console.log(k3)
 	
 	Return translationData
 }
@@ -32,8 +40,6 @@ PoEScripts_DownloadFileSet(short, long) {
 	files := []
 	For key, val in ["stats", "static", "items"] {
 		files.push(["https://" prefix ".pathofexile.com/api/trade/data/" val, short "_" val ".json", val])
-		;files.push(["https://" prefix ".pathofexile.com/api/trade/data/" static, short "_" key ".json", "static"])
-		;files.push(["https://" prefix ".pathofexile.com/api/trade/data/" items, short "_" key ".json", "item"])	
 	}	
 	If (short != "en") {
 		files.push(["http://web.poecdn.com/js/translate." long ".js", short "_basic.json", "basic"])
@@ -50,6 +56,7 @@ PoEScripts_DownloadFileSet(short, long) {
 		url := files[A_Index][1]
 		file:= files[A_Index][2]
 		filePath = %dir%\%file%
+		isJavaScriptFile := RegExMatch(url, ".*\.js$")
 		
 		reqHeaders	:= []
 		reqHeaders.push("Connection: keep-alive")
@@ -64,15 +71,15 @@ PoEScripts_DownloadFileSet(short, long) {
 		} Else {
 			ioHdr.push("Host: " prefix ".pathofexile.com")
 		}
-		console.log(url)
 		output :=  PoEScripts_Download(url, postData := "", ioHdr := reqHeaders, "SaveAs: " filePath "_temp", true, false, true)		
 		
 		FileGetSize, sizeOnDisk, %filePath%_temp
 		If (sizeOnDisk) {
 			FileDelete, %filePath%
-			If (RegExMatch(url, ".*\.js$")) {
+			If (isJavaScriptFile) {
 				FileRead, jsFile, %filepath%_temp
-				JSON := PoEScripts_ConvertJSVariableFileToJSON(jsFile)				
+				jsToObj := {}
+				JSON := PoEScripts_ConvertJSVariableFileToJSON(jsFile, jsToObj, true, true)
 				FileAppend, %JSON%, %filePath%, utf-8
 			} Else {				
 				FileMove, %filePath%_temp, %filePath%
@@ -80,14 +87,19 @@ PoEScripts_DownloadFileSet(short, long) {
 		}
 		FileDelete, %filePath%_temp
 		
-		returnObj := {}
+		parsedJSON := {}
 		If (sizeOnDisk) {
 			FileRead, JSONFile, %filePath%
 			Try {
-				parsedJSON := JSON.Load(JSONFile)
-				returnObj[files[A_Index][3]] := parsedJSON.result
+				If (isJavaScriptFile) {
+					returnObj[files[A_Index][3]] := jsToObj
+				} Else {
+					parsedJSON := JSON.Load(JSONFile)
+					returnObj[files[A_Index][3]] := parsedJSON.result
+				}
 			} Catch e {
-				MsgBox, % "Failed to parse: " filePath 
+				; TODO: improve error handling
+				MsgBox, % "Failed to parse language file: " filePath 
 			}
 		}
 	}
@@ -95,8 +107,67 @@ PoEScripts_DownloadFileSet(short, long) {
 	Return returnObj
 }
 
-PoEScripts_ConvertJSVariableFileToJSON(file) {
-	return file
+PoEScripts_ConvertJSVariableFileToJSON(file, ByRef obj, returnFile = false, returnObj = true) {	
+	; it seems that the file contains multiple duplicate entries
+	; they either need to be filtered out or the json file needs a different structure
+	If (returnFile) {
+		json := file
+		; escape some characters
+		json := RegExReplace(Trim(json), "\\'", "\\'")
+		json := RegExReplace(Trim(json), """", "\""")
+		
+		; duplicates would need to be removed
+		If (false) {
+			; convert JS object properties to JSON properties
+			json := RegExReplace(Trim(json), ".*?\['(.*?)'\]\s+=\s+'(.*?)'.*", """$1"":""$2""")
+			; add an object definition and wrap properties within curly braces
+			json := RegExReplace(Trim(json), "s)(.*var.*?;.*?)("".*"")", "{""result"":[{$2}]}")
+			; replace linebreaks with ,
+			json := RegExReplace(Trim(json), "s)\r\n", ",")
+			json := RegExReplace(Trim(json), "s),{2,}", ",")
+			; remove trailing garbage
+			json := RegExReplace(Trim(json), "s)(.*})(.*)", "$1")	
+		}
+		
+		; different structure, numerical index instead of associative keys
+		If (true) {
+			; convert JS object properties to JSON properties
+			json := RegExReplace(Trim(json), ".*?\['(.*?)'\]\s+=\s+'(.*?)'.*", "{""$1"":""$2""}")
+			; add an object definition and wrap properties within curly braces
+			json := RegExReplace(Trim(json), "s)(.*var.*?;.*?)({.*})", "{""result"":[$2]}")
+			; replace linebreaks with ,
+			json := RegExReplace(Trim(json), "s)\r\n", ",")
+			json := RegExReplace(Trim(json), "s),{2,}", ",")
+			; remove trailing garbage
+			json := RegExReplace(Trim(json), "s)(.*})(.*)", "$1")	
+		}
+	}
+	
+	If (returnObj) {
+		; make sure to have one key-value pair per line
+		objSrc := RegExReplace(file, ";", ";`r`n")
+		obj := {}
+		
+		Loop, parse, objSrc, `n, `r
+		{
+			If (StrLen(A_LoopField)) {
+				RegExMatch(Trim(A_LoopField), ".*?\['(.*?)'\]\s+=\s+'(.*?)'.*", keyValuePair)
+				
+				Loop, 2 {
+					keyValuePair%A_Index% := RegExReplace(keyValuePair%A_Index%, """", """")
+					
+				}
+				
+				If (not obj[keyValuePair1] and StrLen(keyValuePair2)) {
+					obj[keyValuePair1] := keyValuePair2
+				}				
+			}			
+		}	
+	}
+	
+	; Returning this json text and saving it as a file works and produces valid JSON, but
+	; for some reason JSON.load() can't parse it though after that without a scriptreload.
+	Return json
 }
 
 PoEScripts_ParseAvailableLanguages() {
