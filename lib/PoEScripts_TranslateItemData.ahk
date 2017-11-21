@@ -5,11 +5,21 @@
 	}
 					; ["en", "de", "fr", "pt", "ru", "th", "es"]
 	rarityTags		:= ["Rarity", "Seltenheit", "Rareté", "Raridade", "Редкость", "ความหายาก", "Rareza"]	; hardcoded, no reliable translation source
-	rareTranslation	:= ["Rare", "Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]		; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
+	rareTranslation	:= ["Rare", "Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]					; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
 	superiorTag		:= ["Superior", "(hochwertig)", "de qualité", "Superior", "качества", "Superior", "Superior"]
 	itemQuantity		:= ["Item Quantity", "Gegenstandsmenge", "Quantité d'objets", "Quantidade de Itens", "Количество предметов", "จำนวนไอเท็ม", "Cantidad de Ítems"]
 	itemRarity		:= ["Item Rarity", "Gegenstandsseltenheit", "Rareté des objets", "Raridade de Itens", "Редкость предметов", "ระดับความหายากของไอเทม", "Rareza de Ítem"]
 	packSize			:= ["Monster Packsize", "Monstergruppengröße", "Taille des groupes de monstres", "Tamanho do Grupo de Monstros", "Размер групп монстров", "ขนาดบรรจุมอนสเตอร์", "Tamaño de Grupos de Monstruos"]
+	weaponRange		:= ["Weapon Range", "Waffenreichweite"]
+	physicalDamage		:= ["Physical Damage", "Physischer Schaden"]
+	elementalDamage	:= ["Elemental Damage", "Elementarschaden"]
+	manaCost			:= ["Mana Cost", "Manakosten"]
+	castTime			:= ["Cast Time", "Zauberzeit"]
+	cooldownTime		:= ["Cooldown Time", "Abklingzeit"]
+	damageEffectiveness	:= ["Damage Effectiveness", "Effektivität zusätzlichen Schadens"]
+	manaReserved		:= ["Mana Reserved", "Mana reserviert"]
+	manaMultiplier		:= ["Mana Multiplier", "Manamultiplikator"]
+	
 	regex 			:= {}
 	regex.superior		:= ["^Superior(.*)", "(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
 	regex.map			:= ["(.*)Map", "Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
@@ -101,15 +111,35 @@
 		If (key = 2) {
 			_t := []
 			For k, line in section {
-				RegExMatch(line, "i)(.*):{1,}(.*)", part)
+				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
+				part1 := StrLen(part4) ? part4 : part1
 				_p1 := lang.GetBasicInfo(Trim(part1))
+				
 				If (not _p1) {
 					; TODO: find alternative
+					; maps
 					_p1 := (lang.IsInArray(Trim(part1), itemRarity, foundPos)) ? itemRarity[1] : _p1
 					_p1 := (lang.IsInArray(Trim(part1), itemQuantity, foundPos)) ? itemQuantity[1] : _p1
 					_p1 := (lang.IsInArray(Trim(part1), packSize, foundPos)) ? packSize[1] : _p1
-				}				
-				sectionsT[key][k] := _p1 ": " Trim(part2)
+					
+					; weapons
+					_p1 := (lang.IsInArray(Trim(part1), physicalDamage, foundPos)) ? physicalDamage[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), elementalDamage, foundPos)) ? elementalDamage[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), weaponRange, foundPos)) ? weaponRange[1] : _p1
+					
+					; TODO: Flasks
+					
+					
+					; Gems 
+					_p1 := (lang.IsInArray(Trim(part1), manaCost, foundPos)) ? manaCost[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), castTime, foundPos)) ? castTime[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), cooldownTime, foundPos)) ? cooldownTime[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), damageEffectiveness, foundPos)) ? damageEffectiveness[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), manaReserved, foundPos)) ? manaReserved[1] : _p1
+					; TODO: Gem tags?
+				}
+				
+				sectionsT[key][k] := _p1 . part2 . part3
 			}
 			debugprintarray(sectionsT)
 		}
