@@ -3,13 +3,16 @@
 		status := "Translation aborted"
 		Return data
 	}
-					; ["de", "fr", "pt", "ru", "th", "es"]
-	rarityTags		:= ["Seltenheit", "Rareté", "Raridade", "Редкость", "ความหายาก", "Rareza"]	; hardcoded, no reliable translation source
-	rareTranslation	:= ["Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]		; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
-	superiorTag		:= ["(hochwertig)", "de qualité", "Superior", "качества", "Superior", "Superior"]
+					; ["en", "de", "fr", "pt", "ru", "th", "es"]
+	rarityTags		:= ["Rarity", "Seltenheit", "Rareté", "Raridade", "Редкость", "ความหายาก", "Rareza"]	; hardcoded, no reliable translation source
+	rareTranslation	:= ["Rare", "Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]		; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
+	superiorTag		:= ["Superior", "(hochwertig)", "de qualité", "Superior", "качества", "Superior", "Superior"]
+	itemQuantity		:= ["Item Quantity", "Gegenstandsmenge", "Quantité d'objets", "Quantidade de Itens", "Количество предметов", "จำนวนไอเท็ม", "Cantidad de Ítems"]
+	itemRarity		:= ["Item Rarity", "Gegenstandsseltenheit", "Rareté des objets", "Raridade de Itens", "Редкость предметов", "ระดับความหายากของไอเทม", "Rareza de Ítem"]
+	packSize			:= ["Monster Packsize", "Monstergruppengröße", "Taille des groupes de monstres", "Tamanho do Grupo de Monstros", "Размер групп монстров", "ขนาดบรรจุมอนสเตอร์", "Tamaño de Grupos de Monstruos"]
 	regex 			:= {}
-	regex.superior		:= ["(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
-	regex.map			:= ["Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
+	regex.superior		:= ["^Superior(.*)", "(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
+	regex.map			:= ["(.*)Map", "Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
 	
 	lang := new TranslationHelpers(langData, regex)
 	
@@ -43,6 +46,7 @@
 	_ItemBaseType := ""
 	_item := {}
 	
+	;debugprintarray(sections)
 	For key, section in sections {
 		sectionsT[key] := []
 		
@@ -89,12 +93,31 @@
 			_ItemBaseType := sectionsT[key][3]
 		}
 		
+		/*
+			Armour/Weapon innate stats like EV, ES, AR, Quality, PhysDmg, EleDmg, APs, CritChance AND Flask Charges/Duration
+			Map PackSize, Rarity, Quantity etc
+		*/
 		
+		If (key = 2) {
+			_t := []
+			For k, line in section {
+				RegExMatch(line, "i)(.*):{1,}(.*)", part)
+				_p1 := lang.GetBasicInfo(Trim(part1))
+				If (not _p1) {
+					; TODO: find alternative
+					_p1 := (lang.IsInArray(Trim(part1), itemRarity, foundPos)) ? itemRarity[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), itemQuantity, foundPos)) ? itemQuantity[1] : _p1
+					_p1 := (lang.IsInArray(Trim(part1), packSize, foundPos)) ? packSize[1] : _p1
+				}				
+				sectionsT[key][k] := _p1 ": " Trim(part2)
+			}
+			debugprintarray(sectionsT)
+		}
 		
-		; 
-		
-		debugprintarray([sectionsT, _item])
-		break
+		;debugprintarray([sectionsT, _item])
+		If (key = 2) {
+			break
+		}
 	}
 
 	Return data
