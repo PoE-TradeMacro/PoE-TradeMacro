@@ -54,7 +54,7 @@
 				rarity
 			*/
 			RegExMatch(section[1], "i)(.*?):(.*)", keyValuePair)
-			If (LangUtils.IsInArray(keyValuePair1, rarityTags, posFound)) {
+			If (lang.IsInArray(keyValuePair1, rarityTags, posFound)) {
 				_item.default_rarity:= lang.GetBasicInfo(Trim(keyValuePair2))
 				_item.local_rarity	:= Trim(keyValuePair2)			
 				
@@ -87,8 +87,6 @@
 			}
 			
 			_ItemBaseType := sectionsT[key][3]
-			
-			
 		}
 		
 		
@@ -109,12 +107,19 @@ class TranslationHelpers {
 		this.regEx := regExObj
 	}
 	
-	GetBasicInfo(needle) {
+	GetBasicInfo(needle, reverse = false) {
 		basic := this.data.localized.basic
 
 		For key, val in basic {
-			If (needle = val.localized and StrLen(needle)) {
-				Return val.default
+			If (not reverse) {
+				If (needle = val.localized and StrLen(needle)) {
+					Return val.default
+				}	
+			}
+			Else {
+				If (needle = val.default and StrLen(needle)) {
+					Return val.localized
+				}				
 			}
 		}
 	}
@@ -125,18 +130,15 @@ class TranslationHelpers {
 		
 		local	:= this.data.localized.static
 		def	 	:= this.data.default.static	
-		s := 
+
 		_arr := {}
+		found := false
 		Loop, % localized.MaxIndex() {
 			i := A_Index
 			For key, val in localized[i] {			
 				label := localized[i].label
 				If (key = "entries") {
-					For k, v in val {
-						if (label = "gemmen") {
-							s .= v.text ", "
-						}
-						
+					For k, v in val {						
 						; currency, gems, cards and other similiar items use their name as type 
 						If (not StrLen(needleType)) {
 							foundType := v.type = Trim(needleName) and Strlen(v.type) ? true : false
@@ -152,8 +154,9 @@ class TranslationHelpers {
 							_arr.default_name		:= default[i][key][k].name
 							_arr.default_baseType	:= default[i][key][k].type
 							_arr.default_type		:= default[i].label
-							;debugprintarray(_arr)
-							Return _arr
+							
+							found := true
+							Break
 						}
 						Else If (foundType) {
 							_arr.local_name		:= needleName
@@ -164,19 +167,25 @@ class TranslationHelpers {
 							If (not StrLen(needleType)) {
 								_arr.default_name	:= default[i][key][k].type
 							}
-							;debugprintarray(_arr)
-							Return _arr
+							
+							found := true
+							Break
 						}
 					}
 				}
+				If (found) {
+					Break
+				}
 			}
-		}
-		
+			If (found) {
+				Break
+			}
+		}	
+
 		; backup check for static items (div cards, currency, maps, leaguestones, fragments, essences etc)
-		If (not foundName and not foundType) {			
+		If (not found) {			
 			id := ""
 			index := ""
-			_arr := {}
 			
 			For k, v in local {
 				For key, val in local[k] {
@@ -188,8 +197,7 @@ class TranslationHelpers {
 				}	
 			}			
 
-			For key, val in def[index] {
-				
+			For key, val in def[index] {				
 				If (val.id = id) {
 					_arr.local_name		:= needleName					
 					_arr.default_name		:= val.text
@@ -205,14 +213,28 @@ class TranslationHelpers {
 						_arr.default_baseType	:= ""
 						_arr.default_type		:= needleRarity
 					}
-					;debugprintarray([[val.id, val.text], _arr])
-					Return _arr
+					found := true
+					Break					
+				}
+				If (found) {
+					Break
 				}
 			}
 			
-			; TODO: prophecies? where are they?
 			; TODO: test leaguestones
+		}
+		
+		; replace the type with it's singular form
+		typePlural	:= ["Weapons", "Armour", "Accessories", "Gems", "Jewels", "Flasks", "Maps", "Leaguestones", "Prophecies", "Cards", "Currency"]
+		typeSingular	:= ["Weapon", "Armour", "Accessory", "Gem", "Jewel", "Flask", "Map", "Leaguestone", "Prophecy", "Card", "Currency"]		
+		_arr.default_type := (replaced := this.IsInArray(_arr.default_type, typePlural, posFound)) ? typeSingular[posFound] : _arr.default_type
+		
+		If (replaced) {			
+			_arr.local_type := (StrLen(_tempType := this.GetBasicInfo(_arr.default_type, true))) ? _tempType : _arr.local_type
 		}		
+		;debugprintarray(_arr)
+		
+		Return _arr
 	}
 	
 	AddPropertiesToObj(ByRef target, source) {
@@ -220,9 +242,7 @@ class TranslationHelpers {
 			target[key] := val
 		}
 	}
-}
-
-class LangUtils {
+	
 	IsArray(obj) {
 		Return !!obj.MaxIndex()
 	}
@@ -264,5 +284,5 @@ class LangUtils {
 			For each, value in obj
 				res.Insert(value)
 		return res
-	}	
+	}
 }
