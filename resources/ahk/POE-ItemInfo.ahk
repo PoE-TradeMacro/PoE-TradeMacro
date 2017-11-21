@@ -444,7 +444,7 @@ GoSub, InitGDITooltip
 
 ; Todo: remove test/debug code
 If (true) {
-	currentLocale := ""
+	global currentLocale := ""
 	_Debug := true
 	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...", _Debug)
 }
@@ -6352,11 +6352,18 @@ PreProcessContents(CBContents)
 {
 ; --- Place fixes for data inconsistencies here ---
 	
-; Remove the line that indicates an item cannot be used due to missing character stats
-	Needle := "You cannot use this item. Its stats will be ignored`r`n--------`r`n"
-	StringReplace, CBContents, CBContents, %Needle%,
-; Replace double separator lines with one separator line
-	Needle := "--------`r`n--------`r`n"
+; Remove the line that indicates an item cannot be used due to missing character stats	
+	; Matches "Rarity: ..." + anything until "--------"\r\n
+	If (RegExMatch(CBContents, "s)^(.+?:.+?\r\n)(.+?-{8}\r\n)(.*)", match)) {
+		; Matches any ".", looking for the 2 sentences saying "You cannot use this item. Its stats will be ignored."
+		; Could be improved, should suffice though because the alternative would be the item name/type, which can't have any dots.
+		; This should work regardless of the selected language.
+		If (RegExMatch(match2, "\.")) {
+			CBContents := match1 . match3	
+		}		
+	}
+	
+     Needle := "--------`r`n--------`r`n"
 	StringReplace, CBContents, CBContents, %Needle%, --------`r`n, All
 	
 	return CBContents
@@ -6398,9 +6405,9 @@ ParseClipBoardChanges(debug = false)
 	
 	CBContents := GetClipboardContents()
 	CBContents := PreProcessContents(CBContents)
+	CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retCode)
 	
 	Globals.Set("ItemText", CBContents)
-	
 	
 	ParsedData := ParseItemData(CBContents)
 	ParsedData := PostProcessData(ParsedData)

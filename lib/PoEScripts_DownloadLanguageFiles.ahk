@@ -1,4 +1,4 @@
-PoEScripts_DownloadLanguageFiles(currentLocale, dlAll = false, SplashTitle = "", SplashText = "", onlyParseFiles = false) {
+PoEScripts_DownloadLanguageFiles(ByRef currentLocale, dlAll = false, SplashTitle = "", SplashText = "", onlyParseFiles = false) {
 	; onlyParseFiles = skip downloading anything for development purposes (if the data files exist).
 	currentLocale := PoEScripts_GetClientLanguage()
 	If (currentLocale = "en" or not currentLocale) {
@@ -125,7 +125,7 @@ PoEScripts_DownloadFileSet(short, long, skipDL = false) {
 				If (isJavaScriptFile and not skipDL) {
 					returnObj[files[A_Index][3]] := jsToObj
 				} Else {
-					parsedJSON := JSON.Load(JSONFile)
+					parsedJSON := JSON.Load(JSONFile)					
 					returnObj[files[A_Index][3]] := parsedJSON.result
 				}
 			} Catch e {
@@ -145,7 +145,8 @@ PoEScripts_ConvertJSVariableFileToJSON(file, ByRef obj) {
 	; make sure to have one key-value pair per line
 	objSrc := RegExReplace(file, ";", ";`r`n")
 	obj := {}
-	
+	obj.result := []
+
 	Loop, parse, objSrc, `n, `r
 	{
 		If (StrLen(A_LoopField)) {
@@ -159,7 +160,7 @@ PoEScripts_ConvertJSVariableFileToJSON(file, ByRef obj) {
 				_t := {}
 				_t.default := keyValuePair1
 				_t.localized := keyValuePair2
-				obj.push(_t)
+				obj.result.push(_t)
 			}				
 		}			
 	}
