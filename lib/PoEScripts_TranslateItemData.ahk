@@ -7,9 +7,11 @@
 	rarityTags		:= ["Seltenheit", "Rareté", "Raridade", "Редкость", "ความหายาก", "Rareza"]	; hardcoded, no reliable translation source
 	rareTranslation	:= ["Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]		; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
 	superiorTag		:= ["(hochwertig)", "de qualité", "Superior", "качества", "Superior", "Superior"]
-	;superiorRegex		:= ["(.*)(\(hochwertig\))$", "(.*)(de qualité)$", "(.*)(Superior)$", "(.*)(качества)$", "^(Superior)(.*)", "(.*)(Superior)$"]
-	superiorRegex		:= ["(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
-	lang := new TranslationHelpers(langData)
+	regex 			:= {}
+	regex.superior		:= ["(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
+	regex.map			:= ["Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
+	
+	lang := new TranslationHelpers(langData, regex)
 	
 	;---- Not every item has every section,  depending on BaseType and Corruption/Enchantment
 	; Section01 = NamePlate (Rarity, ItemName, ItemBaseType)
@@ -68,17 +70,25 @@
 			*/
 			sectionLength := section.MaxIndex()
 			; remove "superior" when using name as search needle
-			needleName := Trim(RegExReplace(section[2], "" superiorRegex[posFound] "", "$1", replacedSuperiorTag))			
+			needleName := Trim(RegExReplace(section[2], "" regex.superior[posFound] "", "$1", replacedSuperiorTag))			
 			
-			_obj := lang.GetItemInfo(section[3], needleName, _item.default_rarity, _item.rarityLocal)		
+			_obj := lang.GetItemInfo(section[3], needleName, _item.default_rarity, _item.rarityLocal)
 			sectionsT[key][2] := _obj.default_name ? _obj.default_name : Trim(section[2])
 			If (replacedSuperiorTag) {
 				sectionsT[key][2] := "Superior " sectionsT[key][2]
 			}
+			
 			sectionsT[key][3] := _obj.default_baseType ? _obj.default_baseType : Trim(section[3])
+			lang.AddPropertiesToObj(_item, _obj)
+			
+			; don't set third line if name and baseType are the same (currency, cards etc)
+			If (_item.default_name == _item.default_baseType or RegExMatch(_item.default_baseType, "" regex.map[posFound] "")) {			
+				sectionsT[key][3] := ""
+			}
+			
 			_ItemBaseType := sectionsT[key][3]
 			
-			lang.AddPropertiesToObj(_item, _obj)
+			
 		}
 		
 		
@@ -93,9 +103,10 @@
 }
 
 class TranslationHelpers {
-	__New(dataObj)
+	__New(dataObj, regExObj)
 	{
-		this.data := dataObj
+		this.data	:= dataObj
+		this.regEx := regExObj
 	}
 	
 	GetBasicInfo(needle) {
@@ -109,22 +120,30 @@ class TranslationHelpers {
 	}
 	
 	GetItemInfo(needleType, needleName = "", needleRarity = "", needleRarityLocal = "") {
-		mapRegex := ["Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
 		localized	:= this.data.localized.items
 		default 	:= this.data.default.items
 		
 		local	:= this.data.localized.static
 		def	 	:= this.data.default.static	
-		
+		s := 
 		_arr := {}
 		Loop, % localized.MaxIndex() {
-			i := A_Index			
-			For key, val in localized[i] {				
+			i := A_Index
+			For key, val in localized[i] {			
 				label := localized[i].label
 				If (key = "entries") {
 					For k, v in val {
+						if (label = "gemmen") {
+							s .= v.text ", "
+						}
+						
+						; currency, gems, cards and other similiar items use their name as type 
+						If (not StrLen(needleType)) {
+							foundType := v.type = Trim(needleName) and Strlen(v.type) ? true : false
+						} Else {							
+							foundType := v.type = Trim(needleType) and Strlen(v.type) ? true : false
+						}
 						foundName := v.name = Trim(needleName) and Strlen(v.name) ? true : false
-						foundType := v.type = Trim(needleType) and Strlen(v.type) ? true : false
 						
 						If (foundName and foundType) {
 							_arr.local_name		:= v.name
@@ -133,6 +152,7 @@ class TranslationHelpers {
 							_arr.default_name		:= default[i][key][k].name
 							_arr.default_baseType	:= default[i][key][k].type
 							_arr.default_type		:= default[i].label
+							;debugprintarray(_arr)
 							Return _arr
 						}
 						Else If (foundType) {
@@ -141,6 +161,10 @@ class TranslationHelpers {
 							_arr.local_type		:= label
 							_arr.default_baseType	:= default[i][key][k].type
 							_arr.default_type		:= default[i].label
+							If (not StrLen(needleType)) {
+								_arr.default_name	:= default[i][key][k].type
+							}
+							;debugprintarray(_arr)
 							Return _arr
 						}
 					}
@@ -148,7 +172,7 @@ class TranslationHelpers {
 			}
 		}
 		
-		; check static items (gems, div cards, currency, maps, leaguestones, fragments, essences etc)
+		; backup check for static items (div cards, currency, maps, leaguestones, fragments, essences etc)
 		If (not foundName and not foundType) {			
 			id := ""
 			index := ""
@@ -171,8 +195,8 @@ class TranslationHelpers {
 					_arr.default_name		:= val.text
 					
 					If (RegExMatch(index, "i)maps")) {
-						_arr.local_baseType		:= needleName						
-						_arr.local_type		:= RegExReplace(needleName, "" mapRegex "", "$1")
+						_arr.local_baseType		:= needleName				
+						_arr.local_type		:= RegExReplace(needleName, "" this.regEx.map "", "$1")
 						_arr.default_baseType	:= val.text
 						_arr.default_type		:= "Map"
 					} Else {
