@@ -5,6 +5,7 @@
 	}
 					; ["en", "de", "fr", "pt", "ru", "th", "es"]
 	rarityTags		:= ["Rarity", "Seltenheit", "Rareté", "Raridade", "Редкость", "ความหายาก", "Rareza"]	; hardcoded, no reliable translation source
+	
 	rareTranslation	:= ["Rare", "Selten", "Rare", "Raro", "Редкий", "แรร์", "Raro"]					; hardcoded, at least the german term for "rare" is "wrong" and differently translated elsewhere
 	superiorTag		:= ["Superior", "(hochwertig)", "de qualité", "Superior", "качества", "Superior", "Superior"]
 	itemQuantity		:= ["Item Quantity", "Gegenstandsmenge", "Quantité d'objets", "Quantidade de Itens", "Количество предметов", "จำนวนไอเท็ม", "Cantidad de Ítems"]
@@ -13,16 +14,27 @@
 	weaponRange		:= ["Weapon Range", "Waffenreichweite"]
 	physicalDamage		:= ["Physical Damage", "Physischer Schaden"]
 	elementalDamage	:= ["Elemental Damage", "Elementarschaden"]
+	chanceToBlock		:= ["Chance to Block", "Chance auf Blocken"]
 	manaCost			:= ["Mana Cost", "Manakosten"]
 	castTime			:= ["Cast Time", "Zauberzeit"]
 	cooldownTime		:= ["Cooldown Time", "Abklingzeit"]
 	damageEffectiveness	:= ["Damage Effectiveness", "Effektivität zusätzlichen Schadens"]
 	manaReserved		:= ["Mana Reserved", "Mana reserviert"]
 	manaMultiplier		:= ["Mana Multiplier", "Manamultiplikator"]
+	evasionRating		:= ["Evasion Rating", "Ausweichwert"]
 	
 	regex 			:= {}
 	regex.superior		:= ["^Superior(.*)", "(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
 	regex.map			:= ["(.*)Map", "Karte.*'(.*)'", "Carte:(.*)","Mapa:(.*)", "Карта(.*)", "(.*)Map", "Mapa de(.*)"]
+	
+	regex.magicItem	:= {}
+	regex.magicItem.en	:= "im).*?([^ ]+\s+[^ ]+)(?:\sof.*)|([^ ]+\s+[^ ]+)$"
+	regex.magicItem.de	:= "im).*?([^ ]+\s+[^ ]+)(?:\s(?:der|des).*)|([^ ]+\s+[^ ]+)$"
+	regex.magicItem.fr	:= "(.*?)(?:\s(?:de la\s|de l'|du\s))(?:.*)"
+	regex.magicItem.pt	:= "(.*?)(?:\s(?:do\s|da\s))(?:.*)"
+	regex.magicItem.ru	:= ""
+	regex.magicItem.th	:= "im).*?([^ ]+\s+[^ ]+)(?:\sof.*)|([^ ]+\s+[^ ]+)$"
+	regex.magicItem.es	:= "im)(?:de la|del)\s[\w]+(.*)|([\w]+\sde\s[\w]+.*)|(.*)(?:de la|del)"
 	
 	lang := new TranslationHelpers(langData, regex)
 	
@@ -117,26 +129,39 @@
 				
 				If (not _p1) {
 					; TODO: find alternative
-					; maps
-					_p1 := (lang.IsInArray(Trim(part1), itemRarity, foundPos)) ? itemRarity[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), itemQuantity, foundPos)) ? itemQuantity[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), packSize, foundPos)) ? packSize[1] : _p1
 					
-					; weapons
-					_p1 := (lang.IsInArray(Trim(part1), physicalDamage, foundPos)) ? physicalDamage[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), elementalDamage, foundPos)) ? elementalDamage[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), weaponRange, foundPos)) ? weaponRange[1] : _p1
+					; maps
+					If (_item.default_type = "map") {
+						_p1 := (lang.IsInArray(Trim(part1), itemRarity, foundPos)) ? itemRarity[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), itemQuantity, foundPos)) ? itemQuantity[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), packSize, foundPos)) ? packSize[1] : _p1
+					}
+					
+					If (RegExMatch(_item.default_type, "i)armour|weapon")) {
+						; weapons / shields
+						_p1 := (lang.IsInArray(Trim(part1), physicalDamage, foundPos)) ? physicalDamage[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), elementalDamage, foundPos)) ? elementalDamage[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), weaponRange, foundPos)) ? weaponRange[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), chanceToBlock, foundPos)) ? chanceToBlock[1] : _p1
+						
+						; armour
+						_p1 := (lang.IsInArray(Trim(part1), evasionRating, foundPos)) ? evasionRating[1] : _p1
+					}
 					
 					; TODO: Flasks
+					If (_item.default_type = "flask") {
+						msgbox ey
+					}
 					
-					
-					; Gems 
-					_p1 := (lang.IsInArray(Trim(part1), manaCost, foundPos)) ? manaCost[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), castTime, foundPos)) ? castTime[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), cooldownTime, foundPos)) ? cooldownTime[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), damageEffectiveness, foundPos)) ? damageEffectiveness[1] : _p1
-					_p1 := (lang.IsInArray(Trim(part1), manaReserved, foundPos)) ? manaReserved[1] : _p1
-					; TODO: Gem tags?
+					; Gems
+					If (_item.default_type = "gem") {					
+						_p1 := (lang.IsInArray(Trim(part1), manaCost, foundPos)) ? manaCost[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), castTime, foundPos)) ? castTime[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), cooldownTime, foundPos)) ? cooldownTime[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), damageEffectiveness, foundPos)) ? damageEffectiveness[1] : _p1
+						_p1 := (lang.IsInArray(Trim(part1), manaReserved, foundPos)) ? manaReserved[1] : _p1
+						; TODO: Gem tags?
+					}
 				}
 				
 				sectionsT[key][k] := _p1 . part2 . part3
@@ -181,9 +206,26 @@ class TranslationHelpers {
 		localized	:= this.data.localized.items
 		default 	:= this.data.default.items
 		
+		currentLocale := this.data.currentLocale
+		
 		local	:= this.data.localized.static
 		def	 	:= this.data.default.static	
 
+		
+		; magic items have only a name, containing pre- and suffix, try to match the type agaisnt a substring of the name
+		If (needleRarity = "magic") {
+			RegExMatch(needleName, "" this.regEx.magicItem[currentLocale] "", match)		
+			magic_capturegroups := []
+			; TODO = improve this
+			Loop, 20 {
+				If (StrLen(match%A_Index%)) {
+					magic_capturegroups.push(match%A_Index%)	
+				}
+			}						
+		}
+		
+		isUnique := needleRarity = "Unique"	
+		
 		_arr := {}
 		found := false
 		Loop, % localized.MaxIndex() {
@@ -191,14 +233,29 @@ class TranslationHelpers {
 			For key, val in localized[i] {			
 				label := localized[i].label
 				If (key = "entries") {
-					For k, v in val {						
+					For k, v in val {
+						If (isUnique and not v.flags.unique) {
+							continue
+						}
+						
 						; currency, gems, cards and other similiar items use their name as type 
-						If (not StrLen(needleType)) {
-							foundType := v.type = Trim(needleName) and Strlen(v.type) ? true : false
+						If (not StrLen(needleType)) {							 
+							If (needleRarity = "magic") {		
+								For c, capturegroup in magic_capturegroups {
+									If (InStr(capturegroup, v.type, 0)) {
+										foundType := v.type										
+									}	
+								}
+							} Else {
+								foundType := v.type = Trim(needleName) and Strlen(v.type) ? true : false	
+							}
 						} Else {							
 							foundType := v.type = Trim(needleType) and Strlen(v.type) ? true : false
 						}
-						foundName := v.name = Trim(needleName) and Strlen(v.name) ? true : false
+						
+						If (isUnique) {
+							foundName := v.name = Trim(needleName) and Strlen(v.name) ? true : false		
+						}			
 						
 						If (foundName and foundType) {
 							_arr.local_name		:= v.name
@@ -217,7 +274,7 @@ class TranslationHelpers {
 							_arr.local_type		:= label
 							_arr.default_baseType	:= default[i][key][k].type
 							_arr.default_type		:= default[i].label
-							If (not StrLen(needleType)) {
+							If (not StrLen(needleType) and not needleRarity = "magic") {
 								_arr.default_name	:= default[i][key][k].type
 							}
 							
@@ -298,6 +355,12 @@ class TranslationHelpers {
 	
 	IsArray(obj) {
 		Return !!obj.MaxIndex()
+	}
+	
+	CaptureGroupsToArray(match) {
+		; TODO = improve this
+		
+		Return
 	}
 
 	; Trim trailing zeros from numbers
