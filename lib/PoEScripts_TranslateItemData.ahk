@@ -11,17 +11,18 @@
 	itemQuantity		:= ["Item Quantity", "Gegenstandsmenge", "Quantité d'objets", "Quantidade de Itens", "Количество предметов", "จำนวนไอเท็ม", "Cantidad de Ítems"]
 	itemRarity		:= ["Item Rarity", "Gegenstandsseltenheit", "Rareté des objets", "Raridade de Itens", "Редкость предметов", "ระดับความหายากของไอเทม", "Rareza de Ítem"]
 	packSize			:= ["Monster Packsize", "Monstergruppengröße", "Taille des groupes de monstres", "Tamanho do Grupo de Monstros", "Размер групп монстров", "ขนาดบรรจุมอนสเตอร์", "Tamaño de Grupos de Monstruos"]
-	weaponRange		:= ["Weapon Range", "Waffenreichweite"]
-	physicalDamage		:= ["Physical Damage", "Physischer Schaden"]
-	elementalDamage	:= ["Elemental Damage", "Elementarschaden"]
-	chanceToBlock		:= ["Chance to Block", "Chance auf Blocken"]
-	manaCost			:= ["Mana Cost", "Manakosten"]
-	castTime			:= ["Cast Time", "Zauberzeit"]
-	cooldownTime		:= ["Cooldown Time", "Abklingzeit"]
-	damageEffectiveness	:= ["Damage Effectiveness", "Effektivität zusätzlichen Schadens"]
-	manaReserved		:= ["Mana Reserved", "Mana reserviert"]
-	manaMultiplier		:= ["Mana Multiplier", "Manamultiplikator"]
-	evasionRating		:= ["Evasion Rating", "Ausweichwert"]
+	weaponRange		:= ["Weapon Range", "Waffenreichweite", "", "", "", "", ""]
+	physicalDamage		:= ["Physical Damage", "Physischer Schaden", "", "", "", "", ""]
+	elementalDamage	:= ["Elemental Damage", "Elementarschaden", "", "", "", "", ""]
+	chanceToBlock		:= ["Chance to Block", "Chance auf Blocken", "", "", "", "", ""]
+	manaCost			:= ["Mana Cost", "Manakosten", "", "", "", "", ""]
+	castTime			:= ["Cast Time", "Zauberzeit", "", "", "", "", ""]
+	cooldownTime		:= ["Cooldown Time", "Abklingzeit", "", "", "", "", ""]
+	damageEffectiveness	:= ["Damage Effectiveness", "Effektivität zusätzlichen Schadens", "", "", "", "", ""]
+	manaReserved		:= ["Mana Reserved", "Mana reserviert", "", "", "", "", ""]
+	manaMultiplier		:= ["Mana Multiplier", "Manamultiplikator", "", "", "", "", ""]
+	evasionRating		:= ["Evasion Rating", "Ausweichwert", "", "", "", "", ""]
+	limitedTo			:= ["Limited to", "Begrenzt auf", "", "", "", "", ""]
 	
 	regex 			:= {}
 	regex.superior		:= ["^Superior(.*)", "(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
@@ -32,7 +33,7 @@
 	regex.magicItem.de	:= "im).*?([^ ]+\s+[^ ]+)(?:\s(?:der|des).*)|([^ ]+\s+[^ ]+)$"
 	regex.magicItem.fr	:= "(.*?)(?:\s(?:de la\s|de l'|du\s))(?:.*)"
 	regex.magicItem.pt	:= "(.*?)(?:\s(?:do\s|da\s))(?:.*)"
-	regex.magicItem.ru	:= ""
+	regex.magicItem.ru	:= "(.*)"
 	regex.magicItem.th	:= "im).*?([^ ]+\s+[^ ]+)(?:\sof.*)|([^ ]+\s+[^ ]+)$"
 	regex.magicItem.es	:= "im)(?:de la|del)\s[\w]+(.*)|([\w]+\sde\s[\w]+.*)|(.*)(?:de la|del)"
 	
@@ -67,14 +68,14 @@
 	_specialTypes := ["Currency", "Divination Card"]
 	_ItemBaseType := ""
 	_item := {}
-	
-	;debugprintarray(sections)
+
 	For key, section in sections {
 		sectionsT[key] := []
 		
 		/*
 			nameplate section, look for ItemBaseType which is important for further parsing.
 		*/
+		; TODO: parse second section first to get the item type, use it to improve parsing the item basetype
 		If (key = 1) {
 			/*
 				rarity
@@ -116,10 +117,10 @@
 		}
 		
 		/*
-			Armour/Weapon innate stats like EV, ES, AR, Quality, PhysDmg, EleDmg, APs, CritChance AND Flask Charges/Duration
+			Armour/Weapon innate stats like EV, ES, AR, Quality, PhysDmg, EleDmg, APS, CritChance
+			Flask Charges/Duration
 			Map PackSize, Rarity, Quantity etc
-		*/
-		
+		*/		
 		If (key = 2) {
 			_t := []
 			For k, line in section {
@@ -128,7 +129,7 @@
 				_p1 := lang.GetBasicInfo(Trim(part1))
 				
 				If (not _p1) {
-					; TODO: find alternative
+					; TODO: find alternative to this hardcoded shit
 					
 					; maps
 					If (_item.default_type = "map") {
@@ -150,7 +151,7 @@
 					
 					; TODO: Flasks
 					If (_item.default_type = "flask") {
-						msgbox ey
+						
 					}
 					
 					; Gems
@@ -162,15 +163,59 @@
 						_p1 := (lang.IsInArray(Trim(part1), manaReserved, foundPos)) ? manaReserved[1] : _p1
 						; TODO: Gem tags?
 					}
+					
+					; Jewels
+					If (_item.default_type = "jewel") {					
+						_p1 := (lang.IsInArray(Trim(part1), limitedTo, foundPos)) ? limitedTo[1] : _p1						
+					}
 				}
 				
 				sectionsT[key][k] := _p1 . part2 . part3
 			}
-			debugprintarray(sectionsT)
 		}
 		
+		/*
+			Requirements
+			Item Level
+			Sockets
+			Implicit/Corruption (Amulet without requirements for example)
+		*/
+		If (key = 3) {
+			_t := []
+			section.push("10% verstärkte Wirkung Eurer Auren (Fluch-Auren ausgenommen)")
+			section.push("12% erhöhte Treffgenauigkeit")
+			debugprintarray(section)
+			For k, line in section {
+				; requirements etc
+				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
+				part1 := StrLen(part4) ? part4 : part1
+				
+				_p1 := lang.GetBasicInfo(Trim(part1))
+				
+				If (_p1) {
+					sectionsT[key][k] := _p1 . part2 . part3	
+				} Else {
+					_p1 := lang.GetItemAffix(line)	
+				}
+				
+				; mods/enchantments
+				
+				; X%
+				; 30%
+				; X sekunden
+				
+			}			
+		}
+		
+		/*
+			Sockets
+			Affixes/Enchantments/Corruptions
+		*/
+
+		
 		;debugprintarray([sectionsT, _item])
-		If (key = 2) {
+		If (key = 3) {
+			debugprintarray(sectionsT)
 			break
 		}
 	}
@@ -200,6 +245,57 @@ class TranslationHelpers {
 				}				
 			}
 		}
+	}
+	
+	GetItemAffix(affixLine) {
+		localized	:= this.data.localized.stats
+		default 	:= this.data.default.stats
+
+		_m		:= {}
+		For k, types in localized {
+			typeLocal := types.label
+			If (not typeLocal = "pseudo") {
+				For i, stat in types.entries {
+					;replace strings in parentheses with regex, can be optional like (local) and hidden on the item or an actual mod having parentheses
+					search_stat := RegExReplace(stat.text, "(?:\s)?\((.*)\)", "(\s?\($1\))?")
+					
+					; escape some characters
+					;search_stat := RegExReplace(stat.text, "(\(|\)|\[|\]]|\+)", "\$1")
+
+					search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "\d{1,2}$2")
+					
+					If (RegExMatch(affixLine, "i)" search_stat "", match)) {
+						_m.local_match := match
+						_m.local_text  := stat.text
+						_m.local_line	:= affixLine
+						_m.stat_id	:= stat.id
+						_m.default_type:= stat.type
+						;debugprintarray([match, search_stat, affixLine, i, stat])
+						found := true
+						Break
+					}
+				}
+			}
+			If (found) {
+				Break
+			}
+		} 
+		
+		If (_m.stat_id) {
+			For k, types in default {			
+				If (types.label = _m.default_type) {
+					For i, stat in types.entries {
+						If (stat.id = _m.stat_id) {
+							_m.default_text := stat.text
+							DebugPrintArray(_m)
+						}
+					}
+				}
+			}			
+		}
+		
+		
+		;Return stat_id
 	}
 	
 	GetItemInfo(needleType, needleName = "", needleRarity = "", needleRarityLocal = "") {
