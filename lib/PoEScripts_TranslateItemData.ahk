@@ -182,9 +182,9 @@
 		*/
 		If (key = 3) {
 			_t := []
-			section.push("10% verstärkte Wirkung Eurer Auren (Fluch-Auren ausgenommen)")
-			section.push("12% erhöhte Treffgenauigkeit")
-			debugprintarray(section)
+			;section.push("10% verstärkte Wirkung Eurer Auren (Fluch-Auren ausgenommen)")
+			;section.push("12% erhöhte Treffgenauigkeit")
+
 			For k, line in section {
 				; requirements etc
 				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
@@ -195,15 +195,11 @@
 				If (_p1) {
 					sectionsT[key][k] := _p1 . part2 . part3	
 				} Else {
-					_p1 := lang.GetItemAffix(line)	
+					_p1 := lang.GetItemAffix(line)
+					If (_p1) {
+						sectionsT[key][k] := _p1
+					}
 				}
-				
-				; mods/enchantments
-				
-				; X%
-				; 30%
-				; X sekunden
-				
 			}			
 		}
 		
@@ -211,15 +207,32 @@
 			Sockets
 			Affixes/Enchantments/Corruptions
 		*/
-
+		If (key = 4 or key = 5 or key = 6 or key = 7) {
+			For k, line in section {
+				; requirements etc
+				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
+				part1 := StrLen(part4) ? part4 : part1
+				
+				_p1 := lang.GetBasicInfo(Trim(part1))
+				
+				If (_p1) {
+					sectionsT[key][k] := _p1 . part2 . part3	
+				} Else {
+					_p1 := lang.GetItemAffix(line)
+					If (_p1) {
+						sectionsT[key][k] := _p1
+					}
+				}
+			}
+		}
 		
 		;debugprintarray([sectionsT, _item])
-		If (key = 3) {
-			debugprintarray(sectionsT)
+		If (key = 7) {
+			;debugprintarray(sectionsT)
 			break
 		}
 	}
-
+	debugprintarray(sectionsT)
 	Return data
 }
 
@@ -263,6 +276,7 @@ class TranslationHelpers {
 					;search_stat := RegExReplace(stat.text, "(\(|\)|\[|\]]|\+)", "\$1")
 
 					search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "\d{1,2}$2")
+					;search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "[0-9.]+$2")
 					
 					If (RegExMatch(affixLine, "i)" search_stat "", match)) {
 						_m.local_match := match
@@ -270,7 +284,6 @@ class TranslationHelpers {
 						_m.local_line	:= affixLine
 						_m.stat_id	:= stat.id
 						_m.default_type:= stat.type
-						;debugprintarray([match, search_stat, affixLine, i, stat])
 						found := true
 						Break
 					}
@@ -281,21 +294,62 @@ class TranslationHelpers {
 			}
 		} 
 		
+		; get english affix name
 		If (_m.stat_id) {
 			For k, types in default {			
 				If (types.label = _m.default_type) {
 					For i, stat in types.entries {
 						If (stat.id = _m.stat_id) {
 							_m.default_text := stat.text
-							DebugPrintArray(_m)
+							Break
 						}
 					}
+				}
+				If (_m.default_text) {
+					Break
 				}
 			}			
 		}
 		
+		values_local := this.GetAllMatches(_m.local_line, "((?:\+|-)?[0-9.]+\%?)")
+		_m.default_line := this.ReplaceAllMatches(_m.default_text, values_local, "(?:(?:\+|-)?[0-9.XY]+\%?)")
+		_m.default_line := RegExReplace(_m.default_line, "(\s\(Local|Map|Staves|Shields\))")
 		
-		;Return stat_id
+		;DebugPrintArray(_m)	
+		
+		Return _m.default_line
+	}
+	
+	GetAllMatches(s, regex) {
+		m := []
+		Pos := 0
+		While Pos := RegExMatch(s, "" regex "", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+			m.push(value)
+		}
+		Return m
+	}
+	
+	ReplaceAllMatches(s, r, reg) {
+		regex	:= "(.*?)"
+		replaceWith := ""
+		
+		i := 0
+		For k, val in r {
+			If (k = r.MaxIndex()) {
+				regex .= reg "(.*)"
+			} Else {
+				regex .= reg "(.*?)"	
+			}
+			i++
+			replaceWith .= "$" i "" val "$" i + 1
+			i++
+		}
+		
+		Regexmatch(s, "" regex "", match)
+		s := RegExReplace(s, "" regex "", replaceWith)
+		
+		;debugprintarray([s, regex, replaceWith, match])
+		Return s
 	}
 	
 	GetItemInfo(needleType, needleName = "", needleRarity = "", needleRarityLocal = "") {
