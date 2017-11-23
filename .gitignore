@@ -70,3 +70,4 @@ release
 _TradeMacroMain.ahk
 _ItemInfoMain.ahk
 resources/tests/tempOutput/*
+data/lang/lang.json

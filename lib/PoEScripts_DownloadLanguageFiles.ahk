@@ -20,6 +20,12 @@ PoEScripts_DownloadLanguageFiles(ByRef currentLocale, dlAll = false, SplashTitle
 		translationData.default	 	:= PoEScripts_DownloadFileSet("en", lang["en"], onlyParseFiles)
 	}
 	
+	If (onlyParseFiles) {
+		dumpObj := JSON.Dump(translationData)
+		FileDelete, %A_ScriptDir%\data\lang\lang.json
+		FileAppend, %dumpObj%, %A_ScriptDir%\data\lang\lang.json
+	}
+	
 	SplashTextOff
 	Return translationData
 }

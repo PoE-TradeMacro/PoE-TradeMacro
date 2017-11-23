@@ -179,12 +179,10 @@
 			Item Level
 			Sockets
 			Implicit/Corruption (Amulet without requirements for example)
+			
+			Affixes/Enchantments/Corruptions
 		*/
-		If (key = 3) {
-			_t := []
-			;section.push("10% verstärkte Wirkung Eurer Auren (Fluch-Auren ausgenommen)")
-			;section.push("12% erhöhte Treffgenauigkeit")
-
+		If (key >= 3) {
 			For k, line in section {
 				; requirements etc
 				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
@@ -206,7 +204,6 @@
 		/*
 			Sockets
 			Affixes/Enchantments/Corruptions
-		*/
 		If (key = 4 or key = 5 or key = 6 or key = 7) {
 			For k, line in section {
 				; requirements etc
@@ -226,12 +223,9 @@
 			}
 		}
 		
-		;debugprintarray([sectionsT, _item])
-		If (key = 7) {
-			;debugprintarray(sectionsT)
-			break
-		}
+		*/
 	}
+	
 	debugprintarray(sectionsT)
 	Return data
 }
@@ -271,13 +265,10 @@ class TranslationHelpers {
 				For i, stat in types.entries {
 					;replace strings in parentheses with regex, can be optional like (local) and hidden on the item or an actual mod having parentheses
 					search_stat := RegExReplace(stat.text, "(?:\s)?\((.*)\)", "(\s?\($1\))?")
-					
-					; escape some characters
-					;search_stat := RegExReplace(stat.text, "(\(|\)|\[|\]]|\+)", "\$1")
 
-					search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "\d{1,2}$2")
+					search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "[0-9.]+$2")
 					;search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "[0-9.]+$2")
-					
+
 					If (RegExMatch(affixLine, "i)" search_stat "", match)) {
 						_m.local_match := match
 						_m.local_text  := stat.text
@@ -310,7 +301,7 @@ class TranslationHelpers {
 				}
 			}			
 		}
-		
+
 		values_local := this.GetAllMatches(_m.local_line, "((?:\+|-)?[0-9.]+\%?)")
 		_m.default_line := this.ReplaceAllMatches(_m.default_text, values_local, "(?:(?:\+|-)?[0-9.XY]+\%?)")
 		_m.default_line := RegExReplace(_m.default_line, "(\s\(Local|Map|Staves|Shields\))")
@@ -330,10 +321,13 @@ class TranslationHelpers {
 	}
 	
 	ReplaceAllMatches(s, r, reg) {
+		If (not r.MaxIndex()) {
+			Return s
+		}
 		regex	:= "(.*?)"
 		replaceWith := ""
 		
-		i := 0
+		i := 0		
 		For k, val in r {
 			If (k = r.MaxIndex()) {
 				regex .= reg "(.*)"
@@ -341,9 +335,9 @@ class TranslationHelpers {
 				regex .= reg "(.*?)"	
 			}
 			i++
-			replaceWith .= "$" i "" val "$" i + 1
-			i++
+			replaceWith .= "$" i "" val 
 		}
+		replaceWith .= "$" i + 1		
 		
 		Regexmatch(s, "" regex "", match)
 		s := RegExReplace(s, "" regex "", replaceWith)
