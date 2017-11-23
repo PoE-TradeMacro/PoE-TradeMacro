@@ -1,4 +1,4 @@
-﻿PoEScripts_TranslateItemData(data, langData, locale, ByRef status = "") {
+﻿PoEScripts_TranslateItemData(data, langData, locale, ByRef retObj = "", ByRef status = "") {
 	If (not StrLen(locale) or locale = "en") {
 		status := "Translation aborted"
 		Return data
@@ -52,19 +52,20 @@
 	sections	:= []
 	sectionsT := []
 	Pos		:= 0
+
 	_data := data "--------"
-	
-	While Pos := RegExMatch(_data, "is)(.*?)(\r\n-{8})", section, Pos + (StrLen(section) ? StrLen(section) : 1)) {
+	While Pos := RegExMatch(_data, "is)(.*?)(?:\r\n-{8})|(.*?)(?:\n-{8})", section, Pos + (StrLen(section) ? StrLen(section) : 1)) {
 		sectionLines := []
-		Loop, parse, section1, `n, `r 
-		{			
+		cLine := StrLen(section1) ? section1 : section2
+		Loop, parse, cLine, `n, `r   
+		{
 			If (StrLen(Trim(A_LoopField))) {
 				sectionLines.push(Trim(A_LoopField))
 			}
 		}
 		sections.push(sectionLines)
 	}
-	
+
 	_specialTypes := ["Currency", "Divination Card"]
 	_ItemBaseType := ""
 	_item := {}
@@ -196,6 +197,8 @@
 					_p1 := lang.GetItemAffix(line)
 					If (_p1) {
 						sectionsT[key][k] := _p1
+					} Else {
+						sectionsT[key][k] := "ERROR, NOT FOUND: " line
 					}
 				}
 			}			
@@ -225,8 +228,23 @@
 		
 		*/
 	}
+
+	;debugprintarray(sectionsT)
+	retObj := sectionsT
 	
-	debugprintarray(sectionsT)
+	data := ""
+	spacer := "--------"
+	For key, sectionT in sectionsT {
+		For k, lineT in sectionT {
+			If (not InStr(lineT, "ERROR, NOT FOUND:")) {			
+				data .= lineT "`n"
+			}
+		}
+		If (not k = sectionsT.MaxIndex()) {
+			data .= spacer "`n"
+		}
+	}
+	
 	Return data
 }
 

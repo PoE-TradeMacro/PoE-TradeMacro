@@ -462,6 +462,7 @@ Menu, Tray, NoStandard
 Menu, Tray, Add, Reload Script (Use only this), ReloadScript
 Menu, Tray, Add ; Separator
 Menu, Tray, Add, About..., MenuTray_About
+Menu, Tray, Add, Translate Item, ShowTranslationUI
 Menu, Tray, Add, Show all assigned Hotkeys, ShowAssignedHotkeys
 Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE ItemInfo Settings"), ShowSettingsUI
 Menu, Tray, Add, Check for updates, CheckForUpdates
@@ -6405,7 +6406,7 @@ ParseClipBoardChanges(debug = false)
 	
 	CBContents := GetClipboardContents()
 	CBContents := PreProcessContents(CBContents)
-	CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retCode)
+	CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retObj, retCode)
 	
 	Globals.Set("ItemText", CBContents)
 	
@@ -10116,6 +10117,70 @@ OnClipBoardChange:
 ShowUpdateNotes:
 	ShowUpdateNotes()
 	return
+	
+ShowTranslationUI:
+	ShowTranslationUI()
+	return
+
+TranslationUI_BtnTranslate:
+	Gui, Translate:Submit, NoHide
+	GuiControlGet, cbTransData, , TranslationEditInput
+	CBContents := PreProcessContents(cbTransData)
+	CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retObj, retCode)
+	GuiControl, Translate:, TranslationEditOutput, % CBContents
+	GuiControl, Translate:, TranslationEditOutputDebug, % DebugPrintarray(retObj, 0)
+	CBContents :=
+	return
+
+TranslationUI_BtnCancel:
+	Gui, Translate:Destroy
+	return
+	
+TranslationUI_BtnCopyToClipboard:
+	Gui, Translate:Submit, NoHide
+	SuspendPOEItemScript = 1
+	GuiControlGet, cbTransData, , TranslationEditOutput
+	Clipboard := cbTransData
+	SuspendPOEItemScript = 0
+	return
+
+ShowTranslationUI() {
+	Global 
+	
+	Gui, Translate:Destroy
+	
+	Gui, Translate:Margin, 10 , 10
+	Gui, Translate:Add, Text, , Add your copied item information to translate it to english. The rightmost column shows some debug information. 
+	
+	TransGuiWidth	:= 1300
+	TransGuiHeight	:= 750
+	TransEditWidth	:= 375
+	TransEditDebugWidth := 500
+	TransEditHeight := (TransGuiHeight - 115)
+	TransGuiSecondColumnPosX := TransEditWidth + 30
+	TransGuiCopyButtonPosX := TransGuiWidth - 130 - 500
+	TransGuiTransButtonPosX := TransEditWidth + 10 - 100
+	TransGuiCloseButtonPosX := TransGuiWidth - 110
+
+	Gui, Translate:Font, bold, Tahoma
+	Gui, Translate:Add, Text, y+20, Add item text (copied ingame via ctrl + c)
+	Gui, Translate:Font
+	Gui, Translate:Add, Button, yp-5 w100 x%TransGuiTransButtonPosX% gTranslationUI_BtnTranslate, Translate
+	Gui, Translate:Font, bold, Tahoma
+	Gui, Translate:Add, Text, yp+5 x%TransGuiSecondColumnPosX%, Translated text
+	Gui, Translate:Font
+	Gui, Translate:Add, Button, yp-5 w100 x%TransGuiCopyButtonPosX% gTranslationUI_BtnCopyToClipboard, Copy (Clipboard)
+	Gui, Translate:Font, , Consolas 
+	Gui, Translate:Add, Edit, w%TransEditWidth% h%TransEditHeight% y+5 x10 HScroll vTranslationEditInput hwndTransateEditHwnd, 	
+	Gui, Translate:Add, Edit, w%TransEditWidth% h%TransEditHeight% yp+0 x+20 HScroll vTranslationEditOutput ReadOnly, 
+	Gui, Translate:Add, Edit, w%TransEditDebugWidth% h%TransEditHeight% yp+0 x+10 HScroll vTranslationEditOutputDebug ReadOnly, 
+	Gui, Translate:Font
+	
+	Gui, Translate:Add, Button, x%TransGuiCloseButtonPosX% y+15 w100 gTranslationUI_BtnCancel, Close
+	
+	ControlFocus, , ahk_id %TransateEditHwnd%
+	Gui, Translate:Show, w%TransGuiWidth% h%TransGuiHeight%, Translate Item Data
+}
 
 ChangedUserFilesWindow_Cancel:
 	Gui, ChangedUserFiles:Cancel
