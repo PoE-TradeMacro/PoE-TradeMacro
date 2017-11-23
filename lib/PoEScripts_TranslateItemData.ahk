@@ -23,6 +23,7 @@
 	manaMultiplier		:= ["Mana Multiplier", "Manamultiplikator", "", "", "", "", ""]
 	evasionRating		:= ["Evasion Rating", "Ausweichwert", "", "", "", "", ""]
 	limitedTo			:= ["Limited to", "Begrenzt auf", "", "", "", "", ""]
+	radius			:= ["Radius", "Radius", "", "", "", "", ""]
 	
 	regex 			:= {}
 	regex.superior		:= ["^Superior(.*)", "(.*)\(hochwertig\)$", "(.*)de qualité$", "(.*)Superior$", "(.*)качества$", "^Superior(.*)", "(.*)Superior$"]
@@ -76,7 +77,6 @@
 		/*
 			nameplate section, look for ItemBaseType which is important for further parsing.
 		*/
-		; TODO: parse second section first to get the item type, use it to improve parsing the item basetype
 		If (key = 1) {
 			/*
 				rarity
@@ -123,7 +123,6 @@
 			Map PackSize, Rarity, Quantity etc
 		*/		
 		If (key = 2) {
-			_t := []
 			For k, line in section {
 				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
 				part1 := StrLen(part4) ? part4 : part1
@@ -203,33 +202,10 @@
 				}
 			}			
 		}
-		
-		/*
-			Sockets
-			Affixes/Enchantments/Corruptions
-		If (key = 4 or key = 5 or key = 6 or key = 7) {
-			For k, line in section {
-				; requirements etc
-				RegExMatch(line, "i)(.*?)(:):?(.*)|(.*)", part)
-				part1 := StrLen(part4) ? part4 : part1
-				
-				_p1 := lang.GetBasicInfo(Trim(part1))
-				
-				If (_p1) {
-					sectionsT[key][k] := _p1 . part2 . part3	
-				} Else {
-					_p1 := lang.GetItemAffix(line)
-					If (_p1) {
-						sectionsT[key][k] := _p1
-					}
-				}
-			}
-		}
-		
-		*/
+
 	}
 
-	;debugprintarray(sectionsT)
+	debugprintarray(sectionsT)
 	retObj := sectionsT
 	
 	data := ""
@@ -273,6 +249,7 @@ class TranslationHelpers {
 	}
 	
 	GetItemAffix(affixLine) {
+		; TODO : Enchantments/some League stone mods are missing
 		localized	:= this.data.localized.stats
 		default 	:= this.data.default.stats
 
@@ -285,7 +262,6 @@ class TranslationHelpers {
 					search_stat := RegExReplace(stat.text, "(?:\s)?\((.*)\)", "(\s?\($1\))?")
 
 					search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "[0-9.]+$2")
-					;search_stat := RegExReplace(search_stat, "(X|Y)(\%)?", "[0-9.]+$2")
 
 					If (RegExMatch(affixLine, "i)" search_stat "", match)) {
 						_m.local_match := match
@@ -319,7 +295,7 @@ class TranslationHelpers {
 				}
 			}			
 		}
-
+		debugprintarray(_m)
 		values_local := this.GetAllMatches(_m.local_line, "((?:\+|-)?[0-9.]+\%?)")
 		_m.default_line := this.ReplaceAllMatches(_m.default_text, values_local, "(?:(?:\+|-)?[0-9.XY]+\%?)")
 		_m.default_line := RegExReplace(_m.default_line, "(\s\(Local|Map|Staves|Shields\))")
@@ -416,8 +392,12 @@ class TranslationHelpers {
 						}
 						
 						If (isUnique) {
-							foundName := v.name = Trim(needleName) and Strlen(v.name) ? true : false		
-						}			
+							foundName := v.name = Trim(needleName) and Strlen(v.name) ? true : false							
+						}
+						
+						If (foundType and isUnique and not foundName) {
+							continue
+						}
 						
 						If (foundName and foundType) {
 							_arr.local_name		:= v.name
@@ -426,7 +406,6 @@ class TranslationHelpers {
 							_arr.default_name		:= default[i][key][k].name
 							_arr.default_baseType	:= default[i][key][k].type
 							_arr.default_type		:= default[i].label
-							
 							found := true
 							Break
 						}
@@ -439,7 +418,6 @@ class TranslationHelpers {
 							If (not StrLen(needleType) and not needleRarity = "magic") {
 								_arr.default_name	:= default[i][key][k].type
 							}
-							
 							found := true
 							Break
 						}
@@ -491,9 +469,7 @@ class TranslationHelpers {
 				If (found) {
 					Break
 				}
-			}
-			
-			; TODO: test leaguestones
+			}			
 		}
 		
 		; replace the type with it's singular form
