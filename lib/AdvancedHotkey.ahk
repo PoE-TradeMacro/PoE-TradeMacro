@@ -277,6 +277,8 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 	Gui, %Hotkey_numGui%:Color, %defBgColor%
 	If prompt <>
 		Gui, %Hotkey_numGui%:Add, Text, w220, %Prompt%
+	If prompt <>
+		Gui, %Hotkey_numGui%:Add, Text, w220 cRed, (Assigning currently requires a script reload)
 	IfNotInString, Options, -KeyNames
 		Gui, %Hotkey_numGui%:Add, ListView
 		, vHotkey_Hotkey1 r1 -Hdr -LV0x20 r1 w220 c%defLVTxtColor1% Background%defLVBgColor%, 1|2
@@ -618,6 +620,15 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 	Else
 		ReturnValue = %k%	;we got keynames already
 	Gui, %Hotkey_numGui%:Destroy
+	
+	; make single word characters in hotkeys upper case
+	; simple version, only works if there are no multi word character strings 
+	If (ReturnValue) {
+		If (not RegExMatch(ReturnValue, "([\w]{2,})")) {
+			StringUpper, ReturnValue, ReturnValue
+		}
+	}
+	
 	Return
 
 	Hotkey_Cancel:

@@ -8952,7 +8952,7 @@ CreateSettingsUI()
 		}
 
 		StringTrimRight, TabNames, TabNames, 1
-		Gui, Add, Tab3, Choose1 h610 x0, %TabNames%	
+		Gui, Add, Tab3, Choose1 h660 x0, %TabNames%	
 	}
 	
 	; Note: window handles (hwnd) are only needed if a UI tooltip should be attached.
@@ -9134,7 +9134,7 @@ CreateSettingsUI()
 				}
 			}
 		}
-	}	
+	}
 	
 	; AM General
 
@@ -9166,6 +9166,14 @@ CreateSettingsUI()
 		GuiAddText("Use these buttons to change ItemInfo/AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
 		GuiAddText("", "x10 y10 w250 h10")
 	}	
+	
+	GuiAddText("Experimental Feature!", ButtonsShiftX "y+35 w240 h200 cRed")
+	experimentalNotice := "This new feature to assign hotkeys may cause issues for users with non-latin keyboard layouts."
+	experimentalNotice .= "`n`n" . "AHKs default UI element for selecting hotkeys doesn't support any special keys and mouse buttons."
+	experimentalNotice .= "`n`n" . "Please report any issues that you are experiencing."
+	experimentalNotice .= " You can still assign your settings directly using the AdditionalMacros.ini like before."
+	experimentalNotice .= " (Right-click system tray icon -> Edit Files)."
+	GuiAddText(experimentalNotice, ButtonsShiftX "yp+25 w240")
 	
 	; close tabs
 	Gui, Tab
@@ -10232,7 +10240,7 @@ LV_HotkeyEdit:
 	Gui, ListView, %_LVID%
 	LV_GetText(_oV, 1, 2)
 	
-	_prompt := "Please hold down the keys or mousebuttons you want to turn into a hotkey:"
+	_prompt := "Please hold down the keys or mouse buttons you want to turn into a hotkey:"
 	_note := "The majority of common keys from latin keyboard layouts should work."
 	If (_switched) {
 		_note := "`n`n" . "Forcibly switched to en_US layout because your layout seems to be unsupported."
