@@ -172,39 +172,42 @@ class ItemInfoOptions extends UserOptions {
 Opts := new ItemInfoOptions()
 
 class Fonts {
-
-	Init(FontSizeFixed, FontSizeUI)
+	__New(FontSizeFixed, FontSizeUI = 9)
 	{
 		this.FontSizeFixed	:= FontSizeFixed
 		this.FontSizeUI	:= FontSizeUI
-		this.FixedFont		:= this.CreateFixedFont(FontSizeFixed)
-		this.UIFont		:= this.CreateUIFont(FontSizeUI)
+		this.FixedFont		:= this.CreateFixedFont(this.FontSizeFixed)
+		this.UIFont		:= this.CreateUIFont(this.FontSizeUI)
+		;debugprintarray(this)
 	}
 
-	CreateFixedFont(FontSize_)
+	CreateFixedFont(FontSize_, Options = "")
 	{
-		Options :=
+		; Q5 = Windows XP and later: If set, text is rendered (when possible) using ClearType antialiasing method.
+		Options .= " q5 "
 		If (!(FontSize_ == ""))
 		{
 			Options = s%FontSize_%
 		}
 		Gui Font, %Options%, Courier New
 		Gui Font, %Options%, Consolas
-		Gui Add, Text, HwndHidden,
+		Gui Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
 		return ErrorLevel
 	}
 
-	CreateUIFont(FontSize_)
+	CreateUIFont(FontSize_, Options = "")
 	{
-		Options :=
+		; Q5 = Windows XP and later: If set, text is rendered (when possible) using ClearType antialiasing method.
+		Options .= " q5 "
 		If (!(FontSize_ == ""))
 		{
 			Options = s%FontSize_%
 		}
 		Gui Font, %Options%, Tahoma
 		Gui Font, %Options%, Segoe UI
-		Gui Add, Text, HwndHidden,
+		;Gui Font, %Options%, Verdana
+		Gui Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
 		return ErrorLevel
 	}
@@ -219,32 +222,34 @@ class Fonts {
 		SendMessage, 0x30, NewFont, 1,, ahk_class tooltips_class32 ahk_exe AutoHotkeyU64.exe
 	}
 
-	SetFixedFont(FontSize_=-1)
-	{
-		If (FontSize_ == -1)
-		{
+	SetFixedFont(FontSize_=-1, Options = "")
+	{		
+		If (FontSize_ != -1) {
 			FontSize_ := this.FontSizeFixed
-		}
-		Else
-		{
+		} Else {
 			this.FontSizeFixed := FontSize_
-			this.FixedFont := this.CreateFixedFont(FontSize_)
 		}
-		this.Set(this.FixedFont)
+		FixedFont := this.CreateFixedFont(FontSize_, Options)
+		
+		If (FixedFont) {		
+			this.Set(this.FixedFont)
+			this.FontSizeFixed := FixedFont
+		}		
 	}
 
-	SetUIFont(FontSize_=-1)
-	{
-		If (FontSize_ == -1)
-		{
+	SetUIFont(FontSize_=-1, Options = "")
+	{		
+		If (FontSize_ == -1) {
 			FontSize_ := this.FontSizeUI
-		}
-		Else
-		{
+		} Else {
 			this.FontSizeUI := FontSize_
-			this.UIFont := this.CreateUIFont(FontSize_)
-		}
-		this.Set(this.UIFont)
+		}		
+		UIFont := this.CreateUIFont(FontSize_, Options)
+		
+		If (UIFont and (this.UIFont != UIFont)) {
+			this.Set(this.UIFont)
+			this.UIFont := UIFont
+		}		
 	}
 
 	GetFixedFont()
@@ -487,8 +492,7 @@ Menu, Tray, Default, % Globals.Get("SettingsUITitle", "PoE ItemInfo Settings")
 #Include %A_ScriptDir%\data\DivinationCardList.txt
 #Include %A_ScriptDir%\data\GemQualityList.txt
 
-
-Fonts.Init(Opts.FontSize, 9)
+Fonts := new Fonts(Opts.FontSize, 9)
 
 GetAhkExeFilename(Default_="AutoHotkey.exe")
 {
@@ -8761,8 +8765,7 @@ GuiAdd(ControlType, Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabe
 	ah := StrPrefix(AssocHwnd, "hwnd")
 
 	If (ControlType = "GroupBox") {
-		Gui, Font, cDA4F49
-		Options := Param4
+		Options := Param4 " cDA4F49 "
 	}
 	Else If (ControlType = "ListView") {
 		Options := Param4
@@ -8773,7 +8776,6 @@ GuiAdd(ControlType, Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabe
 
 	GuiName := (StrLen(GuiName) > 0) ? Trim(GuiName) . ":Add" : "Add"
 	Gui, %GuiName%, %ControlType%, %PositionInfo% %av% %al% %ah% %Options%, %Contents%
-	Gui, Font
 }
 
 GuiAddListView(ColumnHeaders, PositionInfo, AssocVar="", AssocHwnd="", AssocLabel="", Options="", GuiName="")
@@ -8941,6 +8943,8 @@ AddToolTip(con, text, Modify=0){
 CreateSettingsUI()
 {
 	Global
+
+	Fonts.SetUIFont()
 	
 	; ItemInfo is not included in other scripts
 	If (not SkipItemInfoUpdateCall) {		
@@ -9097,7 +9101,7 @@ CreateSettingsUI()
 	chkBoxWidth := 130
 	chkBoxShiftY := 28
 	LVWidth := 155
-	
+
 	_AM_sections := StrSplit(AM_Config.GetSections("|", "C"), "|")
 	For sectionIndex, sectionName in _AM_sections {	; this enables section sorting		
 		If (sectionName != "General") {
