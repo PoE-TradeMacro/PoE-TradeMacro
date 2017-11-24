@@ -187,7 +187,7 @@ class Fonts {
 		Options .= " q5 "
 		If (!(FontSize_ == ""))
 		{
-			Options = s%FontSize_%
+			Options .= "s" FontSize_
 		}
 		Gui Font, %Options%, Courier New
 		Gui Font, %Options%, Consolas
@@ -202,10 +202,11 @@ class Fonts {
 		Options .= " q5 "
 		If (!(FontSize_ == ""))
 		{
-			Options = s%FontSize_%
-		}
+			Options .= "s" FontSize_
+		}		
+		Gui Font, %Options%, Arial
 		Gui Font, %Options%, Tahoma
-		Gui Font, %Options%, Segoe UI
+		;Gui Font, %Options%, Segoe UI
 		;Gui Font, %Options%, Verdana
 		Gui Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
@@ -8943,11 +8944,10 @@ AddToolTip(con, text, Modify=0){
 CreateSettingsUI()
 {
 	Global
-
-	Fonts.SetUIFont()
 	
 	; ItemInfo is not included in other scripts
-	If (not SkipItemInfoUpdateCall) {		
+	If (not SkipItemInfoUpdateCall) {	
+		Fonts.SetUIFont()
 		Scripts := Globals.Get("SettingsScriptList")
 		TabNames := ""
 		Loop, % Scripts.Length() {
@@ -9167,9 +9167,8 @@ CreateSettingsUI()
 	GuiAddButton("Cancel", "x+5 yp+0 w80 h23", "SettingsUI_BtnCancel")
 	
 	If (SkipItemInfoUpdateCall) {
-		GuiAddText("Use these buttons to change ItemInfo/AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
-		GuiAddText("", "x10 y10 w250 h10")
-	}	
+		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
+	}
 	
 	GuiAddText("Experimental Feature!", ButtonsShiftX "y+35 w240 h200 cRed")
 	experimentalNotice := "This new feature to assign hotkeys may cause issues for users with non-latin keyboard layouts."
