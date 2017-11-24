@@ -1,5 +1,4 @@
 ﻿PoEScripts_CheckCorrectClientLanguage() {
-	return true
 	iniPath		:= A_MyDocuments . "\My Games\Path of Exile\"
 	configs 		:= []
 	productionIni	:= iniPath . "production_Config.ini"

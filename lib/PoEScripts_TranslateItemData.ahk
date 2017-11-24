@@ -1,4 +1,9 @@
-﻿PoEScripts_TranslateItemData(data, langData, locale, ByRef retObj = "", ByRef status = "") {
+﻿/*
+	Unfinished, will wait until after 3.1.0 release, there are chances to get support from GGG. 
+	Current data files are insufficient.
+*/
+
+PoEScripts_TranslateItemData(data, langData, locale, ByRef retObj = "", ByRef status = "") {
 	If (not StrLen(locale) or locale = "en") {
 		status := "Translation aborted"
 		Return data

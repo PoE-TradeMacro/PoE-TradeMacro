@@ -442,8 +442,12 @@ GoSub, AM_AssignHotkeys
 GoSub, FetchCurrencyData
 GoSub, InitGDITooltip
 
-; Todo: remove test/debug code
-If (true) {
+
+/*
+	Item data translation, won't be used for now.
+	Todo: remove test/debug code
+*/
+If (false) {
 	global currentLocale := ""
 	_Debug := true
 	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...", _Debug)
@@ -462,7 +466,10 @@ Menu, Tray, NoStandard
 Menu, Tray, Add, Reload Script (Use only this), ReloadScript
 Menu, Tray, Add ; Separator
 Menu, Tray, Add, About..., MenuTray_About
-Menu, Tray, Add, Translate Item, ShowTranslationUI
+/*
+	;Item data Translation, won't be used for now.
+	Menu, Tray, Add, Translate Item, ShowTranslationUI
+*/
 Menu, Tray, Add, Show all assigned Hotkeys, ShowAssignedHotkeys
 Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE ItemInfo Settings"), ShowSettingsUI
 Menu, Tray, Add, Check for updates, CheckForUpdates
@@ -6406,7 +6413,10 @@ ParseClipBoardChanges(debug = false)
 	
 	CBContents := GetClipboardContents()
 	CBContents := PreProcessContents(CBContents)
-	CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retObj, retCode)
+	/*
+		;Item Data Translation, won't be used for now.
+		CBContents := PoEScripts_TranslateItemData(CBContents, translationData, currentLocale, retObj, retCode)
+	*/	
 	
 	Globals.Set("ItemText", CBContents)
 	
