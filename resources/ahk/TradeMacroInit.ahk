@@ -577,7 +577,7 @@ CreateTradeSettingsUI()
 	AddToolTip(ChangeLeagueHotkeyH, "Press key/key combination.`nDefault: ctrl + l")
 
 
-	Gui, Add, Link, x17 yp+39 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
+	Gui, Add, Link, x17 yp+35 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
 
     ; Search
 
