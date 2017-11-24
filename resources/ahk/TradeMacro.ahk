@@ -3669,7 +3669,7 @@ OverwriteSettingsWidthTimer:
 	o := Globals.Get("SettingsUIWidth")
 
 	If (o) {
-		Globals.Set("SettingsUIWidth", 813)
+		Globals.Set("SettingsUIWidth", 963)
 		SetTimer, OverwriteSettingsWidthTimer, Off
 	}
 Return

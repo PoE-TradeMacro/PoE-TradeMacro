@@ -206,8 +206,8 @@ class Fonts {
 		}		
 		Gui Font, %Options%, Arial
 		Gui Font, %Options%, Tahoma
-		;Gui Font, %Options%, Segoe UI
-		;Gui Font, %Options%, Verdana
+		Gui Font, %Options%, Segoe UI
+		Gui Font, %Options%, Verdana
 		Gui Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
 		return ErrorLevel
@@ -9072,7 +9072,7 @@ CreateSettingsUI()
 	GuiAddText("Font Size:", "xs10 yp+3 w130 h20 0x0100")
 
 	; Buttons
-	ButtonsShiftX := "x557 "
+	ButtonsShiftX := "x659 "
 	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "y40 w240 h30 0x0100")
 	
 	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_BtnDefaults")
@@ -9092,15 +9092,15 @@ CreateSettingsUI()
 	}
 	
 	; AM Hotkeys
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w530 h625")	
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w630 h625")	
 	
 	If (not AM_Config) {
 		GoSub, AM_Init
 	}
 	
-	chkBoxWidth := 130
+	chkBoxWidth := 160
 	chkBoxShiftY := 28
-	LVWidth := 155
+	LVWidth := 185
 
 	_AM_sections := StrSplit(AM_Config.GetSections("|", "C"), "|")
 	For sectionIndex, sectionName in _AM_sections {	; this enables section sorting		
@@ -9112,14 +9112,14 @@ CreateSettingsUI()
 			
 			For keyIndex, keyValue in StrSplit(AM_Config[sectionName].Hotkeys, ", ") {	
 				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex
-			
-				GuiAddListView("1|2", "x+10 yp+0 h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1 C454444 Backgroundf0f0f0")			
+				LV_shiftY := keyIndex > 1 ? 1 : 0 
+				GuiAddListView("1|2", "x+10 yp+" LV_shiftY " h20 w" LVWidth, HotKeyID, HotKeyID "H", "", "r1 -Hdr -LV0x20 r1 C454444 Backgroundf0f0f0")			
 				LV_ModifyCol(1, 0)
 				LV_ModifyCol(2, LVWidth - 5)
 				LV_Delete(1)
 				LV_Add("","", keyValue)			
 
-				GuiAddButton("Edit", "xp+" LVWidth " yp-1 w25 h22 v" HotKeyID "_Trigger", "LV_HotkeyEdit")
+				GuiAddButton("Edit", "xp+" LVWidth " yp-1 w30 h22 v" HotKeyID "_Trigger", "LV_HotkeyEdit")
 			}
 			
 			For keyIndex, keyValue in AM_Config[sectionName] {
@@ -9133,7 +9133,7 @@ CreateSettingsUI()
 					Else {
 						EditID := "AM_" sectionName "_" keyIndex
 						GuiAddText(keyIndex ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
-						GuiAddEdit(keyValue, "x+0 yp-2 w94 h20", EditID)
+						GuiAddEdit(keyValue, "x+0 yp-2 w99 h20", EditID)
 					}					
 				}
 			}
@@ -9142,7 +9142,7 @@ CreateSettingsUI()
 	
 	; AM General
 
-	GuiAddGroupBox("[AdditionalMacros] General", "x547 y35 w260 h60")
+	GuiAddGroupBox("[AdditionalMacros] General", "x647 y35 w310 h60")
 	
 	_i := 0
 	For keyIndex, keyValue in AM_Config.General {
@@ -9152,7 +9152,7 @@ CreateSettingsUI()
 			If (RegExMatch(keyIndex, ".*State$") and not (InStr(keyIndex, "KeyToSC", 0))) {
 				RegExMatch(AM_ConfigDefault.General[keyIndex "_Description"], ".*Short\$(.*)Long\$(.*)""", _description)		; read description from default config
 				ControlID := "AM_General_" keyIndex
-				GuiAddCheckbox(Trim(_description1), "x557 yp+" elementYPos " w210 h30", AM_Config.General[keyIndex], ControlID, ControlID "H")
+				GuiAddCheckbox(Trim(_description1), "x657 yp+" elementYPos " w250 h30", AM_Config.General[keyIndex], ControlID, ControlID "H")
 				AddToolTip(%ControlID%H, Trim(_description2))
 			}
 			_i++
@@ -9161,22 +9161,22 @@ CreateSettingsUI()
 	
 	; AM Buttons
 	
-	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "yp+60 w240 h30 0x0100")	
+	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "yp+60 w290 h30 0x0100")	
 	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_AM_BtnDefaults")
-	GuiAddButton("OK", "Default x+5 yp+0 w75 h23", "SettingsUI_BtnOK")
-	GuiAddButton("Cancel", "x+5 yp+0 w80 h23", "SettingsUI_BtnCancel")
+	GuiAddButton("OK", "Default x+5 yp+0 w90 h23", "SettingsUI_BtnOK")
+	GuiAddButton("Cancel", "x+5 yp+0 w90 h23", "SettingsUI_BtnCancel")
 	
 	If (SkipItemInfoUpdateCall) {
-		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
+		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w280 h50 cRed")
 	}
 	
-	GuiAddText("Experimental Feature!", ButtonsShiftX "y+35 w240 h200 cRed")
+	GuiAddText("Experimental Feature!", ButtonsShiftX "y+35 w280 h200 cRed")
 	experimentalNotice := "This new feature to assign hotkeys may cause issues for users with non-latin keyboard layouts."
 	experimentalNotice .= "`n`n" . "AHKs default UI element for selecting hotkeys doesn't support any special keys and mouse buttons."
 	experimentalNotice .= "`n`n" . "Please report any issues that you are experiencing."
 	experimentalNotice .= " You can still assign your settings directly using the AdditionalMacros.ini like before."
 	experimentalNotice .= " (Right-click system tray icon -> Edit Files)."
-	GuiAddText(experimentalNotice, ButtonsShiftX "yp+25 w240")
+	GuiAddText(experimentalNotice, ButtonsShiftX "yp+25 w290")
 	
 	; close tabs
 	Gui, Tab
