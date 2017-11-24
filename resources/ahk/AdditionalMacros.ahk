@@ -98,7 +98,7 @@ AM_KickYourself_HKey:
 Return
 
 AM_Hideout_HKey:
-	SendInput {Enter}/hideout{Enter}					; Go to hideout with F5.
+	SendInput {Enter}/hideout{Enter}{Enter}{Up}{Up}{Esc}	; Go to hideout with F5. Restores the last chat that you were in.
 Return
 
 AM_ScrollTabRight_HKey:
