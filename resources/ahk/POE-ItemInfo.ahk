@@ -8964,72 +8964,73 @@ CreateSettingsUI()
 	generalHeight := SkipItemInfoUpdateCall ? "150" : "240"		; "180" : "270" with ParseItemHotKey
 	
 	; General
-	GuiAddGroupBox("General", "x7 ym" 30 " w260 h" generalHeight " Section")
-	GuiAddCheckbox("Only show tooltip if PoE is frontmost", "xs10 yp+20 w210 h30", Opts.OnlyActiveIfPOEIsFront, "OnlyActiveIfPOEIsFront", "OnlyActiveIfPOEIsFrontH")
+	GuiAddGroupBox("General", "x7 ym" 30 " w310 h" generalHeight " Section")
+	GuiAddCheckbox("Only show tooltip if PoE is frontmost", "xs10 yp+20 w250 h30", Opts.OnlyActiveIfPOEIsFront, "OnlyActiveIfPOEIsFront", "OnlyActiveIfPOEIsFrontH")
 	AddToolTip(OnlyActiveIfPOEIsFrontH, "When checked the script only activates while you are ingame`n(technically while the game window is the frontmost)")
 	
 	;GuiAddHotkey(Opts.ParseItemHotKey, "xs75 yp+37 w120 h20", "ParseItemHotKey")
 	;GuiAddText("Hotkey:", "xs27 yp+2 w50 h20 0x0100", "LblParseItemHotKey")
 	; Change next from yp+30 to yp+25 when this is implemented.
 	
-	GuiAddCheckbox("Put tooltip results on clipboard", "xs10 yp+30 w210 h30", Opts.PutResultsOnClipboard, "PutResultsOnClipboard", "PutResultsOnClipboardH")
+	GuiAddCheckbox("Put tooltip results on clipboard", "xs10 yp+30 w250 h30", Opts.PutResultsOnClipboard, "PutResultsOnClipboard", "PutResultsOnClipboardH")
 	AddToolTip(PutResultsOnClipboardH, "Put tooltip result text into the system clipboard`n(overwriting the raw text PoE itself put there to begin with)")
 	
-	GuiAddCheckbox("Enable Map Mod Warnings", "xs10 yp+30 w210 h30", Opts.EnableMapModWarnings, "EnableMapModWarnings", "EnableMapModWarningsH")
+	GuiAddCheckbox("Enable Map Mod Warnings", "xs10 yp+30 w250 h30", Opts.EnableMapModWarnings, "EnableMapModWarnings", "EnableMapModWarningsH")
 	AddToolTip(EnableMapModWarningsH, "Enables or disables the entire Map Mod Warnings function.")
 	
 	If (!SkipItemInfoUpdateCall) {
-		GuiAddCheckbox("Update: Show Notifications", "xs10 yp+30 w210 h30", Opts.ShowUpdateNotification, "ShowUpdateNotification", "ShowUpdateNotificationH")
+		GuiAddCheckbox("Update: Show Notifications", "xs10 yp+30 w250 h30", Opts.ShowUpdateNotification, "ShowUpdateNotification", "ShowUpdateNotificationH")
 		AddToolTip(ShowUpdateNotificationH, "Notifies you when there's a new release available.")
 		
-		GuiAddCheckbox("Update: Skip folder selection", "xs10 yp+30 w210 h30", Opts.UpdateSkipSelection, "UpdateSkipSelection", "UpdateSkipSelectionH")
+		GuiAddCheckbox("Update: Skip folder selection", "xs10 yp+30 w250 h30", Opts.UpdateSkipSelection, "UpdateSkipSelection", "UpdateSkipSelectionH")
 		AddToolTip(UpdateSkipSelectionH, "Skips selecting an update location.`nThe current script directory will be used as default.")
 		
-		GuiAddCheckbox("Update: Skip backup", "xs10 yp+30 w210 h30", Opts.UpdateSkipBackup, "UpdateSkipBackup", "UpdateSkipBackupH")
+		GuiAddCheckbox("Update: Skip backup", "xs10 yp+30 w250 h30", Opts.UpdateSkipBackup, "UpdateSkipBackup", "UpdateSkipBackupH")
 		AddToolTip(UpdateSkipBackupH, "Skips making a backup of the install location/folder.")
 	}	
 	
 	; GDI+
 	GDIShift := SkipItemInfoUpdateCall ? 190 : 280
-	GuiAddGroupBox("GDI+", "x7 ym+" GDIShift " w260 h320 Section")
-	GuiAddCheckBox("Enable GDI+", "xs10 yp+20 w90", Opts.UseGDI, "UseGDI", "UseGDIH", "SettingsUI_ChkUseGDI")
+	GuiAddGroupBox("GDI+", "x7 ym+" GDIShift " w310 h320 Section")
+	
+	GuiAddCheckBox("Enable GDI+", "xs10 yp+20 w115", Opts.UseGDI, "UseGDI", "UseGDIH", "SettingsUI_ChkUseGDI")
 	AddToolTip(UseGDIH, "Enables rendering of tooltips using Windows gdip.dll`n(allowing limited styling options).")
-	GuiAddCheckBox("Rendering Fix", "xs10 yp+30 w90", Opts.GDIRenderingFix, "GDIRenderingFix", "GDIRenderingFixH")
+	GuiAddCheckBox("Rendering Fix", "xs10 yp+30 w115", Opts.GDIRenderingFix, "GDIRenderingFix", "GDIRenderingFixH")
 	AddToolTip(GDIRenderingFixH, "In the case that rendered graphics (window, border and text) are`nunsharp/blurry this should fix the issue.")
-	GuiAddText("(Restart script after disabling GDI+. Enabling might cause general FPS drops.)", "xs110 ys+20 w150 cRed", "")
+	GuiAddText("(Restart script after disabling GDI+. Enabling might cause general FPS drops.)", "xs120 ys+20 w185 cRed", "")
 	
 	GuiAddButton("Edit Window", "xs9 ys80 w80 h23", "SettingsUI_BtnGDIWindowColor", "BtnGDIWindowColor")
-	GuiAddText("Color (hex RGB):", "xs100 ys85 w150", "LblGDIWindowColor")
-	GuiAddEdit(Opts.GDIWindowColor, "xs190 ys82 w60", "GDIWindowColor", "GDIWindowColorH")
-	GuiAddText("Opactiy (0-100):", "xs100 ys115 w150", "LblGDIWindowOpacity")
-	GuiAddEdit(Opts.GDIWindowOpacity, "xs190 ys112 w60", "GDIWindowOpacity", "GDIWindowOpacityH")	
+	GuiAddText("Color (hex RGB):", "xs100 ys85 w200", "LblGDIWindowColor")
+	GuiAddEdit(Opts.GDIWindowColor, "xs240 ys82 w60", "GDIWindowColor", "GDIWindowColorH")
+	GuiAddText("Opactiy (0-100):", "xs100 ys115 w200", "LblGDIWindowOpacity")
+	GuiAddEdit(Opts.GDIWindowOpacity, "xs240 ys112 w60", "GDIWindowOpacity", "GDIWindowOpacityH")	
 	GuiAddButton("Edit Border", "xs9 ys140 w80 h23", "SettingsUI_BtnGDIBorderColor", "BtnGDIBorderColor")
-	GuiAddText("Color (hex RGB):", "xs100 ys145 w150", "LblGDIBorderColor")
-	GuiAddEdit(Opts.GDIBorderColor, "xs190 ys142 w60", "GDIBorderColor", "GDIBorderColorH")	
-	GuiAddText("Opacity (0-100):", "xs100 ys175 w150", "LblGDIBorderOpacity")
-	GuiAddEdit(Opts.GDIBorderOpacity, "xs190 ys172 w60", "GDIBorderOpacity", "GDIBorderOpacityH")	
+	GuiAddText("Color (hex RGB):", "xs100 ys145 w200", "LblGDIBorderColor")
+	GuiAddEdit(Opts.GDIBorderColor, "xs240 ys142 w60", "GDIBorderColor", "GDIBorderColorH")	
+	GuiAddText("Opacity (0-100):", "xs100 ys175 w200", "LblGDIBorderOpacity")
+	GuiAddEdit(Opts.GDIBorderOpacity, "xs240 ys172 w60", "GDIBorderOpacity", "GDIBorderOpacityH")	
 	GuiAddButton("Edit Text", "xs9 ys200 w80 h23", "SettingsUI_BtnGDITextColor", "BtnGDITextColor")
-	GuiAddText("Color (hex RGB):", "xs100 ys205 w150", "LblGDITextColor")
-	GuiAddEdit(Opts.GDITextColor, "xs190 ys202 w60", "GDITextColor", "GDITextColorH")
-	GuiAddText("Opacity (0-100):", "xs100 ys235 w150", "LblGDITextOpacity")
-	GuiAddEdit(Opts.GDITextOpacity, "xs190 ys232 w60", "GDITextOpacity", "GDITextOpacityH")
-	GuiAddCheckBox("Style border depending on checked item.", "xs10 ys260 w210", Opts.GDIConditionalColors, "GDIConditionalColors", "GDIConditionalColorsH")
+	GuiAddText("Color (hex RGB):", "xs100 ys205 w200", "LblGDITextColor")
+	GuiAddEdit(Opts.GDITextColor, "xs240 ys202 w60", "GDITextColor", "GDITextColorH")
+	GuiAddText("Opacity (0-100):", "xs100 ys235 w200", "LblGDITextOpacity")
+	GuiAddEdit(Opts.GDITextOpacity, "xs240 ys232 w60", "GDITextOpacity", "GDITextOpacityH")
+	GuiAddCheckBox("Style border depending on checked item.", "xs10 ys260 w260", Opts.GDIConditionalColors, "GDIConditionalColors", "GDIConditionalColorsH")
 	
-	GuiAddButton("GDI Defaults", "xs9 ys290 w80 h23", "SettingsUI_BtnGDIDefaults", "BtnGDIDefaults", "BtnGDIDefaultsH")
-	GuiAddButton("Preview", "xs170 ys290 w80 h23", "SettingsUI_BtnGDIPreviewTooltip", "BtnGDIPreviewTooltip", "BtnGDIPreviewTooltipH")
+	GuiAddButton("GDI Defaults", "xs9 ys290 w100 h23", "SettingsUI_BtnGDIDefaults", "BtnGDIDefaults", "BtnGDIDefaultsH")
+	GuiAddButton("Preview", "xs210 ys290 w80 h23", "SettingsUI_BtnGDIPreviewTooltip", "BtnGDIPreviewTooltip", "BtnGDIPreviewTooltipH")
 
 	; Tooltip
-	GuiAddGroupBox("Tooltip", "x277 ym" 30 " w260 h140 Section")
+	GuiAddGroupBox("Tooltip", "x327 ym" 30 " w310 h140 Section")
 
-	GuiAddEdit(Opts.MouseMoveThreshold, "xs180 yp+22 w50 h20 Number", "MouseMoveThreshold", "MouseMoveThresholdH")
-	GuiAddText("Mouse move threshold (px):", "xs27 yp+3 w150 h20 0x0100", "LblMouseMoveThreshold", "LblMouseMoveThresholdH")
+	GuiAddEdit(Opts.MouseMoveThreshold, "xs250 yp+22 w50 h20 Number", "MouseMoveThreshold", "MouseMoveThresholdH")
+	GuiAddText("Mouse move threshold (px):", "xs27 yp+3 w200 h20 0x0100", "LblMouseMoveThreshold", "LblMouseMoveThresholdH")
 	AddToolTip(LblMouseMoveThresholdH, "Hide tooltip when the mouse cursor moved x pixel away from the initial position.`nEffectively permanent tooltip when using a value larger than the monitor diameter.")
 	
-	GuiAddEdit(Opts.ToolTipTimeoutSeconds, "xs180 yp+27 w50 Number", "ToolTipTimeoutSeconds")
-	GuiAddCheckBox("Use tooltip timeout (seconds)", "xs10 yp+3 w160", Opts.UseTooltipTimeout, "UseTooltipTimeout", "UseTooltipTimeoutH", "SettingsUI_ChkUseTooltipTimeout")
+	GuiAddEdit(Opts.ToolTipTimeoutSeconds, "xs250 yp+27 w50 Number", "ToolTipTimeoutSeconds")
+	GuiAddCheckBox("Use tooltip timeout (seconds)", "xs10 yp+3 w200", Opts.UseTooltipTimeout, "UseTooltipTimeout", "UseTooltipTimeoutH", "SettingsUI_ChkUseTooltipTimeout")
 	AddToolTip(UseTooltipTimeoutH, "Hide tooltip automatically after defined time.")
 	
-	GuiAddCheckbox("Display at fixed coordinates", "xs10 yp+30 w230", Opts.DisplayToolTipAtFixedCoords, "DisplayToolTipAtFixedCoords", "DisplayToolTipAtFixedCoordsH", "SettingsUI_ChkDisplayToolTipAtFixedCoords")
+	GuiAddCheckbox("Display at fixed coordinates", "xs10 yp+30 w280", Opts.DisplayToolTipAtFixedCoords, "DisplayToolTipAtFixedCoords", "DisplayToolTipAtFixedCoordsH", "SettingsUI_ChkDisplayToolTipAtFixedCoords")
 	AddToolTip(DisplayToolTipAtFixedCoordsH, "Show tooltip in virtual screen space at the fixed`ncoordinates given below. Virtual screen space means`nthe full desktop frame, including any secondary`nmonitors. Coords are relative to the top left edge`nand increase going down and to the right.")
 		GuiAddEdit(Opts.ScreenOffsetX, "xs50 yp+22 w50", "ScreenOffsetX")
 		GuiAddEdit(Opts.ScreenOffsetY, "xs130 yp+0 w50", "ScreenOffsetY")
@@ -9038,24 +9039,24 @@ CreateSettingsUI()
 	
 	
 	; Display	
-	GuiAddGroupBox("Display", "x277 ym+" 180 " w260 h295 Section")
+	GuiAddGroupBox("Display", "x327 ym+" 180 " w310 h295 Section")
 	
-	GuiAddCheckbox("Show header for affix overview", "xs10 yp+20 w210 h30", Opts.ShowHeaderForAffixOverview, "ShowHeaderForAffixOverview", "ShowHeaderForAffixOverviewH")
+	GuiAddCheckbox("Show header for affix overview", "xs10 yp+20 w260 h30", Opts.ShowHeaderForAffixOverview, "ShowHeaderForAffixOverview", "ShowHeaderForAffixOverviewH")
 	AddToolTip(ShowHeaderForAffixOverviewH, "Include a header above the affix overview:`n   TierRange ilvl   Total ilvl  Tier")
 	
-	GuiAddCheckbox("Show explanation for used notation", "xs10 yp+30 w210 h30", Opts.ShowExplanationForUsedNotation, "ShowExplanationForUsedNotation", "ShowExplanationForUsedNotationH")
+	GuiAddCheckbox("Show explanation for used notation", "xs10 yp+30 w260 h30", Opts.ShowExplanationForUsedNotation, "ShowExplanationForUsedNotation", "ShowExplanationForUsedNotationH")
 	AddToolTip(ShowExplanationForUsedNotationH, "Explain abbreviations and special notation symbols at`nthe end of the tooltip when they are used")
 	
-	GuiAddEdit(Opts.AffixTextEllipsis, "xs160 y+5 w40 h20", "AffixTextEllipsis")
-	GuiAddText("Affix text ellipsis:", "xs10 yp+3 w120 h20 0x0100", "LblAffixTextEllipsis", "AffixTextEllipsisH")
+	GuiAddEdit(Opts.AffixTextEllipsis, "xs260 y+5 w40 h20", "AffixTextEllipsis")
+	GuiAddText("Affix text ellipsis:", "xs10 yp+3 w170 h20 0x0100", "LblAffixTextEllipsis", "AffixTextEllipsisH")
 	AddToolTip(AffixTextEllipsisH, "Symbol used when affix text is shortened, such as:`n50% increased Spell…")
 	
-	GuiAddEdit(Opts.AffixColumnSeparator, "xs160 y+7 w40 h20", "AffixColumnSeparator")
-	GuiAddText("Affix column separator:", "xs10 yp+3 w120 h20 0x0100", "LblAffixColumnSeparator", "AffixColumnSeparatorH")
+	GuiAddEdit(Opts.AffixColumnSeparator, "xs260 y+7 w40 h20", "AffixColumnSeparator")
+	GuiAddText("Affix column separator:", "xs10 yp+3 w170 h20 0x0100", "LblAffixColumnSeparator", "AffixColumnSeparatorH")
 	AddToolTip(AffixColumnSeparatorH, "Select separator (default: 2 spaces) for the \\ spots:`n50% increased Spell…\\50-59 (46)\\75-79 (84)\\T4 P")
 	
-	GuiAddEdit(Opts.DoubleRangeSeparator, "xs160 y+7 w40 h20", "DoubleRangeSeparator")
-	GuiAddText("Double range separator:", "xs10 yp+3 w120 h20 0x0100", "LblDoubleRangeSeparator", "DoubleRangeSeparatorH")
+	GuiAddEdit(Opts.DoubleRangeSeparator, "xs260 y+7 w40 h20", "DoubleRangeSeparator")
+	GuiAddText("Double range separator:", "xs10 yp+3 w170 h20 0x0100", "LblDoubleRangeSeparator", "DoubleRangeSeparatorH")
 	AddToolTip(DoubleRangeSeparatorH, "Select separator (default: | ) for double ranges from 'added damage' mods:`na-b to c-d is displayed as a-b|c-d")
 	
 	GuiAddCheckbox("Use compact double ranges", "xs10 y+3 w210 h30", Opts.UseCompactDoubleRanges, "UseCompactDoubleRanges", "UseCompactDoubleRangesH", "SettingsUI_ChkUseCompactDoubleRanges")
@@ -9064,23 +9065,23 @@ CreateSettingsUI()
 	GuiAddCheckbox("Only compact for 'Total' column", "xs30 yp+30 w210 h30", Opts.OnlyCompactForTotalColumn, "OnlyCompactForTotalColumn", "OnlyCompactForTotalColumnH")
 	AddToolTip(OnlyCompactForTotalColumnH, "Only use compact double ranges for the second range column`nin the affix overview (with the header 'total')")
 	
-	GuiAddEdit(Opts.MultiTierRangeSeparator, "xs160 y+6 w40 h20", "MultiTierRangeSeparator")
-	GuiAddText("Multi tier range separator:", "xs10 yp+3 w120 h20 0x0100", "LblMultiTierRangeSeparator", "MultiTierRangeSeparatorH")
+	GuiAddEdit(Opts.MultiTierRangeSeparator, "xs260 y+6 w40 h20", "MultiTierRangeSeparator")
+	GuiAddText("Multi tier range separator:", "xs10 yp+3 w170 h20 0x0100", "LblMultiTierRangeSeparator", "MultiTierRangeSeparatorH")
 	AddToolTip(MultiTierRangeSeparatorH, "Select separator (default: … ) for a multi tier roll range with uncertainty:`n83% increased Light…   73-85…83-95   102-109 (84)  T1-4 P + T1-6 S`n	                     There--^")
 	
-	GuiAddEdit(Opts.FontSize, "xs160 y+6 w40 h20 Number", "FontSize")
-	GuiAddText("Font Size:", "xs10 yp+3 w130 h20 0x0100")
+	GuiAddEdit(Opts.FontSize, "xs260 y+6 w40 h20 Number", "FontSize")
+	GuiAddText("Font Size:", "xs10 yp+3 w180 h20 0x0100")
 
 	; Buttons
 	ButtonsShiftX := "x659 "
-	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "y40 w240 h30 0x0100")
+	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "y40 w290 h30 0x0100")
 	
-	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_BtnDefaults")
-	GuiAddButton("OK", "Default x+5 yp+0 w75 h23", "SettingsUI_BtnOK")
-	GuiAddButton("Cancel", "x+5 yp+0 w80 h23", "SettingsUI_BtnCancel")	
+	GuiAddButton("Defaults", ButtonsShiftX "y+8 w90 h23", "SettingsUI_BtnDefaults")
+	GuiAddButton("OK", "Default x+5 yp+0 w90 h23", "SettingsUI_BtnOK")
+	GuiAddButton("Cancel", "x+5 yp+0 w90 h23", "SettingsUI_BtnCancel")	
 	
 	If (SkipItemInfoUpdateCall) {
-		GuiAddText("Use these buttons to change ItemInfo/AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
+		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w250 h50 cRed")
 		GuiAddText("", "x10 y10 w250 h10")
 	}	
 	
