@@ -495,7 +495,7 @@ CreateTradeSettingsUI()
 
     ; General
 
-	GuiAddGroupBox("[TradeMacro] General", "x7 y+7 w260 h320")
+	GuiAddGroupBox("[TradeMacro] General", "x7 y+7 w260 h350")
 
     ; Note: window handles (hwnd) are only needed if a UI tooltip should be attached.
 
@@ -522,7 +522,10 @@ CreateTradeSettingsUI()
 	AddToolTip(LblBrowserPathH, "Optional: Set the path to the browser (.exe) to open Urls with.")
 	GuiAddEdit(TradeOpts.BrowserPath, "x+10 yp-2 w150 h20", "BrowserPath", "BrowserPathH")
 
-	GuiAddCheckbox("Enable ""Url shortcuts"" without item hover.", "x17 yp+23 w220 h30", TradeOpts.OpenUrlsOnEmptyItem, "OpenUrlsOnEmptyItem", "OpenUrlsOnEmptyItemH")
+	GuiAddCheckbox("Copy urls to clipboard.", "x17 yp+23 w220 h30", TradeOpts.CopyUrlToClipboard, "CopyUrlToClipboard", "CopyUrlToClipboardH")
+	AddToolTip(CopyUrlToClipboardH, "Copies urls to your clipboard instead of directly opening them.")
+
+	GuiAddCheckbox("Enable ""Url shortcuts"" without item hover.", "x17 yp+30 w220 h30", TradeOpts.OpenUrlsOnEmptyItem, "OpenUrlsOnEmptyItem", "OpenUrlsOnEmptyItemH")
 	AddToolTip(OpenUrlsOnEmptyItemH, "This enables the ctrl+q and ctrl+w shortcuts`neven without hovering over an item.`nBe careful!")
 
 	GuiAddCheckbox("Download Data Files on start", "x17 yp+30 w200 h30", TradeOpts.DownloadDataFiles, "DownloadDataFiles", "DownloadDataFilesH")
@@ -534,7 +537,7 @@ CreateTradeSettingsUI()
 
     ; Hotkeys
 
-	GuiAddGroupBox("[TradeMacro] Hotkeys", "x7 yp+42 w260 h295")
+	GuiAddGroupBox("[TradeMacro] Hotkeys", "x7 yp+42 w260 h265")
 
 	GuiAddText("Price Check:", "x17 yp+28 w100 h20 0x0100", "LblPriceCheckHotKey", "LblPriceCheckHotKeyH")
 	AddToolTip(LblPriceCheckHotKeyH, "Check item prices.")
@@ -585,7 +588,7 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("", "x+5 yp-6 w30 h30", TradeOpts.ChangeLeagueEnabled, "ChangeLeagueEnabled", "ChangeLeagueEnabledH")
 	AddToolTip(ChangeLeagueEnabledH, "Enable Hotkey.")
 
-	Gui, Add, Link, x17 yp+32 w160 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
+	Gui, Add, Link, x17 yp+39 w160 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
 
     ; Search
 
