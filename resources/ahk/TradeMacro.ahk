@@ -172,7 +172,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	if(!isAdvancedPriceCheckRedirect) {
 		TradeFunc_DoParseClipboard()
 	}
-
 	iLvl     := Item.Level
 
 	; cancel search If Item is empty
@@ -661,6 +660,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
+	; intelligent search (poeprices.info)
+	If (Item.RarityLevel >= 2 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {	
+		If (Item.RarityLevel = 2 and not (Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
+			itemEligibleForIntelligentSearch := true	
+		}
+		Else {
+			itemEligibleForIntelligentSearch := true	
+		}		
+	}
+
 	; show item age
 	If (isItemAgeRequest) {
 		RequestParams.name        := Item.Name
@@ -713,7 +722,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 	ParsingError	:= ""
 	currencyUrl	:= ""
-	If (Item.IsCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
+	If (Item.IsCurrency and not Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
 			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)
 			If (error) {
@@ -729,6 +738,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				GoSub, ReadPoeNinjaCurrencyData
 			}
 		}
+	}
+	Else If (not openSearchInBrowser and TradeOpts.UseIntelligentItemSearch and itemEligibleForIntelligentSearch) {
+		Html := TradeFunc_DoPoePricesRequest(ItemData.FullText)
 	}
 	Else If (not openSearchInBrowser) {
 		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)
@@ -764,6 +776,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			ParsedData := TradeFunc_ParseAlternativeCurrencySearch(Item.Name, Payload)
 		}
+
+		SetClipboardContents("")
+		ShowToolTip("")
+		ShowToolTip(ParsedData)
+	}
+	Else If (TradeOpts.UseIntelligentItemSearch and itemEligibleForIntelligentSearch) {		
+		ParsedData := TradeFunc_ParsePoePricesInfoData(Html, Payload)
 
 		SetClipboardContents("")
 		ShowToolTip("")
@@ -1269,6 +1288,10 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	}
 
 	Return, html
+}
+
+TradeFunc_DoPoePricesRequest(RawItemData) {
+	Return, response
 }
 
 TradeFunc_MapCurrencyNameToID(name) {
@@ -1984,6 +2007,16 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	Title .= (isAdvancedSearch) ? "" : "`n`n" "Use Ctrl + Alt + D (default) instead for a more thorough search."
 
 	Return, Title
+}
+
+TradeFunc_ParsePoePricesInfoData(response, payload) {
+	Global Item, ItemData, TradeOpts
+	LeagueName := TradeGlobals.Get("LeagueName")
+
+	seperatorBig := "`n---------------------------------------------------------------------`n"
+	Title := ""
+	
+	Return,  Title
 }
 
 ; Trim names/string and add dots at the end If they are longer than specified length
