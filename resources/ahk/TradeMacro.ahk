@@ -1291,6 +1291,25 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 }
 
 TradeFunc_DoPoePricesRequest(RawItemData) {
+	EncodedItemData := StringToBase64UriEncoded(RawItemData)
+	
+	postData 	:= "data=" EncodedItemData
+	payLength	:= StrLen(postData)
+	url 		:= "http://poeprices.info/api"
+	options	:= ""
+
+	reqHeaders	:= []
+	reqHeaders.push("Host: poeprices.info")
+	reqHeaders.push("Connection: keep-alive")
+	reqHeaders.push("Cache-Control: max-age=0")
+	reqHeaders.push("Origin: https://poeprices.info")
+	reqHeaders.push("Upgrade-Insecure-Requests: 1")
+	reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8")
+	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	reqHeaders.push("Referer: https://poeprices.info/")
+
+	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
+	
 	Return, response
 }
 
