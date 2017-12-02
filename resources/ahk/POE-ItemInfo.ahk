@@ -10028,15 +10028,20 @@ AdvancedItemInfoExt() {
 	}
 }
 
-StringToBase64UriEncoded(stringIn) {
+StringToBase64UriEncoded(stringIn, noUriEncode = false) {
 	stringBase64 := ""
 	FileDelete, %A_ScriptDir%\temp\itemText.txt
 	FileAppend, %stringIn%, %A_ScriptDir%\temp\itemText.txt, utf-8
 	command		:= "certutil -encode -f ""%cd%\temp\itemText.txt"" ""%cd%\temp\base64ItemText.txt"" & type ""%cd%\temp\base64ItemText.txt"""
 	stringBase64	:= ReadConsoleOutputFromFile(command, "encodeToBase64.txt")
 	stringBase64	:= Trim(RegExReplace(stringBase64, "i)-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|77u/", ""))
-	stringBase64	:= UriEncode(stringBase64)
-	stringBase64	:= RegExReplace(stringBase64, "i)^(%0D)?(%0A)?|((%0D)?(%0A)?)+$", "")
+	
+	If (not noUriEncode) {
+		stringBase64	:= UriEncode(stringBase64)
+		stringBase64	:= RegExReplace(stringBase64, "i)^(%0D)?(%0A)?|((%0D)?(%0A)?)+$", "")
+	} Else {
+		stringBase64 := RegExReplace(stringBase64, "i)\r|\n", "") 
+	}	
 	
 	Return stringBase64
 }
@@ -10647,6 +10652,26 @@ ShowAssignedHotkeys:
 	Gui, 3:Cancel
 	return
 
+GuiEscape: 
+	; settings 
+	Gui, Cancel
+Return
+
+AboutGuiEscape:
+	Gui, About:Cancel
+Return
+
+ShowHotkeysGuiEscape:
+	Gui, ShowHotkeys:Cancel
+Return
+
+TranslateGuiEscape:
+	Gui, Translate:Cancel
+Return
+
+UpdateNotesGuiEscape:
+	Gui, UpdateNotes:Cancel
+Return
 
 CheckForUpdates:
 	If (not globalUpdateInfo.repo) {

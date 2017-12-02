@@ -1291,11 +1291,16 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 }
 
 TradeFunc_DoPoePricesRequest(RawItemData) {
-	EncodedItemData := StringToBase64UriEncoded(RawItemData)
+	EncodedItemData := StringToBase64UriEncoded(RawItemData,  true)
 	
-	postData 	:= "data=" EncodedItemData
+	postData 	:= EncodedItemData
 	payLength	:= StrLen(postData)
-	url 		:= "http://poeprices.info/api"
+	url 		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData
+	url2		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData "&w=1"
+	
+	;debugprintarray([RawitemData, url,  url2])
+	
+	return ""
 	options	:= ""
 
 	reqHeaders	:= []
@@ -4165,4 +4170,25 @@ Kill_CookieDataExe:
 
 	}
 	SetTimer, Kill_CookieDataExe, Off
+Return
+
+SelectModsGuiGuiEscape:
+	; trademacro advanced search 
+	Gui, SelectModsGui:Cancel
+Return
+
+CustomSearchGuiEscape:
+	Gui, CustomSearch:Cancel
+Return
+
+PricingTestGuiEscape:
+	Gui, PricingTest:Cancel
+Return
+
+CookieWindowGuiEscape:
+	Gui, CookieWindow:Cancel
+Return
+
+ConnectionFailureGuiEscape:
+	Gui, ConnectionFailure:Cancel
 Return
