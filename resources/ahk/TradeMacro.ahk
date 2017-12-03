@@ -660,13 +660,17 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; intelligent search (poeprices.info)
-	If (Item.RarityLevel >= 2 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {	
-		If (Item.RarityLevel = 2 and not (Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
-			itemEligibleForIntelligentSearch := true	
+	; predicted pricing (poeprices.info - machine learning)
+	If (Item.RarityLevel >= 2 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
+		If ((Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
+			If (Item.RarityLevel = 2) {
+				itemEligibleForPredictedPricing := false	
+			} Else {
+				itemEligibleForPredictedPricing := true
+			}
 		}
 		Else {
-			itemEligibleForIntelligentSearch := true	
+			itemEligibleForPredictedPricing := true	
 		}		
 	}
 
@@ -715,9 +719,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Payload := RequestParams.ToPayload()
 
 	If (openSearchInBrowser) {
-		ShowToolTip("Opening search in your browser...")
+		ShowToolTip("Opening search in your browser... ")
 	} Else {
-		ShowToolTip("Requesting search results...")
+		ShowToolTip("Requesting search results... ")
 	}
 
 	ParsingError	:= ""
@@ -739,7 +743,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}
 	}
-	Else If (not openSearchInBrowser and TradeOpts.UseIntelligentItemSearch and itemEligibleForIntelligentSearch) {
+	Else If (not openSearchInBrowser and TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing) {
 		Html := TradeFunc_DoPoePricesRequest(ItemData.FullText)
 	}
 	Else If (not openSearchInBrowser) {
@@ -781,12 +785,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
 	}
-	Else If (TradeOpts.UseIntelligentItemSearch and itemEligibleForIntelligentSearch) {		
-		ParsedData := TradeFunc_ParsePoePricesInfoData(Html, Payload)
-
+	Else If (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing) {		
 		SetClipboardContents("")
-		ShowToolTip("")
-		ShowToolTip(ParsedData)
+		If (TradeOpts.UsePredictedItemPricingGui and not false) { ;disabled for now
+			TradeFunc_ShowPredictedPricingFeedbackUI(Html)
+		} Else {
+			ParsedData := TradeFunc_ParsePoePricesInfoData(Html)
+			ShowToolTip("")
+			ShowToolTip(ParsedData)	
+		}		
 	}
 	Else {
 		; Check item age
@@ -1291,31 +1298,39 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 }
 
 TradeFunc_DoPoePricesRequest(RawItemData) {
-	EncodedItemData := StringToBase64UriEncoded(RawItemData,  true)
+	EncodedItemData := StringToBase64UriEncoded(RawItemData, true)
 	
 	postData 	:= EncodedItemData
 	payLength	:= StrLen(postData)
 	url 		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData
-	url2		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData "&w=1"
-	
-	;debugprintarray([RawitemData, url,  url2])
-	
-	return ""
-	options	:= ""
 
+	options	:= "RequestType: GET"
 	reqHeaders	:= []
-	reqHeaders.push("Host: poeprices.info")
+	
+	reqHeaders.push("Host: www.poeprices.info")
 	reqHeaders.push("Connection: keep-alive")
 	reqHeaders.push("Cache-Control: max-age=0")
 	reqHeaders.push("Origin: https://poeprices.info")
-	reqHeaders.push("Upgrade-Insecure-Requests: 1")
-	reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8")
-	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	reqHeaders.push("Referer: https://poeprices.info/")
-
+	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+	
+	ShowToolTip("Getting price prediction... ")
 	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
 	
-	Return, response
+	If (TradeOpts.Debug) {
+		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.html
+		FileAppend, %response%, %A_ScriptDir%\temp\DebugSearchOutput.html
+	}
+	
+	Try {
+		response := JSON.Load(response)
+		response.added := {}
+		response.added.requestUrl := url
+		response.added.browserUrl := url "&w=1"
+	} Catch e {
+		response := "Parsing response failed."
+	}	
+	
+	Return response
 }
 
 TradeFunc_MapCurrencyNameToID(name) {
@@ -2033,14 +2048,70 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	Return, Title
 }
 
-TradeFunc_ParsePoePricesInfoData(response, payload) {
+TradeFunc_ParsePoePricesInfoData(response) {
 	Global Item, ItemData, TradeOpts
 	LeagueName := TradeGlobals.Get("LeagueName")
 
-	seperatorBig := "`n---------------------------------------------------------------------`n"
-	Title := ""
+	Name := (Item.IsRare and not Item.IsMap) ? Item.Name " " Item.BaseName : Item.Name
+	headLine := Trim(StrReplace(Name, "Superior", ""))
+	; add corrupted tag
+	If (Item.IsCorrupted) {
+		headLine .= " [Corrupted] "
+	}
+
+	; add gem quality and level
+	If (Item.IsGem) {
+		headLine := Item.Name ", Q" Item.Quality "%"
+		If (Item.Level >= 16) {
+			headLine := Item.Name ", " Item.Level "`/" Item.Quality "%"
+		}
+	}
+	; add item sockets and links
+	If (ItemData.Sockets >= 5) {
+		headLine := Name " " ItemData.Sockets "s" ItemData.Links "l"
+	}
+	If (showItemLevel) {
+		headLine .= ", iLvl: " iLvl
+	}
+	headLine .= ", (" LeagueName ")"
+
+	lines := []
+	lines.push(["~~ Predicted item pricing (via machine-learning) ~~", "center", true])
+	lines.push([headLine, "left",  true])
+	lines.push(["", "left"])
+	lines.push(["   Price range: " Trim(response.min) " ~ " Trim(response.max) " " Trim(response.currency), "left"])
+	lines.push(["", "left", true])
+	lines.push(["", "left"])
+	lines.push(["Please consider supporting POEPRICES.INFO.", "left"])
+	lines.push(["Financially or via feedback on this feature on their website.", "left"])
 	
-	Return,  Title
+	maxWidth := 0
+	For i, line in lines {
+		maxWidth := StrLen(line[1]) > maxWidth ? StrLen(line[1]) : maxWidth
+	}
+
+	Title := ""
+	For i, line in lines {
+		If (RegExMatch(line[2], "i)center")) {
+			diff := maxWidth - StrLen(line[1])			
+			line[1] := StrPad(line[1], maxWidth - Floor(diff / 2), "left")
+			console.log(maxWidth - Floor(diff / 2))
+		}
+		If (RegExMatch(line[2], "i)right")) {
+			line[1] := StrPad(line[1], maxWidth, "left")
+		}
+		
+		Title .= line[1] "`n"
+		If (line[3]) {
+			seperator := ""
+			Loop, % maxWidth {
+				seperator .= "-"
+			}
+			Title .= seperator "`n"
+		}
+	}
+	
+	Return Title
 }
 
 ; Trim names/string and add dots at the end If they are longer than specified length
@@ -2821,6 +2892,24 @@ TradeFunc_CreateItemPricingTestGUI() {
 	Gui, PricingTest:Add, Text, x+10 yp+4 cGray, (Use Alt + N/A/E/W/C/T/O to submit a button)
 
 	Gui, PricingTest:Show, w500 , Item Pricing Test
+}
+
+TradeFunc_ShowPredictedPricingFeedbackUI(data) {
+	Gui, IntelligentSearch:Destroy
+	
+	Gui, IntelligentSearch:Margin, 10, 10
+	
+	Gui, IntelligentSearch:Font, bold, Verdana
+	Gui, IntelligentSearch:Add, Text, , Predicted item pricing (machine-learning powered by poeprices.info).	
+	
+	Gui, IntelligentSearch:Font, bold, Consolas
+	Gui, IntelligentSearch:Add, Text, w200, Price range: 
+	Gui, IntelligentSearch:Font, , Consolas
+	Gui, IntelligentSearch:Add, Text, w50 yp+0 x+10, "0.50 chaos" " - " "3.44 chaos" 
+	
+	
+	
+	Gui, IntelligentSearch:Show, AutoSize, Predicted Search
 }
 
 ; Open Gui window to show the items variable mods, select the ones that should be used in the search and set their min/max values
@@ -4088,7 +4177,7 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 			TradeFunc_OpenUrlInBrowser("http://poe.trade/" ParsedUrl1)
 		}
 		Else {
-			ShowToolTip("Requesting search results...")
+			ShowToolTip("Requesting search results... ")
 			Html := TradeFunc_DoPostRequest(Payload)
 			ParsedData := TradeFunc_ParseHtml(Html, Payload)
 			SetClipboardContents(ParsedData)
@@ -4191,4 +4280,8 @@ Return
 
 ConnectionFailureGuiEscape:
 	Gui, ConnectionFailure:Cancel
+Return
+
+IntelligentSearchGuiEscape:
+	Gui, IntelligentSearch:Cancel
 Return
