@@ -2928,53 +2928,53 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	_headLine .= ", (" TradeGlobals.Get("LeagueName") ")"
 	
 	
-	Gui, IntelligentSearch:Destroy
+	Gui, PredictedPricing:Destroy
 	
-	Gui, IntelligentSearch:Margin, 10, 10
+	Gui, PredictedPricing:Margin, 10, 10
 
-	Gui, IntelligentSearch:Font, bold s8, Verdana
-	Gui, IntelligentSearch:Add, Text, BackgroundTrans, Priced using machine learning algorithms.
-	Gui, IntelligentSearch:Add, Text, BackgroundTrans x+5 yp+0 cRed, (Close with ESC)
+	Gui, PredictedPricing:Font, bold s8, Verdana
+	Gui, PredictedPricing:Add, Text, BackgroundTrans, Priced using machine learning algorithms.
+	Gui, PredictedPricing:Add, Text, BackgroundTrans x+5 yp+0 cRed, (Close with ESC)
 	
-	Gui, IntelligentSearch:Add, GroupBox, w400 h90 y+10 x10, Results
-	Gui, IntelligentSearch:Font, norm s10, Consolas
-	Gui, IntelligentSearch:Add, Text, yp+25 x20 w380 BackgroundTrans, % _headLine
-	Gui, IntelligentSearch:Font, norm bold, Consolas
-	Gui, IntelligentSearch:Add, Text, x20 w90 y+10 BackgroundTrans, % "Price range: "
-	Gui, IntelligentSearch:Font, norm, Consolas
-	Gui, IntelligentSearch:Add, Text, x+5 yp+0 BackgroundTrans, % Trim(data.min) " ~ " Trim(data.max) " " Trim(data.currency)	
+	Gui, PredictedPricing:Add, GroupBox, w400 h90 y+10 x10, Results
+	Gui, PredictedPricing:Font, norm s10, Consolas
+	Gui, PredictedPricing:Add, Text, yp+25 x20 w380 BackgroundTrans, % _headLine
+	Gui, PredictedPricing:Font, norm bold, Consolas
+	Gui, PredictedPricing:Add, Text, x20 w90 y+10 BackgroundTrans, % "Price range: "
+	Gui, PredictedPricing:Font, norm, Consolas
+	Gui, PredictedPricing:Add, Text, x+5 yp+0 BackgroundTrans, % Trim(data.min) " ~ " Trim(data.max) " " Trim(data.currency)	
 	_url := data.added.browserUrl
-	Gui, IntelligentSearch:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
+	Gui, PredictedPricing:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
 	
-	Gui, IntelligentSearch:Font, norm s8, Verdana
-	Gui, IntelligentSearch:Add, Text, cRed BackgroundTrans x15 y130 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
+	Gui, PredictedPricing:Font, norm s8, Verdana
+	Gui, PredictedPricing:Add, Text, cRed BackgroundTrans x15 y130 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
 	
-	Gui, IntelligentSearch:Font, bold s8, Verdana
-	Gui, IntelligentSearch:Add, GroupBox, w400 h230 y165 x10, Feedback
-	Gui, IntelligentSearch:Font, norm, Verdana
+	Gui, PredictedPricing:Font, bold s8, Verdana
+	Gui, PredictedPricing:Add, GroupBox, w400 h230 y165 x10, Feedback
+	Gui, PredictedPricing:Font, norm, Verdana
 	
-	Gui, IntelligentSearch:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
-	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio1 Group BackgroundTrans, Low
-	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio2 Checked BackgroundTrans, Fair
-	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio3 BackgroundTrans, High
+	Gui, PredictedPricing:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio1 Group BackgroundTrans, Low
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio2 Checked BackgroundTrans, Fair
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio3 BackgroundTrans, High
 	
-	Gui, IntelligentSearch:Add, Text, x20 yp+30 BackgroundTrans, % "Add comment (max. 1000 characters):"
-	Gui, IntelligentSearch:Add, Edit, x20 yp+20 w380 r4 limit1000 vPredictedPricingComment, 
+	Gui, PredictedPricing:Add, Text, x20 yp+30 BackgroundTrans, % "Add comment (max. 1000 characters):"
+	Gui, PredictedPricing:Add, Edit, x20 yp+20 w380 r4 limit1000 vPredictedPricingComment, 
 	
-	Gui, IntelligentSearch:add, Button, x260 w90 y+5 gPredictedPricingSendFeedback, Send && Close
-	Gui, IntelligentSearch:add, Button, x+10 w40 gPredictedPricingClose, Close
+	Gui, PredictedPricing:add, Button, x260 w90 y+5 gPredictedPricingSendFeedback, Send && Close
+	Gui, PredictedPricing:add, Button, x+10 w40 gPredictedPricingClose, Close
 	
-	Gui, IntelligentSearch:Add, Text, x15 y+20 cGreen BackgroundTrans, % "This feature is powered by poeprices.info!"
-	Gui, IntelligentSearch:Add, Link, x15 y+5 cBlue BackgroundTrans, <a href="https://www.paypal.com/donate/?token=x154t12a0L0CE7BOpfpu9CcwpTa__7fOZ9rg1BECyXchYYt33Kbt5Gfj0rsDeg5WF6IhWG&country.x=US&locale.x=US">Support them via PayPal</a>
-	Gui, IntelligentSearch:Add, Text, x+5 yp+0 cDefault BackgroundTrans, % "or"
-	Gui, IntelligentSearch:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
+	Gui, PredictedPricing:Add, Text, x15 y+20 cGreen BackgroundTrans, % "This feature is powered by poeprices.info!"
+	Gui, PredictedPricing:Add, Link, x15 y+5 cBlue BackgroundTrans, <a href="https://www.paypal.com/donate/?token=x154t12a0L0CE7BOpfpu9CcwpTa__7fOZ9rg1BECyXchYYt33Kbt5Gfj0rsDeg5WF6IhWG&country.x=US&locale.x=US">Support them via PayPal</a>
+	Gui, PredictedPricing:Add, Text, x+5 yp+0 cDefault BackgroundTrans, % "or"
+	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
 	
 	; invisible fields
-	Gui, IntelligentSearch:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingEncodedData, % data.added.encodedData
-	Gui, IntelligentSearch:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingLeague, % data.added.League
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingEncodedData, % data.added.encodedData
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingLeague, % data.added.League
 	
-	Gui, IntelligentSearch:Color, FFFFFF	
-	Gui, IntelligentSearch:Show, AutoSize, Predicted Item Pricing
+	Gui, PredictedPricing:Color, FFFFFF	
+	Gui, PredictedPricing:Show, AutoSize, Predicted Item Pricing
 	ControlFocus, Send && Close, Predicted Item Pricing
 }
 
@@ -4353,19 +4353,19 @@ ConnectionFailureGuiEscape:
 	Gui, ConnectionFailure:Cancel
 Return
 
-IntelligentSearchGuiEscape:
-	Gui, IntelligentSearch:Destroy
+PredictedPricingGuiEscape:
+	Gui, PredictedPricing:Destroy
 	TradeFunc_ActivatePoeWindow()
 Return
 
 PredictedPricingClose:
-	Gui, IntelligentSearch:Destroy
+	Gui, PredictedPricing:Destroy
 	TradeFunc_ActivatePoeWindow()
 Return
 
 PredictedPricingSendFeedback:
-	Gui, IntelligentSearch:Submit
-	Gui, IntelligentSearch:Destroy
+	Gui, PredictedPricing:Submit
+	Gui, PredictedPricing:Destroy
 	TradeFunc_ActivatePoeWindow()
 	_rating := ""
 	If (PredictionPricingRadio1) {
