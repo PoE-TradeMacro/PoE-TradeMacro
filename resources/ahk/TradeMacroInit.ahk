@@ -658,10 +658,8 @@ CreateTradeSettingsUI()
 	AddToolTip(UsePredictedItemPricingH, "Use predicted item pricing via machine-learning algorithms.`nReplaces the default search, works with magic/rare/unique items.`n`nProvided by poeprices.info.")
 
 	; option group start
-	/*
 	GuiAddCheckbox("Predicted item pricing: Use feedback Gui.", "x337 yp+30 w280 h40", TradeOpts.UsePredictedItemPricingGui, "UsePredictedItemPricingGui", "UsePredictedItemPricingGuiH")
 	AddToolTip(UsePredictedItemPricingGuiH, "Use a Gui instead of the default tooltip to display results.`nYou can send some feedback to improve this feature.")
-	*/
 
 	; header
 	GuiAddText("Pre-Select Options (Advanced Search)", "x337 yp+43 w280 h20 0x0100 cDA4F49", "", "")
