@@ -2899,7 +2899,7 @@ TradeFunc_CreateItemPricingTestGUI() {
 TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Global 
 	
-	If (not data.min and data.max) {
+	If (not data.min and not data.max) {
 		ShowTooltip("ERROR: Request to poeprices.info failed! ", true)
 		Return
 	}
@@ -2946,11 +2946,11 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	_url := data.added.browserUrl
 	Gui, PredictedPricing:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
 	
-	Gui, PredictedPricing:Font, norm s8, Verdana
-	Gui, PredictedPricing:Add, Text, cRed BackgroundTrans x15 y130 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
+	Gui, PredictedPricing:Font, norm s8 italic, Verdana
+	Gui, PredictedPricing:Add, Text, BackgroundTrans x15 y135 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
 	
 	Gui, PredictedPricing:Font, bold s8, Verdana
-	Gui, PredictedPricing:Add, GroupBox, w400 h230 y165 x10, Feedback
+	Gui, PredictedPricing:Add, GroupBox, w400 h230 y175 x10, Feedback
 	Gui, PredictedPricing:Font, norm, Verdana
 	
 	Gui, PredictedPricing:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
