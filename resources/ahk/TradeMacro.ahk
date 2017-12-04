@@ -787,7 +787,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	Else If (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing) {		
 		SetClipboardContents("")
-		If (TradeOpts.UsePredictedItemPricingGui and not false) { ;disabled for now
+		If (TradeOpts.UsePredictedItemPricingGui and false) { ;disabled for now
 			TradeFunc_ShowPredictedPricingFeedbackUI(Html)
 		} Else {
 			ParsedData := TradeFunc_ParsePoePricesInfoData(Html)
@@ -2895,21 +2895,72 @@ TradeFunc_CreateItemPricingTestGUI() {
 }
 
 TradeFunc_ShowPredictedPricingFeedbackUI(data) {
+	Global 
+
+	_Name := (Item.IsRare and not Item.IsMap) ? Item.Name " " Item.BaseName : Item.Name
+	_headLine := Trim(StrReplace(_Name, "Superior", ""))
+	; add corrupted tag
+	If (Item.IsCorrupted) {
+		_headLine .= " [Corrupted] "
+	}
+
+	; add gem quality and level
+	If (Item.IsGem) {
+		_headLine := Item.Name ", Q" Item.Quality "%"
+		If (Item.Level >= 16) {
+			_headLine := Item.Name ", " Item.Level "`/" Item.Quality "%"
+		}
+	}
+	; add item sockets and links
+	If (ItemData.Sockets >= 5) {
+		_headLine := _Name " " ItemData.Sockets "s" ItemData.Links "l"
+	}
+	If (showItemLevel) {
+		_headLine .= ", iLvl: " iLvl
+	}
+	_headLine .= ", (" TradeGlobals.Get("LeagueName") ")"
+	
+	
 	Gui, IntelligentSearch:Destroy
 	
 	Gui, IntelligentSearch:Margin, 10, 10
+
+	Gui, IntelligentSearch:Font, bold s8, Verdana
+	Gui, IntelligentSearch:Add, Text, BackgroundTrans, Priced using machine learning algorithms.
 	
-	Gui, IntelligentSearch:Font, bold, Verdana
-	Gui, IntelligentSearch:Add, Text, , Predicted item pricing (machine-learning powered by poeprices.info).	
+	Gui, IntelligentSearch:Add, GroupBox, w400 h90 y+10 x10, Results
+	Gui, IntelligentSearch:Font, norm s10, Consolas
+	Gui, IntelligentSearch:Add, Text, yp+25 x20 w380 BackgroundTrans, % _headLine
+	Gui, IntelligentSearch:Font, norm bold, Consolas
+	Gui, IntelligentSearch:Add, Text, x20 w90 y+10 BackgroundTrans, % "Price range: "
+	Gui, IntelligentSearch:Font, norm, Consolas
+	Gui, IntelligentSearch:Add, Text, x+5 yp+0 BackgroundTrans, % Trim(data.min) " ~ " Trim(data.min) " " Trim(data.currency)	
+	_url := data.added.browserUrl
+	Gui, IntelligentSearch:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
 	
-	Gui, IntelligentSearch:Font, bold, Consolas
-	Gui, IntelligentSearch:Add, Text, w200, Price range: 
-	Gui, IntelligentSearch:Font, , Consolas
-	Gui, IntelligentSearch:Add, Text, w50 yp+0 x+10, "0.50 chaos" " - " "3.44 chaos" 
+	Gui, IntelligentSearch:Font, bold s8, Verdana
+	Gui, IntelligentSearch:Add, GroupBox, w400 h230 y130 x10, Feedback
+	Gui, IntelligentSearch:Font, norm, Verdana
 	
+	Gui, IntelligentSearch:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
+	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio1 Group BackgroundTrans, Low
+	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio2 Checked BackgroundTrans, Fair
+	Gui, IntelligentSearch:Add, Radio, x20 yp+20 vPredictionPricingRadio3 BackgroundTrans, High
 	
+	Gui, IntelligentSearch:Add, Text, x20 yp+30 BackgroundTrans, % "Add comment (max. 1000 characters):"
+	Gui, IntelligentSearch:Add, Edit, x20 yp+20 w380 r4 limit1000, 
 	
-	Gui, IntelligentSearch:Show, AutoSize, Predicted Search
+	Gui, IntelligentSearch:add, Button, x260 w90 y+5, Send && Close
+	Gui, IntelligentSearch:add, Button, x+10 w40, Close
+	
+	Gui, IntelligentSearch:Add, Text, x15 y+20 cGreen BackgroundTrans, % "This feature is powered by poeprices.info!"
+	Gui, IntelligentSearch:Add, Link, x15 y+5 cBlue BackgroundTrans, <a href="https://www.paypal.com/donate/?token=x154t12a0L0CE7BOpfpu9CcwpTa__7fOZ9rg1BECyXchYYt33Kbt5Gfj0rsDeg5WF6IhWG&country.x=US&locale.x=US">Support them via PayPal</a>
+	Gui, IntelligentSearch:Add, Text, x+5 yp+0 cDefault BackgroundTrans, % "or"
+	Gui, IntelligentSearch:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
+	
+	Gui, IntelligentSearch:Color, FFFFFF	
+	Gui, IntelligentSearch:Show, AutoSize, Predicted Item Pricing
+	ControlFocus, Send && Close, Predicted Item Pricing
 }
 
 ; Open Gui window to show the items variable mods, select the ones that should be used in the search and set their min/max values
