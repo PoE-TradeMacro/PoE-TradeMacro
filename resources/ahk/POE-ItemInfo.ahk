@@ -343,6 +343,9 @@ class Item_ {
 		This.IsMapFragment	:= False
 		This.IsEssence		:= False
 		This.IsRelic		:= False
+		This.IsElderBase	:= False
+		This.IsShaperBase	:= False
+		This.IsAbyssJewel	:= False
 	}
 }
 Global Item := new Item_
