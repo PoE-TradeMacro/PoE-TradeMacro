@@ -79,7 +79,10 @@
 					commandHdr  .= cookies
 				}
 			}
-			If (StrLen(ioData) and not requestType = "GET") {
+			If (StrLen(ioData) and not requestType = "GET") {				
+				If (requestType = "POST") {
+					commandData .= "-X POST "
+				}
 				commandData .= "--data """ ioData """ "
 			}
 			

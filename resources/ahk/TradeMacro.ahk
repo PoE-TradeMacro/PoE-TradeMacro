@@ -4379,12 +4379,13 @@ PredictedPricingSendFeedback:
 	TradeFunc_PredictedPricingSendFeedback(_rating, PredictedPricingComment, PredictedPricingEncodedData, PredictedPricingLeague)
 Return
 
-TradeFunc_PredictedPricingSendFeedback(rating, comment, encodedData, league) {
+TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league) {
 	postData 	:= ""
-	postData := rating ? postData "rating=" UriEncode(rating) "&" : postData
-	postData := comment ? postData "comment=" UriEncode(comment) "&" : postData
-	postData := encodedData ? postData "encodedData=" encodedData "&" : postData
+	postData := selector ? postData "selector=" UriEncode(Trim(selector)) "&" : postData
+	postData := comment ? postData "feedbacktxt=" UriEncode(comment) "&" : postData
+	postData := encodedData ? postData "qitem_txt=" encodedData "&" : postData
 	postData := league ? postData "league=" UriEncode(league) "&" : postData
+	postData := postData "source=" UriEncode("poetrademacro") "&"
 	postData := RegExReplace(postData, "(\&)$")
 	
 	payLength	:= StrLen(postData)
@@ -4400,7 +4401,7 @@ TradeFunc_PredictedPricingSendFeedback(rating, comment, encodedData, league) {
 	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
 
 	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
-	If (response != "Success") {
+	If (not RegExMatch(response, "i)^(low|fair|high)$")) {
 		ShowTooltip("ERROR: Sending feedback failed. ", true)
 	}
 }
