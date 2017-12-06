@@ -2954,17 +2954,23 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Font, norm, Verdana
 	
 	Gui, PredictedPricing:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
-	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio1 Group BackgroundTrans, Low
-	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio2 Checked BackgroundTrans, Fair
+	Gui, PredictedPricing:Add, Progress, x16 yp+18 w2 h56 BackgroundRed hwndPredictedPricingHiddenControl1
+	GuiControl, Hide, % PredictedPricingHiddenControl1
+	Gui, PredictedPricing:Add, Radio, x20 yp+2 vPredictionPricingRadio1 Group BackgroundTrans, Low
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio2 BackgroundRed, Fair
 	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio3 BackgroundTrans, High
 	
 	Gui, PredictedPricing:Add, Text, x20 yp+30 BackgroundTrans, % "Add comment (max. 1000 characters):"
 	Gui, PredictedPricing:Add, Edit, x20 yp+20 w380 r4 limit1000 vPredictedPricingComment, 
 	
-	Gui, PredictedPricing:add, Button, x260 w90 y+5 gPredictedPricingSendFeedback, Send && Close
-	Gui, PredictedPricing:add, Button, x+10 w40 gPredictedPricingClose, Close
+	Gui, PredictedPricing:Add, Text, x100 y+10 cRed hwndPredictedPricingHiddenControl2, Please select a rating first!
+	GuiControl, Hide, % PredictedPricingHiddenControl2
+	Gui, PredictedPricing:Add, Button, x260 w90 yp-5 gPredictedPricingSendFeedback, Send && Close
+	Gui, PredictedPricing:Add, Button, x+11 w40 gPredictedPricingClose, Close
 	
+	Gui, PredictedPricing:Font, bold s8, Verdana
 	Gui, PredictedPricing:Add, Text, x15 y+20 cGreen BackgroundTrans, % "This feature is powered by poeprices.info!"
+	Gui, PredictedPricing:Font, norm, Verdana
 	Gui, PredictedPricing:Add, Link, x15 y+5 cBlue BackgroundTrans, <a href="https://www.paypal.com/donate/?token=x154t12a0L0CE7BOpfpu9CcwpTa__7fOZ9rg1BECyXchYYt33Kbt5Gfj0rsDeg5WF6IhWG&country.x=US&locale.x=US">Support them via PayPal</a>
 	Gui, PredictedPricing:Add, Text, x+5 yp+0 cDefault BackgroundTrans, % "or"
 	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
@@ -4364,8 +4370,15 @@ PredictedPricingClose:
 Return
 
 PredictedPricingSendFeedback:
-	Gui, PredictedPricing:Submit
-	Gui, PredictedPricing:Destroy
+	Gui, PredictedPricing:Submit, NoHide
+	If (PredictionPricingRadio1 or PredictionPricingRadio2 or PredictionPricingRadio3) {
+		Gui, PredictedPricing:Destroy
+	} Else {
+		GuiControl, Show, % PredictedPricingHiddenControl1
+		GuiControl, Show, % PredictedPricingHiddenControl2
+		Return
+	}
+
 	TradeFunc_ActivatePoeWindow()
 	_rating := ""
 	If (PredictionPricingRadio1) {
@@ -4389,7 +4402,7 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league) {
 	postData := RegExReplace(postData, "(\&)$")
 	
 	payLength	:= StrLen(postData)
-	url 		:= "https://www.poeprices.info/api"
+	url 		:= "https://www.poeprices.info/send_feedback"
 	options	:= ""
 
 	reqHeaders	:= []
@@ -4401,7 +4414,7 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league) {
 	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
 
 	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
-	If (not RegExMatch(response, "i)^(low|fair|high)$")) {
+	If (not RegExMatch(response, "i)^""?(low|fair|high)""?$")) {
 		ShowTooltip("ERROR: Sending feedback failed. ", true)
 	}
 }
