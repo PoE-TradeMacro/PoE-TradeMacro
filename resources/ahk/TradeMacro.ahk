@@ -248,7 +248,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
-			preparedItem.specialBase	:= Item.isAbyssJewel ? "Abyss Jewel" : preparedItem.specialBase
+			;preparedItem.specialBase	:= Item.isAbyssJewel ? "Abyss Jewel" : preparedItem.specialBase
 		}		
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
@@ -350,15 +350,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 		
 		; special bases (elder/shaper)
-		; TODO: add request param
 		If (Item.IsShaperBase or Item.IsElderBase) {
 			If (Item.IsShaperBase) {
-				;RequestParams. := 1
-				;Item.UsedInSearch.specialBase := "Shaper"
+				RequestParams.Shaper := 1
+				Item.UsedInSearch.specialBase := "Shaper"
 			}
 			Else If (Item.IsElderBase) {
-				;RequestParams. := 1
-				;Item.UsedInSearch.specialBase := "Elder"
+				RequestParams.Elder := 1
+				Item.UsedInSearch.specialBase := "Elder"
 			}
 		}
 	}
@@ -456,17 +455,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.online := ""
 		}
 		
-		; special bases (elder/shaper/abyss jewel)
-		; TODO: add request param
+		; special bases (elder/shaper)
 		If (s.useSpecialBase) {
 			If (Item.IsShaperBase) {
-				;RequestParams. := 1
+				RequestParams.Shaper := 1
 			}
 			Else If (Item.IsElderBase) {
-				;RequestParams. := 1
-			}
-			If (Item.IsAbyssJewel) {
-				;RequestParams. := 1
+				RequestParams.Elder := 1
 			}
 		}		
 	}
@@ -691,7 +686,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.IsJewel and Item.IsUnique) {
 			RequestParams.xbase := Item.SubType
 		}
-		; TODO: add request param
+		; TODO: add request param (not supported yet)
 		If (Item.IsAbyssJewel) {
 			;RequestParams. := 1
 			;Item.UsedInSearch.abyssJewel := 1 
@@ -2142,6 +2137,10 @@ class RequestParams_ {
 	enchanted 	:= ""
 	progress_min	:= ""
 	progress_max	:= ""
+	sockets_a_min	:= ""
+	sockets_a_max	:= ""
+	shaper		:= ""
+	elder		:= ""
 
 	ToPayload() {
 		modGroupStr := ""
@@ -3332,8 +3331,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase %baseCheckState%, % "Use Item Base"
 
 	If (advItem.specialBase) {
-		; TODO: enable once it's implemented on poe.trade
-		;Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
+		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 	}
 
 	Item.UsedInSearch.SearchType := "Advanced"
