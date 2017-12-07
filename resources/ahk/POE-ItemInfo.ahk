@@ -840,9 +840,9 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			return
 		}
 		; Abyss Jewels
-		If (RegExMatch(LoopField, "i)(Hypnotic Eye|Murderous Eye|Ghastly Eye) Jewel", match)) {
+		If (RegExMatch(LoopField, "i)(Hypnotic|Murderous|Ghastly|Searching) Eye Jewel", match)) {
 			BaseType = Jewel
-			SubType := match1 " Jewel"
+			SubType := match1 " Eye Jewel"
 			return
 		}
 
