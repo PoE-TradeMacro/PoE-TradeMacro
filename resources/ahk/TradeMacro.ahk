@@ -524,6 +524,20 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 			Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
 		}
+		
+		If (Item.IsShaperBase) {
+			RequestParams.Shaper := 1
+			Item.UsedInSearch.specialBase := "Shaper"
+		} Else {		
+			RequestParams.Shaper := 0
+		} 
+		
+		If (Item.IsElderBase) {
+			RequestParams.Elder := 1
+			Item.UsedInSearch.specialBase := "Elder"
+		} Else {			
+			RequestParams.Elder := 0
+		}
 	} Else {
 		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
