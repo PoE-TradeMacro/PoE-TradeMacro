@@ -2978,6 +2978,9 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	; invisible fields
 	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingEncodedData, % data.added.encodedData
 	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingLeague, % data.added.League
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingMin, % data.min
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingMax, % data.max
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingCurrency, % data.currency
 	
 	Gui, PredictedPricing:Color, FFFFFF	
 	Gui, PredictedPricing:Show, AutoSize, Predicted Item Pricing
@@ -4388,17 +4391,28 @@ PredictedPricingSendFeedback:
 	} Else If (PredictionPricingRadio3) {
 		_rating := "High"
 	}
-
-	TradeFunc_PredictedPricingSendFeedback(_rating, PredictedPricingComment, PredictedPricingEncodedData, PredictedPricingLeague)
+	
+	_prices := {}
+	_prices.min := PredictedPricingMin
+	_prices.max := PredictedPricingMax
+	_prices.currency := PredictedPricingCurrency
+	TradeFunc_PredictedPricingSendFeedback(_rating, PredictedPricingComment, PredictedPricingEncodedData, PredictedPricingLeague, _prices)
 Return
 
-TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league) {
+TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, price) {
 	postData 	:= ""
 	postData := selector ? postData "selector=" UriEncode(Trim(selector)) "&" : postData
 	postData := comment ? postData "feedbacktxt=" UriEncode(comment) "&" : postData
 	postData := encodedData ? postData "qitem_txt=" encodedData "&" : postData
+	postData := price.min ? postData "min=" UriEncode(price.min "") "&" : postData
+	postData := price.max ? postData "max=" UriEncode(price.max "") "&" : postData
+	postData := price.currency ? postData "currency=" UriEncode(price.currency "") "&" : postData
 	postData := league ? postData "league=" UriEncode(league) "&" : postData
 	postData := postData "source=" UriEncode("poetrademacro") "&"
+
+	If (TradeOpts.Debug) {
+		postData := postData "debug=1" "&"	
+	}
 	postData := RegExReplace(postData, "(\&)$")
 	
 	payLength	:= StrLen(postData)
