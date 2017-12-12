@@ -46,6 +46,9 @@
 			If (RegExMatch(options, "i)PreventErrorMsg")) {
 				PreventErrorMsg := true
 			}
+			If (RegExMatch(options, "i)RequestType:(.*)", match)) {
+				requestType := Trim(match1)
+			}
 		}
 
 		e := {}
@@ -58,18 +61,28 @@
 					commandData .= "-o """ SavePath """ "	; set target destination and name
 				}
 			} Else {
-				commandData .= " -" redirect "ks --compressed "			
-				commandHdr  .= " -I" redirect "ks "
-			}
+				commandData .= " -" redirect "ks --compressed "
+				If (requestType = "GET") {
+					commandHdr  .= " -k" redirect "s "
+				} Else {
+					commandHdr  .= " -I" redirect "ks "
+				}
+			}			
+			
 			If (StrLen(headers)) {
-				commandData .= headers
-				commandHdr  .= headers
+				If (not requestType = "GET") {
+					commandData .= headers
+					commandHdr  .= headers	
+				}				
 				If (StrLen(cookies)) {
 					commandData .= cookies
 					commandHdr  .= cookies
 				}
 			}
-			If (StrLen(ioData)) {
+			If (StrLen(ioData) and not requestType = "GET") {				
+				If (requestType = "POST") {
+					commandData .= "-X POST "
+				}
 				commandData .= "--data """ ioData """ "
 			}
 			
@@ -83,9 +96,6 @@
 
 			; get data
 			html	:= StdOutStream(curl """" url """" commandData)
-			if (instr(url, "cdn")) {
-				;msgbox % curl """" url """" commandData
-			}
 			;html := ReadConsoleOutputFromFile(commandData """" url """", "commandData") ; alternative function
 
 			; get return headers in seperate request

@@ -638,20 +638,28 @@ CreateTradeSettingsUI()
 	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
 
 	; option group start
-	GuiAddCheckbox("Remove multiple Listings from same Account", "x337 yp+30 w280 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
+	GuiAddCheckbox("Force max links (certain corrupted items).", "x337 yp+30 w280 h40", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
+	AddToolTip(ForceMaxLinksH, "Searches for corrupted 3/4 max-socket unique items always use`nthe maximum amount of links if your item is fully linked.")
+	
+	; option group start
+	GuiAddCheckbox("Remove multiple Listings from same Account.", "x337 yp+30 w280 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
 	AddToolTip(RemoveMultipleListingsFromSameAccountH, "Removes multiple listings from the same account from`nyour search results (to combat market manipulators).`n`nThe removed items are also removed from the average and`nmedian price calculations.")
 
 	; option group start
-	GuiAddCheckbox("Force max links (certain corrupted items)", "x337 yp+30 w280 h40", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
-	AddToolTip(ForceMaxLinksH, "Searches for corrupted 3/4 max-socket unique items always use`nthe maximum amount of links if your item is fully linked.")
-
-	; option group start
-	GuiAddCheckbox("Alternative currency search", "x337 yp+30 w280 h40", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
-	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
-
-	; option group start
-	GuiAddCheckbox("Show prices as chaos equivalent", "x337 yp+30 w280 h40", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
+	GuiAddCheckbox("Show prices as chaos equivalent.", "x337 yp+30 w280 h40", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
 	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaos equivalent.")
+	
+	; option group start
+	GuiAddCheckbox("Alternative currency search.", "x337 yp+30 w280 h40", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
+	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
+	
+	; option group start
+	GuiAddCheckbox("Use predicted item pricing (experimental).", "x337 yp+30 w280 h40", TradeOpts.UsePredictedItemPricing, "UsePredictedItemPricing", "UsePredictedItemPricingH")
+	AddToolTip(UsePredictedItemPricingH, "Use predicted item pricing via machine-learning algorithms.`nReplaces the default search, works with magic/rare/unique items.`n`nProvided by poeprices.info.")
+
+	; option group start
+	GuiAddCheckbox("Predicted item pricing: Use feedback Gui.", "x337 yp+30 w280 h40", TradeOpts.UsePredictedItemPricingGui, "UsePredictedItemPricingGui", "UsePredictedItemPricingGuiH")
+	AddToolTip(UsePredictedItemPricingGuiH, "Use a Gui instead of the default tooltip to display results.`nYou can send some feedback to improve this feature.")
 
 	; header
 	GuiAddText("Pre-Select Options (Advanced Search)", "x337 yp+43 w280 h20 0x0100 cDA4F49", "", "")

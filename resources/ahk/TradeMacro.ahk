@@ -172,7 +172,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	if(!isAdvancedPriceCheckRedirect) {
 		TradeFunc_DoParseClipboard()
 	}
-
 	iLvl     := Item.Level
 
 	; cancel search If Item is empty
@@ -721,6 +720,20 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
+	; predicted pricing (poeprices.info - machine learning)
+	If (Item.RarityLevel >= 2 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
+		If ((Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
+			If (Item.RarityLevel = 2) {
+				itemEligibleForPredictedPricing := false	
+			} Else {
+				itemEligibleForPredictedPricing := true
+			}
+		}
+		Else {
+			itemEligibleForPredictedPricing := true	
+		}		
+	}
+
 	; show item age
 	If (isItemAgeRequest) {
 		RequestParams.name        := Item.Name
@@ -765,14 +778,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Payload := RequestParams.ToPayload()
 
 	If (openSearchInBrowser) {
-		ShowToolTip("Opening search in your browser...")
-	} Else {
-		ShowToolTip("Requesting search results...")
+		ShowToolTip("Opening search in your browser... ")
+	} Else If (not (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing)) {
+		ShowToolTip("Requesting search results... ")
 	}
 
 	ParsingError	:= ""
 	currencyUrl	:= ""
-	If (Item.IsCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
+	If (Item.IsCurrency and not Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
 			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)
 			If (error) {
@@ -788,6 +801,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				GoSub, ReadPoeNinjaCurrencyData
 			}
 		}
+	}
+	Else If (not openSearchInBrowser and TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing) {
+		Html := TradeFunc_DoPoePricesRequest(ItemData.FullText)
 	}
 	Else If (not openSearchInBrowser) {
 		Html := TradeFunc_DoPostRequest(Payload, openSearchInBrowser)
@@ -827,6 +843,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		SetClipboardContents("")
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
+	}
+	Else If (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing) {		
+		SetClipboardContents("")
+		If (TradeOpts.UsePredictedItemPricingGui) { ;disabled for now
+			TradeFunc_ShowPredictedPricingFeedbackUI(Html)
+		} Else {
+			ParsedData := TradeFunc_ParsePoePricesInfoData(Html)
+			ShowToolTip("")
+			ShowToolTip(ParsedData)	
+		}		
 	}
 	Else {
 		; Check item age
@@ -1328,6 +1354,44 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	}
 
 	Return, html
+}
+
+TradeFunc_DoPoePricesRequest(RawItemData) {
+	EncodedItemData := StringToBase64UriEncoded(RawItemData, true)
+	
+	postData 	:= EncodedItemData
+	payLength	:= StrLen(postData)
+	url 		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData
+
+	options	:= "RequestType: GET"
+	reqHeaders	:= []
+	
+	reqHeaders.push("Host: www.poeprices.info")
+	reqHeaders.push("Connection: keep-alive")
+	reqHeaders.push("Cache-Control: max-age=0")
+	reqHeaders.push("Origin: https://poeprices.info")
+	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
+	
+	ShowToolTip("Getting price prediction... ")
+	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
+	
+	If (TradeOpts.Debug) {
+		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.html
+		FileAppend, %response%, %A_ScriptDir%\temp\DebugSearchOutput.html
+	}
+	
+	Try {
+		response := JSON.Load(response)
+		response.added := {}
+		response.added.encodedData := postData
+		response.added.league := TradeGlobals.Get("LeagueName")
+		response.added.requestUrl := url
+		response.added.browserUrl := url "&w=1"
+	} Catch e {
+		response := "Parsing response failed."
+	}	
+	
+	Return response
 }
 
 TradeFunc_MapCurrencyNameToID(name) {
@@ -2045,6 +2109,72 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 	Title .= (isAdvancedSearch) ? "" : "`n`n" "Use Ctrl + Alt + D (default) instead for a more thorough search."
 
 	Return, Title
+}
+
+TradeFunc_ParsePoePricesInfoData(response) {
+	Global Item, ItemData, TradeOpts
+	LeagueName := TradeGlobals.Get("LeagueName")
+
+	Name := (Item.IsRare and not Item.IsMap) ? Item.Name " " Item.BaseName : Item.Name
+	headLine := Trim(StrReplace(Name, "Superior", ""))
+	; add corrupted tag
+	If (Item.IsCorrupted) {
+		headLine .= " [Corrupted] "
+	}
+
+	; add gem quality and level
+	If (Item.IsGem) {
+		headLine := Item.Name ", Q" Item.Quality "%"
+		If (Item.Level >= 16) {
+			headLine := Item.Name ", " Item.Level "`/" Item.Quality "%"
+		}
+	}
+	; add item sockets and links
+	If (ItemData.Sockets >= 5) {
+		headLine := Name " " ItemData.Sockets "s" ItemData.Links "l"
+	}
+	If (showItemLevel) {
+		headLine .= ", iLvl: " iLvl
+	}
+	headLine .= ", (" LeagueName ")"
+
+	lines := []
+	lines.push(["~~ Predicted item pricing (via machine-learning) ~~", "center", true])
+	lines.push([headLine, "left",  true])
+	lines.push(["", "left"])
+	lines.push(["   Price range: " Trim(response.min) " ~ " Trim(response.max) " " Trim(response.currency), "left"])
+	lines.push(["", "left", true])
+	lines.push(["", "left"])
+	lines.push(["Please consider supporting POEPRICES.INFO.", "left"])
+	lines.push(["Financially or via feedback on this feature on their website.", "left"])
+	
+	maxWidth := 0
+	For i, line in lines {
+		maxWidth := StrLen(line[1]) > maxWidth ? StrLen(line[1]) : maxWidth
+	}
+
+	Title := ""
+	For i, line in lines {
+		If (RegExMatch(line[2], "i)center")) {
+			diff := maxWidth - StrLen(line[1])			
+			line[1] := StrPad(line[1], maxWidth - Floor(diff / 2), "left")
+			console.log(maxWidth - Floor(diff / 2))
+		}
+		If (RegExMatch(line[2], "i)right")) {
+			line[1] := StrPad(line[1], maxWidth, "left")
+		}
+		
+		Title .= line[1] "`n"
+		If (line[3]) {
+			seperator := ""
+			Loop, % maxWidth {
+				seperator .= "-"
+			}
+			Title .= seperator "`n"
+		}
+	}
+	
+	Return Title
 }
 
 ; Trim names/string and add dots at the end If they are longer than specified length
@@ -2851,6 +2981,97 @@ TradeFunc_CreateItemPricingTestGUI() {
 	Gui, PricingTest:Show, w500 , Item Pricing Test
 }
 
+TradeFunc_ShowPredictedPricingFeedbackUI(data) {
+	Global 
+	
+	If (not data.min and not data.max) {
+		ShowTooltip("ERROR: Request to poeprices.info failed! ", true)
+		Return
+	}
+	
+	_Name := (Item.IsRare and not Item.IsMap) ? Item.Name " " Item.BaseName : Item.Name
+	_headLine := Trim(StrReplace(_Name, "Superior", ""))
+	; add corrupted tag
+	If (Item.IsCorrupted) {
+		_headLine .= " [Corrupted] "
+	}
+
+	; add gem quality and level
+	If (Item.IsGem) {
+		_headLine := Item.Name ", Q" Item.Quality "%"
+		If (Item.Level >= 16) {
+			_headLine := Item.Name ", " Item.Level "`/" Item.Quality "%"
+		}
+	}
+	; add item sockets and links
+	If (ItemData.Sockets >= 5) {
+		_headLine := _Name " " ItemData.Sockets "s" ItemData.Links "l"
+	}
+	If (showItemLevel) {
+		_headLine .= ", iLvl: " iLvl
+	}
+	_headLine .= ", (" TradeGlobals.Get("LeagueName") ")"
+	
+	
+	Gui, PredictedPricing:Destroy
+	
+	Gui, PredictedPricing:Margin, 10, 10
+
+	Gui, PredictedPricing:Font, bold s8, Verdana
+	Gui, PredictedPricing:Add, Text, BackgroundTrans, Priced using machine learning algorithms.
+	Gui, PredictedPricing:Add, Text, BackgroundTrans x+5 yp+0 cRed, (Close with ESC)
+	
+	Gui, PredictedPricing:Add, GroupBox, w400 h90 y+10 x10, Results
+	Gui, PredictedPricing:Font, norm s10, Consolas
+	Gui, PredictedPricing:Add, Text, yp+25 x20 w380 BackgroundTrans, % _headLine
+	Gui, PredictedPricing:Font, norm bold, Consolas
+	Gui, PredictedPricing:Add, Text, x20 w90 y+10 BackgroundTrans, % "Price range: "
+	Gui, PredictedPricing:Font, norm, Consolas
+	Gui, PredictedPricing:Add, Text, x+5 yp+0 BackgroundTrans, % Trim(data.min) " ~ " Trim(data.max) " " Trim(data.currency)	
+	_url := data.added.browserUrl
+	Gui, PredictedPricing:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
+	
+	Gui, PredictedPricing:Font, norm s8 italic, Verdana
+	Gui, PredictedPricing:Add, Text, BackgroundTrans x15 y135 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
+	
+	Gui, PredictedPricing:Font, bold s8, Verdana
+	Gui, PredictedPricing:Add, GroupBox, w400 h230 y175 x10, Feedback
+	Gui, PredictedPricing:Font, norm, Verdana
+	
+	Gui, PredictedPricing:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
+	Gui, PredictedPricing:Add, Progress, x16 yp+18 w2 h56 BackgroundRed hwndPredictedPricingHiddenControl1
+	GuiControl, Hide, % PredictedPricingHiddenControl1
+	Gui, PredictedPricing:Add, Radio, x20 yp+2 vPredictionPricingRadio1 Group BackgroundTrans, Low
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio2 BackgroundRed, Fair
+	Gui, PredictedPricing:Add, Radio, x20 yp+20 vPredictionPricingRadio3 BackgroundTrans, High
+	
+	Gui, PredictedPricing:Add, Text, x20 yp+30 BackgroundTrans, % "Add comment (max. 1000 characters):"
+	Gui, PredictedPricing:Add, Edit, x20 yp+20 w380 r4 limit1000 vPredictedPricingComment, 
+	
+	Gui, PredictedPricing:Add, Text, x100 y+10 cRed hwndPredictedPricingHiddenControl2, Please select a rating first!
+	GuiControl, Hide, % PredictedPricingHiddenControl2
+	Gui, PredictedPricing:Add, Button, x260 w90 yp-5 gPredictedPricingSendFeedback, Send && Close
+	Gui, PredictedPricing:Add, Button, x+11 w40 gPredictedPricingClose, Close
+	
+	Gui, PredictedPricing:Font, bold s8, Verdana
+	Gui, PredictedPricing:Add, Text, x15 y+20 cGreen BackgroundTrans, % "This feature is powered by poeprices.info!"
+	Gui, PredictedPricing:Font, norm, Verdana
+	Gui, PredictedPricing:Add, Link, x15 y+5 cBlue BackgroundTrans, <a href="https://www.paypal.com/donate/?token=x154t12a0L0CE7BOpfpu9CcwpTa__7fOZ9rg1BECyXchYYt33Kbt5Gfj0rsDeg5WF6IhWG&country.x=US&locale.x=US">Support them via PayPal</a>
+	Gui, PredictedPricing:Add, Text, x+5 yp+0 cDefault BackgroundTrans, % "or"
+	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
+	
+	; invisible fields
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingEncodedData, % data.added.encodedData
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingLeague, % data.added.League
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingMin, % data.min
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingMax, % data.max
+	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingCurrency, % data.currency
+	
+	Gui, PredictedPricing:Color, FFFFFF	
+	Gui, PredictedPricing:Show, AutoSize, Predicted Item Pricing
+	ControlFocus, Send && Close, Predicted Item Pricing
+}
+
 ; Open Gui window to show the items variable mods, select the ones that should be used in the search and set their min/max values
 TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedImplicit = "") {
 	;https://autohotkey.com/board/topic/9715-positioning-of-controls-a-cheat-sheet/
@@ -3611,6 +3832,7 @@ TradeFunc_HandleGuiSubmit() {
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)
 	Gui, SelectModsGui:Destroy
+	TradeFunc_ActivatePoeWindow()
 }
 
 class TradeUtils {
@@ -3833,7 +4055,7 @@ OverwriteUpdateOptionsTimer:
 Return
 
 BringPoEWindowToFrontAfterInit:
-	WinActivate, Path of Exile ahk_class POEWindowClass
+	TradeFunc_ActivatePoeWindow()
 	SetTimer, BringPoEWindowToFrontAfterInit, OFF
 Return
 
@@ -4000,6 +4222,7 @@ Return
 CloseCustomSearch:
 	TradeFunc_ResetCustomSearchGui()
 	Gui, CustomSearch:Destroy
+	TradeFunc_ActivatePoeWindow()
 Return
 
 TradeFunc_ResetCustomSearchGui() {
@@ -4121,7 +4344,7 @@ TradeFunc_HandleCustomSearchSubmit(openInBrowser = false) {
 			TradeFunc_OpenUrlInBrowser("http://poe.trade/" ParsedUrl1)
 		}
 		Else {
-			ShowToolTip("Requesting search results...")
+			ShowToolTip("Requesting search results... ")
 			Html := TradeFunc_DoPostRequest(Payload)
 			ParsedData := TradeFunc_ParseHtml(Html, Payload)
 			SetClipboardContents(ParsedData)
@@ -4204,3 +4427,104 @@ Kill_CookieDataExe:
 	}
 	SetTimer, Kill_CookieDataExe, Off
 Return
+
+SelectModsGuiGuiEscape:
+	; trademacro advanced search 
+	Gui, SelectModsGui:Cancel
+	TradeFunc_ActivatePoeWindow()
+Return
+
+CustomSearchGuiEscape:
+	Gui, CustomSearch:Cancel
+	TradeFunc_ActivatePoeWindow()
+Return
+
+PricingTestGuiEscape:
+	Gui, PricingTest:Cancel
+	TradeFunc_ActivatePoeWindow()
+Return
+
+CookieWindowGuiEscape:
+	Gui, CookieWindow:Cancel
+Return
+
+ConnectionFailureGuiEscape:
+	Gui, ConnectionFailure:Cancel
+Return
+
+PredictedPricingGuiEscape:
+	Gui, PredictedPricing:Destroy
+	TradeFunc_ActivatePoeWindow()
+Return
+
+PredictedPricingClose:
+	Gui, PredictedPricing:Destroy
+	TradeFunc_ActivatePoeWindow()
+Return
+
+PredictedPricingSendFeedback:
+	Gui, PredictedPricing:Submit, NoHide
+	If (PredictionPricingRadio1 or PredictionPricingRadio2 or PredictionPricingRadio3) {
+		Gui, PredictedPricing:Destroy
+	} Else {
+		GuiControl, Show, % PredictedPricingHiddenControl1
+		GuiControl, Show, % PredictedPricingHiddenControl2
+		Return
+	}
+
+	TradeFunc_ActivatePoeWindow()
+	_rating := ""
+	If (PredictionPricingRadio1) {
+		_rating := "Low"
+	} Else If (PredictionPricingRadio2) {
+		_rating := "Fair"
+	} Else If (PredictionPricingRadio3) {
+		_rating := "High"
+	}
+	
+	_prices := {}
+	_prices.min := PredictedPricingMin
+	_prices.max := PredictedPricingMax
+	_prices.currency := PredictedPricingCurrency
+	TradeFunc_PredictedPricingSendFeedback(_rating, PredictedPricingComment, PredictedPricingEncodedData, PredictedPricingLeague, _prices)
+Return
+
+TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, price) {
+	postData 	:= ""
+	postData := selector ? postData "selector=" UriEncode(Trim(selector)) "&" : postData
+	postData := comment ? postData "feedbacktxt=" UriEncode(comment) "&" : postData
+	postData := encodedData ? postData "qitem_txt=" encodedData "&" : postData
+	postData := price.min ? postData "min=" UriEncode(price.min "") "&" : postData
+	postData := price.max ? postData "max=" UriEncode(price.max "") "&" : postData
+	postData := price.currency ? postData "currency=" UriEncode(price.currency "") "&" : postData
+	postData := league ? postData "league=" UriEncode(league) "&" : postData
+	postData := postData "source=" UriEncode("poetrademacro") "&"
+
+	If (TradeOpts.Debug) {
+		postData := postData "debug=1" "&"	
+	}
+	postData := RegExReplace(postData, "(\&)$")
+	
+	payLength	:= StrLen(postData)
+	url 		:= "https://www.poeprices.info/send_feedback"
+	options	:= ""
+
+	reqHeaders	:= []
+	reqHeaders.push("Host: www.poeprices.info")
+	reqHeaders.push("Connection: keep-alive")
+	reqHeaders.push("Cache-Control: max-age=0")
+	reqHeaders.push("Origin: https://poeprices.info")
+	reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8")
+	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+
+	response := PoEScripts_Download(url, postData, reqHeaders, options, false)
+	If (not RegExMatch(response, "i)^""?(low|fair|high)""?$")) {
+		ShowTooltip("ERROR: Sending feedback failed. ", true)
+	}
+}
+
+TradeFunc_ActivatePoeWindow() {
+	If (not WinActive("ahk_group PoEWindowGrp")) {
+		WinActivate, ahk_group PoEWindowGrp
+	}
+}
