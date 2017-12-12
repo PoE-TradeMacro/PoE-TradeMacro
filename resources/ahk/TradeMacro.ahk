@@ -851,7 +851,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		} Else {
 			ParsedData := TradeFunc_ParsePoePricesInfoData(Html)
 			ShowToolTip("")
-			ShowToolTip(ParsedData)	
+			ShowToolTip(ParsedData)
 		}		
 	}
 	Else {
@@ -2113,6 +2113,17 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 
 TradeFunc_ParsePoePricesInfoData(response) {
 	Global Item, ItemData, TradeOpts
+
+	If ( response.HasKey("min") and response.HasKey("max") ) {
+		If (not StrLen(response.min) and not StrLen(response.max)) {
+			Title := "No price prediction available. `n`nThis may be caused by not having sufficient sample data. " 
+			Return Title
+		}
+	} Else If (not StrLen(response.min) and not StrLen(response.max)) {
+		Title := "ERROR: Request to poeprices.info failed! " 
+		Return Title
+	}
+	
 	LeagueName := TradeGlobals.Get("LeagueName")
 
 	Name := (Item.IsRare and not Item.IsMap) ? Item.Name " " Item.BaseName : Item.Name
@@ -2983,9 +2994,16 @@ TradeFunc_CreateItemPricingTestGUI() {
 
 TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Global 
-	
-	If (not data.min and not data.max) {
-		ShowTooltip("ERROR: Request to poeprices.info failed! ", true)
+
+	If ( data.HasKey("min") and data.HasKey("max") ) {
+		If (not StrLen(data.min) and not StrLen(data.max)) {
+			ShowToolTip("")
+			ShowTooltip("No price prediction available. `n`nThis may be caused by not having sufficient sample data. ")
+			Return
+		}
+	} Else If (not StrLen(data.min) and not StrLen(data.max)) {
+		ShowToolTip("")
+		ShowTooltip("ERROR: Request to poeprices.info failed! ")
 		Return
 	}
 	
