@@ -721,7 +721,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	; predicted pricing (poeprices.info - machine learning)
-	If (Item.RarityLevel >= 2 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
+	If (Item.RarityLevel >= 2 and Item.RarityLevel < 4 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
 		If ((Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
 			If (Item.RarityLevel = 2) {
 				itemEligibleForPredictedPricing := false	
