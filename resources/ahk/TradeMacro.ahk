@@ -126,7 +126,7 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 	Else {
 		UrlAffix := ""
 		UrlPage := ""
-		If (TradeOpts.WIkiAlternative) {
+		If (TradeOpts.WikiAlternative) {
 			; uses poedb.tw
 			UrlPage := "item.php?n="
 			
@@ -160,7 +160,7 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 		
 
 		If (StrLen(UrlAffix) > 0) {
-			If (TradeOpts.WIkiAlternative) {
+			If (TradeOpts.WikiAlternative) {
 				UrlAffix := StrReplace(UrlAffix," ","+")
 				WikiUrl := "http://poedb.tw/us/" UrlPage . UrlAffix
 			} Else {				
@@ -1423,8 +1423,8 @@ TradeFunc_DoPoePricesRequest(RawItemData) {
 		response.added := {}
 		response.added.encodedData := postData
 		response.added.league := TradeGlobals.Get("LeagueName")
-		response.added.requestUrl := url
-		response.added.browserUrl := url "&w=1"
+		response.added.requestUrl := url "?" postData
+		response.added.browserUrl := url "?" postData "&w=1"
 	} Catch e {
 		response := "ERROR: Parsing response failed, invalid JSON! "
 	}	
