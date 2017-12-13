@@ -116,23 +116,57 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 	TradeFunc_DoParseClipboard()
 
 	If (!Item.Name and TradeOpts.OpenUrlsOnEmptyItem) {
-		TradeFunc_OpenUrlInBrowser("http://pathofexile.gamepedia.com/")
+		If (TradeOpts.WIkiAlternative) {
+			;http://poedb.tw/us/item.php?n=The+Doctor
+			TradeFunc_OpenUrlInBrowser("http://poedb.tw/us/")
+		} Else {
+			TradeFunc_OpenUrlInBrowser("http://pathofexile.gamepedia.com/")	
+		}		
 	}
 	Else {
-		UrlAffix :=
-		If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
-			UrlAffix := Item.Name
-		} Else If (Item.IsFlask or Item.IsMap) {
-			UrlAffix := Item.SubType
-		} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
-			UrlAffix := Item.Name
-		} Else {
-			UrlAffix := Item.BaseType
+		UrlAffix := ""
+		UrlPage := ""
+		If (TradeOpts.WIkiAlternative) {
+			; uses poedb.tw
+			UrlPage := "item.php?n="
+			
+			If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
+				UrlAffix := Item.Name
+			} Else If (Item.IsFlask) {
+				UrlPage := "search.php?Search="
+				UrlAffix := Item.SubType
+			} Else If (Item.IsMap) {
+				UrlPage := "area.php?n="				
+				UrlAffix := RegExMatch(Item.SubType, "i)Unknown Map") ? Item.BaseName : Item.SubType
+			} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
+				UrlAffix := Item.Name
+			} Else {
+				UrlAffix := Item.BaseName
+			}				
 		}
+		Else {
+			UrlPage := ""
+			
+			If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
+				UrlAffix := Item.Name
+			} Else If (Item.IsFlask or Item.IsMap) {
+				UrlAffix := Item.SubType
+			} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
+				UrlAffix := Item.Name
+			} Else {
+				UrlAffix := Item.BaseType
+			}
+		}
+		
 
 		If (StrLen(UrlAffix) > 0) {
-			UrlAffix := StrReplace(UrlAffix," ","_")
-			WikiUrl := "http://pathofexile.gamepedia.com/" UrlAffix
+			If (TradeOpts.WIkiAlternative) {
+				UrlAffix := StrReplace(UrlAffix," ","+")
+				WikiUrl := "http://poedb.tw/us/" UrlPage . UrlAffix
+			} Else {				
+				UrlAffix := StrReplace(UrlAffix," ","_")
+				WikiUrl := "http://pathofexile.gamepedia.com/" UrlPage . UrlAffix
+			}
 			TradeFunc_OpenUrlInBrowser(WikiUrl)
 		}
 	}
