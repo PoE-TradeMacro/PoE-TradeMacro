@@ -36,19 +36,25 @@
 		redirect := "L"
 		PreventErrorMsg := false
 		If (StrLen(options)) {
-			If (RegExMatch(options, "i)SaveAs:[ \t]*\K[^\r\n]+", SavePath)) {
-				commandData	.= " " options " "
-				commandHdr	.= ""	
-			}
-			If (RegExMatch(options, "i)Redirect:\sFalse")) {
-				redirect := ""
-			}
-			If (RegExMatch(options, "i)PreventErrorMsg")) {
-				PreventErrorMsg := true
-			}
-			If (RegExMatch(options, "i)RequestType:(.*)", match)) {
-				requestType := Trim(match1)
-			}
+			Loop, Parse, options, `n 
+			{
+				If (RegExMatch(A_LoopField, "i)SaveAs:[ \t]*\K[^\r\n]+", SavePath)) {
+					commandData	.= " " A_LoopField " "
+					commandHdr	.= ""	
+				}
+				If (RegExMatch(A_LoopField, "i)Redirect:\sFalse")) {
+					redirect := ""
+				}
+				If (RegExMatch(A_LoopField, "i)PreventErrorMsg")) {
+					PreventErrorMsg := true
+				}
+				If (RegExMatch(A_LoopField, "i)RequestType:(.*)", match)) {
+					requestType := Trim(match1)
+				}
+				If (RegExMatch(A_LoopField, "i)ReturnHeaders:(.*skip.*)")) {
+					skipRetHeaders := true
+				}	
+			}			
 		}
 
 		e := {}
@@ -79,11 +85,13 @@
 					commandHdr  .= cookies
 				}
 			}
-			If (StrLen(ioData) and not requestType = "GET") {				
+			If (StrLen(ioData) and not requestType = "GET") {
 				If (requestType = "POST") {
 					commandData .= "-X POST "
 				}
 				commandData .= "--data """ ioData """ "
+			} Else If (StrLen(ioData)) {
+				url := url "?" ioData
 			}
 			
 			If (binaryDL) {
@@ -99,9 +107,9 @@
 			;html := ReadConsoleOutputFromFile(commandData """" url """", "commandData") ; alternative function
 
 			; get return headers in seperate request
-			If (not binaryDL) {
-				If (StrLen(ioData)) {
-					commandHdr := curl """" url "?" ioData """" commandHdr		; add payload to url since you can't use the -I argument with POST requests
+			If (not binaryDL and not skipRetHeaders) {
+				If (StrLen(ioData) and not requestType = "GET") {
+					commandHdr := curl """" url "?" ioData """" commandHdr		; add payload to url since you can't use the -I argument with POST requests					
 				} Else {
 					commandHdr := curl """" url """" commandHdr
 				}
@@ -110,6 +118,7 @@
 			} Else {
 				ioHdr := html
 			}
+			
 			reqHeadersCurl := commandHdr
 		} Catch e {
 

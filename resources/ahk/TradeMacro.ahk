@@ -721,7 +721,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	; predicted pricing (poeprices.info - machine learning)
-	If (Item.RarityLevel >= 2 and Item.RarityLevel < 4 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
+	If (Item.RarityLevel > 2 and Item.RarityLevel < 4 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem)) {		
 		If ((Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
 			If (Item.RarityLevel = 2) {
 				itemEligibleForPredictedPricing := false	
@@ -1359,11 +1359,12 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 TradeFunc_DoPoePricesRequest(RawItemData) {
 	EncodedItemData := StringToBase64UriEncoded(RawItemData, true)
 	
-	postData 	:= EncodedItemData
+	postData 	:= "l=" TradeGlobals.Get("LeagueName") "&i=" EncodedItemData
 	payLength	:= StrLen(postData)
-	url 		:= "https://www.poeprices.info/api?l=" TradeGlobals.Get("LeagueName") "&i=" postData
+	url 		:= "https://www.poeprices.info/api"
 
 	options	:= "RequestType: GET"
+	options	.= "`n" "ReturnHeaders: skip"
 	reqHeaders	:= []
 	
 	reqHeaders.push("Host: www.poeprices.info")
@@ -4525,7 +4526,7 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, p
 	
 	payLength	:= StrLen(postData)
 	url 		:= "https://www.poeprices.info/send_feedback"
-	options	:= ""
+	options	:= "ReturnHeaders: skip"
 
 	reqHeaders	:= []
 	reqHeaders.push("Host: www.poeprices.info")
