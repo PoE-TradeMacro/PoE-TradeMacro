@@ -53,8 +53,14 @@
 				}
 				If (RegExMatch(A_LoopField, "i)ReturnHeaders:(.*skip.*)")) {
 					skipRetHeaders := true
+				}
+				If (RegExMatch(A_LoopField, "i)TimeOut:(.*)", match)) {
+					timeout := Trim(match1)
 				}	
 			}			
+		}
+		If (not timeout) {
+			timeout := 30
 		}
 
 		e := {}
@@ -95,11 +101,11 @@
 			}
 			
 			If (binaryDL) {
-				commandData	.= "--connect-timeout 30 "
-				commandData	.= "--connect-timeout 30 "
+				commandData	.= "--connect-timeout " timeout " "
+				commandData	.= "--connect-timeout " timeout " "
 			} Else {				
-				commandData	.= "--max-time 30 "
-				commandHdr	.= "--max-time 30 "
+				commandData	.= "--max-time " timeout " "
+				commandHdr	.= "--max-time " timeout " "
 			}
 
 			; get data

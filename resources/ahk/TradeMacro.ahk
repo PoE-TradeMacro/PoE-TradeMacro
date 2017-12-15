@@ -1402,6 +1402,7 @@ TradeFunc_DoPoePricesRequest(RawItemData) {
 
 	options	:= "RequestType: GET"
 	options	.= "`n" "ReturnHeaders: skip"
+	options	.= "`n" "TimeOut: 15"
 	reqHeaders	:= []
 	
 	reqHeaders.push("Host: www.poeprices.info")
@@ -1427,7 +1428,7 @@ TradeFunc_DoPoePricesRequest(RawItemData) {
 		response.added.browserUrl := url "?" postData "&w=1"
 	} Catch e {
 		response := "ERROR: Parsing response failed, invalid JSON! "
-	}	
+	}
 	
 	Return response
 }
@@ -3103,7 +3104,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Font, norm, Consolas
 	Gui, PredictedPricing:Add, Text, x+5 yp+0 BackgroundTrans, % Trim(data.min) " ~ " Trim(data.max) " " Trim(data.currency)	
 	_url := data.added.browserUrl
-	Gui, PredictedPricing:Add, Link, x295 y97 cBlue BackgroundTrans, <a href="%_url%">Open in browser</a>
+	Gui, PredictedPricing:Add, Link, x245 y99 cBlue BackgroundTrans, <a href="%_url%">Open on poeprices.info</a>
 	
 	Gui, PredictedPricing:Font, norm s8 italic, Verdana
 	Gui, PredictedPricing:Add, Text, BackgroundTrans x15 y135 w400, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group."
