@@ -6326,7 +6326,7 @@ ParseAffixes(ItemDataAffixes, Item)
 		}
 		
 		If (ItemSubType = "Amulet" or ItemSubType = "Ring"){
-			FileMana := "MaxMana_AmuletRing.txt"
+			FileMana := "data\MaxMana_AmuletRing.txt"
 		}
 		Else{
 			FileMana := "data\MaxMana.txt"
