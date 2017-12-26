@@ -4318,7 +4318,11 @@ ParseAffixes(ItemDataAffixes, Item)
 					LookupAffixAndSetInfoLine(["1|10-14"], "Prefix", ItemLevel, CurrValue)
 					Continue
 				}
-				
+				IfInString, A_LoopField, to Accuracy Rating
+				{
+					LookupAffixAndSetInfoLine("data\abyss_jewel\AccuracyRating.txt", "Suffix", ItemLevel, CurrValue)
+					Continue
+				}
 				IfInString, A_LoopField, Minion
 				{
 					If RegExMatch(A_LoopField, "Minions deal \d+? to \d+? additional (Physical|Fire|Cold|Lightning|Chaos) Damage", match)
@@ -4397,7 +4401,6 @@ ParseAffixes(ItemDataAffixes, Item)
 						Continue
 					}					
 				}
-				
 				IfInString, A_LoopField, to Accuracy Rating
 				{
 					LookupAffixAndSetInfoLine("data\abyss_jewel\AccuracyRating.txt", "Suffix", ItemLevel, CurrValue)
@@ -9147,6 +9150,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 			{
 				ToolTip, %String%, XCoord, YCoord
 				Fonts.SetFixedFont()
+				Sleep, 10	
 				ToolTip, %String%, XCoord, YCoord
 			}
 		}
@@ -9154,7 +9158,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 		{
 			XCoord := (X - 135 >= 0) ? X - 135 : 0
 			YCoord := (Y +  35 >= 0) ? Y +  35 : 0
-			
+
 			If (Opts.UseGDI) 
 			{
 				ChangeTooltipColorByItem(conditionalColors)
@@ -9164,6 +9168,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 			{
 				ToolTip, %String%, XCoord, YCoord
 				Fonts.SetFixedFont()
+				Sleep, 10	
 				ToolTip, %String%, XCoord, YCoord
 			}
 		}
@@ -9186,6 +9191,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 		{
 			ToolTip, %String%, XCoord, YCoord
 			Fonts.SetFixedFont()
+			Sleep, 10
 			ToolTip, %String%, XCoord, YCoord
 		}
 	}
