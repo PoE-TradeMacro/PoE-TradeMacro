@@ -9138,6 +9138,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 			{
 				ToolTip, %String%, XCoord, YCoord
 				Fonts.SetFixedFont()
+				Sleep, 10	
 				ToolTip, %String%, XCoord, YCoord
 			}
 		}
@@ -9145,7 +9146,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 		{
 			XCoord := (X - 135 >= 0) ? X - 135 : 0
 			YCoord := (Y +  35 >= 0) ? Y +  35 : 0
-			
+
 			If (Opts.UseGDI) 
 			{
 				ChangeTooltipColorByItem(conditionalColors)
@@ -9155,6 +9156,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 			{
 				ToolTip, %String%, XCoord, YCoord
 				Fonts.SetFixedFont()
+				Sleep, 10	
 				ToolTip, %String%, XCoord, YCoord
 			}
 		}
@@ -9177,6 +9179,7 @@ ShowToolTip(String, Centered = false, conditionalColors = false)
 		{
 			ToolTip, %String%, XCoord, YCoord
 			Fonts.SetFixedFont()
+			Sleep, 10
 			ToolTip, %String%, XCoord, YCoord
 		}
 	}
