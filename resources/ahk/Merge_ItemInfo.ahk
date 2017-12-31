@@ -9,7 +9,6 @@
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_CreateTempFolder.ahk
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_HandleUserSettings.ahk
 
-RunAsAdmin()
 arg1 	= %1%
 scriptDir := FileExist(arg1) ? arg1 : RegExReplace(A_ScriptDir, "(.*)\\[^\\]+\\.*", "$1")
 
@@ -29,9 +28,6 @@ If (not PoEScripts_CheckCorrectClientLanguage()) {
 }
 If (!PoEScripts_CreateTempFolder(scriptDir, projectName)) {
 	ExitApp
-}
-If (InStr(scriptDir, A_Desktop)) {
-	Msgbox, 0x1010, Invalid Installation Path, Executing PoE-ItemInfo from your Desktop (or any of its subfolders) may cause script errors, please choose a different directory.
 }
 
 /*
@@ -87,19 +83,6 @@ CloseScript(Name)
 		}
 	Else
 		Return Name . " not found"
-}
-
-RunAsAdmin()
-{
-    ShellExecute := A_IsUnicode ? "shell32\ShellExecute":"shell32\ShellExecuteA"
-    If Not A_IsAdmin
-    {
-		If A_IsCompiled
-			DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_ScriptFullPath, str, A_WorkingDir, int, 1)
-		Else
-			DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_AhkPath, str, """" . A_ScriptFullPath . """", str, A_WorkingDir, int, 1)
-		ExitApp
-    }
 }
 
 AppendCustomMacros(userDirectory)

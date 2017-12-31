@@ -19,16 +19,7 @@ Loop, %0%  ; For each parameter
 	}
 }
 
-If (!InStr(arguments, "-noelevation", 0)) {
-	RunAsAdmin(arguments)
-}
-
-If (InStr(arguments, "-nosplash", 0)) {
-	skipSplash := 1
-} Else {
-	skipSplash := 0
-	StartSplashScreen()
-}
+skipSplash := 1
 
 If (InStr(arguments, "-mergeonly", 0)) {
 	onlyMergeFiles := 1
@@ -51,10 +42,6 @@ If (not PoEScripts_CheckCorrectClientLanguage()) {
 }
 If (!PoEScripts_CreateTempFolder(scriptDir, projectName)) {
 	ExitApp
-}
-
-If (InStr(scriptDir, A_Desktop)) {
-	Msgbox, 0x1010, Invalid Installation Path, Executing PoE-TradeMacro from your Desktop (or any of its subfolders) may cause script errors, please choose a different directory.
 }
 
 /*
@@ -118,25 +105,6 @@ CloseScript(Name)
 		}
 	Else
 		Return Name . " not found"
-}
-
-RunAsAdmin(arguments)
-{
-    ShellExecute := A_IsUnicode ? "shell32\ShellExecute":"shell32\ShellExecuteA"
-    If Not A_IsAdmin
-    {
-		If A_IsCompiled
-			DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_ScriptFullPath . " " . arguments, str, A_WorkingDir, int, 1)
-		Else
-			DllCall(ShellExecute, uint, 0, str, "RunAs", str, A_AhkPath, str, """" . A_ScriptFullPath . """" . " " . arguments, str, A_WorkingDir, int, 1)
-		ExitApp
-    }
-
-    Return arguments
-}
-
-StartSplashScreen() {
-    SplashTextOn, , 20, PoE-TradeMacro, Merging and starting Scripts...
 }
 
 AppendCustomMacros(userDirectory)
