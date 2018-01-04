@@ -134,12 +134,13 @@
 
 		}
 		
-		If (Strlen(ioHdr)) {
-			Break	; only go into the second loop if the respone is empty (possible problem with the added host header)			
+		goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
+		If (Strlen(ioHdr) and goodStatusCode) {
+			Break	; only go into the second loop if the respone is empty or has a bad status code (possible problem with the added host header)			
 		}
 	}
 
-	goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
+	;goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
 	If (RegExMatch(ioHdr, "i)HTTP\/1.1 403 Forbidden") and not handleAccessForbidden) {
 		PreventErrorMsg		:= true
 		handleAccessForbidden	:= "403 Forbidden"
