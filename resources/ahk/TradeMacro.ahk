@@ -3540,9 +3540,9 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			modValueMax := modValue + (modValue * valueRangeMax)
 		}
 
-		; floor values only if greater than 2, in case of leech/regen mods, use Abs() to support negative numbers
+		; floor/Ceil values only if greater than 2, in case of leech/regen mods, use Abs() to support negative numbers
 		modValueMin := (Abs(modValueMin) > 2) ? Floor(modValueMin) : modValueMin
-		modValueMax := (Abs(modValueMax) > 2) ? Floor(modValueMax) : modValueMax
+		modValueMax := (Abs(modValueMax) > 2) ? Ceil(modValueMax) : modValueMax
 
 		; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
 		If (advItem.mods[A_Index].ranges[1]) {
