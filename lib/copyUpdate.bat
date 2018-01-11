@@ -13,7 +13,7 @@ if exist %tempInstallPath% (
 	if exist %tempInstallPath% rd /s /q %tempInstallPath% || rem
 	if exist %tempInstallPath% (
 		echo.
-		echo executed command: rd /s /q %tempInstallPath%
+		echo Executed command: rd /s /q %tempInstallPath%
 		echo Failed to remove/clear temporary installation folder. 
 		echo.
 	)
@@ -28,7 +28,8 @@ if not exist %tempInstallPath% (
 
 :: copy new script files to temp install directory
 :: https://ss64.com/nt/robocopy-exit.html
-robocopy /s /NFL /NDL /NJH /NJS /nc /np %updateScriptPath% %tempInstallPath%
+echo Executing command: robocopy %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np
+robocopy %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np 
 if %ERRORLEVEL% EQU 16 set errorL=%ERRORLEVEL% & set error="***FATAL ERROR***" & goto EndScript
 if %ERRORLEVEL% EQU 15 set errorL=%ERRORLEVEL% & set error="OKCOPY + FAIL + MISMATCHES + XTRA" & goto EndScript
 if %ERRORLEVEL% EQU 14 set errorL=%ERRORLEVEL% & set error="FAIL + MISMATCHES + XTRA" & goto EndScript
@@ -67,6 +68,7 @@ if exist %installPath% (
 )
 
 if %clearInstallDir% EQU 1 (
+	echo Executing command: robocopy %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
 	robocopy %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
 	if %ERRORLEVEL% NEQ 1 (
 		echo Swap directories, rename/move temp folder to install folder:
@@ -85,7 +87,7 @@ if %clearInstallDir% EQU 1 (
 			if exist %tempInstallPath% rd /s /q %tempInstallPath% || rem
 			if exist %tempInstallPath% (
 				echo.
-				echo executed command: rd /s /q %tempInstallPath%
+				echo Executed command: rd /s /q %tempInstallPath%
 				echo Cleanup: Failed to clear temporary installation folder. 
 				echo.
 			)
