@@ -1,13 +1,26 @@
 echo off
+if not defined in_subprocess (cmd /k set in_subprocess=y ^& %0 %*) & exit )
+
 set updateScriptPath=%1
 set installPath=%2
 set installFolder=%3
 set tempInstallPath=%4
 set tempInstallFolder=%5
 
+if not exist %updateScriptPath% (
+	dir /b /a %installPath%"\*" | >nul findstr "^" && (set extractedFilesExist=1) || (set extractedFilesExist=0)
+	if %%extractedFilesExist EQU 0 (
+		set error="Folder with extracted update files is empty."
+		set errorL=20
+	) else (
+		set error="Folder with extracted update files does not exist."
+		set errorL=19
+	)
+	goto EndScript
+)
+
 :: create temporary install folder 
 :: if the installation of new files fails we don't want to have the script deleted completely
-
 if exist %tempInstallPath% (
 	rd /s /q %tempInstallPath%
 	if exist %tempInstallPath% rd /s /q %tempInstallPath% || rem
