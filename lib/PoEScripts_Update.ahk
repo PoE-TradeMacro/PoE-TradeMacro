@@ -395,8 +395,8 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 		
 		savePath := "" ; ByRef
 		If (DownloadRelease(url, project, savePath)) {
-			folderName := ExtractRelease(savePath, project)			
-			If (StrLen(folderName)) {
+			folderName := ExtractRelease(savePath, project)
+			If (StrLen(folderName) and not isEmpty(folderName)) {
 				; successfully downloaded and extracted release.zip to %A_Temp%\%Project%\ext
 				; copy script to %A_Temp%\%Project%
 				SplitPath, savePath, , saveDir				
@@ -416,6 +416,12 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 					MsgBox Update failed, couldn't launch 'FinishUpdate' script.
 				}				
 				ExitApp
+			}
+			Else If (StrLen(folderName)) {
+				MsgBox % "Update failed, tempory folder containing the extracted update files doesn't exist." "`n`n" folderName
+			} 
+			Else {
+				MsgBox % "Update failed, tempory folder containing the extracted update files is empty." "`n`n" folderName
 			}
 		}		
 	}
@@ -555,7 +561,7 @@ ExtractRelease(file, project) {
 	If (Number > 1) {
 		folderName := sUnz
 	}
-	
+
 	Return folderName
 }
 

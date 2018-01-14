@@ -34,7 +34,7 @@ Try {
 	installParentDir	:= installParentDir1
 	
 	If (debug) {
-		RunWait, "copyUpdate.bat" "%updateScriptPath%" "%installPath%" "%installFolder%" "%installPath%_tempInstall" "%installFolder%_tempInstall" && pause, , 
+		RunWait, "copyUpdate.bat" "%updateScriptPath%" "%installPath%" "%installFolder%" "%installPath%_tempInstall" "%installFolder%_tempInstall" "1" && pause, , 
 	} Else {
 		RunWait, "copyUpdate.bat" "%updateScriptPath%" "%installPath%" "%installFolder%" "%installPath%_tempInstall" "%installFolder%_tempInstall", , hide
 	}	

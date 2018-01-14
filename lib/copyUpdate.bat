@@ -1,11 +1,15 @@
 echo off
-if not defined in_subprocess (cmd /k set in_subprocess=y ^& %0 %*) & exit )
 
 set updateScriptPath=%1
 set installPath=%2
 set installFolder=%3
 set tempInstallPath=%4
 set tempInstallFolder=%5
+set debug=%6
+
+if %%debug EQU 1 (
+	if not defined in_subprocess (cmd /k set in_subprocess=y ^& %0 %*) & exit )
+)
 
 if not exist %updateScriptPath% (
 	dir /b /a %installPath%"\*" | >nul findstr "^" && (set extractedFilesExist=1) || (set extractedFilesExist=0)
