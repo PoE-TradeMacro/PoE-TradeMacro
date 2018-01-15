@@ -418,10 +418,10 @@ UpdateScript(url, project, defaultDir, isDevVersion, skipSelection, skipBackup, 
 				ExitApp
 			}
 			Else If (StrLen(folderName)) {
-				MsgBox % "Update failed, tempory folder containing the extracted update files doesn't exist." "`n`n" folderName
+				MsgBox % "Update failed, temporary folder containing the extracted update files doesn't exist." "`n`n" folderName
 			} 
 			Else {
-				MsgBox % "Update failed, tempory folder containing the extracted update files is empty." "`n`n" folderName
+				MsgBox % "Update failed, temporary folder containing the extracted update files is empty." "`n`n" folderName
 			}
 		}		
 	}

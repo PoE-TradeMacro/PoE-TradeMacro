@@ -4619,7 +4619,8 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, p
 	payLength	:= StrLen(postData)
 	url 		:= "https://www.poeprices.info/send_feedback"
 	options	:= "ReturnHeaders: skip"
-
+	options	.= "`n" "ValidateResponse: false"
+	
 	reqHeaders	:= []
 	reqHeaders.push("Host: www.poeprices.info")
 	reqHeaders.push("Connection: keep-alive")
