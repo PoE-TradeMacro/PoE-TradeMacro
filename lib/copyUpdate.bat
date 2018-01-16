@@ -6,13 +6,15 @@ set installFolder=%3
 set tempInstallPath=%4
 set tempInstallFolder=%5
 set debug=%6
+set robocopyExe=%SystemRoot%\System32\robocopy.exe
+set findStrExe=%SystemRoot%\System32\findstr.exe
 
 if %%debug EQU 1 (
 	if not defined in_subprocess (cmd /k set in_subprocess=y ^& %0 %*) & exit )
 )
 
 if not exist %updateScriptPath% (
-	dir /b /a %installPath%"\*" | >nul findstr "^" && (set extractedFilesExist=1) || (set extractedFilesExist=0)
+	dir /b /a %installPath%"\*" | >nul %findStrExe% "^" && (set extractedFilesExist=1) || (set extractedFilesExist=0)
 	if %%extractedFilesExist EQU 0 (
 		set error="Folder with extracted update files is empty."
 		set errorL=20
@@ -45,8 +47,8 @@ if not exist %tempInstallPath% (
 
 :: copy new script files to temp install directory
 :: https://ss64.com/nt/robocopy-exit.html
-echo Executing command: robocopy %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np
-robocopy %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np 
+echo Executing command: %robocopyExe% %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np
+%robocopyExe% %updateScriptPath% %tempInstallPath% /s /NFL /NDL /NJH /NJS /nc /np 
 if %ERRORLEVEL% EQU 16 set errorL=%ERRORLEVEL% & set error="***FATAL ERROR***" & goto EndScript
 if %ERRORLEVEL% EQU 15 set errorL=%ERRORLEVEL% & set error="OKCOPY + FAIL + MISMATCHES + XTRA" & goto EndScript
 if %ERRORLEVEL% EQU 14 set errorL=%ERRORLEVEL% & set error="FAIL + MISMATCHES + XTRA" & goto EndScript
@@ -79,14 +81,14 @@ if exist %installPath% (
 )
 
 if exist %installPath% (
-	dir /b /a %installPath%"\*" | >nul findstr "^" && (set clearInstallDir=0) || set clearInstallDir=1
+	dir /b /a %installPath%"\*" | >nul %findStrExe% "^" && (set clearInstallDir=0) || set clearInstallDir=1
 ) else (
 	set clearInstallDir=1
 )
 
 if %clearInstallDir% EQU 1 (
-	echo Executing command: robocopy %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
-	robocopy %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
+	echo Executing command: %robocopyExe% %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
+	%robocopyExe% %tempInstallPath% %installPath% /E /MOVE /NFL /NDL /NJH /nc /np
 	if %ERRORLEVEL% NEQ 1 (
 		echo Swap directories, rename/move temp folder to install folder:
 		echo. robocopy ERRORLEVEL: %ERRORLEVEL%
