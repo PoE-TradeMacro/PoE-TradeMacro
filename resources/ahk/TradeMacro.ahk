@@ -241,8 +241,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	RequestParams			:= new RequestParams_()
-	RequestParams.league	:= LeagueName
-	RequestParams.buyout	:= "1"
+	RequestParams.league		:= LeagueName
+	RequestParams.has_buyout	:= "1"
 
 	; ignore item name in certain cases
 	If (!Item.IsJewel and !Item.IsLeaguestone and Item.RarityLevel > 1 and Item.RarityLevel < 4 and !Item.IsFlask or (Item.IsJewel and isAdvancedPriceCheckRedirect)) {
@@ -773,7 +773,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	; show item age
 	If (isItemAgeRequest) {
 		RequestParams.name        := Item.Name
-		RequestParams.buyout      := ""
+		RequestParams.has_buyout  := ""
 		RequestParams.seller      := TradeOpts.AccountName
 		RequestParams.q_min       := Item.Quality
 		RequestParams.q_max       := Item.Quality
@@ -805,7 +805,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 	If (openSearchInBrowser) {
 		If (!TradeOpts.BuyoutOnly) {
-			RequestParams.buyout := ""
+			RequestParams.has_buyout := ""
 		}
 	}
 	If (TradeOpts.Debug) {
@@ -2398,7 +2398,7 @@ class RequestParams_ {
 	identified 	:= ""
 	corrupted		:= "0"
 	online 		:= (TradeOpts.OnlineOnly == 0) ? "" : "x"
-	buyout 		:= ""
+	has_buyout	:= ""
 	altart 		:= ""
 	capquality 	:= "x"
 	buyout_min 	:= ""
