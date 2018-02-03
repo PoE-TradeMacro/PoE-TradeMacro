@@ -6886,7 +6886,7 @@ ParseClipBoardChanges(debug = false)
 	ParsedData := ParseItemData(CBContents)
 	ParsedData := PostProcessData(ParsedData)
 	
-	If (Opts.PutResultsOnClipboard > 0)
+	If (Opts.PutResultsOnClipboard && ParsedData)
 	{
 		SetClipboardContents(ParsedData)
 	}
