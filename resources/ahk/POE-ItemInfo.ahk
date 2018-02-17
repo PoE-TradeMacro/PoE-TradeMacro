@@ -1535,7 +1535,7 @@ ParseItemLevel(ItemDataText)
 }
 
 ;;hixxie fixed. Shows MapLevel for any map base.
-ParseMapLevel(ItemDataText)
+ParseMapTier(ItemDataText)
 {
 	ItemDataChunk := GetItemDataChunk(ItemDataText, "MapTier:")
 	If (StrLen(ItemDataChunk) <= 0)
@@ -1543,7 +1543,7 @@ ParseMapLevel(ItemDataText)
 		ItemDataChunk := GetItemDataChunk(ItemDataText, "Map Tier:")
 	}
 
-	Assert(StrLen(ItemDataChunk) > 0, "ParseMapLevel: couldn't parse item data chunk")
+	Assert(StrLen(ItemDataChunk) > 0, "ParseMapTier: couldn't parse item data chunk")
 
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
@@ -1556,7 +1556,7 @@ ParseMapLevel(ItemDataText)
 		IfInString, A_LoopField, Map Tier:
 		{
 			StringSplit, MapLevelParts, A_LoopField, %A_Space%
-			Result := StrTrimWhitespace(MapLevelParts3) + 67
+			Result := StrTrimWhitespace(MapLevelParts3)
 			return Result
 		}
 	}
@@ -8071,20 +8071,29 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	
 	If (Item.IsMap)
 	{
-		Item.MapLevel := ParseMapLevel(ItemDataText)
-		Item.MapTier  := Item.MapLevel - 67
+		Item.MapTier  := ParseMapTier(ItemDataText)
+		Item.MapLevel := Item.MapTier + 67
+		
+		MapDescription := " (Tier: " Item.MapTier ", Level: " Item.MapLevel ")`n`n"
 		
 		If (Item.IsUnique)
 		{
-			MapDescription := uniqueMapList[uniqueMapNameFromBase[Item.SubType]]
+			MapDescription .= uniqueMapList[uniqueMapNameFromBase[Item.SubType]]
 		}
 		Else
 		{
-			MapDescription := mapList[Item.SubType]
+			If (RegExMatch(Item.SubType, "Shaped (.+ Map)", match))
+			{
+				MapDescription .= "Infos from non-shaped version:`n" mapList[match1]
+			}
+			Else
+			{
+				MapDescription .= mapList[Item.SubType]
+			}
 		}
 		If(MapDescription)
 		{
-			TT := TT "`n" MapDescription
+			TT .= MapDescription
 		}
 		
 		If (RarityLevel > 1 and RarityLevel < 4 and Not Item.IsUnidentified)
