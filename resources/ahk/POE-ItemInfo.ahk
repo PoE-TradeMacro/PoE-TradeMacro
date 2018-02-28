@@ -1535,7 +1535,7 @@ ParseItemLevel(ItemDataText)
 }
 
 ;;hixxie fixed. Shows MapLevel for any map base.
-ParseMapLevel(ItemDataText)
+ParseMapTier(ItemDataText)
 {
 	ItemDataChunk := GetItemDataChunk(ItemDataText, "MapTier:")
 	If (StrLen(ItemDataChunk) <= 0)
@@ -1543,7 +1543,7 @@ ParseMapLevel(ItemDataText)
 		ItemDataChunk := GetItemDataChunk(ItemDataText, "Map Tier:")
 	}
 
-	Assert(StrLen(ItemDataChunk) > 0, "ParseMapLevel: couldn't parse item data chunk")
+	Assert(StrLen(ItemDataChunk) > 0, "ParseMapTier: couldn't parse item data chunk")
 
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
@@ -1556,7 +1556,7 @@ ParseMapLevel(ItemDataText)
 		IfInString, A_LoopField, Map Tier:
 		{
 			StringSplit, MapLevelParts, A_LoopField, %A_Space%
-			Result := StrTrimWhitespace(MapLevelParts3) + 67
+			Result := StrTrimWhitespace(MapLevelParts3)
 			return Result
 		}
 	}
@@ -4318,11 +4318,7 @@ ParseAffixes(ItemDataAffixes, Item)
 					LookupAffixAndSetInfoLine(["1|10-14"], "Prefix", ItemLevel, CurrValue)
 					Continue
 				}
-				IfInString, A_LoopField, to Accuracy Rating
-				{
-					LookupAffixAndSetInfoLine("data\abyss_jewel\AccuracyRating.txt", "Suffix", ItemLevel, CurrValue)
-					Continue
-				}
+				
 				IfInString, A_LoopField, Minion
 				{
 					If RegExMatch(A_LoopField, "Minions deal \d+? to \d+? additional (Physical|Fire|Cold|Lightning|Chaos) Damage", match)
@@ -4401,6 +4397,7 @@ ParseAffixes(ItemDataAffixes, Item)
 						Continue
 					}					
 				}
+				
 				IfInString, A_LoopField, to Accuracy Rating
 				{
 					LookupAffixAndSetInfoLine("data\abyss_jewel\AccuracyRating.txt", "Suffix", ItemLevel, CurrValue)
@@ -4925,7 +4922,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				LookupAffixAndSetInfoLine("data\jewel\IncrPhysDamageWith1H2HMelee.txt", "Prefix", ItemLevel, CurrValue)
 				Continue
 			}
-			IfInString, A_LoopField, increased Physical Damage
+			IfInString, A_LoopField, increased Global Physical Damage
 			{
 				LookupAffixAndSetInfoLine("data\jewel\IncrPhysDamage_Jewels.txt", "Prefix", ItemLevel, CurrValue)
 				Continue
@@ -5663,7 +5660,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			Continue
 		}
 		If (ItemSubType = "Shield"){
-			IfInString, A_LoopField, increased Physical Damage
+			IfInString, A_LoopField, increased Global Physical Damage
 			{
 				HasIncrPhysDmg := False	; No worries about hybrid here.
 				LookupAffixAndSetInfoLine("data\IncrPhysDamage_Shield.txt", "Prefix", ItemLevel, CurrValue)
@@ -6070,36 +6067,36 @@ ParseAffixes(ItemDataAffixes, Item)
 					LineNum := HasToArmour
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToArmourHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToArmourHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 					
 					LineNum := HasToEvasion
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToEvasionHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToEvasionHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 				}
 				Else If (HasToArmour and HasToMaxES)
 				{
 					LineNum := HasToArmour
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToArmourHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToArmourHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 					
 					LineNum := HasToMaxES
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToMaxESHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToMaxESHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 				}
 				Else If (HasToEvasion and HasToMaxES)
 				{
 					LineNum := HasToEvasion
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToEvasionHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToEvasionHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 					
 					LineNum := HasToMaxES
 					LineTxt := Itemdata.AffixTextLines[LineNum].Text
 					Value   := Itemdata.AffixTextLines[LineNum].Value
-					LookupAffixAndSetInfoLine(FileToMaxESHyb, "Hybrid Prefix", ItemLevel, Value, LineTxt, LineNum)
+					LookupAffixAndSetInfoLine(FileToMaxESHyb, "Hybrid Defence Prefix", ItemLevel, Value, LineTxt, LineNum)
 				}
 				Else If (HasToArmour)
 				{
@@ -6889,7 +6886,7 @@ ParseClipBoardChanges(debug = false)
 	ParsedData := ParseItemData(CBContents)
 	ParsedData := PostProcessData(ParsedData)
 	
-	If (Opts.PutResultsOnClipboard > 0)
+	If (Opts.PutResultsOnClipboard && ParsedData)
 	{
 		SetClipboardContents(ParsedData)
 	}
@@ -7636,7 +7633,7 @@ ParseClipBoardChanges()
 */
 ParseItemData(ItemDataText, ByRef RarityLevel="")
 {
-	Global Opts, AffixTotals, uniqueMapList, mapList, mapMatchList, shapedMapMatchList, divinationCardList, gemQualityList
+	Global Opts, AffixTotals, mapList, mapMatchList, uniqueMapList, uniqueMapNameFromBase, divinationCardList, gemQualityList
 	
 	ItemDataPartsIndexLast =
 	ItemDataPartsIndexAffixes =
@@ -8054,7 +8051,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		If (divinationCardList[Item.Name] != "")
 		{
-			CardDescription := "`nPOTENTIALLY OUTDATED 3.0 INFORMATION:`n`n" divinationCardList[Item.Name]
+			CardDescription := divinationCardList[Item.Name]
 		}
 		Else
 		{
@@ -8074,27 +8071,36 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	
 	If (Item.IsMap)
 	{
-		Item.MapLevel := ParseMapLevel(ItemDataText)
-		Item.MapTier  := Item.MapLevel - 67
+		Item.MapTier  := ParseMapTier(ItemDataText)
+		Item.MapLevel := Item.MapTier + 67
+		
+		MapDescription := " (Tier: " Item.MapTier ", Level: " Item.MapLevel ")`n`n"
 		
 		If (Item.IsUnique)
 		{
-			MapDescription := uniqueMapList[Item.SubType]
+			MapDescription .= uniqueMapList[uniqueMapNameFromBase[Item.SubType]]
 		}
 		Else
 		{
-			MapDescription := mapList[Item.SubType]
+			If (RegExMatch(Item.SubType, "Shaped (.+ Map)", match))
+			{
+				MapDescription .= "Infos from non-shaped version:`n" mapList[match1]
+			}
+			Else
+			{
+				MapDescription .= mapList[Item.SubType]
+			}
 		}
 		If(MapDescription)
 		{
-			TT := TT "`n" "`nOUTDATED 3.0 INFORMATION:`n`n" MapDescription
+			TT .= MapDescription
 		}
 		
 		If (RarityLevel > 1 and RarityLevel < 4 and Not Item.IsUnidentified)
 		{
 			AffixDetails := AssembleMapAffixes()
 			MapAffixCount := AffixTotals.NumPrefixes + AffixTotals.NumSuffixes
-			TT = %TT%`n`n-----------`nMods (%MapAffixCount%):%AffixDetails%
+			TT = %TT%`n`nMods (%MapAffixCount%):%AffixDetails%
 			
 			If (MapModWarnings)
 			{
