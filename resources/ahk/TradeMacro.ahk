@@ -315,7 +315,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		; returns mods with their ranges of the searched item if it is unique and has variable mods
 		uniqueWithVariableMods :=
 		uniqueWithVariableMods := TradeFunc_FindUniqueItemIfItHasVariableRolls(Name, Item.IsRelic)
-
+		
 		; Return if the advanced search was used but the checked item doesn't have variable mods
 		If (!uniqueWithVariableMods and isAdvancedPriceCheck and not Enchantment and not Corruption) {
 			ShowToolTip("Advanced search not available for this item (no variable mods)`nor item is new and the necessary data is not yet available/updated.")
@@ -2540,7 +2540,7 @@ TradeFunc_FindModInRequestParams(RequestParams, name) {
 	Return False
 }
 
-; Return unique item with its variable mods and mod ranges If it has any
+; Return unique item with its variable mods and mod ranges if it has any
 TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
 {
 	data := isRelic ? TradeGlobals.Get("VariableRelicData") : TradeGlobals.Get("VariableUniqueData")
@@ -2552,6 +2552,10 @@ TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
 					Return uitem
 				}
 			}
+			If (uitem.hasVariant) {
+				uitem.IsUnique := true
+				Return uitem
+			}
 		}
 	}
 	Return 0
@@ -2561,7 +2565,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
 	tempMods	:= []
-
+	
 	For k, v in Item.mods {
 		modFound := false
 		For key, val in Affixes {
@@ -2579,9 +2583,9 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 			tempMods.push(v)
 		}
 	}
-
+	
 	Item.mods := tempMods
-
+	
 	return Item
 }
 
@@ -2740,7 +2744,7 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 }
 
 ; Add poe.trades mod names to the items mods to use as POST parameter
-TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
+TradeFunc_GetItemsPoeTradeUniqueMods(_item) {	
 	mods := TradeGlobals.Get("ModsData")
 	For k, imod in _item.mods {
 		_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["unique explicit"], _item.mods[k])

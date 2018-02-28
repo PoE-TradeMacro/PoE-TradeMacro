@@ -8286,41 +8286,43 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 
 GetNegativeAffixOffset(Item)
 {
-	NegativeAffixOffset := 0
-	If (Item.IsFlask or Item.IsUnique or Item.IsTalisman)
+	; Certain item types have descriptive text lines at the end,
+	; so decrement item index to get to the affix lines.
+	NegativeAffixOffset := 0		
+	If (Item.IsFlask)
+	{	
+		NegativeAffixOffset := NegativeAffixOffset + 1
+	}
+	If (Item.IsUnique)
 	{
-		; Uniques as well as flasks have descriptive text as last item,
-		; so decrement item index to get to the item before last one
+		NegativeAffixOffset := NegativeAffixOffset + 1
+	}
+	If (Item.IsTalisman)
+	{
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.IsMap)
 	{
-		; Maps have a descriptive text as the last item
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.IsJewel)
 	{
-		; Jewels, like maps and flask, have a descriptive text as the last item
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.HasEffect)
 	{
-		; Same with weapon skins or other effects
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.IsCorrupted)
 	{
-		; And corrupted items
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.IsElderBase or Item.IsShaperBase)
 	{
-		; And Elder/Shaper items
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	If (Item.IsMirrored)
 	{
-		; And mirrored items
 		NegativeAffixOffset := NegativeAffixOffset + 1
 	}
 	return NegativeAffixOffset
