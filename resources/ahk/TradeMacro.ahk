@@ -2571,7 +2571,8 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		For key, val in Affixes {
 			; remove negative sign also
 			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
-			n := TradeUtils.CleanUp(v.param)
+			n := TradeUtils.CleanUp(RegExReplace(v.param, "i)-?[\d\.]+", "#"))
+			n := TradeUtils.CleanUp(n)
 			; match with optional positive sign to match for example "-7% to cold resist" with "+#% to cold resist"
 			RegExMatch(n, "i)(\+?" . t . ")", match)
 			If (match) {
@@ -2937,16 +2938,21 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 		ErrorMsg := "Mod not found on poe.trade!"
 		Return ErrorMsg
 	}
+	poeTradeMod_ValueTypes := TradeFunc_CountValuesAndReplacedValues(poeTradeMod)
+
 	Loop, Parse, itemModifiers, `n, `r
 	{
+		console.log(A_LoopField)
 		If StrLen(A_LoopField) = 0
 		{
 			Continue ; Not interested in blank lines
-		}
-		CurrValue := ""
+		}		
+		
+		ModStr := ""
 		CurrValues := []
-		CurrValue := GetActualValue(A_LoopField)
-
+		CurrLine_ValueTypes := TradeFunc_CountValuesAndReplacedValues(A_LoopField)		
+		CurrValue := TradeFunc_GetActualValue(A_LoopField, poeTradeMod_ValueTypes)
+		
 		If (CurrValue ~= "\d+") {
 			; handle value range
 			RegExMatch(CurrValue, "(\d+) ?(-|to) ?(\d+)", values)
@@ -2961,19 +2967,78 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 				CurrValues.Push(CurrValue)
 				ModStr := StrReplace(A_LoopField, CurrValue, "#")
 			}
-
+			
 			; remove negative sign since poe.trade mods are always positive
 			ModStr := RegExReplace(ModStr, "^-#", "#")
 			ModStr := StrReplace(ModStr, "+")
 			; replace multi spaces with a single one
 			ModStr := RegExReplace(ModStr, " +", " ")
-
+			
 			If (RegExMatch(poeTradeMod, "i).*" ModStr "$")) {
 				Return CurrValues
 			}
 		}
+		
 	}
 }
+
+; Get value while being able to ignore some, depending on their position
+; ValueTypes = ["value", "replaced"]
+TradeFunc_GetActualValue(ActualValueLine, ValueTypes)
+{
+	returnValue 	:= ""	
+	Pos		:= 0
+	Count 	:= 0
+	; Leaves "-" in for negative values, example: "Ventor's Gamble"
+	While Pos	:= RegExMatch(ActualValueLine, "\+?(-?\d+(?: to -?\d+|\.\d+)?)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+		Count++		
+		If (InStr(ValueTypes[Count], "Replaced", 0)) {			
+			; Formats "1 to 2" as "1-2"
+			StringReplace, Result, value1, %A_SPACE%to%A_SPACE%, -
+			returnValue := Trim(RegExReplace(Result, ""))	
+		}
+	}
+	
+	return returnValue
+}
+
+; Get actual values from a line of the ingame tooltip as numbers
+; that can be used in calculations.
+TradeFunc_GetActualValues(ActualValueLine)
+{
+	values := []
+	
+	Pos		:= 0
+	; Leaves "-" in for negative values, example: "Ventor's Gamble"
+	While Pos	:= RegExMatch(ActualValueLine, "\+?(-?\d+(?: to -?\d+|\.\d+)?)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+		; Formats "1 to 2" as "1-2"
+		StringReplace, Result, value1, %A_SPACE%to%A_SPACE%, -
+		values.push(Trim(RegExReplace(Result, "")))
+	}
+	
+	return values
+}
+
+TradeFunc_CountValuesAndReplacedValues(ActualValueLine)
+{
+	values := []
+	
+	Pos		:= 0
+	Count	:= 0
+	; Leaves "-" in for negative values, example: "Ventor's Gamble"
+	While Pos	:= RegExMatch(ActualValueLine, "\+?(-?\d+(?: to -?\d+|\.\d+)?)|\+?(-?#(?: to -?#)?)", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+		Count++
+		If (value1) {
+			values.push("value")
+		}
+		Else If (value2) {
+			values.push("replaced")
+		}
+	}
+
+	return values
+}
+
 
 TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod, ByRef keepOrigModName = false) {
 	If (StrLen(poeTradeMod) < 1) {
@@ -3493,14 +3558,14 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		SetFormat, FloatFast, 5.2
 		ErrorMsg :=
 		If (advItem.IsUnique) {
-			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)
+			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)			
 		}
 		Else {
 			useOriginalModName := false
 			modValues := TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(advItem.mods[A_Index], advItem.mods[A_Index].param, useOriginalModName)
 			If (useOriginalModName) {
 				displayName := advItem.mods[A_Index].name_orig
-			}
+			}			
 		}
 		
 		If (modValues.Length() > 1) {
@@ -3514,7 +3579,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			}
 			modValue := modValues[1]
 		}
-
+		
 		switchValue :=
 		; make sure that the lower vaule is always min (reduced mana cost of minion skills)
 		If (StrLen(theoreticalMinValue) and StrLen(theoreticalMaxValue)) {
