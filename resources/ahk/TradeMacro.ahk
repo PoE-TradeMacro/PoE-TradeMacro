@@ -2565,7 +2565,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
 	tempMods	:= []
-	
+
 	For k, v in Item.mods {
 		modFound := false
 		For key, val in Affixes {
@@ -2586,7 +2586,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	}
 	
 	Item.mods := tempMods
-	
+
 	return Item
 }
 
@@ -3325,7 +3325,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	modLengthMax	:= 0
 	modGroupBox	:= 0
 	Loop % advItem.mods.Length() {
-		If (!advItem.mods[A_Index].isVariable and advItem.IsUnique) {
+		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique)
+		If (invalidUnique) {
 			continue
 		}
 		tempValue := StrLen(advItem.mods[A_Index].name)
@@ -3521,9 +3522,12 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	TradeAdvancedNormalModCount := 0
 	ModNotFound := false
 	PreCheckNormalMods := TradeOpts.AdvancedSearchCheckMods ? "Checked" : ""
+	
 	Loop % advItem.mods.Length() {
 		hidePseudo := advItem.mods[A_Index].hideForTradeMacro ? true : false
-		If ((!advItem.mods[A_Index].isVariable and advItem.IsUnique) or hidePseudo or not StrLen(advItem.mods[A_Index].name)) {
+		; allow non-variable mods if the item has variants to better identify the specific version/variant
+		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique)
+		If (invalidUnique or hidePseudo or not StrLen(advItem.mods[A_Index].name)) {
 			continue
 		}
 		xPosMin := modGroupBox + 25
@@ -3555,6 +3559,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			}
 		}
 
+		
 		SetFormat, FloatFast, 5.2
 		ErrorMsg :=
 		If (advItem.IsUnique) {
@@ -3589,53 +3594,59 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 				theoreticalMaxValue := switchValue
 			}
 		}
-
-		; calculate values to prefill min/max fields
-		; assume the difference between the theoretical max and min value as 100%
-		If (advItem.mods[A_Index].ranges[1]) {
-			If (not StrLen(switchValue)) {
-				modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
-				modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)
+		
+		If (advItem.mods[A_Index].isVariable or not advItem.IsUnique) {	
+			; calculate values to prefill min/max fields
+			; assume the difference between the theoretical max and min value as 100%
+			If (advItem.mods[A_Index].ranges[1]) {
+				If (not StrLen(switchValue)) {
+					modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
+					modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)
+				} Else {
+					modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
+					modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)
+				}
 			} Else {
-				modValueMin := modValue - ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMin)
-				modValueMax := modValue + ((theoreticalMaxValue - theoreticalMinValue) * valueRangeMax)
+				modValueMin := modValue - (modValue * valueRangeMin)
+				modValueMax := modValue + (modValue * valueRangeMax)
 			}
-		} Else {
-			modValueMin := modValue - (modValue * valueRangeMin)
-			modValueMax := modValue + (modValue * valueRangeMax)
-		}
 
-		; floor/Ceil values only if greater than 2, in case of leech/regen mods, use Abs() to support negative numbers
-		modValueMin := (Abs(modValueMin) > 2) ? Floor(modValueMin) : modValueMin
-		modValueMax := (Abs(modValueMax) > 2) ? Ceil(modValueMax) : modValueMax
+			; floor/Ceil values only if greater than 2, in case of leech/regen mods, use Abs() to support negative numbers
+			modValueMin := (Abs(modValueMin) > 2) ? Floor(modValueMin) : modValueMin
+			modValueMax := (Abs(modValueMax) > 2) ? Ceil(modValueMax) : modValueMax
 
-		; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
-		If (advItem.mods[A_Index].ranges[1]) {
-			modValueMin := TradeUtils.ZeroTrim((modValueMin < theoreticalMinValue and not staticValue) ? theoreticalMinValue : modValueMin)
-			modValueMax := TradeUtils.ZeroTrim((modValueMax > theoreticalMaxValue) ? theoreticalMaxValue : modValueMax)
-		}
+			; prevent calculated values being smaller than the lowest possible min value or being higher than the highest max values
+			If (advItem.mods[A_Index].ranges[1]) {
+				modValueMin := TradeUtils.ZeroTrim((modValueMin < theoreticalMinValue and not staticValue) ? theoreticalMinValue : modValueMin)
+				modValueMax := TradeUtils.ZeroTrim((modValueMax > theoreticalMaxValue) ? theoreticalMaxValue : modValueMax)
+			}
 
-		; create Labels to show unique items min/max rolls
-		If (advItem.mods[A_Index].ranges[2][1]) {
-			minLF := "(" TradeUtils.ZeroTrim((advItem.mods[A_Index].ranges[1][1] + advItem.mods[A_Index].ranges[1][2]) / 2) ")"
-			maxLF := "(" TradeUtils.ZeroTrim((advItem.mods[A_Index].ranges[2][1] + advItem.mods[A_Index].ranges[2][2]) / 2) ")"
-		}
-		Else If (staticValue) {
-			minLF := "(" TradeUtils.ZeroTrim((staticValue + advItem.mods[A_Index].ranges[1][1]) / 2) ")"
-			maxLF := "(" TradeUtils.ZeroTrim((staticValue + advItem.mods[A_Index].ranges[1][2]) / 2) ")"
+			; create Labels to show unique items min/max rolls
+			If (advItem.mods[A_Index].ranges[2][1]) {
+				minLF := "(" TradeUtils.ZeroTrim((advItem.mods[A_Index].ranges[1][1] + advItem.mods[A_Index].ranges[1][2]) / 2) ")"
+				maxLF := "(" TradeUtils.ZeroTrim((advItem.mods[A_Index].ranges[2][1] + advItem.mods[A_Index].ranges[2][2]) / 2) ")"
+			}
+			Else If (staticValue) {
+				minLF := "(" TradeUtils.ZeroTrim((staticValue + advItem.mods[A_Index].ranges[1][1]) / 2) ")"
+				maxLF := "(" TradeUtils.ZeroTrim((staticValue + advItem.mods[A_Index].ranges[1][2]) / 2) ")"
+			}
+			Else {
+				minLF := "(" TradeUtils.ZeroTrim(advItem.mods[A_Index].ranges[1][1]) ")"
+				maxLF := "(" TradeUtils.ZeroTrim(advItem.mods[A_Index].ranges[1][2]) ")"
+			}
+			
+			; make sure that the lower value is always min (reduced mana cost of minion skills)
+			If (not StrLen(switchValue)) {
+				minLabelFirst	:= minLF
+				maxLabelFirst	:= maxLF
+			} Else {
+				minLabelFirst	:= maxLF
+				maxLabelFirst	:= minLF
+			}
 		}
 		Else {
-			minLF := "(" TradeUtils.ZeroTrim(advItem.mods[A_Index].ranges[1][1]) ")"
-			maxLF := "(" TradeUtils.ZeroTrim(advItem.mods[A_Index].ranges[1][2]) ")"
-		}
-
-		; make sure that the lower value is always min (reduced mana cost of minion skills)
-		If (not StrLen(switchValue)) {
-			minLabelFirst	:= minLF
-			maxLabelFirst	:= maxLF
-		} Else {
-			minLabelFirst	:= maxLF
-			maxLabelFirst	:= minLF
+			modValueMin := ""
+			modValueMax := ""
 		}
 
 		If (not TradeOpts.PrefillMinValue or ErrorMsg) {
@@ -3664,7 +3675,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			TradeAdvancedNormalModCount++
 		}
 
-		state := modValue ? 0 : 1
+		state := modValue and (advItem.mods[A_Index].isVariable or not advItem.IsUnique) ? 0 : 1
 
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color% vTradeAdvancedModName%index%			, % isPseudo ? "(pseudo) " . displayName : displayName
 		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 Disabled%state% 	, % modValueMin
@@ -3673,9 +3684,10 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 Disabled%state% 	, % modValueMax
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen 			                       		, % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
 		checkEnabled := ErrorMsg ? 0 : 1
+		
 		; pre-select mods according to the options in the settings menu
 		If (checkEnabled) {
-			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods) ? "Checked" : ""
+			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods or (not advItem.mods[A_Index].isVariable and advItem.IsUnique)) ? "Checked" : ""
 			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index%
 		}
 		Else {
