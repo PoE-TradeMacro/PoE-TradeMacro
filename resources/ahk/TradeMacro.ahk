@@ -2941,8 +2941,7 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 	poeTradeMod_ValueTypes := TradeFunc_CountValuesAndReplacedValues(poeTradeMod)
 
 	Loop, Parse, itemModifiers, `n, `r
-	{
-		console.log(A_LoopField)
+	{		
 		If StrLen(A_LoopField) = 0
 		{
 			Continue ; Not interested in blank lines
