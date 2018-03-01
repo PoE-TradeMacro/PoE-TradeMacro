@@ -67,13 +67,48 @@ TradeFunc_OpenSearchOnPoeTradeHotkey(priceCheckTest = false, itemData = "") {
 	; simulate clipboard change to test item pricing
 	If (priceCheckTest) {
 		Clipboard :=
-		CLipboard := itemData
+		Clipboard := itemData
 	} Else {
 		Send ^{sc02E}
 	}
 	Sleep 250
 	TradeFunc_Main(true)
-	SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+	SuspendPOEItemScript = 0 ; Allow ItemInfo to handle clipboard change event
+}
+
+OpenSearchOnPoEApp:
+	IfWinActive, ahk_group PoEWindowGrp
+	{
+		TradeFunc_OpenSearchOnPoeAppHotkey()
+	}
+Return
+
+TradeFunc_OpenSearchOnPoeAppHotkey(priceCheckTest = false, itemData = "") {
+	Global TradeOpts, Item
+
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+	TradeFunc_PreventClipboardGarbageAfterInit()
+	
+	clipPrev :=
+	; simulate clipboard change to test item pricing
+	If (priceCheckTest) {
+		Clipboard :=
+		Clipboard := itemData
+	} Else {
+		clipPrev := Clipboard
+		Send ^{sc02E}
+	}
+	Sleep 250
+	
+	TradeFunc_DoParseClipboard()
+	
+	If (Item.Name or Item.BaseName) {
+		itemContents := TradeUtils.UriEncode(Clipboard)
+		url := "https://poeapp.com?utm_source=poe-trademacro#/item-import/" + itemContents
+		Clipboard := clipPrev
+		TradeFunc_OpenUrlInBrowser(url)	
+	}
+	SuspendPOEItemScript = 0 ; Allow ItemInfo to handle clipboard change event
 }
 
 ShowItemAge:
@@ -116,7 +151,7 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 	TradeFunc_DoParseClipboard()
 
 	If (!Item.Name and TradeOpts.OpenUrlsOnEmptyItem) {
-		If (TradeOpts.WIkiAlternative) {
+		If (TradeOpts.WikiAlternative) {
 			;http://poedb.tw/us/item.php?n=The+Doctor
 			TradeFunc_OpenUrlInBrowser("http://poedb.tw/us/")
 		} Else {
@@ -192,7 +227,7 @@ ChangeLeague:
 	}
 Return
 
-; Prepare Reqeust Parametes and send Post Request
+; Prepare Request Parameters and send Post Request
 ; openSearchInBrowser : set to true to open the search on poe.trade instead of showing the tooltip
 ; isAdvancedPriceCheck : set to true If the GUI to select mods should be openend
 ; isAdvancedPriceCheckRedirect : set to true If the search is triggered from the GUI

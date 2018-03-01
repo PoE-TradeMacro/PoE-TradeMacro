@@ -2,6 +2,7 @@ The following is a list of what has been updated, starting with 1.1.0
 
 2.7.6
 ================================================================================================
+Added simple support for opening an item on poeapp.com, the default hotkey is ctrl + alt + q and can be changed in the settings menu.
 Updated all data files (uniques etc.), since that data comes from the wiki and the wiki was broken a while ago there where some issues updating these files.
 Fixed a few issues with unique flasks and certain mods on other uniqe items not working with the advanced search.
 Added full support for unique items having variations. You can now use the advanced search on items like Vessel of Vinktar and search for the specific version that you have.
