@@ -16,7 +16,9 @@ ItemInfo:
 	NO (!) support for Elder/Shaper mods. Waiting on GGG's advanced tier info for the clipboard, for now.
 	Slight parsing and display changes.
 	Parsing fix for shaped maps.
-
+	Fixed most cases where long mods with linebreaks would cause issues.
+	Added Gem Quality information for the three new v3.2 gems.	
+	
 2.7.5
 ================================================================================================
 Fixed a rare cURL request issue.
