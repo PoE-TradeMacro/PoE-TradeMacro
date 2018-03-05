@@ -148,7 +148,6 @@
 			
 		}
 		SplashTextOff
-		goodStatusCode := "0"
 		msgbox % "URL:  " url "`n`n`n" ioHdr "`n`n`ngood status: " goodStatusCode "`n`nloop: " A_Index "`n`n`nisJSON: " isJSON "`n`n`nvalidate response: " validateResponse
 		
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {
