@@ -149,10 +149,10 @@
 		} Catch er {
 			
 		}
-
-		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {
 			SplashTextOff
 			msgbox % "URL:  " url "`n`n`n" ioHdr "`n`n`ngood status: " goodStatusCode "`n`nloop: " A_Index
+		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {
+
 			Break	; only go into the second loop if the respone is empty or has a bad status code (possible problem with the added host header)
 		}
 	}
