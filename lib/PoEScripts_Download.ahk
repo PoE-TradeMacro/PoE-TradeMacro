@@ -151,7 +151,8 @@
 		}
 
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {
-			msgbox % url "`n`n`n" ioHdr "`n`n`ngood status: " goodStatusCode "`n`nloop: " A_Index
+			SplashTextOff
+			msgbox % "URL:  " url "`n`n`n" ioHdr "`n`n`ngood status: " goodStatusCode "`n`nloop: " A_Index
 			Break	; only go into the second loop if the respone is empty or has a bad status code (possible problem with the added host header)
 		}
 	}
