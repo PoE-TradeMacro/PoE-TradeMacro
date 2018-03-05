@@ -35,6 +35,7 @@
 		
 		redirect := "L"
 		PreventErrorMsg := false
+		validateResponse := 1
 		If (StrLen(options)) {
 			Loop, Parse, options, `n 
 			{
@@ -60,10 +61,7 @@
 				If (RegExMatch(A_LoopField, "i)ValidateResponse:(.*)", match)) {
 					If (Trim(match1) = "false") {
 						validateResponse := 0
-					}
-					Else {
-						validateResponse := 1	
-					}					
+					}				
 				}	
 			}			
 		}
@@ -150,7 +148,9 @@
 			
 		}
 		SplashTextOff
+		goodStatusCode := "0"
 		msgbox % "URL:  " url "`n`n`n" ioHdr "`n`n`ngood status: " goodStatusCode "`n`nloop: " A_Index "`n`n`nisJSON: " isJSON "`n`n`nvalidate response: " validateResponse
+		
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {
 			If (InStr(url,  "poe.trade")) {
 				msgbox % "BREAK the Loop."	
