@@ -4386,13 +4386,14 @@ TradeFunc_DowloadURLtoJSON(url, sampleValue, critical = false, league = "") {
 		UrlDownloadToFile, %url%, %A_ScriptDir%\temp\currencyData.json
 		FileRead, JSONFile, %A_ScriptDir%\temp\currencyData.json
 		parsedJSON := JSON.Load(JSONFile)
-
+		msgbox % "url: " url "`n`nisObject: " isObject(parsedJSON) "`n`nresult length: " parsedJSON.lines.length()
 		; first currency data parsing (script start)
 		If (critical and not sampleValue or not parsedJSON.lines.length()) {
 			errors++
 		}
 	} Catch error {
 		; first currency data parsing (script start)
+		msgbox % "url: " url "`n`nerror while parsing the results!`n`nsample value: " sampleValue
 		If (critical and not sampleValue) {
 			errors++
 		}
