@@ -539,11 +539,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}		
 	}
-
+	
 	; prepend the item.subtype to match the options used on poe.trade
 	If (RegExMatch(Item.SubType, "i)Mace|Axe|Sword")) {
 		If (Item.IsThreeSocket) {
-			Item.xtype := "One Hand " . Item.SubType
+			If (RegExMatch(Item.BaseName, "i)Sceptre")) {
+				Item.xtype := "Sceptre"
+			} Else {
+				Item.xtype := "One Hand " . Item.SubType	
+			}			
 		}
 		Else {
 			Item.xtype := "Two Hand " . Item.SubType
@@ -634,8 +638,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		; genus ?
 		; family ?
 	}
-	
-	debugprintarray(requestparams)
 	
 	; league stones
 	If (Item.IsLeagueStone) {
@@ -866,7 +868,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		;console.log(RequestParams)
 	}
 	Payload := RequestParams.ToPayload()
-
+	
 	If (openSearchInBrowser) {
 		ShowToolTip("Opening search in your browser... ")
 	} Else If (not (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing)) {
@@ -2467,6 +2469,7 @@ class RequestParams_ {
 	shaper		:= ""
 	elder		:= ""
 	map_series 	:= ""
+	exact_currency := ""
 
 	ToPayload() {
 		modGroupStr := ""
