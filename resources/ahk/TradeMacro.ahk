@@ -2745,9 +2745,6 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["explicit"], _item.mods[k])
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
-			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
-		}
-		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["shaped"], _item.mods[k])
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
@@ -2761,6 +2758,9 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["crafted"], _item.mods[k])
+		}		
+		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["enchantments"], _item.mods[k])
