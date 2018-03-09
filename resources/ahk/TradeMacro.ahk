@@ -2774,6 +2774,9 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
 		}
+		If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["bestiary"], _item.mods[k])
+		}
 	}
 
 	Return _item
