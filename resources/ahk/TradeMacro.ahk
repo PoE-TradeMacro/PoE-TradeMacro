@@ -286,7 +286,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (Item.RarityLevel > 0 and Item.RarityLevel < 4 and (Item.IsWeapon or Item.IsArmour or Item.IsRing or Item.IsBelt or Item.IsAmulet)) {
 		IgnoreName := true
 	}
-	If (Item.IsRelic) {
+	If (Item.IsRelic or Item.IsBeast) {
 		IgnoreName := false
 	}
 
@@ -313,7 +313,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Item.IsUnique 	:= false
 	}
 
-	If (!Item.IsUnique) {
+	If (!Item.IsUnique ot Item.IsBeast) {
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
 		preparedItem.maxSockets	:= Item.maxSockets
 		preparedItem.iLvl		:= Item.level
@@ -323,7 +323,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
-			;preparedItem.specialBase	:= Item.isAbyssJewel ? "Abyss Jewel" : preparedItem.specialBase
 		}		
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
@@ -567,7 +566,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.xbase  := Item.BaseName
 		}
 		Item.UsedInSearch.FullName := true
-	} Else If (!Item.isUnique and AdvancedPriceCheckItem.mods.length() <= 0) {
+	} 
+	Else If (!Item.isUnique and AdvancedPriceCheckItem.mods.length() <= 0) {
 		isCraftingBase         := TradeFunc_CheckIfItemIsCraftingBase(Item.BaseName)
 		hasHighestCraftingILvl := TradeFunc_CheckIfItemHasHighestCraftingLevel(Item.SubType, iLvl)
 		; xtype = Item.SubType (Helmet)
@@ -582,20 +582,23 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				RequestParams.ilvl_min := hasHighestCraftingILvl
 				Item.UsedInSearch.iLvl.min := hasHighestCraftingILvl
 			}
-		} Else If (Enchantment.param and not isAdvancedPriceCheckRedirect) {
+		} 
+		Else If (Enchantment.param and not isAdvancedPriceCheckRedirect) {
 			modParam := new _ParamMod()
 			modParam.mod_name := Enchantment.param
 			modParam.mod_min  := Enchantment.min
 			modParam.mod_max  := Enchantment.max
 			RequestParams.modGroups[1].AddMod(modParam)
 			Item.UsedInSearch.Enchantment := true
-		} Else If (Corruption.param and not isAdvancedPriceCheckRedirect) {
+		} 
+		Else If (Corruption.param and not isAdvancedPriceCheckRedirect) {
 			modParam := new _ParamMod()
 			modParam.mod_name := Corruption.param
 			modParam.mod_min  := (Corruption.min) ? Corruption.min : ""
 			RequestParams.modGroups[1].AddMod(modParam)
 			Item.UsedInSearch.CorruptedMod := true
-		} Else {
+		} 
+		Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 			Item.UsedInSearch.Type := (Item.xtype) ? Item.xtype : Item.SubType
 		}
@@ -603,21 +606,37 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.IsShaperBase) {
 			RequestParams.Shaper := 1
 			Item.UsedInSearch.specialBase := "Shaper"
-		} Else {		
+		} 
+		Else {		
 			RequestParams.Shaper := 0
 		} 
 		
 		If (Item.IsElderBase) {
 			RequestParams.Elder := 1
 			Item.UsedInSearch.specialBase := "Elder"
-		} Else {			
+		} 
+		Else {			
 			RequestParams.Elder := 0
 		}
-	} Else {
+	} 
+	Else {
 		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
 	}
-
+	
+	If (Item.IsBeast) {
+		If (!Item.IsUnique) {
+			RequestParams.Name := ""
+		}
+		RequestParams.xbase := Item.BaseType
+		; ilevel?
+		; group ?
+		; genus ?
+		; family ?
+	}
+	
+	debugprintarray(requestparams)
+	
 	; league stones
 	If (Item.IsLeagueStone) {
 		; only manually add these mods if they don't already exist (created by advanced search)
