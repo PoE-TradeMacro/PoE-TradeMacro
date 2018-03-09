@@ -313,7 +313,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Item.IsUnique 	:= false
 	}
 
-	If (!Item.IsUnique ot Item.IsBeast) {
+	If (!Item.IsUnique or Item.IsBeast) {
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap)
 		preparedItem.maxSockets	:= Item.maxSockets
 		preparedItem.iLvl		:= Item.level
