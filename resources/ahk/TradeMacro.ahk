@@ -570,14 +570,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.xbase  := Item.BaseName
 		}
 		Item.UsedInSearch.FullName := true
-	} 
+	}
 	Else If (!Item.isUnique and AdvancedPriceCheckItem.mods.length() <= 0) {
 		isCraftingBase         := TradeFunc_CheckIfItemIsCraftingBase(Item.BaseName)
 		hasHighestCraftingILvl := TradeFunc_CheckIfItemHasHighestCraftingLevel(Item.SubType, iLvl)
 		; xtype = Item.SubType (Helmet)
 		; xbase = Item.BaseName (Eternal Burgonet)
 
-		;If desired crafting base and not isAdvancedPriceCheckRedirect
+		; If desired crafting base and not isAdvancedPriceCheckRedirect
 		If (isCraftingBase and not Enchantment.param and not Corruption.param and not isAdvancedPriceCheckRedirect) {
 			RequestParams.xbase := Item.BaseName
 			Item.UsedInSearch.ItemBase := Item.BaseName
@@ -586,7 +586,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				RequestParams.ilvl_min := hasHighestCraftingILvl
 				Item.UsedInSearch.iLvl.min := hasHighestCraftingILvl
 			}
-		} 
+		}
 		Else If (Enchantment.param and not isAdvancedPriceCheckRedirect) {
 			modParam := new _ParamMod()
 			modParam.mod_name := Enchantment.param
@@ -601,7 +601,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			modParam.mod_min  := (Corruption.min) ? Corruption.min : ""
 			RequestParams.modGroups[1].AddMod(modParam)
 			Item.UsedInSearch.CorruptedMod := true
-		} 
+		}
 		Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 			Item.UsedInSearch.Type := (Item.xtype) ? Item.xtype : Item.SubType
@@ -610,15 +610,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.IsShaperBase) {
 			RequestParams.Shaper := 1
 			Item.UsedInSearch.specialBase := "Shaper"
-		} 
+		}
 		Else {		
 			RequestParams.Shaper := 0
-		} 
+		}
 		
 		If (Item.IsElderBase) {
 			RequestParams.Elder := 1
 			Item.UsedInSearch.specialBase := "Elder"
-		} 
+		}
 		Else {			
 			RequestParams.Elder := 0
 		}
@@ -626,6 +626,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Else {
 		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
 		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
+	}
+	
+	; make sure to not look for unique items when searching rare/white/magic items
+	If (!Item.IsUnique) {
+		RequestParams.rarity := "non_unique"
 	}
 	
 	If (Item.IsBeast) {
