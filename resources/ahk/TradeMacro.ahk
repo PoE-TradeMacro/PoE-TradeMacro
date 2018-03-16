@@ -563,7 +563,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}		
 	}
-	
+
 	; prepend the item.subtype to match the options used on poe.trade
 	If (RegExMatch(Item.SubType, "i)Mace|Axe|Sword")) {
 		If (Item.IsThreeSocket) {
@@ -628,7 +628,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 		Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
-			Item.UsedInSearch.Type := (Item.xtype) ? Item.xtype : Item.SubType
+			If (not Item.IsBeast) {
+				Item.UsedInSearch.Type := (Item.xtype) ? Item.xtype : Item.SubType
+			}
 		}
 		
 		If (Item.IsShaperBase) {
@@ -649,9 +651,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	} 
 	Else {
 		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
-		Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType
+		If (not Item.IsBeast) {
+			Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType	
+		}		
 	}
-	
+
 	; make sure to not look for unique items when searching rare/white/magic items
 	If (!Item.IsUnique) {
 		RequestParams.rarity := "non_unique"
