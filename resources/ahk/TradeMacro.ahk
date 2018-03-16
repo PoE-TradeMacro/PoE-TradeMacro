@@ -640,6 +640,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		RequestParams.rarity := "non_unique"
 	}
 	
+	; handle beasts
 	If (Item.IsBeast) {
 		If (!Item.IsUnique) {
 			RequestParams.Name := ""
@@ -659,20 +660,21 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		modParam.mod_min  := ""
 		RequestParams.modGroups[1].AddMod(modParam)
 		
-		/* 
-			add beastiary mods
-			*/
-		If (not isAdvancedPriceCheck) {
-			For key, imod in preparedItem.mods {
-				If (imod.param) {	; exists on poe.trade
-					modParam := new _ParamMod()
-					modParam.mod_name := imod.param
-					modParam.mod_min  := ""
-					RequestParams.modGroups[1].AddMod(modParam)	
-				}				
-			}
+		If (not isAdvancedPriceCheckRedirect) {
+			/* 
+				add beastiary mods
+				*/
+			If (not isAdvancedPriceCheck) {
+				For key, imod in preparedItem.mods {
+					If (imod.param) {	; exists on poe.trade
+						modParam := new _ParamMod()
+						modParam.mod_name := imod.param
+						modParam.mod_min  := ""
+						RequestParams.modGroups[1].AddMod(modParam)	
+					}				
+				}
+			}			
 		}
-		Item.UsedInSearch.AddedMods := "Bestiary Mods"
 		
 		; ilevel?
 		; group ?
@@ -2110,7 +2112,7 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 			Title .= (Item.UsedInSearch.AreaMonsterLvl) ? "| " . Item.UsedInSearch.AreaMonsterLvl . " " : ""
 			
 			If (Item.IsBeast and not Item.IsUnique) {
-				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Added all special bestiary mods to the search !!" : ""	
+				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Added special bestiary mods to the search !!" : ""	
 			} Else {
 				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Mod rolls are being ignored !!" : ""
 			}			

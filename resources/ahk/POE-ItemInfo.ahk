@@ -7798,7 +7798,6 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		Item.IsBeast := True
 		Item.BeastData := ParseBeastData(ItemData)
 		Item.BaseType := "Beast"
-		DebugPrintArray(Item.BeastData)
 	}
 	
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
