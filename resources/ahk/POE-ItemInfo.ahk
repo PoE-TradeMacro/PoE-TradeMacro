@@ -987,7 +987,7 @@ SetClipboardContents(String)
 */
 ArrayFromDataobject(Obj)
 {
-	If(Obj = False)
+	If (Obj = False)
 	{
 		return False
 	}
@@ -1168,7 +1168,7 @@ Returns an object with 3 keys:
 */
 LookupTierByValue(Value, ModDataArray, ItemLevel=100)
 {
-	If(ModDataArray = False)
+	If (ModDataArray = False)
 	{
 		return False
 	}
@@ -1179,14 +1179,14 @@ LookupTierByValue(Value, ModDataArray, ItemLevel=100)
 	
 	Loop
 	{
-		If( A_Index > ModDataArray.Length() )
+		If ( A_Index > ModDataArray.Length() )
 		{
 			Break
 		}
 		
 		CheckTier := A_Index
 		
-		If( ModDataArray[CheckTier].ilvl > ItemLevel)
+		If ( ModDataArray[CheckTier].ilvl > ItemLevel)
 		{
 			; Skip line if the ItemLevel is too low for the tier
 			Continue
@@ -1198,10 +1198,10 @@ LookupTierByValue(Value, ModDataArray, ItemLevel=100)
 				; Value is a range (due to a double range mod)
 				SplitRange(Value, ValueLo, ValueHi)
 				
-				If( (ModDataArray[CheckTier].minLo <= ValueLo) and (ValueLo <= ModDataArray[CheckTier].minHi) and (ModDataArray[CheckTier].maxLo <= ValueHi) and (ValueHi <= ModDataArray[CheckTier].maxHi) )
+				If ( (ModDataArray[CheckTier].minLo <= ValueLo) and (ValueLo <= ModDataArray[CheckTier].minHi) and (ModDataArray[CheckTier].maxLo <= ValueHi) and (ValueHi <= ModDataArray[CheckTier].maxHi) )
 				{
 					; Both values fit in the brackets
-					If(tier="")
+					If (tier="")
 					{
 						; tier not assigned yet, so fill it. This is put into tierTop later if more than one tier fits.
 						tier := CheckTier
@@ -1217,10 +1217,10 @@ LookupTierByValue(Value, ModDataArray, ItemLevel=100)
 			Else
 			{
 				; Value is a number, not a range
-				If( (ModDataArray[CheckTier].min <= Value) and (Value <= ModDataArray[CheckTier].max) )
+				If ( (ModDataArray[CheckTier].min <= Value) and (Value <= ModDataArray[CheckTier].max) )
 				{
 					; Value fits in the bracket
-					If(tier="")
+					If (tier="")
 					{
 						; tier not assigned yet, so fill it. This is put into tierTop later if more than one tier fits.
 						tier := CheckTier
@@ -1235,7 +1235,7 @@ LookupTierByValue(Value, ModDataArray, ItemLevel=100)
 			}
 		}
 	}
-	If(tierBtm)
+	If (tierBtm)
 	{
 		; tierBtm was actually used, so more than one tier fits. Thus putting tier into tierTop instead.
 		tierTop := tier
@@ -1257,15 +1257,15 @@ LookupImplicitValue(ItemBaseName)
 		StringSplit, Part, ImplicitText, `,
 		return [GetActualValue(Part1), GetActualValue(Part2)]
 	}
-	Else If(RegExMatch(ImplicitText, "Adds \((\d+\-\d+)\) to \((\d+\-\d+)\)", match))
+	Else If (RegExMatch(ImplicitText, "Adds \((\d+\-\d+)\) to \((\d+\-\d+)\)", match))
 	{
 		return [match1  Opts.DoubleRangeSeparator  match2]
 	}
-	Else If(RegExMatch(ImplicitText, "Adds (\d+\) to (\d+\)", match))
+	Else If (RegExMatch(ImplicitText, "Adds (\d+\) to (\d+\)", match))
 	{
 		return [match1  Opts.DoubleRangeSeparator  match2]
 	}
-	Else If(RegExMatch(ImplicitText, "\((.*?)\)", match))
+	Else If (RegExMatch(ImplicitText, "\((.*?)\)", match))
 	{
 		return [match1]
 	}
@@ -1276,7 +1276,7 @@ LookupImplicitValue(ItemBaseName)
 
 LookupAffixData(DataSource, ItemLevel, Value, ByRef Tier="")
 {
-	If(IsObject(DataSource)){
+	If (IsObject(DataSource)){
 		ModDataArray := ArrayFromDataobject(DataSource)
 	}
 	Else{
@@ -1285,18 +1285,18 @@ LookupAffixData(DataSource, ItemLevel, Value, ByRef Tier="")
 	
 	ModTiers := LookupTierByValue(Value, ModDataArray, ItemLevel)
 	
-	If(ModTiers.Tier)
+	If (ModTiers.Tier)
 	{
 		Tier := ModTiers.Tier
 	}
-	Else If(ModTiers.Top and ModTiers.Btm)
+	Else If (ModTiers.Top and ModTiers.Btm)
 	{
 		Tier := [ModTiers.Top, ModTiers.Btm]
 	}
-	Else If(Value contains "-")
+	Else If (Value contains "-")
 	{
 		SplitRange(Value, Lo, Hi)
-		If(Lo > ModDataArray[1].maxLo and Hi > ModDataArray[1].maxHi)
+		If (Lo > ModDataArray[1].maxLo and Hi > ModDataArray[1].maxHi)
 		{
 			Tier := 0
 		}
@@ -1307,7 +1307,7 @@ LookupAffixData(DataSource, ItemLevel, Value, ByRef Tier="")
 	}
 	Else
 	{
-		If(Value > ModDataArray[1].max)
+		If (Value > ModDataArray[1].max)
 		{
 			Tier := 0
 		}
@@ -1474,7 +1474,7 @@ FormatDoubleRanges(BtmMin, BtmMax, TopMin, TopMax, StyleOverwrite="")
 {
 	Global Opts
 	
-	If(StyleOverwrite = "compact" or (Opts.UseCompactDoubleRanges and StyleOverwrite = "") )
+	If (StyleOverwrite = "compact" or (Opts.UseCompactDoubleRanges and StyleOverwrite = "") )
 	{
 		ValueRange := BtmMin "-" TopMax
 	}
@@ -1495,7 +1495,7 @@ FormatMultiTierRange(BtmMin, BtmMax, TopMin, TopMax)
 {
 	Global Opts
 	
-	If(BtmMin = TopMin and BtmMax = TopMax)
+	If (BtmMin = TopMin and BtmMax = TopMax)
 	{
 		return BtmMin "-" TopMax
 	}
@@ -1616,22 +1616,22 @@ DebugFile(Content, LineEnd="`n", StartNewFile=False)
 {
 	Global DebugMode
 	
-	If( not isDevVersion){
+	If ( not isDevVersion){
 	DebugMode := False 
 	}
 	
-	If(DebugMode = False)
+	If (DebugMode = False)
 		return
 	
-	If(StartNewFile){
+	If (StartNewFile){
 		FileDelete, DebugFile.txt
 	}
 	
-	If(IsObject(Content))
+	If (IsObject(Content))
 	{
 		Print := "`n>>`n" ExploreObj(Content) "`n<<`n"
 	}
-	Else If(StrLen(Content) > 100)
+	Else If (StrLen(Content) > 100)
 	{
 		Print := "`n" Content "`n`n"
 	}
@@ -1726,7 +1726,7 @@ NumFormat(Num, Format)
 
 ; Formats floating values such as 2.50000 or 3.00000 into 2.5 and 3
 NumFormatPointFiveOrInt(Value){
-	If( not Mod(Value, 1) )
+	If ( not Mod(Value, 1) )
 	{
 		return Round(Value)
 	}
@@ -1747,7 +1747,7 @@ NumPad(Num, TotalWidth, DecimalPlaces=0)
 AffixTypeShort(AffixType)
 {
 	result := RegExReplace(AffixType, "Hybrid Defence Prefix", "HDP")
-	result := RegExReplace(result, "Crafted ", "Cr")		; not properly supported yet, so remove completely
+	result := RegExReplace(result, "Crafted ", "Cr")		; not fully supported yet.
 	result := RegExReplace(result, "Hybrid ", "Hyb")
 	result := RegExReplace(result, "Prefix", "P")
 	result := RegExReplace(result, "Suffix", "S")
@@ -1861,7 +1861,7 @@ AssembleAffixDetails()
 	Result := ""
 	NumAffixLines := AffixLines.MaxIndex()		; ( Itemdata.AffixTextLines.MaxIndex() > AffixLines.MaxIndex() ) ? Itemdata.AffixTextLines.MaxIndex() : AffixLines.MaxIndex()
 	
-	TextLineWidth := 20
+	TextLineWidth := 23
 	TextLineWidthUnique := TextLineWidth + 10
 	TextLineWidthJewel  := TextLineWidth + 10
 	
@@ -1871,7 +1871,7 @@ AssembleAffixDetails()
 	Separator := Opts.AffixColumnSeparator
 	Ellipsis := Opts.AffixTextEllipsis
 	
-	If(Item.IsUnique)
+	If (Item.IsUnique)
 	{
 		Loop, %NumAffixLines%
 		{
@@ -1879,7 +1879,7 @@ AssembleAffixDetails()
 			AffixText := CurLine[1]
 			ValueRange := CurLine[2]
 			
-			If(StrLen(AffixText) > TextLineWidthUnique)
+			If (StrLen(AffixText) > TextLineWidthUnique)
 			{
 				AffixText := SubStr(AffixText, 1, TextLineWidthUnique - StrLen(Ellipsis)) . Ellipsis
 			}
@@ -1902,21 +1902,21 @@ AssembleAffixDetails()
 			CurLine := AffixLines[A_Index]
 			
 			ValueRange := CurLine[2]
-			If( ! IsObject(ValueRange) )
+			If ( ! IsObject(ValueRange) )
 			{
 				; Text as ValueRange
 				continue
 			}
 			
-			If( StrLen(ValueRange[1]) > ValueRange1Width )
+			If ( StrLen(ValueRange[1]) > ValueRange1Width )
 			{
-				If(ValueRange[2])
+				If (ValueRange[2])
 				{
 					ValueRange1Width := StrLen(ValueRange[1])
 				}
 				Else
-				{	; Has no ilvl entry for first range, can expand a bit.
-					; Moving more the longer the range text is. Until 9: +2, 10-11: +3, 12-13: +4, then: +5.
+				{	; TierRange has no ilvl entry, can expand a bit.
+					; Moving more the longer the range text is. Until 9 chars: +2, 10-11 chars: +3, 12-13 chars: +4, then: +5.
 					; This keeps the "…" of a multi tier range aligned with the "-" of most normal ranges,
 					;   but also keeps slightly larger normal ranges aligned as usual, like so:
 					/*        28-32 (44)
@@ -1929,20 +1929,20 @@ AssembleAffixDetails()
 					*/
 					extra := StrLen(ValueRange[1]) <= 7 ? 0 : (StrLen(ValueRange[1]) <= 9 ? 2 : ( StrLen(ValueRange[1]) <= 11 ? 3 : ( StrLen(ValueRange[1]) <= 13 ? 4 : 5)))
 					
-					If( StrLen(ValueRange[1]) > ValueRange1Width + extra )
+					If ( StrLen(ValueRange[1]) > ValueRange1Width + extra )
 					{
 						ValueRange1Width := StrLen(ValueRange[1]) - extra
 					}
 				}
 			}
 			
-			If( StrLen(ValueRange[3]) > ValueRange2Width )
+			If ( StrLen(ValueRange[3]) > ValueRange2Width )
 			{
 				ValueRange2Width := StrLen(ValueRange[3])
 			}
 		}
 		
-		If( not ((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask) and Opts.ShowHeaderForAffixOverview)
+		If ( not ((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask) and Opts.ShowHeaderForAffixOverview)
 		{
 			; Add a header line above the affix infos.			
 			ProcessedLine := "`n"
@@ -1959,21 +1959,21 @@ AssembleAffixDetails()
 		{
 			CurLine := AffixLines[A_Index]
 			; Any empty line is considered as an Unprocessed Mod
-			If(IsObject(CurLine))
+			If (IsObject(CurLine))
 			{
 				AffixText := CurLine[1]
 				ValueRange := CurLine[2]
 				TierAndType := CurLine[3]
 				
-				If(AffixText = "or")
+				If (AffixText = "or")
 				{
 					AffixText := "--or--"
 					AffixText := StrPad(AffixText, round( (TextLineWidth + StrLen(AffixText))/2 ), "left")	; align mid
 				}
 				
-				If((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask)
+				If ((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask)
 				{
-					If(StrLen(AffixText) > TextLineWidthJewel)
+					If (StrLen(AffixText) > TextLineWidthJewel)
 					{
 						ProcessedLine := SubStr(AffixText, 1, TextLineWidthJewel - StrLen(Ellipsis))  Ellipsis
 					}
@@ -1988,7 +1988,7 @@ AssembleAffixDetails()
 				}
 				Else
 				{
-					If(StrLen(AffixText) > TextLineWidth)
+					If (StrLen(AffixText) > TextLineWidth)
 					{
 						ProcessedLine := SubStr(AffixText, 1, TextLineWidth - StrLen(Ellipsis))  Ellipsis
 					}
@@ -1997,10 +1997,10 @@ AssembleAffixDetails()
 						ProcessedLine := StrPad(AffixText, TextLineWidth)
 					}
 					
-					If( ! IsObject(ValueRange) )
+					If ( ! IsObject(ValueRange) )
 					{
 						; Text as ValueRange. Right-aligned to tier range column and with separator if it fits.
-						If(StrLen(ValueRange) > ValueRange1Width + 5)
+						If (StrLen(ValueRange) > ValueRange1Width + 5)
 						{
 							; wider than the TierRange column (with ilvl space), content is allowed to also move in the second column but we can't put the Separator in.
 							ProcessedLine .= Separator  StrPad(StrPad(ValueRange, ValueRange1Width + 5, "left"), ValueRange1Width + 5 + StrLen(Separator) + ValueRange2Width + 5, "right")
@@ -2011,7 +2011,7 @@ AssembleAffixDetails()
 							ProcessedLine .= Separator  StrPad(StrPad(ValueRange, ValueRange1Width + 5, "left") . Separator, ValueRange1Width + 5 + StrLen(Separator) + ValueRange2Width + 5, "right")
 						}
 						
-						If(RegExMatch(TierAndType, "^T\d.*"))
+						If (RegExMatch(TierAndType, "^T\d.*"))
 						{
 							ProcessedLine .= Separator  TierAndType
 						}
@@ -2023,9 +2023,17 @@ AssembleAffixDetails()
 					}
 					Else
 					{
-						If(ValueRange[2])
+						If (IsNum(ValueRange[2]))
 						{	; Has ilvl entry for tier range
 							ProcessedLine .= Separator  StrPad(ValueRange[1], ValueRange1Width, "left") " " StrPad("(" ValueRange[2] ")", 4, "left")
+							ProcessedLine .= Separator  StrPad(ValueRange[3], ValueRange2Width, "left") " " StrPad("(" ValueRange[4] ")", 4, "left")
+							ProcessedLine .= Separator  TierAndType
+						}
+						Else If (ValueRange[2] != "")
+						{	; Has some kind of ilvl entry that is not a number, likely a space. Format as above but without brackets.
+							ProcessedLine .= Separator  StrPad(ValueRange[1], ValueRange1Width, "left") " " StrPad(ValueRange[2] , 4, "left")
+							ProcessedLine .= Separator  StrPad(ValueRange[3], ValueRange2Width, "left") " " StrPad(ValueRange[4] , 4, "left")
+							ProcessedLine .= Separator  TierAndType
 						}
 						Else
 						{	; Has no ilvl entry for tier range, can expand a bit.
@@ -2033,10 +2041,9 @@ AssembleAffixDetails()
 							extra := StrLen(ValueRange[1]) <= 7 ? 0 : (StrLen(ValueRange[1]) <= 9 ? 2 : ( StrLen(ValueRange[1]) <= 11 ? 3 : ( StrLen(ValueRange[1]) <= 13 ? 4 : 5)))
 							
 							ProcessedLine .= Separator  StrPad(ValueRange[1] . StrMult(" ", 5 - extra), ValueRange1Width + 5, "left")
+							ProcessedLine .= Separator  StrPad(ValueRange[3], ValueRange2Width, "left") " " StrPad("(" ValueRange[4] ")", 4, "left")
+							ProcessedLine .= Separator  TierAndType
 						}
-						
-						ProcessedLine .= Separator  StrPad(ValueRange[3], ValueRange2Width, "left") " " StrPad("(" ValueRange[4] ")", 4, "left")
-						ProcessedLine .= Separator  TierAndType
 					}
 				}
 			}
@@ -2063,7 +2070,7 @@ AssembleMapAffixes()
 	{
 		CurLine := AffixLines[A_Index]
 		; Any empty line is considered as an Unprocessed Mod
-		If(IsObject(CurLine))
+		If (IsObject(CurLine))
 		{
 			AffixLine := CurLine[1]
 			MapAffixCount := CurLine[2]
@@ -2357,11 +2364,11 @@ SetMapInfoLine(AffixType, ByRef MapAffixCount, EnumLabel="")
 {
 	Global AffixTotals
 	
-	If(AffixType =="Prefix")
+	If (AffixType =="Prefix")
 	{
 		AffixTotals.NumPrefixes += 1
 	}
-	Else If(AffixType =="Suffix")
+	Else If (AffixType =="Suffix")
 	{
 		AffixTotals.NumSuffixes += 1
 	}
@@ -2955,25 +2962,38 @@ ParseLeagueStoneAffixes(ItemDataAffixes, Item) {
 
 LookupAffixAndSetInfoLine(DataSource, AffixType, ItemLevel, Value, AffixLineText:="", AffixLineNum:="")
 {	
-	If( ! AffixLineText){
+	If ( ! AffixLineText){
 		AffixLineText := A_LoopField
 	}
-	If( ! AffixLineNum){
+	If ( ! AffixLineNum){
 		AffixLineNum := A_Index
 	}
 	
 	AffixMode := "Native"
-	If(AffixType ~= ".*Craft.*")
+	If (AffixType ~= ".*Craft.*")
 	{
 		AffixMode := "Crafted"
 	}
-	Else If(AffixType ~= ".*Essence.*")
+	Else If (AffixType ~= ".*Essence.*")
 	{
 		AffixMode := "Essence"
 	}
 	
 	ValueRanges := LookupAffixData(DataSource, ItemLevel, Value, CurrTier)
-	AppendAffixInfo(MakeAffixDetailLine(AffixLineText, AffixType, ValueRanges, CurrTier), AffixLineNum)
+	
+	If (RegexMatch(AffixLineText, "Adds (\d+) to (\d+) (.+)", match) and ValueRanges[5])
+	{
+		NormalRow := MakeAffixDetailLine(AffixLineText, AffixType, ValueRanges, CurrTier)
+		
+		avgDmg := NumFormatPointFiveOrInt((match1 + match2)/2)
+		AvgLineText := "   Average: "  StrPad(avgDmg, 4, "left")
+		
+		AppendAffixInfo([NormalRow, [AvgLineText, [ValueRanges[5], " ", ValueRanges[7], " "], ""]], AffixLineNum)
+	}
+	Else
+	{
+		AppendAffixInfo(MakeAffixDetailLine(AffixLineText, AffixType, ValueRanges, CurrTier), AffixLineNum)
+	}
 }
 	
 /*
@@ -2981,7 +3001,7 @@ Finds possible tier combinations for a single value (thus from a single affix li
 */
 SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 {
-	If((Mod1DataArray = False) or (Mod2DataArray = False))
+	If ((Mod1DataArray = False) or (Mod2DataArray = False))
 	{
 		return False
 	}
@@ -2989,7 +3009,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	Mod1MinVal := Mod1DataArray[Mod1DataArray.MaxIndex()].min
 	Mod2MinVal := Mod2DataArray[Mod2DataArray.MaxIndex()].min
 	
-	If(Mod1MinVal + Mod2MinVal > Value)
+	If (Mod1MinVal + Mod2MinVal > Value)
 	{
 		; Value is smaller than smallest possible sum, so it can't be composite
 		return
@@ -2998,7 +3018,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	Mod1MinIlvl := Mod1DataArray[Mod1DataArray.MaxIndex()].ilvl
 	Mod2MinIlvl := Mod2DataArray[Mod2DataArray.MaxIndex()].ilvl
 	
-	If( (Mod1MinIlvl > ItemLevel) or (Mod2MinIlvl > ItemLevel) )
+	If ( (Mod1MinIlvl > ItemLevel) or (Mod2MinIlvl > ItemLevel) )
 	{
 		; The ItemLevel is too low to roll both affixes
 		return
@@ -3008,7 +3028,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	TmpValue := Value - Mod2MinVal
 	Mod1Tiers := LookupTierByValue(TmpValue, Mod1DataArray, ItemLevel)
 	
-	If(Mod1Tiers.Tier)
+	If (Mod1Tiers.Tier)
 	{
 		; Tier exists, so we already found a working combination
 		Mod1TopTier := Mod1Tiers.Tier
@@ -3019,7 +3039,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 		; Assuming the min portion for Mod2 was not enough, so look up the highest tier for Mod1, limited by ItemLevel
 		Loop
 		{
-			If( Mod1DataArray[A_Index].ilvl <= ItemLevel )
+			If ( Mod1DataArray[A_Index].ilvl <= ItemLevel )
 			{
 				Mod1TopTier := A_Index
 				Break
@@ -3030,7 +3050,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 		TmpValue := Value - Mod1DataArray[Mod1TopTier].max
 		Mod2Tiers := LookupTierByValue(TmpValue, Mod2DataArray, ItemLevel)
 		
-		If(Mod2Tiers.Tier)
+		If (Mod2Tiers.Tier)
 		{
 			; Tier exists, we found a working combination
 			Mod2BtmTier := Mod2Tiers.Tier
@@ -3047,7 +3067,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	TmpValue := Value - Mod1MinVal
 	Mod2Tiers := LookupTierByValue(TmpValue, Mod2DataArray, ItemLevel)
 	
-	If(Mod2Tiers.Tier)
+	If (Mod2Tiers.Tier)
 	{
 		Mod2TopTier := Mod2Tiers.Tier
 		Mod1BtmTier := Mod1DataArray.MaxIndex()
@@ -3056,7 +3076,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	{
 		Loop
 		{
-			If( Mod2DataArray[A_Index].ilvl <= ItemLevel )
+			If ( Mod2DataArray[A_Index].ilvl <= ItemLevel )
 			{
 				Mod2TopTier := A_Index
 				Break
@@ -3066,7 +3086,7 @@ SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 		TmpValue := Value - Mod2DataArray[Mod2TopTier].max
 		Mod1Tiers := LookupTierByValue(TmpValue, Mod1DataArray, ItemLevel)
 		
-		If(Mod1Tiers.Tier)
+		If (Mod1Tiers.Tier)
 		{
 			Mod1BtmTier := Mod1Tiers.Tier
 		}
@@ -3090,14 +3110,14 @@ Finds possible tier combinations for the following case/paramenters:
 */
 SolveTiers_ModHyb(ModHybValue, HybOnlyValue, ModDataArray, HybWithModDataArray, HybOnlyDataArray, ItemLevel)
 {
-	If((ModDataArray = False) or (HybWithModDataArray = False) or (HybOnlyDataArray = False))
+	If ((ModDataArray = False) or (HybWithModDataArray = False) or (HybOnlyDataArray = False))
 	{
 		return False
 	}
 	
 	HybTiers := LookupTierByValue(HybOnlyValue, HybOnlyDataArray, ItemLevel)
 	
-	If(not(HybTiers.Tier))
+	If (not(HybTiers.Tier))
 	{
 		; HybOnlyValue can't be found as a bare hybrid mod.
 		return
@@ -3110,25 +3130,25 @@ SolveTiers_ModHyb(ModHybValue, HybOnlyValue, ModDataArray, HybWithModDataArray, 
 	RemainHiTiers := LookupTierByValue(RemainHi, ModDataArray, ItemLevel)
 	RemainLoTiers := LookupTierByValue(RemainLo, ModDataArray, ItemLevel)
 	
-	If( RemainHiTiers.Tier and RemainLoTiers.Tier )
+	If ( RemainHiTiers.Tier and RemainLoTiers.Tier )
 	{
 		; Both RemainLo/Hi result in a possible tier
 		ModTopTier := RemainHiTiers.Tier
 		ModBtmTier := RemainLoTiers.Tier
 	}
-	Else If(RemainHiTiers.Tier)
+	Else If (RemainHiTiers.Tier)
 	{
 		; Only RemainHi gives a possible tier, assign that tier to both Top/Btm output results
 		ModTopTier := RemainHiTiers.Tier
 		ModBtmTier := RemainHiTiers.Tier
 	}
-	Else If(RemainLoTiers.Tier)
+	Else If (RemainLoTiers.Tier)
 	{
 		; Only RemainLo gives a possible tier, assign that tier to both Top/Btm output results
 		ModTopTier := RemainLoTiers.Tier
 		ModBtmTier := RemainLoTiers.Tier
 	}
-	Else If(RemainHi > ModDataArray[1].max)
+	Else If (RemainHi > ModDataArray[1].max)
 	{
 		; Legacy cases
 		ModTopTier := 0
@@ -3155,7 +3175,7 @@ Finds possible tier combinations for the following case/paramenters:
 */
 SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArray, Hyb2DataArray, ItemLevel, TierCombinationArray=False)
 {
-	If((Mod1DataArray = False) or (Mod2DataArray = False) or (Hyb1DataArray = False) or (Hyb2DataArray = False))
+	If ((Mod1DataArray = False) or (Mod2DataArray = False) or (Hyb1DataArray = False) or (Hyb2DataArray = False))
 	{
 		return False
 	}
@@ -3163,7 +3183,7 @@ SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArr
 	Mod1HybTiers := SolveTiers_Mod1Mod2(Value1, Mod1DataArray, Hyb1DataArray, ItemLevel)
 	Mod2HybTiers := SolveTiers_Mod1Mod2(Value2, Mod2DataArray, Hyb2DataArray, ItemLevel)
 	
-	If(not( IsObject(Mod1HybTiers) and IsObject(Mod2HybTiers) ))
+	If (not( IsObject(Mod1HybTiers) and IsObject(Mod2HybTiers) ))
 	{
 		; Checking that both results are objects and thus contain tiers
 		return
@@ -3182,36 +3202,36 @@ SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArr
 	HybTopTier := (Mod1HybTiers.Mod2Top > Mod2HybTiers.Mod2Top) ? Mod1HybTiers.Mod2Top : Mod2HybTiers.Mod2Top
 	HybBtmTier := (Mod1HybTiers.Mod2Btm < Mod2HybTiers.Mod2Btm) ? Mod1HybTiers.Mod2Btm : Mod2HybTiers.Mod2Btm
 	
-	If(HybTopTier > HybBtmTier)
+	If (HybTopTier > HybBtmTier)
 	{
 		; Check that HybTopTier is not worse (numerically higher) than HybBtmTier.
 		return
 	}
 	
 	; Check if any hybrid tier was actually changed and re-calculate the corresponding non-hybrid tier.
-	If(Mod1HybTiers.Mod2Top != HybTopTier)
+	If (Mod1HybTiers.Mod2Top != HybTopTier)
 	{
 		TmpValue := Value1 - Hyb1DataArray[HybTopTier].max
 		Mod1BtmTier := LookupTierByValue(TmpValue, Mod1DataArray, ItemLevel).Tier
 	}
-	Else If(Mod2HybTiers.Mod2Top != HybTopTier)
+	Else If (Mod2HybTiers.Mod2Top != HybTopTier)
 	{
 		TmpValue := Value2 - Hyb2DataArray[HybTopTier].max
 		Mod2BtmTier := LookupTierByValue(TmpValue, Mod2DataArray, ItemLevel).Tier
 	}
 	
-	If(Mod1HybTiers.Mod2Btm != HybBtmTier)
+	If (Mod1HybTiers.Mod2Btm != HybBtmTier)
 	{
 		TmpValue := Value1 - Hyb1DataArray[HybBtmTier].min
 		Mod1TopTier := LookupTierByValue(TmpValue, Mod1DataArray, ItemLevel).Tier
 	}
-	Else If(Mod2HybTiers.Mod2Btm != HybBtmTier)
+	Else If (Mod2HybTiers.Mod2Btm != HybBtmTier)
 	{
 		TmpValue := Value2 - Hyb2DataArray[HybBtmTier].min
 		Mod2TopTier := LookupTierByValue(TmpValue, Mod2DataArray, ItemLevel).Tier
 	}
 	
-	If(TierCombinationArray = True)
+	If (TierCombinationArray = True)
 	{
 		TierArray := []
 		Mod1Tier := Mod1TopTier
@@ -3223,7 +3243,7 @@ SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArr
 				HybTier := HybTopTier
 				While HybTier <= HybBtmTier
 				{
-					If( Mod1DataArray[Mod1Tier].min + Hyb1DataArray[HybTier].min < Value1
+					If ( Mod1DataArray[Mod1Tier].min + Hyb1DataArray[HybTier].min < Value1
 					and Mod1DataArray[Mod1Tier].max + Hyb1DataArray[HybTier].max > Value1
 					and Mod2DataArray[Mod2Tier].min + Hyb2DataArray[HybTier].min < Value2
 					and Mod2DataArray[Mod2Tier].max + Hyb2DataArray[HybTier].max > Value2)
@@ -3243,7 +3263,7 @@ SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArr
 
 SolveTiers_Hyb1Hyb2(HybOverlapValue, Hyb1OnlyValue, Hyb2OnlyValue, Hyb1OverlapDataArray, Hyb2OverlapDataArray, Hyb1OnlyDataArray, Hyb2OnlyDataArray, ItemLevel)
 {
-	If((Hyb1OverlapDataArray = False) or (Hyb2OverlapDataArray = False) or (Hyb1OnlyDataArray = False) or (Hyb2OnlyDataArray = False))
+	If ((Hyb1OverlapDataArray = False) or (Hyb2OverlapDataArray = False) or (Hyb1OnlyDataArray = False) or (Hyb2OnlyDataArray = False))
 	{
 		return False
 	}
@@ -3251,7 +3271,7 @@ SolveTiers_Hyb1Hyb2(HybOverlapValue, Hyb1OnlyValue, Hyb2OnlyValue, Hyb1OverlapDa
 	Hyb1Tiers := LookupTierByValue(Hyb1OnlyValue, Hyb1OnlyDataArray, ItemLevel)
 	Hyb2Tiers := LookupTierByValue(Hyb2OnlyValue, Hyb2OnlyDataArray, ItemLevel)
 	
-	If(not(Hyb1Tiers.Tier) or not(Hyb2Tiers.Tier))
+	If (not(Hyb1Tiers.Tier) or not(Hyb2Tiers.Tier))
 	{
 		; Value can't be found as a bare hybrid mod.
 		return
@@ -3260,7 +3280,7 @@ SolveTiers_Hyb1Hyb2(HybOverlapValue, Hyb1OnlyValue, Hyb2OnlyValue, Hyb1OverlapDa
 	OverlapValueMin := Hyb1OverlapDataArray[Hyb1Tiers.Tier].min + Hyb2OverlapDataArray[Hyb2Tiers.Tier].min
 	OverlapValueMax := Hyb1OverlapDataArray[Hyb1Tiers.Tier].max + Hyb2OverlapDataArray[Hyb2Tiers.Tier].max
 	
-	If(not( (OverlapValueMin < HybOverlapValue) and (HybOverlapValue < OverlapValueMax) ))
+	If (not( (OverlapValueMin < HybOverlapValue) and (HybOverlapValue < OverlapValueMax) ))
 	{
 		; Combined Value can't be explained.
 		return
@@ -3274,12 +3294,12 @@ ReviseTierCombinationArray(TierCombinationArray, ReviseValue, ReviseIndex)
 	RevisedTierCombinationArray := []
 	Loop % TierCombinationArray.MaxIndex()
 	{
-		If(TierCombinationArray[A_Index][ReviseIndex] = ReviseValue)
+		If (TierCombinationArray[A_Index][ReviseIndex] = ReviseValue)
 		{
 			RevisedTierCombinationArray.push(TierCombinationArray[A_Index])
 		}
 	}
-	If(not RevisedTierCombinationArray[1][1]){
+	If (not RevisedTierCombinationArray[1][1]){
 		return False
 	}
 	return RevisedTierCombinationArray
@@ -3287,7 +3307,7 @@ ReviseTierCombinationArray(TierCombinationArray, ReviseValue, ReviseIndex)
 
 GetTierRangesFromTierCombinationArray(TierCombinationArray)
 {
-	If(not IsObject(TierCombinationArray)){
+	If (not IsObject(TierCombinationArray)){
 		return False
 	}
 	
@@ -3303,11 +3323,11 @@ GetTierRangesFromTierCombinationArray(TierCombinationArray)
 		BtmTier := 0
 		Loop % TierCombinationArray.MaxIndex()
 		{
-			If(TierCombinationArray[A_Index][TierIdxToCheck] < TopTier)
+			If (TierCombinationArray[A_Index][TierIdxToCheck] < TopTier)
 			{
 				TopTier := TierCombinationArray[A_Index][TierIdxToCheck]
 			}
-			If(TierCombinationArray[A_Index][TierIdxToCheck] > BtmTier)
+			If (TierCombinationArray[A_Index][TierIdxToCheck] > BtmTier)
 			{
 				BtmTier := TierCombinationArray[A_Index][TierIdxToCheck]
 			}
@@ -3326,9 +3346,9 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 	
 	result := []
 	
-	If(IsObject(Mod2DataArray) and Mod2Tier)
+	If (IsObject(Mod2DataArray) and Mod2Tier)
 	{
-		If(IsObject(Mod1Tiers))
+		If (IsObject(Mod1Tiers))
 		{
 			BtmMin := Mod1DataArray[Mod1Tiers[2]].min + Mod2DataArray[Mod2Tier].min
 			BtmMax := Mod1DataArray[Mod1Tiers[2]].max + Mod2DataArray[Mod2Tier].max
@@ -3336,7 +3356,7 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 			TopMax := Mod1DataArray[Mod1Tiers[1]].max + Mod2DataArray[Mod2Tier].max
 			
 			result[1] := FormatMultiTierRange(BtmMin, BtmMax, TopMin, TopMax)
-			result[2] := 0
+			result[2] := ""
 		}
 		Else
 		{
@@ -3349,9 +3369,9 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 	}
 	Else
 	{
-		If(Mod1DataArray[1].maxHi)	; arbitrary pick to check whether mod has double ranges
+		If (Mod1DataArray[1].maxHi)	; arbitrary pick to check whether mod has double ranges
 		{
-			If(IsObject(Mod1Tiers))
+			If (IsObject(Mod1Tiers))
 			{
 				WorstBtmMin := Mod1DataArray[Mod1Tiers[2]].minLo
 				WorstBtmMax := Mod1DataArray[Mod1Tiers[2]].minHi
@@ -3365,10 +3385,10 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 				TmpFullrange := WorstBtmMin "-" WorstBtmMax " to " WorstTopMin "-" WorstTopMax " " Opts.MultiTierRangeSeparator " " BestBtmMin "-" BestBtmMax " to " BestTopMin "-" BestTopMax
 				Itemdata.SpecialCaseNotation .= "`nWe have a rare case of a double range mod with multi tier uncertainty here.`n The entire TierRange is: " TmpFullrange
 				
-				result[1] := FormatMultiTierRange(WorstBtmMin, WorstTopMin, BestBtmMax, BestTopMax)
-				result[2] := ""
+				result[1] := WorstBtmMin  Opts.DoubleRangeSeparator  WorstTopMin  Opts.MultiTierRangeSeparator  BestBtmMax  Opts.DoubleRangeSeparator  BestTopMax
+				result[2] := " "
 			}
-			Else If(IsNum(Mod1Tiers))
+			Else If (IsNum(Mod1Tiers))
 			{
 				BtmMin := Mod1DataArray[Mod1Tiers].minLo
 				BtmMax := Mod1DataArray[Mod1Tiers].minHi
@@ -3377,6 +3397,7 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 				
 				result[1] := FormatDoubleRanges(BtmMin, BtmMax, TopMin, TopMax)
 				result[2] := Mod1DataArray[Mod1Tiers].ilvl
+				result[5] := NumFormatPointFiveOrInt((BtmMin + TopMin)/2) "-" StrPad(NumFormatPointFiveOrInt((BtmMax + TopMax)/2), StrLen(TopMin) + 1 + StrLen(TopMax) )
 			}
 			Else
 			{
@@ -3385,11 +3406,11 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 			}
 			
 			BtmMin := Mod1DataArray[Mod1DataArray.MaxIndex()].minLo
-			BtmMax := Mod1DataArray[Mod1DataArray.MaxIndex()].minHi
-			TopMin := Mod1DataArray[1].maxLo
+			BtmMax := Mod1DataArray[1].minHi
+			TopMin := Mod1DataArray[Mod1DataArray.MaxIndex()].maxLo
 			TopMax := Mod1DataArray[1].maxHi
 			
-			If(Opts.OnlyCompactForTotalColumn and not Opts.UseCompactDoubleRanges){
+			If (Opts.OnlyCompactForTotalColumn and not Opts.UseCompactDoubleRanges){
 				result[3] := FormatDoubleRanges(BtmMin, BtmMax, TopMin, TopMax, "compact")
 			}
 			Else{
@@ -3397,10 +3418,11 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 			}
 			
 			result[4] := Mod1DataArray[1].ilvl
+			result[7] := NumFormatPointFiveOrInt((BtmMin + TopMin)/2) "-" StrPad(NumFormatPointFiveOrInt((BtmMax + TopMax)/2), StrLen(TopMin) + 1 + StrLen(TopMax) )
 		}
 		Else
 		{
-			If(IsObject(Mod1Tiers))
+			If (IsObject(Mod1Tiers))
 			{
 				BtmMin := Mod1DataArray[Mod1Tiers[2]].min
 				BtmMax := Mod1DataArray[Mod1Tiers[2]].max
@@ -3410,7 +3432,7 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 				result[1] := FormatMultiTierRange(BtmMin, BtmMax, TopMin, TopMax)
 				result[2] := ""
 			}
-			Else If(IsNum(Mod1Tiers))
+			Else If (IsNum(Mod1Tiers))
 			{
 				result[1] := Mod1DataArray[Mod1Tiers].values
 				result[2] := Mod1DataArray[Mod1Tiers].ilvl
@@ -3426,7 +3448,7 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 		}
 	}
 	
-	If(Mod1Tiers = 0 or Mod1Tiers[1] = 0 or Mod1Tiers[2] = 0 or Mod2Tier = 0){
+	If (Mod1Tiers = 0 or Mod1Tiers[1] = 0 or Mod1Tiers[2] = 0 or Mod2Tier = 0){
 		result[1] := "Legacy?"
 	}
 	return result
@@ -3435,11 +3457,11 @@ FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers, Mod2DataArray="", Mod2Tier=""
 
 FormatValueRangesAndIlvl_MultiTiers(Value, Mod1DataArray, Mod2DataArray, Mod1TopTier, Mod1BtmTier, Mod2TopTier, Mod2BtmTier)
 {
-	If( (Mod1TopTier = Mod1BtmTier) and (Mod2TopTier = Mod2BtmTier) )
+	If ( (Mod1TopTier = Mod1BtmTier) and (Mod2TopTier = Mod2BtmTier) )
 	{
 		result := []
 		result[1] := (Mod1DataArray[Mod1TopTier].min + Mod2DataArray[Mod2BtmTier].min) "-" (Mod1DataArray[Mod1TopTier].max + Mod2DataArray[Mod2BtmTier].max)
-		result[2] := 0
+		result[2] := ""
 		result[3] := Mod1DataArray[Mod1DataArray.MaxIndex()].min + Mod2DataArray[Mod2DataArray.MaxIndex()].min "-" Mod1DataArray[1].max + Mod2DataArray[1].max
 		result[4] := (Mod1DataArray[1].ilvl > Mod2DataArray[1].ilvl) ? Mod1DataArray[1].ilvl : Mod2DataArray[1].ilvl
 		
@@ -3473,9 +3495,9 @@ FormatValueRangesAndIlvl_MultiTiers(Value, Mod1DataArray, Mod2DataArray, Mod1Top
 			; Increment t here because we might break/continue the loop just below.
 			++t
 			
-			If(not( (TmpMin <= Value) and (Value <= TmpMax) ))
+			If (not( (TmpMin <= Value) and (Value <= TmpMax) ))
 			{
-				If(t_RestartIndex)
+				If (t_RestartIndex)
 				{
 					; Value not within Tmp-Range, but we have a t_RestartIndex, so we had matching Tmp-Ranges for this b value
 					;   but the Tmp-Ranges are getting too low for "Value" now. Break t loop to check next b, start t at t_RestartIndex and set t_RestartIndex to 0 (see loop end).
@@ -3485,34 +3507,34 @@ FormatValueRangesAndIlvl_MultiTiers(Value, Mod1DataArray, Mod2DataArray, Mod1Top
 				Else continue
 			}
 			
-			If(not(t_RestartIndex))
+			If (not(t_RestartIndex))
 			{
 				; Value is within Tmp-Range (because section above was passed) and we have no t_RestartIndex yet.
 				; This means this is the first matching range found for this b. Record this t (and remove the increment from the loop start).
 				t_RestartIndex := (t-1)
 			}
 			
-			If(TmpMin <= RangeBtmMin)
+			If (TmpMin <= RangeBtmMin)
 			{
-				If(TmpMin < RangeBtmMin)
+				If (TmpMin < RangeBtmMin)
 				{
 					RangeBtmMin := TmpMin
 					RangeBtmMax := TmpMax
 				}
-				Else If(TmpMax < RangeBtmMax)
+				Else If (TmpMax < RangeBtmMax)
 				{
 					RangeBtmMax := TmpMax
 				}
 			}
 			
-			If(TmpMax >= RangeTopMax)
+			If (TmpMax >= RangeTopMax)
 			{
-				If(TmpMax > RangeTopMax)
+				If (TmpMax > RangeTopMax)
 				{
 					RangeTopMax := TmpMax
 					RangeTopMin := TmpMin
 				}
-				Else If(TmpMin > RangeTopMin)
+				Else If (TmpMin > RangeTopMin)
 				{
 					RangeTopMin := TmpMin
 				}
@@ -3526,7 +3548,7 @@ FormatValueRangesAndIlvl_MultiTiers(Value, Mod1DataArray, Mod2DataArray, Mod1Top
 	
 	result := []
 	result[1] := FormatMultiTierRange(RangeBtmMin, RangeBtmMax, RangeTopMin, RangeTopMax)
-	result[2] := 0
+	result[2] := ""
 	result[3] := Mod1DataArray[Mod1DataArray.MaxIndex()].min + Mod2DataArray[Mod2DataArray.MaxIndex()].min "-" Mod1DataArray[1].max + Mod2DataArray[1].max
 	result[4] := (Mod1DataArray[1].ilvl > Mod2DataArray[1].ilvl) ? Mod1DataArray[1].ilvl : Mod2DataArray[1].ilvl
 	
@@ -3565,11 +3587,11 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 	Overlap2Tiers := SolveTiers_Mod1Mod2Hyb(ValueDef2, ValueLife, DualDef_D2_DataArray, Life_DataArray, DefLife_D2_DataArray, DefLife_Li_DataArray, ItemLevel, True)
 	
 	
-	If(IsObject(Overlap1Tiers))
+	If (IsObject(Overlap1Tiers))
 	{
 		Overlap1TierCombinationArray := ReviseTierCombinationArray(Overlap1Tiers.TierCombinationArray, DualDef_D2_Tiers.Tier, 1)
 		
-		If(Overlap1TierCombinationArray = False){
+		If (Overlap1TierCombinationArray = False){
 			Overlap1Tiers := False
 		}
 		Else
@@ -3586,11 +3608,11 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 		}
 	}
 	
-	If(IsObject(Overlap2Tiers))
+	If (IsObject(Overlap2Tiers))
 	{
 		Overlap2TierCombinationArray := ReviseTierCombinationArray(Overlap2Tiers.TierCombinationArray, DualDef_D1_Tiers.Tier, 1)
 		
-		If(Overlap2TierCombinationArray = False){
+		If (Overlap2TierCombinationArray = False){
 			Overlap2Tiers := False
 		}
 		Else
@@ -3608,7 +3630,7 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 	}
 	
 	
-	If(DualDef_D1_Tiers.Tier and DualDef_D2_Tiers.Tier and (DualDef_D1_Tiers.Tier = DualDef_D2_Tiers.Tier) and LifeTiers.Tier)
+	If (DualDef_D1_Tiers.Tier and DualDef_D2_Tiers.Tier and (DualDef_D1_Tiers.Tier = DualDef_D2_Tiers.Tier) and LifeTiers.Tier)
 	{
 		ValueRange1 := FormatValueRangesAndIlvl(DualDef_D1_DataArray, DualDef_D1_Tiers.Tier)
 		LineTxt1    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumDef1].Text, "Hybrid Defence Prefix", ValueRange1, DualDef_D1_Tiers.Tier, False)
@@ -3622,9 +3644,9 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 		Itemdata.UncertainAffixes[Keyname]["1_ModHyb"] := [2, 0, LineNumDef1, LineTxt1, LineNumDef2, LineTxt2, LineNumLife, LineTxt3]
 	}
 	
-	If(IsObject(Def1LifeTiers) or IsObject(Def2LifeTiers))
+	If (IsObject(Def1LifeTiers) or IsObject(Def2LifeTiers))
 	{
-		If(IsObject(Def1LifeTiers))
+		If (IsObject(Def1LifeTiers))
 		{
 			ValueRange1 := FormatValueRangesAndIlvl(DualDef_D1_DataArray, Def1LifeTiers.Hyb1, DefLife_D1_DataArray, Def1LifeTiers.Hyb2)
 			LineTxt1    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumDef1].Text, ["Hybrid Defence Prefix", "Hybrid Prefix"], ValueRange1, [Def1LifeTiers.Hyb1, Def1LifeTiers.Hyb2], False)
@@ -3636,7 +3658,7 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 			LineTxt3    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumLife].Text, "Hybrid Prefix", ValueRange3, Def1LifeTiers.Hyb2, False)
 		}
 		
-		If(IsObject(Def2LifeTiers))
+		If (IsObject(Def2LifeTiers))
 		{
 			ValueRange4 := FormatValueRangesAndIlvl(DualDef_D1_DataArray, Def2LifeTiers.Hyb1)
 			LineTxt4    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumDef2].Text, "Hybrid Defence Prefix", ValueRange4, Def2LifeTiers.Hyb1, False)
@@ -3648,23 +3670,23 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 			LineTxt6    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumLife].Text, "Hybrid Prefix", ValueRange6, Def2LifeTiers.Hyb2, False)
 		}
 		
-		If(IsObject(Def1LifeTiers) and IsObject(Def2LifeTiers))
+		If (IsObject(Def1LifeTiers) and IsObject(Def2LifeTiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["2_Hyb1Hyb2"] := [2, 0, LineNumDef1, LineTxt1, LineNumDef2, LineTxt2, LineNumLife, LineTxt3, LineNumDef1, LineTxt4, LineNumDef2, LineTxt5, LineNumLife, LineTxt6]
 		}
-		Else If(IsObject(Def1LifeTiers))
+		Else If (IsObject(Def1LifeTiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["2_Hyb1Hyb2"] := [2, 0, LineNumDef1, LineTxt1, LineNumDef2, LineTxt2, LineNumLife, LineTxt3]
 		}
-		Else If(IsObject(Def2LifeTiers))
+		Else If (IsObject(Def2LifeTiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["2_Hyb1Hyb2"] := [2, 0, LineNumDef1, LineTxt4, LineNumDef2, LineTxt5, LineNumLife, LineTxt6]
 		}	
 	}
 	
-	If(IsObject(Overlap1Tiers) or IsObject(Overlap2Tiers))
+	If (IsObject(Overlap1Tiers) or IsObject(Overlap2Tiers))
 	{
-		If(IsObject(Overlap1Tiers))
+		If (IsObject(Overlap1Tiers))
 		{
 			ValueRange1 := FormatValueRangesAndIlvl_MultiTiers(ValueDef1, DualDef_D1_DataArray, DefLife_D1_DataArray, Overlap1Tiers.Mod1Top, Overlap1Tiers.Mod1Btm, Overlap1Tiers.HybTop, Overlap1Tiers.HybBtm)
 			LineTxt1    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumDef1].Text, ["Hybrid Defence Prefix", "Hybrid Prefix"], ValueRange1, [[Overlap1Tiers.Mod1Top, Overlap1Tiers.Mod1Btm], [Overlap1Tiers.HybTop, Overlap1Tiers.HybBtm]], False)
@@ -3676,7 +3698,7 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 			LineTxt3    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumLife].Text, ["Prefix", "Hybrid Prefix"], ValueRange3, [[Overlap1Tiers.Mod2Top, Overlap1Tiers.Mod2Btm], [Overlap1Tiers.HybTop, Overlap1Tiers.HybBtm]], False)
 		}
 		
-		If(IsObject(Overlap2Tiers))
+		If (IsObject(Overlap2Tiers))
 		{
 			ValueRange4 := FormatValueRangesAndIlvl(DualDef_D1_DataArray, DualDef_D1_Tiers.Tier)
 			LineTxt4    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumDef1].Text, "Hybrid Defence Prefix", ValueRange4, DualDef_D1_Tiers.Tier, False)
@@ -3688,15 +3710,15 @@ SolveAffixes_HybBase_FlatDefLife(Keyname, LineNumDef1, LineNumDef2, LineNumLife,
 			LineTxt6    := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNumLife].Text, ["Prefix", "Hybrid Prefix"], ValueRange6, [[Overlap2Tiers.Mod2Top, Overlap2Tiers.Mod2Btm], [Overlap2Tiers.HybTop, Overlap2Tiers.HybBtm]], False)
 		}
 		
-		If(IsObject(Overlap1Tiers) and IsObject(Overlap2Tiers))
+		If (IsObject(Overlap1Tiers) and IsObject(Overlap2Tiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["3_ModHyb1Hyb2"] := [3, 0, LineNumDef1, LineTxt1, LineNumDef2, LineTxt2, LineNumLife, LineTxt3, LineNumDef1, LineTxt4, LineNumDef2, LineTxt5, LineNumLife, LineTxt6]
 		}
-		Else If(IsObject(Overlap1Tiers))
+		Else If (IsObject(Overlap1Tiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["3_ModHyb1Hyb2"] := [3, 0, LineNumDef1, LineTxt1, LineNumDef2, LineTxt2, LineNumLife, LineTxt3]
 		}
-		Else If(IsObject(Overlap2Tiers))
+		Else If (IsObject(Overlap2Tiers))
 		{
 			Itemdata.UncertainAffixes[Keyname]["3_ModHyb1Hyb2"] := [3, 0, LineNumDef1, LineTxt4, LineNumDef2, LineTxt5, LineNumLife, LineTxt6]
 		}	
@@ -3724,7 +3746,7 @@ SolveAffixes_Mod1Mod2Hyb(Keyname, LineNum1, LineNum2, Value1, Value2, Mod1Type, 
 	Mod1Mod2HybTiers := SolveTiers_Mod1Mod2Hyb(Value1, Value2, Mod1DataArray, Mod2DataArray, Hyb1DataArray, Hyb2DataArray, ItemLevel)
 	
 	
-	If(Mod1Tiers.Tier and Mod2Tiers.Tier)
+	If (Mod1Tiers.Tier and Mod2Tiers.Tier)
 	{
 		PrefixCount := 0
 		SuffixCount := 0
@@ -3742,7 +3764,7 @@ SolveAffixes_Mod1Mod2Hyb(Keyname, LineNum1, LineNum2, Value1, Value2, Mod1Type, 
 		Itemdata.UncertainAffixes[Keyname]["1_Mod1Mod2"] := [PrefixCount, SuffixCount, LineNum1, LineTxt1, LineNum2, LineTxt2]
 	}
 	
-	If(Hyb1Tiers.Tier and Hyb2Tiers.Tier and (Hyb1Tiers.Tier = Hyb2Tiers.Tier))
+	If (Hyb1Tiers.Tier and Hyb2Tiers.Tier and (Hyb1Tiers.Tier = Hyb2Tiers.Tier))
 	{
 		PrefixCount := 0
 		SuffixCount := 0
@@ -3758,7 +3780,7 @@ SolveAffixes_Mod1Mod2Hyb(Keyname, LineNum1, LineNum2, Value1, Value2, Mod1Type, 
 		Itemdata.UncertainAffixes[Keyname]["2_OnlyHyb"] := [PrefixCount, SuffixCount, LineNum1, LineTxt1, LineNum2, LineTxt2]
 	}
 	
-	If(IsObject(Mod1HybTiers))
+	If (IsObject(Mod1HybTiers))
 	{
 		PrefixCount := 0
 		SuffixCount := 0
@@ -3776,7 +3798,7 @@ SolveAffixes_Mod1Mod2Hyb(Keyname, LineNum1, LineNum2, Value1, Value2, Mod1Type, 
 		Itemdata.UncertainAffixes[Keyname]["3_Mod1Hyb"] := [PrefixCount, SuffixCount, LineNum1, LineTxt1, LineNum2, LineTxt2]
 	}
 	
-	If(IsObject(Mod2HybTiers))
+	If (IsObject(Mod2HybTiers))
 	{
 		PrefixCount := 0
 		SuffixCount := 0
@@ -3794,7 +3816,7 @@ SolveAffixes_Mod1Mod2Hyb(Keyname, LineNum1, LineNum2, Value1, Value2, Mod1Type, 
 		Itemdata.UncertainAffixes[Keyname]["4_Mod2Hyb"] := [PrefixCount, SuffixCount, LineNum1, LineTxt1, LineNum2, LineTxt2]
 	}
 	
-	If(IsObject(Mod1Mod2HybTiers))
+	If (IsObject(Mod1Mod2HybTiers))
 	{
 		PrefixCount := 0
 		SuffixCount := 0
@@ -3827,21 +3849,21 @@ SolveAffixes_PreSuf(Keyname, LineNum, Value, Filename1, Filename2, ItemLevel)
 	Mod2Tiers := LookupTierByValue(Value, Mod2DataArray, ItemLevel)
 	Mod1Mod2Tiers := SolveTiers_Mod1Mod2(Value, Mod1DataArray, Mod2DataArray, ItemLevel)
 	
-	If(Mod1Tiers.Tier)
+	If (Mod1Tiers.Tier)
 	{
 		ValueRange := FormatValueRangesAndIlvl(Mod1DataArray, Mod1Tiers.Tier)
 		LineTxt := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNum].Text, "Prefix", ValueRange, Mod1Tiers.Tier, False)
 		Itemdata.UncertainAffixes[Keyname]["1_Pre"] := [1, 0, LineNum, LineTxt]
 	}
 	
-	If(Mod2Tiers.Tier)
+	If (Mod2Tiers.Tier)
 	{
 		ValueRange := FormatValueRangesAndIlvl(Mod2DataArray, Mod2Tiers.Tier)
 		LineTxt := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNum].Text, "Suffix", ValueRange, Mod2Tiers.Tier, False)
 		Itemdata.UncertainAffixes[Keyname]["2_Suf"] := [0, 1, LineNum, LineTxt]
 	}
 	
-	If(IsObject(Mod1Mod2Tiers))
+	If (IsObject(Mod1Mod2Tiers))
 	{
 		ValueRange := FormatValueRangesAndIlvl_MultiTiers(Value, Mod1DataArray, Mod2DataArray, Mod1Mod2Tiers.Mod1Top, Mod1Mod2Tiers.Mod1Btm, Mod1Mod2Tiers.Mod2Top, Mod1Mod2Tiers.Mod2Btm)
 		LineTxt := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNum].Text, ["Prefix", "Suffix"], ValueRange, [[Mod1Mod2Tiers.Mod1Top, Mod1Mod2Tiers.Mod1Btm] , [Mod1Mod2Tiers.Mod2Top, Mod1Mod2Tiers.Mod2Btm]], False)
@@ -3951,7 +3973,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			
 			IfInString, A_LoopField, to Armour
 			{
-				If(HasToArmour){
+				If (HasToArmour){
 					HasToArmourCraft := A_Index
 				}Else{
 					HasToArmour := A_Index
@@ -3960,7 +3982,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, to Evasion Rating
 			{
-				If(HasToEvasion){
+				If (HasToEvasion){
 					HasToEvasionCraft := A_Index
 				}Else{
 					HasToEvasion := A_Index
@@ -3969,7 +3991,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, to maximum Energy Shield
 			{
-				If(HasToMaxES){
+				If (HasToMaxES){
 					HasToMaxESCraft := A_Index
 				}Else{
 					HasToMaxES := A_Index
@@ -3978,7 +4000,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, to maximum Life
 			{
-				If(HasToMaxLife){
+				If (HasToMaxLife){
 					HasToMaxLifeCraft := A_Index
 				}Else{
 					HasToMaxLife := A_Index
@@ -3987,7 +4009,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Armour and Evasion	; it's indeed "Evasion" and not "Evasion Rating" here
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "Defences_HybridBase"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -3998,7 +4020,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Armour and Energy Shield
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "Defences_HybridBase"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -4009,7 +4031,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Evasion and Energy Shield	; again "Evasion" and not "Evasion Rating"
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "Defences_HybridBase"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -4020,7 +4042,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Armour
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "Armour"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -4031,7 +4053,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Evasion Rating
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "Evasion"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -4042,7 +4064,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Energy Shield
 			{
-				If(HasIncrDefences){
+				If (HasIncrDefences){
 					HasIncrDefencesCraftType := "EnergyShield"
 					HasIncrDefencesCraft := A_Index
 				}Else{
@@ -4066,7 +4088,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, to Accuracy Rating
 			{
-				If(HasToAccuracyRating){
+				If (HasToAccuracyRating){
 					HasToAccuracyRatingCraft := A_Index
 				}Else{
 					HasToAccuracyRating := A_Index
@@ -4075,7 +4097,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Physical Damage
 			{
-				If(HasIncrPhysDmg){
+				If (HasIncrPhysDmg){
 					HasIncrPhysDmgCraft := A_Index
 				}Else{
 					HasIncrPhysDmg := A_Index
@@ -4084,7 +4106,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Rarity of Items found
 			{
-				If(HasIncrRarity){
+				If (HasIncrRarity){
 					HasIncrRarityCraft := A_Index
 				}Else{
 					HasIncrRarity := A_Index
@@ -4093,7 +4115,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, to maximum Mana
 			{
-				If(HasMaxMana){
+				If (HasMaxMana){
 					HasMaxManaCraft := A_Index
 				}Else{
 					HasMaxMana := A_Index
@@ -4107,7 +4129,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Spell Damage
 			{
-				If(HasIncrSpellDamage){
+				If (HasIncrSpellDamage){
 					HasIncrSpellDamageCraft := A_Index
 					HasIncrSpellDamagePrefix := A_Index
 					HasIncrSpellOrElePrefix := A_Index
@@ -4120,7 +4142,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				}Else{
 					Found := LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\SpellDamage_MaxMana_Staff.txt"), ItemLevel).Tier
 				}
-				If( ! Found){
+				If ( ! Found){
 					HasIncrSpellDamagePrefix := A_Index
 					HasIncrSpellOrElePrefix := A_Index
 				}
@@ -4128,7 +4150,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Fire Damage
 			{
-				If(HasIncrFireDamage){
+				If (HasIncrFireDamage){
 					HasIncrFireDamageCraft := A_Index
 					HasIncrFireDamagePrefix := HasIncrFireDamage
 					HasIncrSpellOrElePrefix := HasIncrFireDamagePrefix
@@ -4136,7 +4158,7 @@ ParseAffixes(ItemDataAffixes, Item)
 					HasIncrFireDamage := A_Index
 				}
 				
-				If( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrFireDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
+				If ( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrFireDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
 				{
 					HasIncrFireDamagePrefix := A_Index
 					HasIncrSpellOrElePrefix := A_Index
@@ -4145,7 +4167,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Cold Damage
 			{
-				If(HasIncrColdDamage){
+				If (HasIncrColdDamage){
 					HasIncrColdDamageCraft := A_Index
 					HasIncrColdDamagePrefix := HasIncrColdDamage
 					HasIncrSpellOrElePrefix := HasIncrColdDamagePrefix
@@ -4153,7 +4175,7 @@ ParseAffixes(ItemDataAffixes, Item)
 					HasIncrColdDamage := A_Index
 				}
 				
-				If( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrColdDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
+				If ( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrColdDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
 				{
 					HasIncrColdDamagePrefix := A_Index
 					HasIncrSpellOrElePrefix := A_Index
@@ -4162,7 +4184,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, increased Lightning Damage
 			{
-				If(HasIncrLightningDamage){
+				If (HasIncrLightningDamage){
 					HasIncrLightningDamageCraft := A_Index
 					HasIncrLightningDamagePrefix := HasIncrLightningDamage
 					HasIncrSpellOrElePrefix := HasIncrLightningDamagePrefix
@@ -4170,7 +4192,7 @@ ParseAffixes(ItemDataAffixes, Item)
 					HasIncrLightningDamage := A_Index
 				}
 				
-				If( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrLightningDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
+				If ( ! LookupTierByValue(GetActualValue(A_LoopField), ArrayFromDatafile("data\IncrLightningDamage_Suffix_Weapon.txt"), ItemLevel).Tier )
 				{
 					HasIncrLightningDamagePrefix := A_Index
 					HasIncrSpellOrElePrefix := A_Index
@@ -5375,7 +5397,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			IfInString, A_LoopField, chance to cause Bleeding on Hit
 			{
-				If(CurrValue = 25)
+				If (CurrValue = 25)
 				{
 					; Vagan/Tora prefix
 					AppendAffixInfo(MakeAffixDetailLine(A_Loopfield, "Prefix", "Vagan 7 or Buy:Tora 4", ""), A_Index)
@@ -6459,7 +6481,7 @@ ParseAffixes(ItemDataAffixes, Item)
 	{
 		Itemdata.UncAffTmpAffixLines[A_Index] := AffixLines[A_Index]
 	}
-	If(Itemdata.Rarity = "Magic"){
+	If (Itemdata.Rarity = "Magic"){
 		PrefixLimit := 1
 		SuffixLimit := 1
 	} Else {
@@ -6492,7 +6514,7 @@ ParseAffixes(ItemDataAffixes, Item)
 		; No infinite looping. We re-enable ReloopAll below when it is warranted.
 		ReloopAll := False
 		
-		If(ConsiderAllRemainingAffixes = False)
+		If (ConsiderAllRemainingAffixes = False)
 		{
 			; Phase 1:
 			; Store each grp's affix min count for a later check.
@@ -6537,17 +6559,17 @@ ParseAffixes(ItemDataAffixes, Item)
 					; Even though we might not be able to finalize the group itself yet, we can now use 
 					;   that information to make decisions about the entries of other groups.
 					
-					If(entry[1] < PrefixMinCount){
+					If (entry[1] < PrefixMinCount){
 						PrefixMinCount := entry[1]
 					}
-					If(entry[2] < SuffixMinCount){
+					If (entry[2] < SuffixMinCount){
 						SuffixMinCount := entry[2]
 					}
-					If(entry[1] + entry[2] < TotalMinCount){
+					If (entry[1] + entry[2] < TotalMinCount){
 						TotalMinCount := entry[1] + entry[2]
 					}
 					
-					If(ConsiderAllRemainingAffixes = False)
+					If (ConsiderAllRemainingAffixes = False)
 					{
 						; Phase 1:
 						; No fancy affix assumptions yet, just the certain count due to what we have added to AffixLines already.
@@ -6565,7 +6587,7 @@ ParseAffixes(ItemDataAffixes, Item)
 						AssumeTotalCount  := AffixTotals.NumPrefixes + AffixTotals.NumSuffixes + GrpTotalMinCount["total"] - GrpTotalMinCount[key_grp]
 					}
 					
-					If( (AssumePrefixCount + entry[1] > PrefixLimit) or (AssumeSuffixCount + entry[2] > SuffixLimit) or (AssumeTotalCount + entry[1] + entry[2] > PrefixLimit + SuffixLimit) )
+					If ( (AssumePrefixCount + entry[1] > PrefixLimit) or (AssumeSuffixCount + entry[2] > SuffixLimit) or (AssumeTotalCount + entry[1] + entry[2] > PrefixLimit + SuffixLimit) )
 					{
 						; Mod does not work because of affix number limit
 						; Remove mod entry from "grp"
@@ -6578,7 +6600,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				}
 			}
 			
-			If(ConsiderAllRemainingAffixes = False)
+			If (ConsiderAllRemainingAffixes = False)
 			{
 				; Phase 1:
 				; We've finished the whole "For key_entry..." loop for a grp, so the Prefix/Suffix/TotalMinCount actually represents that grp.
@@ -6595,7 +6617,7 @@ ParseAffixes(ItemDataAffixes, Item)
 			}
 			
 			
-			If(grp_len=1)
+			If (grp_len=1)
 			{
 				; Only one mod in this grp, so there is no ambiguity. Put the mod in and remove grp.
 				FinalizeUncertainAffixGroup(grp)
@@ -6612,7 +6634,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				ReloopAll := True
 				break
 			}
-			Else If(grp_len=0)
+			Else If (grp_len=0)
 			{
 				Itemdata.UncertainAffixes.Delete(key_grp)
 				
@@ -6623,13 +6645,13 @@ ParseAffixes(ItemDataAffixes, Item)
 		}
 		
 		
-		If(ReloopAll = False)
+		If (ReloopAll = False)
 		{
 			; Phase 1:
 			; Basic checks are done. Now we can check if a group is not solved yet but is guaranteed to bring a certain affix type
 			;   which we can count against the limit and then rule out entries from other groups.
 			
-			If(ConsiderAllRemainingAffixes = False)
+			If (ConsiderAllRemainingAffixes = False)
 			{
 				; We enable Phase 2 of affix count comparison here.
 				
@@ -6637,7 +6659,7 @@ ParseAffixes(ItemDataAffixes, Item)
 				ReloopAll = True
 				; ...and ReloopAll obviously. (Continue reading Phase 2 from the top again)
 			}
-			Else If(CheckAgainForGoodMeasure = False)
+			Else If (CheckAgainForGoodMeasure = False)
 			{
 				; Phase 2:
 				; If we arrive here we've checked everything with the Phase 2 comparison.
@@ -6664,14 +6686,14 @@ ParseAffixes(ItemDataAffixes, Item)
 	;   line2 is "T1 HybP" in both cases, we don't want that double entry in line2.
 	For key1, line in Itemdata.UncAffTmpAffixLines{
 		For key2, subline in line{
-			If(IsObject(subline)){
+			If (IsObject(subline)){
 				; Check line possibilities starting from the last index (safer when removing entries)
 				i := line.MaxIndex()
 				While(i > key2)
 				{
 					; Check all entries after our current entry at line[key2] if they are duplicates of it
 					;   (by comparing "TypeAndTier" and line index 3). Remove if identical.
-					If(line[i][3] = line[key2][3])
+					If (line[i][3] = line[key2][3])
 					{
 						line.RemoveAt(i)
 					}
@@ -6702,9 +6724,9 @@ ParseAffixes(ItemDataAffixes, Item)
 	
 	i := 1
 	For key1, line in Itemdata.UncAffTmpAffixLines{
-		If(IsObject(line)){
+		If (IsObject(line)){
 			For key2, subline in line{
-				If(IsObject(subline)){
+				If (IsObject(subline)){
 					AffixLines.Set(i, subline)
 					++i
 				}Else{
@@ -6737,30 +6759,30 @@ FinalizeUncertainAffixGroup(grp)
 	{
 		; entry[1] is PrefixCount and entry[2] is SuffixCount for that entry.
 		
-		If(entry[1] < PrefixMin){
+		If (entry[1] < PrefixMin){
 			PrefixMin := entry[1]
 		}
-		If(entry[1] > PrefixMax){
+		If (entry[1] > PrefixMax){
 			PrefixMax := entry[1]
 		}
-		If(entry[2] < SuffixMin){
+		If (entry[2] < SuffixMin){
 			SuffixMin := entry[2]
 		}
-		If(entry[2] > SuffixMax){
+		If (entry[2] > SuffixMax){
 			SuffixMax := entry[2]
 		}
-		If(entry[1] + entry[2] < TotalMin){
+		If (entry[1] + entry[2] < TotalMin){
 			TotalMin := entry[1] + entry[2]
 		}
-		If(entry[1] + entry[2] > TotalMax){
+		If (entry[1] + entry[2] > TotalMax){
 			TotalMax := entry[1] + entry[2]
 		}
 		
 		For junk, val in [3,5,7,9,11,13]	; these are the potential line number entries, the +1's are the line texts.
 		{
-			If(entry[val])
+			If (entry[val])
 			{
-				If(IsObject(Itemdata.UncAffTmpAffixLines[entry[val]]))
+				If (IsObject(Itemdata.UncAffTmpAffixLines[entry[val]]))
 				{
 					; There already is a mod for that line. Append this alternative to the array of the line.
 					; Overwrite the line text with "or"
@@ -6809,7 +6831,7 @@ IsEmptyString(String)
 }
 
 IsNum(Var){
-	If(++Var)
+	If (++Var)
 		return true
 	return false
 }
@@ -6937,7 +6959,7 @@ GetTimestampUTC() { ; http://msdn.microsoft.com/en-us/library/ms724390
 
 ParseAddedDamage(String, DmgType, ByRef DmgLo, ByRef DmgHi)
 {
-	If(RegExMatch(String, "Adds (\d+) to (\d+) " DmgType " Damage", Match))
+	If (RegExMatch(String, "Adds (\d+) to (\d+) " DmgType " Damage", Match))
 	{
 	;StringSplit, Arr, Match, %A_Space%
 	;StringSplit, Arr, Arr2, -
@@ -7245,7 +7267,7 @@ UniqueHasFatedVariant(ItemName)
 		{
 			Continue
 		}
-		If(ItemName == Line)
+		If (ItemName == Line)
 		{
 			return True
 		}
@@ -7341,10 +7363,20 @@ ParseBeastData(data) {
 	a := {}
 	
 	parts := data.parts[2]
-	Loop,  Parse, parts, `n, `r
+	Loop, Parse, parts, `n, `r
 	{
 		RegExMatch(A_LoopField, "i)(Genus|Family|Group):\s+?(.*)", match)
 		a[match1] := Trim(match2)
+	}
+	
+	parts := data.parts[4]
+	a["Mods"] := []
+	Loop, Parse, parts, `n, `r
+	{
+		If (RegExMatch(A_LoopField, "i)(Aspect of the Hellion|Blood Geyser|Churning Claws|Craicic Presence|Crimson Flock|Crushing Claws|Deep One's Presence|Erupting Winds|Farric Presence|Fenumal Presence|Fertile Presence|Hadal Dive|Incendiary Mite|Infested Earth|Putrid Flight|Raven Caller|Saqawine Presence|Satyr Storm|Spectral Stampede|Spectral Swipe|Tiger Prey|Unstable Swarm|Vile Hatchery|Winter Bloom)", match))
+		{
+			a["Mods"].Push(match1)
+		}
 	}
 	
 	return a
@@ -7527,7 +7559,7 @@ ParseUnique(ItemName)
 		{
 			Continue
 		}
-		If(RegExMatch(ALine, "^" ItemName "\|"))
+		If (RegExMatch(ALine, "^" ItemName "\|"))
 		{
 			StringSplit, LineParts, ALine, |
 			NumLineParts := LineParts0
@@ -7766,6 +7798,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		Item.IsBeast := True
 		Item.BeastData := ParseBeastData(ItemData)
 		Item.BaseType := "Beast"
+		DebugPrintArray(Item.BeastData)
 	}
 	
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
@@ -7931,6 +7964,10 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	If (Item.IsFlask)
 	{
 		ParseFlaskAffixes(ItemData.Affixes)
+	}
+	Else If (Item.IsBeast)
+	{
+		; already parsed
 	}
 	Else If (RarityLevel > 1 and RarityLevel < 4 and Item.IsMap = False and not Item.IsLeaguestone)  ; Code added by Bahnzo to avoid maps showing affixes
 	{
@@ -8147,6 +8184,11 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		TT := TT . "`nQuality 20%:`n" . GemQualityDescription
 	}
 	
+	If (Item.IsBeast)
+	{
+		return TT
+	}
+	
 	If (RarityLevel > 1 and RarityLevel < 4)
 	{
 		; Append affix info if rarity is greater than normal (white)
@@ -8290,7 +8332,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			Notation .= "`n a-b" Opts.MultiTierRangeSeparator "c-d: Multi tier uncertainty. WorstCaseRange" Opts.MultiTierRangeSeparator "BestCaseRange"
 		}
 		
-		If (Itemdata.SpecialCaseNotation is not "")
+		If (Itemdata.SpecialCaseNotation != "")
 		{
 			Notation .= "`n" Itemdata.SpecialCaseNotation
 		}
