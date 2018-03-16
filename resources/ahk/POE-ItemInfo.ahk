@@ -7898,6 +7898,9 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	If (Item.IsLeagueStone) {
 		ItemDataIndexAffixes := ItemDataIndexAffixes - 1
 	}
+	If (Item.IsBeast) {
+		ItemDataIndexAffixes := ItemDataIndexAffixes - 1
+	}
 	ItemData.Affixes := RegExReplace(ItemDataParts%ItemDataIndexAffixes%, "[\r\n]+([a-z])", " $1")
 	ItemData.IndexAffixes := ItemDataIndexAffixes
 	
@@ -8108,7 +8111,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 				MapDescription .= mapList[Item.SubType]
 			}
 		}
-		If(MapDescription)
+		If (MapDescription)
 		{
 			TT .= MapDescription
 		}
@@ -8148,7 +8151,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		; Append affix info if rarity is greater than normal (white)
 		; Affix total statistic
-		If(Itemdata.Rarity = "Magic"){
+		If (Itemdata.Rarity = "Magic"){
 			PrefixLimit := 1
 			SuffixLimit := 1
 		}Else{
@@ -8203,7 +8206,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		
 		Loop, % maxIndex {
 			ImplicitText := Item.Implicit[A_Index]
-			If(StrLen(ImplicitText) > TextLineWidth)
+			If (StrLen(ImplicitText) > TextLineWidth)
 				{
 					ImplicitText := SubStr(ImplicitText, 1, TextLineWidth - StrLen(Ellipsis))  Ellipsis
 				}
@@ -8269,25 +8272,25 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		Notation := ""
 		
-		If(RegExMatch(AffixDetails, "(HybP|HybS)")){
+		If (RegExMatch(AffixDetails, "(HybP|HybS)")){
 			Notation .= "`n Hyb: Hybrid. One mod with two parts in two lines."
 		}
-		If(RegExMatch(AffixDetails, "HDP")){
+		If (RegExMatch(AffixDetails, "HDP")){
 			Notation .= "`n HDP: Hybrid Defence Prefix. Flat Def on Hybrid Base Armour."
 		}
-		If(RegExMatch(AffixDetails, "(CrP|CrS)")){
+		If (RegExMatch(AffixDetails, "(CrP|CrS)")){
 			Notation .= "`n Cr: Craft. Master tiers not in yet, treated as normal mod."
 		}
 		matchpattern := "\d\" Opts.DoubleRangeSeparator "\d"
-		If(RegExMatch(AffixDetails, matchpattern)){
+		If (RegExMatch(AffixDetails, matchpattern)){
 			Notation .= "`n a-b" Opts.DoubleRangeSeparator "c-d: For added damage mods. (a-b) to (c-d)"
 		}
 		matchpattern := "\d\" Opts.MultiTierRangeSeparator "\d"
-		If(RegExMatch(AffixDetails, matchpattern)){
+		If (RegExMatch(AffixDetails, matchpattern)){
 			Notation .= "`n a-b" Opts.MultiTierRangeSeparator "c-d: Multi tier uncertainty. WorstCaseRange" Opts.MultiTierRangeSeparator "BestCaseRange"
 		}
 		
-		If(Itemdata.SpecialCaseNotation is not "")
+		If (Itemdata.SpecialCaseNotation is not "")
 		{
 			Notation .= "`n" Itemdata.SpecialCaseNotation
 		}
