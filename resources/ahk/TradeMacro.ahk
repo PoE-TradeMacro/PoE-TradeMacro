@@ -321,12 +321,21 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	If (!Item.IsUnique or Item.IsBeast) {
+		; TODO: improve this
+		If (Item.IsBeast) {
+			Item.BeastData.GenusMod 		:= {}
+			Item.BeastData.GenusMod.name_orig	:= "(beast) Genus: " Item.BeastData.Genus
+			Item.BeastData.GenusMod.name		:= RegExReplace(Item.BeastData.GenusMod.name_orig, "i)\d+", "#")
+			Item.BeastData.GenusMod.param		:= TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], Item.BeastData.GenusMod)
+		}
+		
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap, Item.IsBeast)
 		preparedItem.maxSockets	:= Item.maxSockets
 		preparedItem.iLvl		:= Item.level
 		preparedItem.Name		:= Item.Name
 		preparedItem.BaseName	:= Item.BaseName
 		preparedItem.Rarity		:= Item.RarityLevel
+		preparedItem.BeastData	:= Item.BeastData
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
@@ -528,8 +537,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 
 		If (s.useBase) {
-			RequestParams.xbase := Item.BaseName
-			Item.UsedInSearch.ItemBase := Item.BaseName
+			If (Item.IsBeast) {
+				modParam := new _ParamMod()
+				modParam.mod_name := Item.BeastData.GenusMod.param
+				modParam.mod_min := ""
+				RequestParams.modGroups[1].AddMod(modParam)
+				Item.UsedInSearch.Type := Item.BaseType ", " Item.BeastData.Genus
+			} Else {
+				RequestParams.xbase := Item.BaseName
+				Item.UsedInSearch.ItemBase := Item.BaseName
+			}			
 		}
 
 		If (s.onlineOverride) {
@@ -645,25 +662,26 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (!Item.IsUnique) {
 			RequestParams.Name := ""
 		}
+		
 		RequestParams.xtype := Item.BaseType
-		Item.UsedInSearch.Type := Item.BaseType ", " Item.BeastData.Genus
+		If (not isAdvancedPriceCheckRedirect) {
+			Item.UsedInSearch.Type := Item.BaseType ", " Item.BeastData.Genus
+		}
 		
 		/*
 			add genus
-			*/
-		needle := {}
-		needle.name_orig := "(beast) Genus: " Item.BeastData.Genus
-		needle.name := RegExReplace(needle.name_orig, "i)\d+", "#")
-		
-		modParam := new _ParamMod()
-		modParam.mod_name := TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], needle)
-		modParam.mod_min  := ""
-		RequestParams.modGroups[1].AddMod(modParam)
-		
+			*/		
 		If (not isAdvancedPriceCheckRedirect) {
-			/* 
-				add beastiary mods
-				*/
+			modParam := new _ParamMod()
+			modParam.mod_name := TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], Item.BeastData.GenusMod)
+			modParam.mod_min  := ""
+			RequestParams.modGroups[1].AddMod(modParam)	
+		}		
+		
+		/* 
+			add beastiary mods
+			*/
+		If (not isAdvancedPriceCheckRedirect) {			
 			If (not isAdvancedPriceCheck) {
 				For key, imod in preparedItem.mods {
 					If (imod.param) {	; exists on poe.trade
@@ -3904,8 +3922,13 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, Edit    , x+1 yp-3 w30 vTradeAdvancedMinILvl , % iLvlValue
 
 	; item base
-	baseCheckState := TradeOpts.AdvancedSearchCheckBase ? "Checked" : ""
-	Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase %baseCheckState%, % "Use Item Base"
+	If (advItem.IsBeast) {
+		baseCheckState := "Checked"
+		Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase %baseCheckState%, % "Use Genus (" advItem.BeastData.Genus ")"
+	} Else {
+		baseCheckState := TradeOpts.AdvancedSearchCheckBase ? "Checked" : ""
+		Gui, SelectModsGui:Add, CheckBox, x+15 yp+3 vTradeAdvancedSelectedItemBase %baseCheckState%, % "Use Item Base"
+	}	
 
 	If (advItem.specialBase) {
 		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 

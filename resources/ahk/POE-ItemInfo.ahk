@@ -942,6 +942,8 @@ GetClipboardContents(DropNewlines=False)
 			}
 			IfInString, A_LoopField, Map drop
 			{
+				; We drop the "Map drop", but the "--------" has already been added and we don't want it, so we delete the last 8 chars.
+				Result := SubStr(Result, 1, -8)
 				break
 			}
 			If A_Index = 1                  ; so we start with just adding the first line w/o either a `n or `r
