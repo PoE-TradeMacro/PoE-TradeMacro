@@ -106,7 +106,28 @@ WinSet, Transparent, 200, ahk_id %TTHWnd%
 WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 GuiAddBorder(BorderColor, BorderWidth, TTW, TTH, "TT", TTHWnd)
 
+global startMouseXPos := 0
+global startMouseYPos := 0
+MouseGetPos, startMouseXPos, startMouseYPos
+SetTimer, ToolTipTimer, 100
+
 Return
+
+CloseToolTipTimer:
+	Gui, TT:Destroy
+Return
+
+; Remove tooltip if mouse is moved
+ToolTipTimer:
+	ToolTipTimeout := 1000
+	MouseGetPos, CurrX, CurrY
+	MouseMoved := (CurrX - startMouseXPos) ** 2 + (CurrY - startMouseYPos) ** 2 > 100 ** 2
+	If (MouseMoved)	{
+		SetTimer, ToolTipTimer, Off
+		Gui, TT:Destroy
+	}
+Return
+
 GuiClose:
 ExitApp
 
