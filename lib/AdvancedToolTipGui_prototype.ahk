@@ -1,7 +1,7 @@
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
-Sleep, 5000
-SoundBeep
+;Sleep, 5000
+;SoundBeep
 
 item := {}
 item.name := "Gloom Bite"
@@ -32,7 +32,8 @@ Gui, TT:New, +AlwaysOnTop +ToolWindow +hwndTTHWnd
 Gui, TT:Margin, %GuiMargin%, %GuiMargin%
 
 ;--------------
-table01 := new Table("TT", "t01", "t01H", 9, "Consolas", "FEFEFE", true)
+table01 := new Table("TT", "t01", "t01H", 9, "Consolas", "FEFEFE", false)
+
 table01.AddCell(1, 1, item.name, "", "", "", "Trans", "", true)
 table01.AddCell(2, 1, item.basetype, "", "", "", "Trans", "", true)
 
@@ -42,10 +43,10 @@ table02 := new Table("TT", "t02", "t02H", 9, "Consolas", "FEFEFE", true)
 table02.AddCell(1, 1, "Item Level:", "", "", "", "Trans", "", true)
 table02.AddCell(1, 2, item.lvl)
 table02.AddCell(1, 3, "", "", "", "", "", "", true)
-table02.AddCell(1, 4, "Base Level:", "", "", "", "", "bold", "", true)
+table02.AddCell(1, 4, "Base Level:", "", "", "", "", "bold", true)
 table02.AddCell(1, 5, item.baselvl)
 
-table02.AddCell(2, 1, "Max Sockets:", "", "", "", "Red", "", true)
+table02.AddCell(2, 1, "Max Sockets:", "", "", "", "", "", true)
 table02.AddCell(2, 2, item.msockets)
 table02.AddCell(2, 3, "", "", "", "", "", "", true)
 table02.AddCell(2, 4, "")
@@ -69,8 +70,20 @@ table02.AddCell(5, 3, "", "", "", "", "", "", true)
 table02.AddCell(5, 4, "Q20 Total:", "", "", "", "", "strike", true)
 table02.AddCell(5, 5, item.dps.qtotal)
 
+;--------------
+table03 := new Table("TT", "t03", "t03H", 9, "Consolas", "FEFEFE", true)
+
+table03.AddCell(1, 1, "Mod", "", "", "", "26292d", "bold", true)
+table03.AddCell(1, 2, "T/A", "", "", "", "26292d", "bold", true)
+
+table03.AddCell(2, 1, "+20 to Maximum Life", "", "", "", "", "", true)
+table03.AddCell(2, 2, "test", "", "", "", "", "", true)
+table03.AddSubCell(2, 2, 1, "6", "", "", "", "", "", true)
+table03.AddSubCell(2, 2, 2, "P", "", "", "", "red", "", true)
+
 table01.drawTable(GuiMargin)
 table02.drawTable(GuiMargin)
+table03.drawTable(GuiMargin, 10)
 
 Gui, TT:Color, 000000
 ; maximize the window before removing the borders/title bar etc
@@ -98,7 +111,7 @@ WinSet, Style, -0xC00000, ahk_id %TTHWnd%
 ;WinActivate, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64Steam.exe
 
 ; restore window to actual size
-Gui, TT:Show, x50 y50 AutoSize Restore NoActivate, CustomTooltip
+Gui, TT:Show, x1050 y100 AutoSize Restore NoActivate, CustomTooltip
 ;make window visible again
 WinSet, Transparent, 200, ahk_id %TTHWnd%
 
@@ -109,7 +122,7 @@ GuiAddBorder(BorderColor, BorderWidth, TTW, TTH, "TT", TTHWnd)
 global startMouseXPos := 0
 global startMouseYPos := 0
 MouseGetPos, startMouseXPos, startMouseYPos
-SetTimer, ToolTipTimer, 100
+;SetTimer, ToolTipTimer, 100
 
 Return
 
@@ -145,7 +158,7 @@ class Table {
 		this.showGrid := grid
 	}
 	
-	DrawTable(guiMargin = 5, tableXPos = "", tableYPos = "") {
+	DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {
 		columnWidths := []		
 		rowHeights := []		
 		Loop, % this.maxColumns {
@@ -171,7 +184,7 @@ class Table {
 		
 		shiftY := 0		
 		tableXPos := not StrLen(tableXPos) ? "x" guiMargin : tableXPos
-		tableYPos := not StrLen(tableYPos) ? "y+" guiMargin : tableYPos
+		tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
 		
 		For key, row in this.rows {
 			height := rowHeights[key] + Round((this.fontSize / 3))
@@ -179,69 +192,81 @@ class Table {
 			shiftY := height - 1
 			
 			For k, cell in row {
-				addedBackground := false
-				width := columnWidths[k] + 20				
-
-				If (k = 1 and key = 1) {
-					yPos := " " tableYPos
-				} Else If (k = 1) {
-					yPos := " yp+" shiftY				
-				} Else {
-					yPos := " yp+0"
-				}
-
-				If (k = 1) {
-					xPos := " " tableXPos					
-				} Else {
-					xPos := " x+-1"
-				}
+				this.DrawCell(cell, guiName, k, key, columnWidths, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)
 				
-				options := ""
-				options .= StrLen(cell.color) ? " c" cell.color : ""				
-				options .= " w" width 
-				options .= " h" height
-				
-				If (k = 1 and key = 1) {
-					;options .= " Section"
-				}
-
-				If (cell.bgColor = "Trans") {
-					options .= " BackGroundTrans"
-				} Else If (StrLen(cell.bgColor)) {
-					options .= " BackGroundTrans"
-					bgColor := cell.bgColor
-					Gui, %guiName%Add, Progress, w%width% h%height% %yPos% %xPos% Background%bgColor%					
-					options .= " xp yp"
-					addedBackground := true
-				}
-				
-				If (not addedBackground) {
-					options .= yPos
-					options .= xPos
-				}
-				
-				If (this.showGrid) {
-					options .= " +Border"
-				}
-
-				If (cell.fColor or cell.font or cell.fontOptions) {
-					elementFontOptions := StrLen(cell.fColor) ? " c" cell.fColor : ""
-					elementFontOptions .= StrLen(cell.fontOptions) ? " " cell.fontOptions : ""
-					elementFont := StrLen(cell.font) ? cell.font : this.font
-					Gui, %guiName%Font, %elementFontOptions%, % elementFont 
-				}
-				
-				If (RegExMatch(cell.alignment, "i)left|center|right")) {
-					options .= " " cell.alignment
-				}
-				
-				;msgbox % options
-				Gui, %guiName%Add, Text, %options%, % cell.value
-				If (cell.fColor or cell.font) {
-					Gui, %guiName%Font, %guiFontOptions% " norm", % this.font 
-				}				
 			}
 		}		
+	}
+	
+	DrawCell(cell, guiName, k, key, columnWidths, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
+		; cell, guiName, guiFontOptions, tableXPos, tableYPos, shiftY, width, height 
+		addedBackground := false
+		width := columnWidths[k] + 20			
+
+		If (k = 1 and key = 1) {
+			yPos := " " tableYPos
+		} Else If (k = 1) {
+			yPos := " yp+" shiftY				
+		} Else {
+			yPos := " yp+0"
+		}
+
+		If (k = 1) {
+			xPos := " " tableXPos					
+		} Else {
+			xPos := " x+-1"
+		}
+		
+		If (cell.subCells.length() and not recurse) {
+			recurse := true
+			this.DrawCell(cell, guiName, k, key, columnWidths, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse)
+		}
+		Else {
+			options := ""
+			options .= StrLen(cell.color) ? " c" cell.color : ""				
+			options .= " w" width 
+			options .= " h" height
+			
+			If (k = 1 and key = 1) {
+				;options .= " Section"
+			}
+
+			If (cell.bgColor = "Trans") {
+				options .= " BackGroundTrans"
+			} Else If (StrLen(cell.bgColor)) {
+				options .= " BackGroundTrans"
+				bgColor := cell.bgColor
+				Gui, %guiName%Add, Progress, w%width% h%height% %yPos% %xPos% Background%bgColor%					
+				options .= " xp yp"
+				addedBackground := true
+			}
+			
+			If (not addedBackground) {
+				options .= yPos
+				options .= xPos
+			}
+			
+			If (this.showGrid) {
+				options .= " +Border"
+			}
+
+			If (cell.fColor or cell.font or cell.fontOptions) {
+				elementFontOptions := StrLen(cell.fColor) ? " c" cell.fColor : ""
+				elementFontOptions .= StrLen(cell.fontOptions) ? " " cell.fontOptions : ""
+				elementFont := StrLen(cell.font) ? cell.font : this.font
+				Gui, %guiName%Font, %elementFontOptions%, % elementFont 
+			}
+			
+			If (RegExMatch(cell.alignment, "i)left|center|right")) {
+				options .= " " cell.alignment
+			}
+			
+			;msgbox % options
+			Gui, %guiName%Add, Text, %options%, % cell.value
+			If (cell.fColor or cell.font) {
+				Gui, %guiName%Font, %guiFontOptions% " norm", % this.font 
+			}
+		}
 	}
 	
 	AddCell(rowIndex, cellIndex, value, alignment = "left", font = "", fColor = "", bgColor = "", fontOptions = "", isSpacingCell = false) {
@@ -250,6 +275,7 @@ class Table {
 		}
 		
 		this.rows[rowIndex][cellIndex] := {}
+		this.rows[rowIndex][cellIndex].subCells := []
 		this.rows[rowIndex][cellIndex].value := " " value " " ; add spaces as table padding
 		this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
 		size := this.MeasureText(this.rows[rowIndex][cellIndex].value, this.fontSize + 2, this.rows[rowIndex][cellIndex].font)
@@ -261,6 +287,43 @@ class Table {
 		this.rows[rowIndex][cellIndex].fontOptions := fontOptions
 		this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
 		;debugprintarray(this.rows[rowIndex][cellIndex])
+	}
+	
+	AddSubCell(rI, cI, sCI, value, alignment = "left", font = "", fColor = "", bgColor = "", fontOptions = "", isSpacingCell = false) {
+		If (not this.rows[rI]) {
+			this.rows[rI] := []
+		}
+		
+		If (not this.rows[rI][cI].haskey("value")) {
+			this.AddCell(rI, cI)			
+		}
+		this.rows[rI][cI].value := "" ; empty cell, only show subcell contents
+		
+		this.rows[rI][cI].subCells[sCI] := {}
+		this.rows[rI][cI].subCells[sCI].value := " " value " " ; add spaces as table padding
+		
+		; font priority: subcell > cell > table
+		this.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : this.rows[rI][cI]
+		If (not StrLen(this.rows[rI][cI].subCells[sCI].font)) {
+			this.rows[rI][cI].subCells[sCI].font := this.font
+		}		
+		
+		this.rows[rI][cI].subCells[sCI].alignment := StrLen(alignment) ? alignment : "left"		
+		this.rows[rI][cI].subCells[sCI].color := fColor
+		this.rows[rI][cI].subCells[sCI].bgColor := bgColor
+		this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
+		
+		size := this.MeasureText(this.rows[rI][cI].subCells[sCI].value, this.fontSize + 2, this.rows[rI][cI].subCells[sCI].font)
+		this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
+		this.rows[rI][cI].subCells[sCI].height := size.H
+
+		For key, subcell in this.rows[rI][cI].subCells {
+			If (key = 1) {
+				this.rows[rI][cI].width := 0
+			}
+			this.rows[rI][cI].width += subcell.width
+		}
+		;debugprintarray(this.rows[rI][cI].subCells[sCI])
 	}
 	
 	MeasureText(Str, FontOpts = "", FontName = "") {
