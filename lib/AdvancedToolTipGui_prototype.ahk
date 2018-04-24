@@ -1,6 +1,7 @@
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
 Sleep, 5000
+SoundBeep
 
 item := {}
 item.name := "Gloom Bite"
@@ -79,24 +80,25 @@ DetectHiddenWindows, On
 ; make window invisible
 WinSet, Transparent, 0, ahk_id %TTHWnd%
 ; "maximize" option or "WinMaximize" don't work because they activate/focus the window.
-Gui, TT:Show, AutoSize X100 Y100 NoActivate, CustomTooltip
+Gui, TT:Show, AutoSize NoActivate, CustomTooltip
 
 ; maximize window using PostMessage / WinMove
-PostMessage, 0x112, 0xF030,,, ahk_id %TTHWnd%
-;WinMove, ahk_id %TTHWnd%, , 0, 0 , A_ScreenWidth, A_ScreenHeight
+;PostMessage, 0x112, 0xF030,,, ahk_id %TTHWnd%
+WinMove, ahk_id %TTHWnd%, , 0, 0 , A_ScreenWidth, A_ScreenHeight
 
-Sleep, 2000
+; PostMessage would require some delay
+;Sleep, 10
 
 ; make tooltip clickthrough and remove borders
 WinSet, ExStyle, +0x20, ahk_id %TTHWnd% ; 0x20 = WS_EX_CLICKTHROUGH
 WinSet, Style, -0xC00000, ahk_id %TTHWnd%
-Sleep, 2000
+;Sleep, 2000
 
 ; make sure that PoE is activated/focused
 ;WinActivate, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64Steam.exe
 
 ; restore window to actual size
-Gui, TT:Show, AutoSize Restore NoActivate, CustomTooltip
+Gui, TT:Show, x50 y50 AutoSize Restore NoActivate, CustomTooltip
 ;make window visible again
 WinSet, Transparent, 200, ahk_id %TTHWnd%
 
