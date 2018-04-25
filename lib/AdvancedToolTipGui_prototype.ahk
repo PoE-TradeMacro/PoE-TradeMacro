@@ -1,7 +1,7 @@
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
-;Sleep, 5000
-;SoundBeep
+Sleep, 5000
+SoundBeep
 
 item := {}
 item.name := "Gloom Bite"
