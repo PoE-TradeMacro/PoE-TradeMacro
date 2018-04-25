@@ -84,9 +84,32 @@ table03.AddSubCell(2, 2, 2, "P", "center", "", "", "red", "", true, true)
 table03.AddSubCell(2, 2, 3, "S", "center", "", "", "blue", "", true, true)
 table03.AddCell(2, 3, "text", "", "", "", "Trans", "", true)
 
+;--------------
+table04 := new Table("TT", "t04", "t04H", 9, "Consolas", "", false)
+
+multilineText := "Multiline Text (no auto breaks):`n"
+multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`n`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
+Loop, Parse, multilineText, `n, `r
+{
+	string := A_LoopField
+	StringReplace, string, string, `r,, All
+	StringReplace, string, string, `n,, All
+	
+	If (not StrLen(string)) {
+		string := " " ; don't prevent emtpy lines, just having a linebreak will break the text measuring 
+	}
+	
+	If (StrLen(string)) {
+		table04.AddCell(A_Index, 1, string, "", "", "", "", "", true)
+	}
+}
+;table04.AddCell(1, 1, multilineText, "", "", "", "", "", true)
+
+;--------------
 table01.drawTable(GuiMargin)
 table02.drawTable(GuiMargin)
 table03.drawTable(GuiMargin, 10)
+table04.drawTable(GuiMargin, 10)
 
 Gui, TT:Color, 000000
 ; maximize the window before removing the borders/title bar etc
@@ -356,7 +379,7 @@ class Table {
 	}
 	
 	MeasureText(Str, FontOpts = "", FontName = "") {
-		Static DT_FLAGS := 0x0520 ; DT_SINGLELINE = 0x20, DT_NOCLIP = 0x0100, DT_CALCRECT = 0x0400
+		Static DT_FLAGS := 0x0520 ; DT_SINGLELINE = 0x20, DT_NOCLIP = 0x0100, DT_CALCRECT = 0x0400		
 		Static WM_GETFONT := 0x31
 		Size := {}
 		Gui, New
