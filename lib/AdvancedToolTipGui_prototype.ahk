@@ -85,25 +85,11 @@ table03.AddSubCell(2, 2, 3, "S", "center", "", "", "blue", "", true, true)
 table03.AddCell(2, 3, "text", "", "", "", "Trans", "", true)
 
 ;--------------
-table04 := new Table("TT", "t04", "t04H", 9, "Consolas", "", false)
+table04 := new Table("TT", "t05", "t05H", 9, "Consolas", "", false)
 
-multilineText := "Multiline Text (no auto breaks):`n"
-multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`n`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-Loop, Parse, multilineText, `n, `r
-{
-	string := A_LoopField
-	StringReplace, string, string, `r,, All
-	StringReplace, string, string, `n,, All
-	
-	If (not StrLen(string)) {
-		string := " " ; don't prevent emtpy lines, just having a linebreak will break the text measuring 
-	}
-	
-	If (StrLen(string)) {
-		table04.AddCell(A_Index, 1, string, "", "", "", "", "", true)
-	}
-}
-;table04.AddCell(1, 1, multilineText, "", "", "", "", "", true)
+multilineText := "Multiline Text (no auto breaks):`n`n"
+multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
+table04.AddCell(1, 1, multilineText, "", "", "", "", "", true)
 
 ;--------------
 table01.drawTable(GuiMargin)
@@ -219,8 +205,7 @@ class Table {
 			
 			For k, cell in row {
 				width := columnWidths[k] + 20
-				this.DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)
-				
+				this.DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)				
 			}
 		}		
 	}
@@ -327,11 +312,46 @@ class Table {
 		
 		this.rows[rowIndex][cellIndex] := {}
 		this.rows[rowIndex][cellIndex].subCells := []
-		this.rows[rowIndex][cellIndex].value := " " value " " ; add spaces as table padding
 		this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
-		size := this.MeasureText(this.rows[rowIndex][cellIndex].value, this.fontSize + 2, this.rows[rowIndex][cellIndex].font)
-		this.rows[rowIndex][cellIndex].height := size.H
-		this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
+		
+		/*
+			text width and height measuring for single and multiline text (no auto line breaks)
+		*/
+		newValue := ""
+		width := 0
+		height := 0
+		value := Trim(value)
+		Loop, Parse, value, `n, `r
+		{
+			string := A_LoopField			
+			StringReplace, string, string, `r,, All
+			StringReplace, string, string, `n,, All
+			
+			emptyLine := false
+			If (not StrLen(string)) {
+				string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
+				emptyLine := true				
+			}
+			string := " " Trim(string) " "	; add spaces as table padding
+			
+			If (StrLen(string)) {
+				size := this.MeasureText(string, "s" this.fontSize, this.rows[rowIndex][cellIndex].font)
+				width := width > size.W ? width : size.W
+				height += size.H
+			}
+			
+			If (emptyLine) {
+				newValue .= "`n"
+			} Else {
+				newValue .= string "`n"
+			}
+		}
+		this.rows[rowIndex][cellIndex].value := newValue
+		this.rows[rowIndex][cellIndex].height := height
+		this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width		
+		/*
+		*/		
+		
 		this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
 		this.rows[rowIndex][cellIndex].color := fColor
 		this.rows[rowIndex][cellIndex].bgColor := bgColor
@@ -348,8 +368,7 @@ class Table {
 		If (not this.rows[rI][cI].haskey("value")) {
 			this.AddCell(rI, cI)			
 		}
-		this.rows[rI][cI].value := " " ; empty cell, only show subcell contents
-		
+		this.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
 		this.rows[rI][cI].subCells[sCI] := {}
 		this.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
 		
@@ -364,8 +383,11 @@ class Table {
 		this.rows[rI][cI].subCells[sCI].bgColor := bgColor
 		this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
 		
+		/*
+			text width and height measuring for singleline text
+		*/
 		measuringText := noSpacing ? this.rows[rI][cI].subCells[sCI].value " " : this.rows[rI][cI].subCells[sCI].value
-		size := this.MeasureText(measuringText, this.fontSize + 2, this.rows[rI][cI].subCells[sCI].font)
+		size := this.MeasureText(measuringText, "s" this.fontSize, this.rows[rI][cI].subCells[sCI].font)
 		this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
 		this.rows[rI][cI].subCells[sCI].height := size.H
 
@@ -375,6 +397,8 @@ class Table {
 			}
 			this.rows[rI][cI].width += subcell.width
 		}
+		/*
+		*/
 		;debugprintarray(this.rows[rI][cI].subCells[sCI])
 	}
 	
