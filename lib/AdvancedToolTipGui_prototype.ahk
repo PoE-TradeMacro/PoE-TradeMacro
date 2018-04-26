@@ -3,6 +3,14 @@
 Sleep, 5000
 SoundBeep
 
+global StopWatchStart := A_TickCount
+global StopWatchTextMeasure := 0
+
+global TextMeasurements := {}
+TextMeasurements["skipped"] := 0
+global defaultToolTipFont := "Consolas"
+global defaultToolTipFontSize := "9"
+
 item := {}
 item.name := "Gloom Bite"
 item.basetype := "Ceremonial Axe"
@@ -97,6 +105,9 @@ table02.drawTable(GuiMargin)
 table03.drawTable(GuiMargin, 10)
 table04.drawTable(GuiMargin, 10)
 
+
+StopWatchStep01 := A_TickCount
+
 Gui, TT:Color, 000000
 ; maximize the window before removing the borders/title bar etc
 ; otherwise there will be some remnants visible that aren't really part of the gui
@@ -126,21 +137,33 @@ WinSet, Style, -0xC00000, ahk_id %TTHWnd%
 Gui, TT:Show, x1050 y100 AutoSize Restore NoActivate, CustomTooltip
 ;make window visible again
 WinSet, Transparent, 200, ahk_id %TTHWnd%
+StopWatchStep02 := A_TickCount
 
 ; add a border to the window
 WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 GuiAddBorder(BorderColor, BorderWidth, TTW, TTH, "TT", TTHWnd)
+
 
 global startMouseXPos := 0
 global startMouseYPos := 0
 MouseGetPos, startMouseXPos, startMouseYPos
 ;SetTimer, ToolTipTimer, 100
 
+Step01 := StopWatchStep01 - StopWatchStart
+Step02 := StopWatchStep02 - StopWatchStart
+;Step03 := StopWatchStep03 - StopWatchStart
+
+msg := "Finished table drawing after:" "`n"
+msg .= "        " Step01 " ms, (" Step01 "ms Step duration)" "`n`n"
+msg .= "Displayed tooltip after:" "`n"
+msg .= "        " Step02 " ms, (" Step02 - Step01 "ms Step duration)" "`n`n"
+msg .= "Measuring all text took:" "`n"
+msg .= "        " StopWatchTextMeasure " ms" "`n`n"
+
+Msgbox % msg
+
 Return
 
-CloseToolTipTimer:
-	Gui, TT:Destroy
-Return
 
 ; Remove tooltip if mouse is moved
 ToolTipTimer:
@@ -158,7 +181,7 @@ ExitApp
 
 
 class Table {
-	__New(GuiName, assocVar, assocHwnd, fontSize = 9, font = "Verdana", color = "Default", grid = false) {
+	__New(GuiName, assocVar, assocHwnd, fontSize = 9, font = "Consolas", color = "Default", grid = false) {
 		this.assocVar := "v" assocVar
 		this.assocHwnd := "hwnd" assocHwnd
 		this.GuiName := StrLen(GuiName) ? GuiName ":" : ""
@@ -314,6 +337,7 @@ class Table {
 		this.rows[rowIndex][cellIndex].subCells := []
 		this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
 		
+		StopWatchTextMeasure_start := A_TickCount
 		/*
 			text width and height measuring for single and multiline text (no auto line breaks)
 		*/
@@ -334,23 +358,25 @@ class Table {
 			}
 			string := " " Trim(string) " "	; add spaces as table padding
 			
+			If (emptyLine) {
+				newValue .= "`n"
+			} Else {
+				newValue .= string "`n"
+			}		
+			
 			If (StrLen(string)) {
 				size := this.MeasureText(string, "s" this.fontSize, this.rows[rowIndex][cellIndex].font)
 				width := width > size.W ? width : size.W
 				height += size.H
 			}
-			
-			If (emptyLine) {
-				newValue .= "`n"
-			} Else {
-				newValue .= string "`n"
-			}
 		}
 		this.rows[rowIndex][cellIndex].value := newValue
 		this.rows[rowIndex][cellIndex].height := height
-		this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width		
+		this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width	
 		/*
 		*/		
+		StopWatchTextMeasure_end := A_TickCount
+		StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
 		
 		this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
 		this.rows[rowIndex][cellIndex].color := fColor
@@ -383,6 +409,7 @@ class Table {
 		this.rows[rI][cI].subCells[sCI].bgColor := bgColor
 		this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
 		
+		StopWatchTextMeasure_start := A_TickCount
 		/*
 			text width and height measuring for singleline text
 		*/
@@ -399,10 +426,26 @@ class Table {
 		}
 		/*
 		*/
+		StopWatchTextMeasure_end := A_TickCount
+		StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
 		;debugprintarray(this.rows[rI][cI].subCells[sCI])
 	}
 	
 	MeasureText(Str, FontOpts = "", FontName = "") {
+		; take results from previous calculations if the same font options (size + family) where being used
+		useSavedResults := InStr(FontOpts, "s" defaultToolTipFontSize) and FontName = defaultToolTipFont
+		saveKey := StrLen(Str)
+		
+		If (useSavedResults) {
+			If (TextMeasurements[saveKey].haskey("width")) {
+				Size := {}
+				Size.H := TextMeasurements[saveKey].height
+				Size.W := TextMeasurements[saveKey].width
+				TextMeasurements["skipped"] += 1
+				Return Size
+			}
+		}
+		
 		Static DT_FLAGS := 0x0520 ; DT_SINGLELINE = 0x20, DT_NOCLIP = 0x0100, DT_CALCRECT = 0x0400		
 		Static WM_GETFONT := 0x31
 		Size := {}
@@ -420,7 +463,15 @@ class Table {
 		Gui, Destroy
 		Size.W := NumGet(RECT,  8, "Int")
 		Size.H := NumGet(RECT, 12, "Int")
-		Return Size
+		
+		; save measurements
+		If (useSavedResults) {
+			TextMeasurements[saveKey] := {}
+			TextMeasurements[saveKey].height := Size.H
+			TextMeasurements[saveKey].width := Size.W				
+		}
+		
+		Return Size		
 	}
 }
 
