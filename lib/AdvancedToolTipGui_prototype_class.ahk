@@ -15,9 +15,7 @@
 global StopWatchStart := A_TickCount
 global StopWatchTextMeasure := 0
 
-global TextMeasurements := {}
-TextMeasurements["skipped"] := 0
-
+global measurementObj := {}
 
 item := {}
 item.name := "Gloom Bite"
@@ -44,72 +42,71 @@ Total DPS:  183.0     Q20 Total:  198.3
 /*
 	Init tooltip gui
 */
-AdvancedToolTip := new AdvancedToolTipGui()
-AdvancedToolTip.CreateGui()
+AdvTT := new AdvancedToolTipGui()
+AdvTT.CreateGui()
 
 /*
 	add tables/content to the tooltip
 */
 ;--------------
-table01 := new AdvancedToolTip.Table("t01", 9, "Consolas", "FEFEFE", false)
+table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t01", 9, "", "FEFEFE", false)
 
-table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
-table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
-
+table01.AddCell(1, 1, measurementObj, item.name, "", "", "", true, "", "")
+table01.AddCell(2, 1, measurementObj, item.basetype, "", "", "", true, "", "")
 
 ;--------------
-table02 := new AdvancedToolTip.Table("t02", 9, "Consolas", "FEFEFE", true)
+table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t02", 9, "Consolas", "FEFEFE", true)
 
-table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
-table02.AddCell(1, 2, item.lvl)
-table02.AddCell(1, 3, "", "", "", "", true, "", "")
-table02.AddCell(1, 4, "Base Level:", "", "bold", "", true, "", "")
-table02.AddCell(1, 5, item.baselvl)
+table02.AddCell(1, 1, measurementObj, "Item Level:", "", "", "", true, "", "")
+table02.AddCell(1, 2, measurementObj,  item.lvl)
+table02.AddCell(1, 3, measurementObj,  "", "", "", "", true, "", "")
+table02.AddCell(1, 4, measurementObj,  "Base Level:", "", "bold", "", true, "", "")
+table02.AddCell(1, 5, measurementObj,  item.baselvl)
 
-table02.AddCell(2, 1, "Max Sockets:", "", "", "", true, "", "")
-table02.AddCell(2, 2, item.msockets)
-table02.AddCell(2, 3, "", "", "", "", true, "", "")
-table02.AddCell(2, 4, "")
-table02.AddCell(2, 5, "")
+table02.AddCell(2, 1, measurementObj,  "Max Sockets:", "", "", "", true, "", "")
+table02.AddCell(2, 2, measurementObj,  item.msockets)
+table02.AddCell(2, 3, measurementObj,  "", "", "", "", true, "", "")
+table02.AddCell(2, 4, measurementObj,  "")
+table02.AddCell(2, 5, measurementObj,  "")
 	
-table02.AddCell(3, 1, "Ele DPS:", "", "", "", true, "", "")
-table02.AddCell(3, 2, item.dps.ele)
-table02.AddCell(3, 3, "", "", "", "", true, "", "")
-table02.AddCell(3, 4, "Chaos DPS:", "", "italic", "", true, "", "")
-table02.AddCell(3, 5, item.dps.chaos)
+table02.AddCell(3, 1, measurementObj,  "Ele DPS:", "", "", "", true, "", "")
+table02.AddCell(3, 2, measurementObj,  item.dps.ele)
+table02.AddCell(3, 3, measurementObj,  "", "", "", "", true, "", "")
+table02.AddCell(3, 4, measurementObj,  "Chaos DPS:", "", "italic", "", true, "", "")
+table02.AddCell(3, 5, measurementObj,  item.dps.chaos)
 
-table02.AddCell(4, 1, "Phys DPS:", "", "", "", true, "", "Wingdings")
-table02.AddCell(4, 2, item.dps.phys)
-table02.AddCell(4, 3, "", "", "", "", true, "", "")
-table02.AddCell(4, 4, "Q20 Phys:", "", "underline", "", true, "", "")
-table02.AddCell(4, 5, item.dps.qphys)
+table02.AddCell(4, 1, measurementObj,  "Phys DPS:", "", "", "", true, "", "Wingdings")
+table02.AddCell(4, 2, measurementObj,  item.dps.phys)
+table02.AddCell(4, 3, measurementObj,  "", "", "", "", true, "", "")
+table02.AddCell(4, 4, measurementObj,  "Q20 Phys:", "", "underline", "", true, "", "")
+table02.AddCell(4, 5, measurementObj,  item.dps.qphys)
 
-table02.AddCell(5, 1, "Total DPS:", "", "", "", true, "", "")
-table02.AddCell(5, 2, item.dps.total)
-table02.AddCell(5, 3, "", "", "", "", true, "", "")
-table02.AddCell(5, 4, "Q20 Total:", "", "strike", "", true, "", "")
-table02.AddCell(5, 5, item.dps.qtotal)
-
-;--------------
-table03 := new AdvancedToolTip.Table("t03", 9, "Consolas", "FEFEFE", true)
-
-table03.AddCell(1, 1, "Mod", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 2, "Tier/Affix", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 3, "Stuff", "", "bold", "26292d", true, "", "")
-
-table03.AddCell(2, 1, "+20 to Maximum Life", "", "", "", true, "", "")
-table03.AddCell(2, 2, "test", "", "", "", "", false, "", "")
-table03.AddSubCell(2, 2, 1, "6", "", "", "", true)
-table03.AddSubCell(2, 2, 2, "P", "center", "", "red", true, "", "", true)
-table03.AddSubCell(2, 2, 3, "S", "center", "", "blue", true, "", "", true)
-table03.AddCell(2, 3, "text", "", "", "", true, "", "")
+table02.AddCell(5, 1, measurementObj,  "Total DPS:", "", "", "", true, "", "")
+table02.AddCell(5, 2, measurementObj,  item.dps.total)
+table02.AddCell(5, 3, measurementObj,  "", "", "", "", true, "", "")
+table02.AddCell(5, 4, measurementObj,  "Q20 Total:", "", "strike", "", true, "", "")
+table02.AddCell(5, 5, measurementObj,  item.dps.qtotal)
 
 ;--------------
-table04 := new AdvancedToolTip.Table("t05", 9, "Consolas", "", false)
+table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t03", 9, "Consolas", "FEFEFE", true)
+
+table03.AddCell(1, 1, measurementObj,  "Mod", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 2, measurementObj,  "Tier/Affix", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 3, measurementObj,  "Stuff", "", "bold", "26292d", true, "", "")
+
+table03.AddCell(2, 1, measurementObj,  "+20 to Maximum Life", "", "", "", true, "", "")
+table03.AddCell(2, 2, measurementObj,  "test", "", "", "", "", false, "", "")
+table03.AddSubCell(2, 2, 1, measurementObj,  "6", "", "", "", true)
+table03.AddSubCell(2, 2, 2, measurementObj,  "P", "center", "", "red", true, "", "", true)
+table03.AddSubCell(2, 2, 3, measurementObj,  "S", "center", "", "blue", true, "", "", true)
+table03.AddCell(2, 3, measurementObj,  "text", "", "", "", true, "", "")
+
+;--------------
+table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t05", 9, "Consolas", "", false)
 
 multilineText := "Multiline Text (no auto breaks):`n`n"
 multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-table04.AddCell(1, 1, multilineText, "", "", "", true, "", "")
+table04.AddCell(1, 1, measurementObj,  multilineText, "", "", "", true, "", "")
 
 /*
 	draw tables onto the tooltip gui
@@ -122,8 +119,8 @@ table04.drawTable(5, 10)
 /*
 	size, position and show the tooltip
 */
-AdvancedToolTip.ShowToolTip()
-
+AdvTT.ShowToolTip()
+debugprintarray(measurementObj)
 Return
 
 
@@ -211,6 +208,13 @@ class AdvancedToolTipGui
 		;make window visible again
 		WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
 	}
+		
+	getF() {
+		return this.defTTFont
+	}
+	getFS() {
+		return this.defTTFontSize
+	}
 	
 	GuiAddBorder(Color, Width, pW, pH, GuiName = "", parentHwnd = "") {
 		; -------------------------------------------------------------------------------------------------------------------------------
@@ -243,22 +247,163 @@ class AdvancedToolTipGui
 	
 	/*
 		Table class
+
+		guiDefFont		: default font used by the entire tooltip gui
+		guiDefFontSize	: default font size used by the entire tooltip gui
+		assocVar		: 
+		fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
+		font			: table-wide font, if "-1" the tooltip gui default font is being used
+		color			: table-wide font color in hex or a valid name like "white"
+		grid			: show table grid/borders
 	*/
 	class Table {
-		__New(assocVar, fontSize = 9, font = "Consolas", color = "Default", grid = false) {
+		__New(guiDefFont, guiDefFontSize, assocVar, fontSize = -1, font = -1, color = "Default", grid = false) {
 			class_parent := SubStr(this.__class,1,InStr(this.__class,".",0,-1)-1)
 			
 			this.guiName := %class_parent%.guiName ":"
-		
+
 			this.assocVar := "v" assocVar
 			this.assocHwnd := "hwnd" assocVar "H"
-			this.fontSize := fontSize
-			this.font := font
+			
+			this.defaultFont := guiDefFont
+			this.defaultFontSize := guiDefFontSize			
+			this.font := (font >= 0 or StrLen(font)) ? font : this.defaultFont
+			this.fontSize := (fontSize >= 0) ? fontSize : this.defaultFontSize
 			this.fColor := color
+			
 			this.rows := []
 			this.maxColumns := 0
 			this.showGrid := grid
+		}
+		
+		/*
+			rowIndex		:
+			cellIndex		:
+			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+			value			: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor			: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+			fColor			: font color in hex or a valid name like "white"
+			font			: font family
+		*/
+		AddCell(rowIndex, cellIndex, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {
+			If (not this.rows[rowIndex]) {
+				this.rows[rowIndex] := []
+			}
+			
+			this.rows[rowIndex][cellIndex] := {}
+			this.rows[rowIndex][cellIndex].subCells := []
+			this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
+			
+			StopWatchTextMeasure_start := A_TickCount
+			/*
+				text width and height measuring for single and multiline text (no auto line breaks)
+			*/
+			newValue := ""
+			width := 0
+			height := 0
+			value := Trim(value)
+			Loop, Parse, value, `n, `r
+			{
+				string := A_LoopField			
+				StringReplace, string, string, `r,, All
+				StringReplace, string, string, `n,, All
+				
+				emptyLine := false
+				If (not StrLen(string)) {
+					string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
+					emptyLine := true				
+				}
+				string := " " Trim(string) " "	; add spaces as table padding
+				
+				If (emptyLine) {
+					newValue .= "`n"
+				} Else {
+					newValue .= string "`n"
+				}		
+				
+				If (StrLen(string)) {
+					size := this.MeasureText(string, measurementObj, "s" this.fontSize, this.rows[rowIndex][cellIndex].font)
+					width := width > size.W ? width : size.W
+					height += size.H
+				}
+			}
 
+			this.rows[rowIndex][cellIndex].value := newValue
+			this.rows[rowIndex][cellIndex].height := height
+			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width	
+			/*
+			*/		
+			StopWatchTextMeasure_end := A_TickCount
+			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
+			
+			this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
+			this.rows[rowIndex][cellIndex].color := fColor
+			this.rows[rowIndex][cellIndex].bgColor := bgColor
+			this.rows[rowIndex][cellIndex].fontOptions := fontOptions
+			this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
+			;debugprintarray(this.rows[rowIndex][cellIndex])
+		}
+		
+		/*
+			rowIndex		:
+			cellIndex		:
+			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+			value			: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor			: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+			fColor			: font color in hex or a valid name like "white"
+			font			: font family
+			noSpacing		: don't add table padding (left/right)
+		*/
+		AddSubCell(rI, cI, sCI, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
+			If (not this.rows[rI]) {
+				this.rows[rI] := []
+			}
+			
+			If (not this.rows[rI][cI].haskey("value")) {
+				this.AddCell(rI, cI)			
+			}
+			this.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
+			this.rows[rI][cI].subCells[sCI] := {}
+			this.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
+			
+			; font priority: subcell > cell > table
+			this.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : this.rows[rI][cI]
+			If (not StrLen(this.rows[rI][cI].subCells[sCI].font)) {
+				this.rows[rI][cI].subCells[sCI].font := this.font
+			}		
+			
+			this.rows[rI][cI].subCells[sCI].alignment := StrLen(alignment) ? alignment : "left"		
+			this.rows[rI][cI].subCells[sCI].color := fColor
+			this.rows[rI][cI].subCells[sCI].bgColor := bgColor
+			this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
+			
+			StopWatchTextMeasure_start := A_TickCount
+			/*
+				text width and height measuring for singleline text
+			*/
+			measuringText := noSpacing ? this.rows[rI][cI].subCells[sCI].value " " : this.rows[rI][cI].subCells[sCI].value
+			size := this.MeasureText(measuringText, measurementObj, "s" this.fontSize, this.rows[rI][cI].subCells[sCI].font)
+			this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
+			this.rows[rI][cI].subCells[sCI].height := size.H
+
+			For key, subcell in this.rows[rI][cI].subCells {
+				If (key = 1) {
+					this.rows[rI][cI].width := 0
+				}
+				this.rows[rI][cI].width += subcell.width
+			}
+			/*
+			*/
+			
+			StopWatchTextMeasure_end := A_TickCount
+			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
+			;debugprintarray(this.rows[rI][cI].subCells[sCI])
 		}
 		
 		DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {	
@@ -396,143 +541,22 @@ class AdvancedToolTipGui
 			}
 		}
 		
-		/*
-			rowIndex		:
-			cellIndex		:
-			value			: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor			: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-			fColor			: font color in hex or a valid name like "white"
-			font			: font family
-		*/
-		AddCell(rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {
-			If (not this.rows[rowIndex]) {
-				this.rows[rowIndex] := []
-			}
-			
-			this.rows[rowIndex][cellIndex] := {}
-			this.rows[rowIndex][cellIndex].subCells := []
-			this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
-			
-			StopWatchTextMeasure_start := A_TickCount
-			/*
-				text width and height measuring for single and multiline text (no auto line breaks)
-			*/
-			newValue := ""
-			width := 0
-			height := 0
-			value := Trim(value)
-			Loop, Parse, value, `n, `r
-			{
-				string := A_LoopField			
-				StringReplace, string, string, `r,, All
-				StringReplace, string, string, `n,, All
-				
-				emptyLine := false
-				If (not StrLen(string)) {
-					string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
-					emptyLine := true				
-				}
-				string := " " Trim(string) " "	; add spaces as table padding
-				
-				If (emptyLine) {
-					newValue .= "`n"
-				} Else {
-					newValue .= string "`n"
-				}		
-				
-				If (StrLen(string)) {
-					size := this.MeasureText(string, "s" this.fontSize, this.rows[rowIndex][cellIndex].font)
-					width := width > size.W ? width : size.W
-					height += size.H
-				}
-			}
-			this.rows[rowIndex][cellIndex].value := newValue
-			this.rows[rowIndex][cellIndex].height := height
-			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width	
-			/*
-			*/		
-			StopWatchTextMeasure_end := A_TickCount
-			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
-			
-			this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
-			this.rows[rowIndex][cellIndex].color := fColor
-			this.rows[rowIndex][cellIndex].bgColor := bgColor
-			this.rows[rowIndex][cellIndex].fontOptions := fontOptions
-			this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
-			;debugprintarray(this.rows[rowIndex][cellIndex])
-		}
-		
-		/*
-			rowIndex		:
-			cellIndex		:
-			value			: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor			: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-			fColor			: font color in hex or a valid name like "white"
-			font			: font family
-			noSpacing		: don't add table padding (left/right)
-		*/
-		AddSubCell(rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
-			If (not this.rows[rI]) {
-				this.rows[rI] := []
-			}
-			
-			If (not this.rows[rI][cI].haskey("value")) {
-				this.AddCell(rI, cI)			
-			}
-			this.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
-			this.rows[rI][cI].subCells[sCI] := {}
-			this.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
-			
-			; font priority: subcell > cell > table
-			this.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : this.rows[rI][cI]
-			If (not StrLen(this.rows[rI][cI].subCells[sCI].font)) {
-				this.rows[rI][cI].subCells[sCI].font := this.font
-			}		
-			
-			this.rows[rI][cI].subCells[sCI].alignment := StrLen(alignment) ? alignment : "left"		
-			this.rows[rI][cI].subCells[sCI].color := fColor
-			this.rows[rI][cI].subCells[sCI].bgColor := bgColor
-			this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
-			
-			StopWatchTextMeasure_start := A_TickCount
-			/*
-				text width and height measuring for singleline text
-			*/
-			measuringText := noSpacing ? this.rows[rI][cI].subCells[sCI].value " " : this.rows[rI][cI].subCells[sCI].value
-			size := this.MeasureText(measuringText, "s" this.fontSize, this.rows[rI][cI].subCells[sCI].font)
-			this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
-			this.rows[rI][cI].subCells[sCI].height := size.H
-
-			For key, subcell in this.rows[rI][cI].subCells {
-				If (key = 1) {
-					this.rows[rI][cI].width := 0
-				}
-				this.rows[rI][cI].width += subcell.width
-			}
-			/*
-			*/
-			StopWatchTextMeasure_end := A_TickCount
-			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
-			;debugprintarray(this.rows[rI][cI].subCells[sCI])
-		}
-		
-		MeasureText(Str, FontOpts = "", FontName = "") {
-			; take results from previous calculations if the same font options (size + family) where being used
-			useSavedResults := InStr(FontOpts, "s" defaultToolTipFontSize) and FontName = defaultToolTipFont
+		MeasureText(Str, ByRef measurementObj, FontOpts = "", FontName = "") {
+			; take results from previous calculations if the same font options (size + family) where being used			
+			useSavedResults := InStr(FontOpts, "s" this.defaultFontSize) and FontName = this.defaultFont
 			saveKey := StrLen(Str)
-			
+
 			If (useSavedResults) {
-				If (TextMeasurements[saveKey].haskey("width")) {
+				If (measurementObj[saveKey].haskey("width")) {
 					Size := {}
-					Size.H := TextMeasurements[saveKey].height
-					Size.W := TextMeasurements[saveKey].width
-					TextMeasurements["skipped"] += 1
+					Size.H := measurementObj[saveKey].height
+					Size.W := measurementObj[saveKey].width
+					
+					If (not measurementObj.haskey("skipped")) {
+						measurementObj["skipped"] := 0	
+					}
+					measurementObj["skipped"] += 1
+					
 					Return Size
 				}
 			}
@@ -557,13 +581,12 @@ class AdvancedToolTipGui
 			
 			; save measurements
 			If (useSavedResults) {
-				TextMeasurements[saveKey] := {}
-				TextMeasurements[saveKey].height := Size.H
-				TextMeasurements[saveKey].width := Size.W				
+				measurementObj[saveKey] := {}
+				measurementObj[saveKey].height := Size.H
+				measurementObj[saveKey].width := Size.W				
 			}
-			
+
 			Return Size		
 		}
-
 	}
 }
