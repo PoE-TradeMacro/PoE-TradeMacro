@@ -86,7 +86,7 @@ table03.AddCell(1, 2, "Tier/Affix", "", "", "", "26292d", "bold", true)
 table03.AddCell(1, 3, "Stuff", "", "", "", "26292d", "bold", true)
 
 table03.AddCell(2, 1, "+20 to Maximum Life", "", "", "", "", "", true)
-table03.AddCell(2, 2, "test", "", "", "", "", "", true, false)
+table03.AddCell(2, 2, "test", "", "", "", "", "", "", false)
 table03.AddSubCell(2, 2, 1, "6", "", "", "", "", "", true)
 table03.AddSubCell(2, 2, 2, "P", "center", "", "", "red", "", true, true)
 table03.AddSubCell(2, 2, 3, "S", "center", "", "", "blue", "", true, true)

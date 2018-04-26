@@ -7,16 +7,7 @@
 ;	
 ;
 ; Arguments:
-;	boSize			Border size in pixel: string or array (w, h)
-;	padding			Padding in pixel: string or array (left/right, top/bottom)
-;	w				Init window width in pixel, will get changed to actual tooltip size later
-;	h				Init window height in pixel, will get changed to actual tooltip size later
-;
-;	wColor			Array or String, possible values:
-;	bColor				"0xFFFFFFFF" or "FFFFFFFF"
-;	fColor				["0xFF", "0xFFFFFF"] or ["0xFF", "FFFFFF"]
-;						[255, "FFFFFF"] (decimal opacity value in hex base)
-;						[100, "FFFFFF", 10] (decimal opacity value, specifying the decimal base)
+
 
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
@@ -62,63 +53,63 @@ AdvancedToolTip.CreateGui()
 ;--------------
 table01 := new AdvancedToolTip.Table("t01", 9, "Consolas", "FEFEFE", false)
 
-table01.AddCell(1, 1, item.name, "", "", "", "Trans", "", true)
-table01.AddCell(2, 1, item.basetype, "", "", "", "Trans", "", true)
+table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
+table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
 
 
 ;--------------
 table02 := new AdvancedToolTip.Table("t02", 9, "Consolas", "FEFEFE", true)
 
-table02.AddCell(1, 1, "Item Level:", "", "", "", "Trans", "", true)
+table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
 table02.AddCell(1, 2, item.lvl)
-table02.AddCell(1, 3, "", "", "", "", "", "", true)
-table02.AddCell(1, 4, "Base Level:", "", "", "", "", "bold", true)
+table02.AddCell(1, 3, "", "", "", "", true, "", "")
+table02.AddCell(1, 4, "Base Level:", "", "bold", "", true, "", "")
 table02.AddCell(1, 5, item.baselvl)
 
-table02.AddCell(2, 1, "Max Sockets:", "", "", "", "", "", true)
+table02.AddCell(2, 1, "Max Sockets:", "", "", "", true, "", "")
 table02.AddCell(2, 2, item.msockets)
-table02.AddCell(2, 3, "", "", "", "", "", "", true)
+table02.AddCell(2, 3, "", "", "", "", true, "", "")
 table02.AddCell(2, 4, "")
 table02.AddCell(2, 5, "")
 	
-table02.AddCell(3, 1, "Ele DPS:", "", "", "", "", "", true)
+table02.AddCell(3, 1, "Ele DPS:", "", "", "", true, "", "")
 table02.AddCell(3, 2, item.dps.ele)
-table02.AddCell(3, 3, "", "", "", "", "", "", true)
-table02.AddCell(3, 4, "Chaos DPS:", "", "", "", "", "italic", true)
+table02.AddCell(3, 3, "", "", "", "", true, "", "")
+table02.AddCell(3, 4, "Chaos DPS:", "", "italic", "", true, "", "")
 table02.AddCell(3, 5, item.dps.chaos)
 
-table02.AddCell(4, 1, "Phys DPS:", "", "Wingdings", "", "", "", true)
+table02.AddCell(4, 1, "Phys DPS:", "", "", "", true, "", "Wingdings")
 table02.AddCell(4, 2, item.dps.phys)
-table02.AddCell(4, 3, "", "", "", "", "", "", true)
-table02.AddCell(4, 4, "Q20 Phys:", "", "", "", "", "underline", true)
+table02.AddCell(4, 3, "", "", "", "", true, "", "")
+table02.AddCell(4, 4, "Q20 Phys:", "", "underline", "", true, "", "")
 table02.AddCell(4, 5, item.dps.qphys)
 
-table02.AddCell(5, 1, "Total DPS:", "", "", "", "", "", true)
+table02.AddCell(5, 1, "Total DPS:", "", "", "", true, "", "")
 table02.AddCell(5, 2, item.dps.total)
-table02.AddCell(5, 3, "", "", "", "", "", "", true)
-table02.AddCell(5, 4, "Q20 Total:", "", "", "", "", "strike", true)
+table02.AddCell(5, 3, "", "", "", "", true, "", "")
+table02.AddCell(5, 4, "Q20 Total:", "", "strike", "", true, "", "")
 table02.AddCell(5, 5, item.dps.qtotal)
 
 ;--------------
 table03 := new AdvancedToolTip.Table("t03", 9, "Consolas", "FEFEFE", true)
 
-table03.AddCell(1, 1, "Mod", "", "", "", "26292d", "bold", true)
-table03.AddCell(1, 2, "Tier/Affix", "", "", "", "26292d", "bold", true)
-table03.AddCell(1, 3, "Stuff", "", "", "", "26292d", "bold", true)
+table03.AddCell(1, 1, "Mod", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 2, "Tier/Affix", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 3, "Stuff", "", "bold", "26292d", true, "", "")
 
-table03.AddCell(2, 1, "+20 to Maximum Life", "", "", "", "", "", true)
-table03.AddCell(2, 2, "test", "", "", "", "", "", true, false)
-table03.AddSubCell(2, 2, 1, "6", "", "", "", "", "", true)
-table03.AddSubCell(2, 2, 2, "P", "center", "", "", "red", "", true, true)
-table03.AddSubCell(2, 2, 3, "S", "center", "", "", "blue", "", true, true)
-table03.AddCell(2, 3, "text", "", "", "", "Trans", "", true)
+table03.AddCell(2, 1, "+20 to Maximum Life", "", "", "", true, "", "")
+table03.AddCell(2, 2, "test", "", "", "", "", false, "", "")
+table03.AddSubCell(2, 2, 1, "6", "", "", "", true)
+table03.AddSubCell(2, 2, 2, "P", "center", "", "red", true, "", "", true)
+table03.AddSubCell(2, 2, 3, "S", "center", "", "blue", true, "", "", true)
+table03.AddCell(2, 3, "text", "", "", "", true, "", "")
 
 ;--------------
 table04 := new AdvancedToolTip.Table("t05", 9, "Consolas", "", false)
 
 multilineText := "Multiline Text (no auto breaks):`n`n"
 multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-table04.AddCell(1, 1, multilineText, "", "", "", "", "", true)
+table04.AddCell(1, 1, multilineText, "", "", "", true, "", "")
 
 /*
 	draw tables onto the tooltip gui
@@ -144,7 +135,7 @@ class AdvancedToolTipGui
 	static guiName := "TT"
 
 	__New(params*)
-	{		
+	{
 		c := params.MaxIndex()
 		If (c > 9) {
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
@@ -162,15 +153,14 @@ class AdvancedToolTipGui
 		this.yPos				:= (params[9] = "" or not params[9]) ? 0 : params[9]
 		this.guiMargin			:= borderWidth + 5
 
-		this.parentWindow :=
-
+		this.parentWindow := 
 	}
 	
 	CreateGui()
 	{
 		GuiMargin := this.guiMargin
 		GuiName := this.guiName
-		
+
 		Gui, %GuiName%:New, +AlwaysOnTop +ToolWindow +hwndTTHWnd
 		Gui, %GuiName%:Margin, %GuiMargin%, %GuiMargin%
 		
@@ -258,7 +248,8 @@ class AdvancedToolTipGui
 		__New(assocVar, fontSize = 9, font = "Consolas", color = "Default", grid = false) {
 			class_parent := SubStr(this.__class,1,InStr(this.__class,".",0,-1)-1)
 			
-			this.guiName := %class_parent%.guiName ":"			
+			this.guiName := %class_parent%.guiName ":"
+		
 			this.assocVar := "v" assocVar
 			this.assocHwnd := "hwnd" assocVar "H"
 			this.fontSize := fontSize
@@ -267,12 +258,10 @@ class AdvancedToolTipGui
 			this.rows := []
 			this.maxColumns := 0
 			this.showGrid := grid
-			
 
-			
 		}
 		
-		DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {
+		DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {	
 			columnWidths := []		
 			rowHeights := []		
 			Loop, % this.maxColumns {
@@ -407,7 +396,18 @@ class AdvancedToolTipGui
 			}
 		}
 		
-		AddCell(rowIndex, cellIndex, value, alignment = "left", font = "", fColor = "", bgColor = "Trans", fontOptions = "", isSpacingCell = false) {
+		/*
+			rowIndex		:
+			cellIndex		:
+			value			: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor			: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+			fColor			: font color in hex or a valid name like "white"
+			font			: font family
+		*/
+		AddCell(rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {
 			If (not this.rows[rowIndex]) {
 				this.rows[rowIndex] := []
 			}
@@ -465,7 +465,19 @@ class AdvancedToolTipGui
 			;debugprintarray(this.rows[rowIndex][cellIndex])
 		}
 		
-		AddSubCell(rI, cI, sCI, value, alignment = "left", font = "", fColor = "", bgColor = "Trans", fontOptions = "", isSpacingCell = false, noSpacing = false) {
+		/*
+			rowIndex		:
+			cellIndex		:
+			value			: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor			: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+			fColor			: font color in hex or a valid name like "white"
+			font			: font family
+			noSpacing		: don't add table padding (left/right)
+		*/
+		AddSubCell(rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
 			If (not this.rows[rI]) {
 				this.rows[rI] := []
 			}
@@ -552,5 +564,6 @@ class AdvancedToolTipGui
 			
 			Return Size		
 		}
+
 	}
 }
