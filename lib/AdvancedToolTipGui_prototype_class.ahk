@@ -119,8 +119,8 @@ table04.drawTable(5, 10)
 /*
 	size, position and show the tooltip
 */
-AdvTT.ShowToolTip()
-debugprintarray(measurementObj)
+AdvTT.ShowToolTip(1000, 100)
+
 Return
 
 
@@ -197,9 +197,38 @@ class AdvancedToolTipGui
 		; add a border to the window, has to be done after auto-resizing the window
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 		this.GuiAddBorder(this.borderColor, this.borderWidth, TTW, TTH, GuiName, TTHWnd)
+		this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
 	}
 	
-	ShowToolTip() {		
+	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {		
+		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
+		
+		xOffset := A_ScreenWidth - (TTX + TTW)
+		If (xOffset < 0) {
+			nTTX := TTX + xOffset
+		}
+		If (TTX < 0) {
+			nTTX := 0
+		}
+		
+		yOffset := A_ScreenHeight - (TTY + TTH)
+		If (yOffset < 0) {
+			nTTY := TTY + yOffset
+		}		
+		If (TTY < 0) {
+			nTTY := 0
+		}
+		
+		If (nTTX != TTX or nTTY != TTY) {
+			WinMove, ahk_id %TTHwnd%, , nTTX, nTTY
+			this.xPos := nTTX
+			this.yPos := nTTY
+		}		
+	}
+	
+	ShowToolTip(x = 0, y = 0) {
+		this.xPos := x
+		this.yPos := y
 		Opacity := this.opacity
 		TTHwnd := this.parentWindow
 		
