@@ -120,6 +120,8 @@ table04.drawTable(5, 10)
 	size, position and show the tooltip
 */
 AdvTT.ShowToolTip(1000, 100)
+toolTipHandle := AdvTT.parentWindow
+
 
 Return
 
@@ -129,7 +131,7 @@ ExitApp
 
 class AdvancedToolTipGui
 {
-	static guiName := "TT"
+	static guiName := "AdvancedToolTipGuiWindow"
 
 	__New(params*)
 	{
@@ -145,10 +147,9 @@ class AdvancedToolTipGui
 		this.opacity			:= (params[4] = "" or not params[4]) ? 200 : params[4]
 		this.defTTFont			:= (params[5] = "" or not params[4]) ? "Consolas" : params[5]
 		this.defTTFontSize		:= (params[6] = "" or not params[4]) ? 9 : params[6]
-		this.toolTipTimeout		:= (params[7] = "" or not params[4]) ? 1000 : params[7]
 		this.xPos				:= (params[8] = "" or not params[8]) ? 0 : params[8]
 		this.yPos				:= (params[9] = "" or not params[9]) ? 0 : params[9]
-		this.guiMargin			:= borderWidth + 5
+		this.guiMargin			:= this.borderWidth + 5
 
 		this.parentWindow := 
 	}
@@ -169,7 +170,7 @@ class AdvancedToolTipGui
 		; make window invisible
 		WinSet, Transparent, 0, ahk_id %TTHWnd%
 		; "maximize" option or "WinMaximize" don't work because they activate/focus the window.
-		Gui, TT:Show, AutoSize NoActivate, CustomTooltip
+		Gui, %GuiName%:Show, AutoSize NoActivate, CustomTooltip
 
 		; maximize window using PostMessage / WinMove
 		;PostMessage, 0x112, 0xF030,,, ahk_id %TTHWnd%
@@ -202,6 +203,8 @@ class AdvancedToolTipGui
 	
 	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {		
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
+		nTTX := TTX
+		nTTY := TTY
 		
 		xOffset := A_ScreenWidth - (TTX + TTW)
 		If (xOffset < 0) {
@@ -217,13 +220,16 @@ class AdvancedToolTipGui
 		}		
 		If (TTY < 0) {
 			nTTY := 0
-		}
+		}		
 		
-		If (nTTX != TTX or nTTY != TTY) {
-			WinMove, ahk_id %TTHwnd%, , nTTX, nTTY
+		If (nTTX != TTX or nTTY != TTY) {			
 			this.xPos := nTTX
 			this.yPos := nTTY
-		}		
+			WinMove, ahk_id %TTHwnd%, , nTTX, nTTY
+		} Else {
+			this.xPos := TTX
+			this.yPos := TTY
+		}
 	}
 	
 	ShowToolTip(x = 0, y = 0) {
