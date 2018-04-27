@@ -4,16 +4,9 @@
 ;
 ; Class Function:
 ;	Advanced ToolTip for table-like contents using a GUI.
-;	
-;
-; Arguments:
-
 
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
-
-global StopWatchStart := A_TickCount
-global StopWatchTextMeasure := 0
 
 global measurementObj := {}
 
@@ -32,15 +25,7 @@ item.dps.qphys := 162.3
 item.dps.qtotal := 198.3
 
 /*
-Item Level:    61     Base Level:    51
-Max Sockets:    3
-Ele DPS:     36.0     Chaos DPS:    0.0
-Phys DPS:   147.0     Q20 Phys:   162.3
-Total DPS:  183.0     Q20 Total:  198.3
-*/
-
-/*
-	Init tooltip gui
+	init tooltip gui
 */
 AdvTT := new AdvancedToolTipGui()
 AdvTT.CreateGui()
@@ -48,14 +33,14 @@ AdvTT.CreateGui()
 /*
 	add tables/content to the tooltip
 */
-;--------------
-table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t01", 9, "", "FEFEFE", false)
+;-------------- table 01 ------------------------------------------------------------
+table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "", "FEFEFE", false)
 
 table01.AddCell(1, 1, measurementObj, item.name, "", "", "", true, "", "")
 table01.AddCell(2, 1, measurementObj, item.basetype, "", "", "", true, "", "")
 
-;--------------
-table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t02", 9, "Consolas", "FEFEFE", true)
+;-------------- table 02 ------------------------------------------------------------
+table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "FEFEFE", true)
 
 table02.AddCell(1, 1, measurementObj, "Item Level:", "", "", "", true, "", "")
 table02.AddCell(1, 2, measurementObj,  item.lvl)
@@ -87,8 +72,8 @@ table02.AddCell(5, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(5, 4, measurementObj,  "Q20 Total:", "", "strike", "", true, "", "")
 table02.AddCell(5, 5, measurementObj,  item.dps.qtotal)
 
-;--------------
-table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t03", 9, "Consolas", "FEFEFE", true)
+;-------------- table 03 ------------------------------------------------------------
+table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "FEFEFE", true)
 
 table03.AddCell(1, 1, measurementObj,  "Mod", "", "bold", "26292d", true, "", "")
 table03.AddCell(1, 2, measurementObj,  "Tier/Affix", "", "bold", "26292d", true, "", "")
@@ -101,30 +86,71 @@ table03.AddSubCell(2, 2, 2, measurementObj,  "P", "center", "", "red", true, "",
 table03.AddSubCell(2, 2, 3, measurementObj,  "S", "center", "", "blue", true, "", "", true)
 table03.AddCell(2, 3, measurementObj,  "text", "", "", "", true, "", "")
 
-;--------------
-table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), "t05", 9, "Consolas", "", false)
+;-------------- table 04 ------------------------------------------------------------
+table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "", false)
 
 multilineText := "Multiline Text (no auto breaks):`n`n"
 multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
 table04.AddCell(1, 1, measurementObj,  multilineText, "", "", "", true, "", "")
 
 /*
-	draw tables onto the tooltip gui
+	(optional) add all tables to an array to handle table drawing via loops, instead of simply calling
+	".drawTable()" for every single table.
 */
-table01.drawTable()
-table02.drawTable()
-table03.drawTable(5, 10)
-table04.drawTable(5, 10)
+tooltipContents := []
+tooltipContents.push({"table": table01, "drawTableParams" : []})
+tooltipContents.push({"table": table02, "drawTableParams" : []})
+tooltipContents.push({"table": table03, "drawTableParams" : [5, 10]})
+tooltipContents.push({"table": table04, "drawTableParams" : [5, 10]})
 
 /*
-	size, position and show the tooltip
+	draw tables onto the tooltip gui, function not part of this class
+*/
+drawAllToolTipTables(tooltipContents)
+
+; alternative:
+; table01.drawTable()
+; table02.drawTable()
+; table03.drawTable(5, 10)
+; table04.drawTable(5, 10)
+
+/*
+	auto-size, position and show the tooltip
 */
 AdvTT.ShowToolTip(1000, 100)
-toolTipHandle := AdvTT.parentWindow
+toolTipWindowHandle := AdvTT.getHwnd()
 
 
 Return
 
+drawAllToolTipTables(tooltipContents) {
+	For key, val in tooltipContents {
+		p := val.drawTableParams
+		
+		If (key = 1) {
+			If (not p[2]) {
+				p[2] := 5
+				p[1] := p[1] ? p[1] : 5
+			}
+		}
+		
+		If (p.length() = 0) {
+			val.table.drawTable()
+		}
+		Else If (p.length() = 1) {
+			val.table.drawTable(p[1])
+		} 
+		Else If (p.length() = 2) {
+			val.table.drawTable(p[1], p[2])
+		}
+		Else If (p.length() = 3) {
+			val.table.drawTable(p[1], p[2], p[3])
+		}
+		Else If (p.length() = 4) {
+			val.table.drawTable(p[1], p[2], p[3], p[4])
+		}
+	}
+}
 
 GuiClose:
 ExitApp
@@ -250,6 +276,9 @@ class AdvancedToolTipGui
 	getFS() {
 		return this.defTTFontSize
 	}
+	getHwnd() {
+		return this.parentWindow
+	}
 	
 	GuiAddBorder(Color, Width, pW, pH, GuiName = "", parentHwnd = "") {
 		; -------------------------------------------------------------------------------------------------------------------------------
@@ -279,20 +308,20 @@ class AdvancedToolTipGui
 			WinExist(LFW)
 	}
 	
-	
-	/*
-		Table class
-
-		guiDefFont		: default font used by the entire tooltip gui
-		guiDefFontSize	: default font size used by the entire tooltip gui
-		assocVar		: 
-		fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
-		font			: table-wide font, if "-1" the tooltip gui default font is being used
-		color			: table-wide font color in hex or a valid name like "white"
-		grid			: show table grid/borders
-	*/
 	class Table {
-		__New(guiDefFont, guiDefFontSize, assocVar, fontSize = -1, font = -1, color = "Default", grid = false) {
+		/*
+			Table class
+
+			guiDefFont		: default font used by the entire tooltip gui
+			guiDefFontSize	: default font size used by the entire tooltip gui
+			fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
+			font			: table-wide font, if "-1" the tooltip gui default font is being used
+			color			: table-wide font color in hex or a valid name like "white"
+			grid			: show table grid/borders
+			assocVar		: 
+		*/
+		
+		__New(guiDefFont, guiDefFontSize, fontSize = -1, font = -1, color = "Default", grid = false, assocVar = "") {
 			class_parent := SubStr(this.__class,1,InStr(this.__class,".",0,-1)-1)
 			
 			this.guiName := %class_parent%.guiName ":"
@@ -301,7 +330,7 @@ class AdvancedToolTipGui
 			this.assocHwnd := "hwnd" assocVar "H"
 			
 			this.defaultFont := guiDefFont
-			this.defaultFontSize := guiDefFontSize			
+			this.defaultFontSize := guiDefFontSize		
 			this.font := (font >= 0 or StrLen(font)) ? font : this.defaultFont
 			this.fontSize := (fontSize >= 0) ? fontSize : this.defaultFontSize
 			this.fColor := color
@@ -310,20 +339,21 @@ class AdvancedToolTipGui
 			this.maxColumns := 0
 			this.showGrid := grid
 		}
-		
-		/*
-			rowIndex		:
-			cellIndex		:
-			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-			value			: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor			: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-			fColor			: font color in hex or a valid name like "white"
-			font			: font family
-		*/
-		AddCell(rowIndex, cellIndex, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {
+
+		AddCell(rowIndex, cellIndex, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
+			/*
+				rowIndex		:
+				cellIndex		:
+				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+				value			: cell contents
+				alignment		: horizontal text-alignment (left, right, center)
+				fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+				bgColor			: background color in hex or a valid name like "red"
+				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+				fColor			: font color in hex or a valid name like "white"
+				font			: font family
+			*/
+			
 			If (not this.rows[rowIndex]) {
 				this.rows[rowIndex] := []
 			}
@@ -332,7 +362,12 @@ class AdvancedToolTipGui
 			this.rows[rowIndex][cellIndex].subCells := []
 			this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
 			
-			StopWatchTextMeasure_start := A_TickCount
+			this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
+			this.rows[rowIndex][cellIndex].color := fColor
+			this.rows[rowIndex][cellIndex].bgColor := bgColor
+			this.rows[rowIndex][cellIndex].fontOptions := fontOptions
+			this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
+			
 			/*
 				text width and height measuring for single and multiline text (no auto line breaks)
 			*/
@@ -368,34 +403,24 @@ class AdvancedToolTipGui
 
 			this.rows[rowIndex][cellIndex].value := newValue
 			this.rows[rowIndex][cellIndex].height := height
-			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width	
-			/*
-			*/		
-			StopWatchTextMeasure_end := A_TickCount
-			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
-			
-			this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
-			this.rows[rowIndex][cellIndex].color := fColor
-			this.rows[rowIndex][cellIndex].bgColor := bgColor
-			this.rows[rowIndex][cellIndex].fontOptions := fontOptions
-			this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
-			;debugprintarray(this.rows[rowIndex][cellIndex])
+			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width
 		}
 		
-		/*
-			rowIndex		:
-			cellIndex		:
-			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-			value			: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor			: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-			fColor			: font color in hex or a valid name like "white"
-			font			: font family
-			noSpacing		: don't add table padding (left/right)
-		*/
 		AddSubCell(rI, cI, sCI, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
+			/*
+				rowIndex		:
+				cellIndex		:
+				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+				value			: cell contents
+				alignment		: horizontal text-alignment (left, right, center)
+				fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
+				bgColor			: background color in hex or a valid name like "red"
+				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+				fColor			: font color in hex or a valid name like "white"
+				font			: font family
+				noSpacing		: don't add table padding (left/right)
+			*/
+			
 			If (not this.rows[rI]) {
 				this.rows[rI] := []
 			}
@@ -417,8 +442,7 @@ class AdvancedToolTipGui
 			this.rows[rI][cI].subCells[sCI].color := fColor
 			this.rows[rI][cI].subCells[sCI].bgColor := bgColor
 			this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
-			
-			StopWatchTextMeasure_start := A_TickCount
+
 			/*
 				text width and height measuring for singleline text
 			*/
@@ -433,15 +457,16 @@ class AdvancedToolTipGui
 				}
 				this.rows[rI][cI].width += subcell.width
 			}
-			/*
-			*/
-			
-			StopWatchTextMeasure_end := A_TickCount
-			StopWatchTextMeasure += StopWatchTextMeasure_end - StopWatchTextMeasure_start
-			;debugprintarray(this.rows[rI][cI].subCells[sCI])
 		}
 		
 		DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {	
+			/*
+				guiMargin	: left and right table margins
+				topMargin	: top table margin
+				tableXPos	: table x coordinate origin, don't use for relative positioning
+				tableYPos	: table y coordinate origin, don't use for relative positioning
+			*/
+			
 			columnWidths := []		
 			rowHeights := []		
 			Loop, % this.maxColumns {
@@ -465,13 +490,18 @@ class AdvancedToolTipGui
 			guiFontOptions .= StrLen(this.fColor) ? " c" this.fColor : ""
 			Gui, %guiName%Font, %guiFontOptions%, % this.font 
 			
-			shiftY := 0		
-			tableXPos := not StrLen(tableXPos) ? "x" guiMargin : tableXPos
+			shiftY := 0
+			If (not StrLen(tableXPos)) {
+				If (this.showGrid) {
+					tableXPos := "x" guiMargin + 5
+				} Else {
+					tableXPos := "x" guiMargin 
+				}
+			}
 			tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
 			
 			For key, row in this.rows {
 				height := rowHeights[key] + Round((this.fontSize / 3))
-				shiftY += height - 1
 				shiftY := height - 1
 				
 				For k, cell in row {
@@ -482,6 +512,20 @@ class AdvancedToolTipGui
 		}
 		
 		DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
+			/*
+				cell			: cell object
+				guiName			: name of the tooltip gui
+				k				: cell index
+				key				: row index
+				guiFontOptions	: font options like font, size, style and color
+				tableXPos		: table x coordinate origin
+				tableYPos		: table y coordinate origin
+				shiftY			: cell y shift (used to overlap cell borders, creating a 1px border)
+				width			: cell width in px
+				height			: cell height in px
+				recurse			: cells use this option to recursively draw subcells
+			*/
+			
 			addedBackground := false
 			
 			; loop to overlay an empty cell over all subcells (easier positioning of the following column in the row)
@@ -577,6 +621,13 @@ class AdvancedToolTipGui
 		}
 		
 		MeasureText(Str, ByRef measurementObj, FontOpts = "", FontName = "") {
+			/*
+				Str				: input string
+				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+				FontOpts		: font options like font size
+				FontName		: font type/family
+			*/
+			
 			; take results from previous calculations if the same font options (size + family) where being used			
 			useSavedResults := InStr(FontOpts, "s" this.defaultFontSize) and FontName = this.defaultFont
 			saveKey := StrLen(Str)
