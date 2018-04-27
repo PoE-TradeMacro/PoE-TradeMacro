@@ -1,6 +1,6 @@
 ; AutoHotkey
 ; Language:       	English 
-; Authors:			Eruyome |	https://github.com/eruyome
+; Authors:		Eruyome |	https://github.com/eruyome
 ;
 ; Class Function:
 ;	Advanced ToolTip for table-like contents using a GUI.
@@ -116,10 +116,9 @@ drawAllToolTipTables(tooltipContents)
 
 /*
 	auto-size, position and show the tooltip
+	(or set absolute position)
 */
 AdvTT.ShowToolTip(1000, 100)
-toolTipWindowHandle := AdvTT.getHwnd()
-
 
 Return
 
@@ -184,7 +183,7 @@ class AdvancedToolTipGui
 		this.parentWindow		:= 
 		this.startMouseXPos		:=
 		this.startMouseYPos		:=
-		this.timer				:= ObjBindMethod(this, "destroyToolTip")
+		this.timer			:= ObjBindMethod(this, "destroyToolTip")
 		this.toolTipTimeout		:= 0
 	}
 	
@@ -353,11 +352,11 @@ class AdvancedToolTipGui
 		/*
 			Table class
 
-			guiDefFont		: default font used by the entire tooltip gui
+			guiDefFont	: default font used by the entire tooltip gui
 			guiDefFontSize	: default font size used by the entire tooltip gui
 			fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
 			font			: table-wide font, if "-1" the tooltip gui default font is being used
-			color			: table-wide font color in hex or a valid name like "white"
+			color		: table-wide font color in hex or a valid name like "white"
 			grid			: show table grid/borders
 			assocVar		: 
 		*/
@@ -386,12 +385,12 @@ class AdvancedToolTipGui
 				rowIndex		:
 				cellIndex		:
 				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-				value			: cell contents
+				value		: cell contents
 				alignment		: horizontal text-alignment (left, right, center)
-				fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-				bgColor			: background color in hex or a valid name like "red"
+				fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+				bgColor		: background color in hex or a valid name like "red"
 				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-				fColor			: font color in hex or a valid name like "white"
+				fColor		: font color in hex or a valid name like "white"
 				font			: font family
 			*/
 			
@@ -452,12 +451,12 @@ class AdvancedToolTipGui
 				rowIndex		:
 				cellIndex		:
 				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-				value			: cell contents
+				value		: cell contents
 				alignment		: horizontal text-alignment (left, right, center)
-				fontOptions		: additional options like "bold", "italic", "strikethrough", "underline"
-				bgColor			: background color in hex or a valid name like "red"
+				fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+				bgColor		: background color in hex or a valid name like "red"
 				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-				fColor			: font color in hex or a valid name like "white"
+				fColor		: font color in hex or a valid name like "white"
 				font			: font family
 				noSpacing		: don't add table padding (left/right)
 			*/
@@ -555,16 +554,16 @@ class AdvancedToolTipGui
 		DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
 			/*
 				cell			: cell object
-				guiName			: name of the tooltip gui
-				k				: cell index
-				key				: row index
+				guiName		: name of the tooltip gui
+				k			: cell index
+				key			: row index
 				guiFontOptions	: font options like font, size, style and color
 				tableXPos		: table x coordinate origin
 				tableYPos		: table y coordinate origin
-				shiftY			: cell y shift (used to overlap cell borders, creating a 1px border)
-				width			: cell width in px
-				height			: cell height in px
-				recurse			: cells use this option to recursively draw subcells
+				shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
+				width		: cell width in px
+				height		: cell height in px
+				recurse		: cells use this option to recursively draw subcells
 			*/
 			
 			addedBackground := false
@@ -663,7 +662,7 @@ class AdvancedToolTipGui
 		
 		MeasureText(Str, ByRef measurementObj, FontOpts = "", FontName = "") {
 			/*
-				Str				: input string
+				Str			: input string
 				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
 				FontOpts		: font options like font size
 				FontName		: font type/family
