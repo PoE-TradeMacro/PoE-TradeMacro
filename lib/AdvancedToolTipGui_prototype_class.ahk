@@ -162,7 +162,7 @@ class AdvancedToolTipGui
 	__New(params*)
 	{
 		c := params.MaxIndex()
-		If (c > 9) {
+		If (c > 12) {
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
 		}
 		
@@ -173,16 +173,19 @@ class AdvancedToolTipGui
 		this.opacity			:= (params[4] = "" or not params[4]) ? 200 : params[4]
 		this.defTTFont			:= (params[5] = "" or not params[5]) ? "Consolas" : params[5]
 		this.defTTFontSize		:= (params[6] = "" or not params[6]) ? 9 : params[6]
-		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 500 : params[7]
+		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 1000 : params[7]
 		this.mouseMoveThreshold	:= (params[8] = "" or not params[8]) ? 50 : params[8]
-		this.xPos				:= (params[9] = "" or not params[9]) ? 0 : params[9]
-		this.yPos				:= (params[10] = "" or not params[10]) ? 0 : params[10]
+		this.useToolTipTimeout	:= (params[9] = "" or not params[9]) ? false : params[9]
+		this.toolTipTimeoutSec	:= (params[10] = "" or not params[10]) ? 15 : params[10]
+		this.xPos				:= (params[11] = "" or not params[11]) ? 0 : params[11]
+		this.yPos				:= (params[12] = "" or not params[12]) ? 0 : params[12]
 		
 		this.guiMargin			:= this.borderWidth + 5
 		this.parentWindow		:= 
 		this.startMouseXPos		:=
 		this.startMouseYPos		:=
 		this.timer				:= ObjBindMethod(this, "destroyToolTip")
+		this.toolTipTimeout		:= 0
 	}
 	
 	CreateGui()
@@ -283,20 +286,28 @@ class AdvancedToolTipGui
 
 	startTimer() {
 		timer := this.timer
+		this.toolTipTimeout := 0
 		SetTimer % timer, % this.timeoutInterval
 	}
+	/*
 	stopTimer() {
 		timer := this.timer
 		SetTimer % timer, Off
 	}
-	destroyToolTip() {
+	*/
+	destroyToolTip(instantly = false) {
 		GuiName := this.guiName
+		timer := this.timer		
+		this.toolTipTimeout += (this.timeoutInterval / 1000)
 		
-		MouseGetPos, CurrX, CurrY
-		MouseMoved := (CurrX - this.startMouseXPos) ** 2 + (CurrY - this.startMouseYPos) ** 2 > this.mouseMoveThreshold ** 2
-		If (MouseMoved)	{	
+		If (not instantly) {
+			MouseGetPos, CurrX, CurrY
+			MouseMoved := (CurrX - this.startMouseXPos) ** 2 + (CurrY - this.startMouseYPos) ** 2 > this.mouseMoveThreshold ** 2
+		}
+		
+		If (instantly or MouseMoved or (this.useToolTipTimeout and (this.tooltipTimeout >= this.toolTipTimeoutSec))) {	
 			Gui, %GuiName%:Destroy
-			this.StopTimer()
+			SetTimer % timer, Off
 		}
 	}
 		
