@@ -196,12 +196,13 @@ class AdvancedToolTipGui
 		Gui, %GuiName%:Margin, %GuiMargin%, %GuiMargin%
 		
 		Gui, %GuiName%:Color, 000000
-		; maximize the window before removing the borders/title bar etc
-		; otherwise there will be some remnants visible that aren't really part of the gui
 
 		DetectHiddenWindows, On
 		; make window invisible
 		WinSet, Transparent, 0, ahk_id %TTHWnd%
+		
+		; maximize the window before removing the borders/title bar etc
+		; otherwise there will be some remnants visible that aren't really part of the gui
 		; "maximize" option or "WinMaximize" don't work because they activate/focus the window.
 		Gui, %GuiName%:Show, AutoSize NoActivate, CustomTooltip
 
