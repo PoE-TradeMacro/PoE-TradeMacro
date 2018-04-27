@@ -171,13 +171,18 @@ class AdvancedToolTipGui
 		this.backgroundColor	:= (params[2] = "" or not params[2]) ? "000000" : params[2]
 		this.borderWidth		:= (params[3] = "" or not params[3]) ? 2 : params[3]
 		this.opacity			:= (params[4] = "" or not params[4]) ? 200 : params[4]
-		this.defTTFont			:= (params[5] = "" or not params[4]) ? "Consolas" : params[5]
-		this.defTTFontSize		:= (params[6] = "" or not params[4]) ? 9 : params[6]
-		this.xPos				:= (params[8] = "" or not params[8]) ? 0 : params[8]
-		this.yPos				:= (params[9] = "" or not params[9]) ? 0 : params[9]
+		this.defTTFont			:= (params[5] = "" or not params[5]) ? "Consolas" : params[5]
+		this.defTTFontSize		:= (params[6] = "" or not params[6]) ? 9 : params[6]
+		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 500 : params[7]
+		this.mouseMoveThreshold	:= (params[8] = "" or not params[8]) ? 50 : params[8]
+		this.xPos				:= (params[9] = "" or not params[9]) ? 0 : params[9]
+		this.yPos				:= (params[10] = "" or not params[10]) ? 0 : params[10]
+		
 		this.guiMargin			:= this.borderWidth + 5
-
-		this.parentWindow := 
+		this.parentWindow		:= 
+		this.startMouseXPos		:=
+		this.startMouseYPos		:=
+		this.timer				:= ObjBindMethod(this, "destroyToolTip")
 	}
 	
 	CreateGui()
@@ -266,8 +271,33 @@ class AdvancedToolTipGui
 		
 		this.SetToolTipSizeAndPosition()
 		
-		;make window visible again
+		; make window visible again
 		WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
+		
+		; set tooltip timeout/timer
+		MouseGetPos, startMouseXPos, startMouseYPos
+		this.startMouseXPos := startMouseXPos
+		this.startMouseYPos := startMouseYPos
+		this.startTimer()
+	}
+
+	startTimer() {
+		timer := this.timer
+		SetTimer % timer, % this.timeoutInterval
+	}
+	stopTimer() {
+		timer := this.timer
+		SetTimer % timer, Off
+	}
+	destroyToolTip() {
+		GuiName := this.guiName
+		
+		MouseGetPos, CurrX, CurrY
+		MouseMoved := (CurrX - this.startMouseXPos) ** 2 + (CurrY - this.startMouseYPos) ** 2 > this.mouseMoveThreshold ** 2
+		If (MouseMoved)	{	
+			Gui, %GuiName%:Destroy
+			this.StopTimer()
+		}
 	}
 		
 	getF() {
