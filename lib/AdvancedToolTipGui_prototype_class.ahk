@@ -27,53 +27,53 @@ item.dps.qtotal := 198.3
 /*
 	init tooltip gui
 */
-AdvTT := new AdvancedToolTipGui()
+AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
 AdvTT.CreateGui()
 
 /*
 	add tables/content to the tooltip
 */
 ;-------------- table 01 ------------------------------------------------------------
-table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "", "FEFEFE", false)
+table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", false)
 
 table01.AddCell(1, 1, measurementObj, item.name, "", "", "", true, "", "")
 table01.AddCell(2, 1, measurementObj, item.basetype, "", "", "", true, "", "")
 
 ;-------------- table 02 ------------------------------------------------------------
-table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "FEFEFE", true)
+table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
 table02.AddCell(1, 1, measurementObj, "Item Level:", "", "", "", true, "", "")
-table02.AddCell(1, 2, measurementObj,  item.lvl)
+table02.AddCell(1, 2, measurementObj,  item.lvl, "right", "", "", true, "", "")
 table02.AddCell(1, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(1, 4, measurementObj,  "Base Level:", "", "bold", "", true, "", "")
-table02.AddCell(1, 5, measurementObj,  item.baselvl)
+table02.AddCell(1, 5, measurementObj,  item.baselvl, "right", "", "", true, "", "")
 
 table02.AddCell(2, 1, measurementObj,  "Max Sockets:", "", "", "", true, "", "")
-table02.AddCell(2, 2, measurementObj,  item.msockets)
+table02.AddCell(2, 2, measurementObj,  item.msockets, "right", "", "", true, "", "")
 table02.AddCell(2, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(2, 4, measurementObj,  "")
 table02.AddCell(2, 5, measurementObj,  "")
 	
 table02.AddCell(3, 1, measurementObj,  "Ele DPS:", "", "", "", true, "", "")
-table02.AddCell(3, 2, measurementObj,  item.dps.ele)
+table02.AddCell(3, 2, measurementObj,  item.dps.ele, "right", "", "", true, "", "")
 table02.AddCell(3, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(3, 4, measurementObj,  "Chaos DPS:", "", "italic", "", true, "", "")
-table02.AddCell(3, 5, measurementObj,  item.dps.chaos)
+table02.AddCell(3, 5, measurementObj,  item.dps.chaos, "right", "", "", true, "", "")
 
-table02.AddCell(4, 1, measurementObj,  "Phys DPS:", "", "", "", true, "", "Wingdings")
-table02.AddCell(4, 2, measurementObj,  item.dps.phys)
+table02.AddCell(4, 1, measurementObj,  "Phys DPS:", "", "", "", true, "", "Consolas")
+table02.AddCell(4, 2, measurementObj,  item.dps.phys, "right", "", "", true, "", "")
 table02.AddCell(4, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(4, 4, measurementObj,  "Q20 Phys:", "", "underline", "", true, "", "")
-table02.AddCell(4, 5, measurementObj,  item.dps.qphys)
+table02.AddCell(4, 5, measurementObj,  item.dps.qphys, "right", "", "", true, "", "")
 
 table02.AddCell(5, 1, measurementObj,  "Total DPS:", "", "", "", true, "", "")
-table02.AddCell(5, 2, measurementObj,  item.dps.total)
+table02.AddCell(5, 2, measurementObj,  item.dps.total, "right", "", "", true, "", "")
 table02.AddCell(5, 3, measurementObj,  "", "", "", "", true, "", "")
 table02.AddCell(5, 4, measurementObj,  "Q20 Total:", "", "strike", "", true, "", "")
-table02.AddCell(5, 5, measurementObj,  item.dps.qtotal)
+table02.AddCell(5, 5, measurementObj,  item.dps.qtotal, "right", "", "", true, "", "")
 
 ;-------------- table 03 ------------------------------------------------------------
-table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "FEFEFE", true)
+table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
 table03.AddCell(1, 1, measurementObj,  "Mod", "", "bold", "26292d", true, "", "")
 table03.AddCell(1, 2, measurementObj,  "Tier/Affix", "", "bold", "26292d", true, "", "")
@@ -87,7 +87,7 @@ table03.AddSubCell(2, 2, 3, measurementObj,  "S", "center", "", "blue", true, ""
 table03.AddCell(2, 3, measurementObj,  "text", "", "", "", true, "", "")
 
 ;-------------- table 04 ------------------------------------------------------------
-table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), 9, "Consolas", "", false)
+table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "", false)
 
 multilineText := "Multiline Text (no auto breaks):`n`n"
 multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
@@ -390,7 +390,7 @@ class AdvancedToolTipGui
 				alignment		: horizontal text-alignment (left, right, center)
 				fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
 				bgColor		: background color in hex or a valid name like "red"
-				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+				isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
 				fColor		: font color in hex or a valid name like "white"
 				font			: font family
 			*/
@@ -436,7 +436,7 @@ class AdvancedToolTipGui
 				}		
 				
 				If (StrLen(string)) {
-					size := this.MeasureText(string, measurementObj, "s" this.fontSize, this.rows[rowIndex][cellIndex].font)
+					size := this.Font_DrawText(string, "", "s" this.fontSize ", " this.rows[rowIndex][cellIndex].font, "CALCRECT SINGLELINE NOCLIP")
 					width := width > size.W ? width : size.W
 					height += size.H
 				}
@@ -444,7 +444,7 @@ class AdvancedToolTipGui
 
 			this.rows[rowIndex][cellIndex].value := newValue
 			this.rows[rowIndex][cellIndex].height := height
-			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? 10 : width
+			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? this.fontSize *4 : width
 		}
 		
 		AddSubCell(rI, cI, sCI, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
@@ -488,7 +488,7 @@ class AdvancedToolTipGui
 				text width and height measuring for singleline text
 			*/
 			measuringText := noSpacing ? this.rows[rI][cI].subCells[sCI].value " " : this.rows[rI][cI].subCells[sCI].value
-			size := this.MeasureText(measuringText, measurementObj, "s" this.fontSize, this.rows[rI][cI].subCells[sCI].font)
+			size := this.Font_DrawText(measuringText, "", "s" this.fontSize ", " this.rows[rI][cI].subCells[sCI].font, "CALCRECT SINGLELINE NOCLIP")
 			this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
 			this.rows[rI][cI].subCells[sCI].height := size.H
 
@@ -536,7 +536,7 @@ class AdvancedToolTipGui
 				If (this.showGrid) {
 					tableXPos := "x" guiMargin + 5
 				} Else {
-					tableXPos := "x" guiMargin 
+					tableXPos := "x" guiMargin
 				}
 			}
 			tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
@@ -545,8 +545,13 @@ class AdvancedToolTipGui
 				height := rowHeights[key] + Round((this.fontSize / 3))
 				shiftY := height - 1
 				
+				; shiftY needs to be changed further if the previous row has a different height than the current one
+				If (key >= 2 and rowHeights[key] != rowHeights[key-1]) {
+					shiftY := shiftY - (rowHeights[key] - rowHeights[key-1])
+				}
+				
 				For k, cell in row {
-					width := columnWidths[k] + 20
+					width := columnWidths[k] + Round(this.fontSize * 2.3)
 					this.DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)				
 				}
 			}		
@@ -584,7 +589,7 @@ class AdvancedToolTipGui
 					If (recurse) {
 						yPosProgress := (tableYPos != "null") ? " yp+" tableYPos + 1 : " yp+1"				
 					} Else {
-						yPosProgress := "yp+0"				
+						yPosProgress := "yp+0"
 					}				
 				}
 
@@ -614,7 +619,7 @@ class AdvancedToolTipGui
 				} Else If (StrLen(cell.bgColor)) {
 					options .= " BackGroundTrans"
 					bgColor := cell.bgColor
-					Gui, %guiName%Add, Progress, w%width% h%height% %yPosProgress% %xPos% Background%bgColor%			
+					Gui, %guiName%Add, Progress, w%width% h%height% %yPosProgress% %xPos% Background%bgColor%		
 					options .= recurse ? " xp yp-1" : " xp yp"
 					addedBackground := true
 				}
@@ -653,7 +658,7 @@ class AdvancedToolTipGui
 						_height := height - 4
 						this.DrawCell(subcell, guiName, 0, 0, guiFontOptions, _xPosShift, _yPosShift, shiftY, _width, _height, _recurse)	
 					}
-				}			
+				}
 				
 				If (not cell.subCells.length()) {
 					Break
@@ -661,6 +666,8 @@ class AdvancedToolTipGui
 			}
 		}
 		
+		/* unused function, too slow 
+		*/
 		MeasureText(Str, ByRef measurementObj, FontOpts = "", FontName = "") {
 			/*
 				Str			: input string
@@ -715,5 +722,113 @@ class AdvancedToolTipGui
 
 			Return Size		
 		}
+		
+		/*
+		Original script by majkinetor.
+		Fixed by Eruyome.
+		
+		https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+		
+		 Function:  CreateFont
+					Creates the font and optinally, sets it for the control.
+		 Parameters:
+					hCtrl - Handle of the control. If omitted, function will create font and return its handle.
+					Font  - AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
+					bRedraw	  - If this parameter is TRUE, the control redraws itself. By default 1.
+		 Returns:	
+					Font handle.
+		 */
+		CreateFont(HCtrl="", Font="", BRedraw=1) {
+			static WM_SETFONT := 0x30
+
+			;if Font is not integer
+			if (not RegExMatch(Trim(Font), "^\d+$"))
+			{
+				StringSplit, Font, Font, `,,%A_Space%%A_Tab%
+				fontStyle := Font1, fontFace := Font2
+
+			  ;parse font 
+				italic      := InStr(Font1, "italic")    ?  1    :  0 
+				underline   := InStr(Font1, "underline") ?  1    :  0 
+				strikeout   := InStr(Font1, "strikeout") ?  1    :  0 
+				weight      := InStr(Font1, "bold")      ? 700   : 400 
+
+			  ;height 
+
+				RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
+				ifEqual, height,, SetEnv, height, 10
+				RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
+				height := -DllCall("MulDiv", "int", Height, "int", LogPixels, "int", 72) 
+			
+				IfEqual, Font2,,SetEnv Font2, MS Sans Serif
+			 ;create font 
+				hFont   := DllCall("CreateFont", "int",  height, "int",  0, "int",  0, "int", 0
+								  ,"int",  weight,   "Uint", italic,   "Uint", underline 
+								  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", Font2, "Uint")
+			} else hFont := Font
+			ifNotEqual, HCtrl,,SendMessage, WM_SETFONT, hFont, BRedraw,,ahk_id %HCtrl%
+			return hFont
+		}
+
+		/*
+		Original script by majkinetor.
+		Fixed by Eruyome.
+		
+		https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+		
+		 Function: DrawText
+				   Draws text using specified font on device context or calculates width and height of the text.
+		 Parameters: 
+				Text	- Text to be drawn or measured. 
+				DC		- Device context to use. If omitted, function will use Desktop's DC.
+				Font	- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
+				Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
+				Rect	- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
+						  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
+						
+		 Flags:
+				CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
+		 Returns:
+				Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
+		 */    
+		Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
+			static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
+
+			hFlag := (Rect = "") ? DT_NOCLIP : 0
+
+			StringSplit, Rect, Rect, %A_Space%
+			loop, parse, Flags, %A_Space%
+				ifEqual, A_LoopField,,continue
+				else hFlag |= DT_%A_LoopField%
+
+			if (RegExMatch(Trim(Font), "^\d+$")) {
+				hFont := Font, bUserHandle := 1
+			}
+			else if (Font != "") {
+				hFont := this.CreateFont( "", Font)
+			}
+			else {
+				hFlag |= DT_INTERNAL
+			}
+
+			IfEqual, hDC,,SetEnv, hDC, % DllCall("GetDC", "Uint", 0, "Uint")
+			ifNotEqual, hFont,, SetEnv, hOldFont, % DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
+
+			VarSetCapacity(RECT, 16)
+			if (Rect0 != 0)
+				loop, 4
+					NumPut(Rect%A_Index%, RECT, (A_Index-1)*4)
+
+			h := DllCall("DrawTextA", "Uint", hDC, "Str", Text, "int", StrLen(Text), "uint", &RECT, "uint", hFlag)
+
+			;clean
+			ifNotEqual, hOldFont,,DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont) 
+			ifNotEqual, bUserHandle, 1, DllCall("DeleteObject", "Uint", hFont)
+			ifNotEqual, DC,,DllCall("ReleaseDC", "Uint", 0, "Uint", hDC) 
+			
+			w	:= NumGet(RECT, 8, "Int")
+			
+			return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
+		} 
 	}
 }
