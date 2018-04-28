@@ -8,8 +8,6 @@
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
 
-global measurementObj := {}
-
 item := {}
 item.name := "Gloom Bite"
 item.basetype := "Ceremonial Axe"
@@ -36,62 +34,62 @@ AdvTT.CreateGui()
 ;-------------- table 01 ------------------------------------------------------------
 table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", false)
 
-table01.AddCell(1, 1, measurementObj, item.name, "", "", "", true, "", "")
-table01.AddCell(2, 1, measurementObj, item.basetype, "", "", "", true, "", "")
+table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
+table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
 
 ;-------------- table 02 ------------------------------------------------------------
 table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
-table02.AddCell(1, 1, measurementObj, "Item Level:", "", "", "", true, "", "")
-table02.AddCell(1, 2, measurementObj,  item.lvl, "right", "", "", true, "", "")
-table02.AddCell(1, 3, measurementObj,  "", "", "", "", true, "", "")
-table02.AddCell(1, 4, measurementObj,  "Base Level:", "", "bold", "", true, "", "")
-table02.AddCell(1, 5, measurementObj,  item.baselvl, "right", "", "", true, "", "")
+table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
+table02.AddCell(1, 2,  item.lvl, "right", "", "", true, "", "")
+table02.AddCell(1, 3,  "", "", "", "", true, "", "")
+table02.AddCell(1, 4,  "Base Level:", "", "bold", "", true, "", "")
+table02.AddCell(1, 5,  item.baselvl, "right", "", "", true, "", "")
 
-table02.AddCell(2, 1, measurementObj,  "Max Sockets:", "", "", "", true, "", "")
-table02.AddCell(2, 2, measurementObj,  item.msockets, "right", "", "", true, "", "")
-table02.AddCell(2, 3, measurementObj,  "", "", "", "", true, "", "")
-table02.AddCell(2, 4, measurementObj,  "")
-table02.AddCell(2, 5, measurementObj,  "")
+table02.AddCell(2, 1,  "Max Sockets:", "", "", "", true, "", "")
+table02.AddCell(2, 2,  item.msockets, "right", "", "", true, "", "")
+table02.AddCell(2, 3,  "", "", "", "", true, "", "")
+table02.AddCell(2, 4,  "")
+table02.AddCell(2, 5,  "")
 	
-table02.AddCell(3, 1, measurementObj,  "Ele DPS:", "", "", "", true, "", "")
-table02.AddCell(3, 2, measurementObj,  item.dps.ele, "right", "", "", true, "", "")
-table02.AddCell(3, 3, measurementObj,  "", "", "", "", true, "", "")
-table02.AddCell(3, 4, measurementObj,  "Chaos DPS:", "", "italic", "", true, "", "")
-table02.AddCell(3, 5, measurementObj,  item.dps.chaos, "right", "", "", true, "", "")
+table02.AddCell(3, 1,  "Ele DPS:", "", "", "", true, "", "")
+table02.AddCell(3, 2,  item.dps.ele, "right", "", "", true, "", "")
+table02.AddCell(3, 3,  "", "", "", "", true, "", "")
+table02.AddCell(3, 4,  "Chaos DPS:", "", "italic", "", true, "", "")
+table02.AddCell(3, 5,  item.dps.chaos, "right", "", "", true, "", "")
 
-table02.AddCell(4, 1, measurementObj,  "Phys DPS:", "", "", "", true, "", "Consolas")
-table02.AddCell(4, 2, measurementObj,  item.dps.phys, "right", "", "", true, "", "")
-table02.AddCell(4, 3, measurementObj,  "", "", "", "", true, "", "")
-table02.AddCell(4, 4, measurementObj,  "Q20 Phys:", "", "underline", "", true, "", "")
-table02.AddCell(4, 5, measurementObj,  item.dps.qphys, "right", "", "", true, "", "")
+table02.AddCell(4, 1,  "Phys DPS:", "", "", "", true, "", "Consolas")
+table02.AddCell(4, 2,  item.dps.phys, "right", "", "", true, "", "")
+table02.AddCell(4, 3,  "", "", "", "", true, "", "")
+table02.AddCell(4, 4,  "Q20 Phys:", "", "underline", "", true, "", "")
+table02.AddCell(4, 5,  item.dps.qphys, "right", "", "", true, "", "")
 
-table02.AddCell(5, 1, measurementObj,  "Total DPS:", "", "", "", true, "", "")
-table02.AddCell(5, 2, measurementObj,  item.dps.total, "right", "", "", true, "", "")
-table02.AddCell(5, 3, measurementObj,  "", "", "", "", true, "", "")
-table02.AddCell(5, 4, measurementObj,  "Q20 Total:", "", "strike", "", true, "", "")
-table02.AddCell(5, 5, measurementObj,  item.dps.qtotal, "right", "", "", true, "", "")
+table02.AddCell(5, 1,  "Total DPS:", "", "", "", true, "", "")
+table02.AddCell(5, 2,  item.dps.total, "right", "", "", true, "", "")
+table02.AddCell(5, 3,  "", "", "", "", true, "", "")
+table02.AddCell(5, 4,  "Q20 Total:", "", "strike", "", true, "", "")
+table02.AddCell(5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
 
 ;-------------- table 03 ------------------------------------------------------------
 table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
-table03.AddCell(1, 1, measurementObj,  "Mod", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 2, measurementObj,  "Tier/Affix", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 3, measurementObj,  "Stuff", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 1,  "Mod", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
+table03.AddCell(1, 3,  "Stuff", "", "bold", "26292d", true, "", "")
 
-table03.AddCell(2, 1, measurementObj,  "+20 to Maximum Life", "", "", "", true, "", "")
-table03.AddCell(2, 2, measurementObj,  "test", "", "", "", "", false, "", "")
-table03.AddSubCell(2, 2, 1, measurementObj,  "6", "", "", "", true)
-table03.AddSubCell(2, 2, 2, measurementObj,  "P", "center", "", "red", true, "", "", true)
-table03.AddSubCell(2, 2, 3, measurementObj,  "S", "center", "", "blue", true, "", "", true)
-table03.AddCell(2, 3, measurementObj,  "text", "", "", "", true, "", "")
+table03.AddCell(2, 1,  "+20 to Maximum Life", "", "", "", true, "", "")
+table03.AddCell(2, 2,  "test", "", "", "", "", false, "", "")
+table03.AddSubCell(2, 2, 1,  "6", "", "", "", true)
+table03.AddSubCell(2, 2, 2,  "P", "center", "", "red", true, "", "", true)
+table03.AddSubCell(2, 2, 3,  "S", "center", "", "blue", true, "", "", true)
+table03.AddCell(2, 3,  "text", "", "", "", true, "", "")
 
 ;-------------- table 04 ------------------------------------------------------------
 table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "", false)
 
 multilineText := "Multiline Text (no auto breaks):`n`n"
 multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-table04.AddCell(1, 1, measurementObj,  multilineText, "", "", "", true, "", "")
+table04.AddCell(1, 1,  multilineText, "", "", "", true, "", "")
 
 /*
 	(optional) add all tables to an array to handle table drawing via loops, instead of simply calling
@@ -381,7 +379,7 @@ class AdvancedToolTipGui
 			this.showGrid := grid
 		}
 
-		AddCell(rowIndex, cellIndex, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
+		AddCell(rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
 			/*
 				rowIndex		:
 				cellIndex		:
@@ -416,6 +414,7 @@ class AdvancedToolTipGui
 			width := 0
 			height := 0
 			value := Trim(value)
+
 			Loop, Parse, value, `n, `r
 			{
 				string := A_LoopField			
@@ -441,13 +440,13 @@ class AdvancedToolTipGui
 					height += size.H
 				}
 			}
-
+			
 			this.rows[rowIndex][cellIndex].value := newValue
 			this.rows[rowIndex][cellIndex].height := height
 			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? this.fontSize *4 : width
 		}
 		
-		AddSubCell(rI, cI, sCI, ByRef measurementObj, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
+		AddSubCell(rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
 			/*
 				rowIndex		:
 				cellIndex		:
@@ -664,63 +663,6 @@ class AdvancedToolTipGui
 					Break
 				}
 			}
-		}
-		
-		/* unused function, too slow 
-		*/
-		MeasureText(Str, ByRef measurementObj, FontOpts = "", FontName = "") {
-			/*
-				Str			: input string
-				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-				FontOpts		: font options like font size
-				FontName		: font type/family
-			*/
-			
-			; take results from previous calculations if the same font options (size + family) where being used			
-			useSavedResults := InStr(FontOpts, "s" this.defaultFontSize) and FontName = this.defaultFont
-			saveKey := StrLen(Str)
-
-			If (useSavedResults) {
-				If (measurementObj[saveKey].haskey("width")) {
-					Size := {}
-					Size.H := measurementObj[saveKey].height
-					Size.W := measurementObj[saveKey].width
-					
-					If (not measurementObj.haskey("skipped")) {
-						measurementObj["skipped"] := 0	
-					}
-					measurementObj["skipped"] += 1
-					
-					Return Size
-				}
-			}
-			
-			Static DT_FLAGS := 0x0520 ; DT_SINGLELINE = 0x20, DT_NOCLIP = 0x0100, DT_CALCRECT = 0x0400		
-			Static WM_GETFONT := 0x31
-			Size := {}
-			Gui, New
-			If (FontOpts <> "") || (FontName <> "")
-				Gui, Font, %FontOpts%, %FontName%
-			Gui, Add, Text, hwndHWND
-			SendMessage, WM_GETFONT, 0, 0, , ahk_id %HWND%
-			HFONT := ErrorLevel
-			HDC := DllCall("User32.dll\GetDC", "Ptr", HWND, "Ptr")
-			DllCall("Gdi32.dll\SelectObject", "Ptr", HDC, "Ptr", HFONT)
-			VarSetCapacity(RECT, 16, 0)
-			DllCall("User32.dll\DrawText", "Ptr", HDC, "Str", Str, "Int", -1, "Ptr", &RECT, "UInt", DT_FLAGS)
-			DllCall("User32.dll\ReleaseDC", "Ptr", HWND, "Ptr", HDC)
-			Gui, Destroy
-			Size.W := NumGet(RECT,  8, "Int")
-			Size.H := NumGet(RECT, 12, "Int")
-			
-			; save measurements
-			If (useSavedResults) {
-				measurementObj[saveKey] := {}
-				measurementObj[saveKey].height := Size.H
-				measurementObj[saveKey].width := Size.W				
-			}
-
-			Return Size		
 		}
 		
 		/*
