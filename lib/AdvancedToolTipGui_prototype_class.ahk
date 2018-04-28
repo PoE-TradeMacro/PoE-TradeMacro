@@ -169,7 +169,7 @@ class AdvancedToolTipGui
 		this.borderColor		:= (params[1] = "" or not params[1]) ? "a65b24" : params[1]
 		this.backgroundColor	:= (params[2] = "" or not params[2]) ? "000000" : params[2]
 		this.borderWidth		:= (params[3] = "" or not params[3]) ? 2 : params[3]
-		this.opacity			:= (params[4] = "" or not params[4]) ? 200 : params[4]
+		this.opacity			:= (params[4] = "" or not params[4]) ? 215 : params[4]
 		this.defTTFont			:= (params[5] = "" or not params[5]) ? "Consolas" : params[5]
 		this.defTTFontSize		:= (params[6] = "" or not params[6]) ? 9 : params[6]
 		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 1000 : params[7]
