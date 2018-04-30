@@ -13,6 +13,11 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64.exe
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64Steam.exe
 
+/*
+	init tooltip gui, don't do this for every tooltip call
+*/
+AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
+
 Return
 
 ^XButton1::
@@ -34,9 +39,8 @@ Return
 	item.dps.qtotal := 198.3
 
 	/*
-		init tooltip gui
+		create tooltip gui
 	*/
-	AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
 	AdvTT.CreateGui()
 
 	/*
@@ -198,13 +202,14 @@ class AdvancedToolTipGui
 		this.startMouseXPos		:=
 		this.startMouseYPos		:=
 		this.timer			:= ObjBindMethod(this, "destroyToolTip")
-		this.toolTipTimeout		:= 0
+		this.toolTipTimeout		:= 0		
 	}
 	
 	CreateGui()
 	{
 		GuiMargin := this.guiMargin
 		GuiName := this.guiName
+		Gui, %GuiName%:Destroy
 
 		Gui, %GuiName%:New, +AlwaysOnTop +ToolWindow +hwndTTHWnd
 		Gui, %GuiName%:Margin, %GuiMargin%, %GuiMargin%
@@ -245,6 +250,7 @@ class AdvancedToolTipGui
 
 		; add a border to the window, has to be done after auto-resizing the window
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
+
 		this.GuiAddBorder(this.borderColor, this.borderWidth, TTW, TTH, GuiName, TTHWnd)
 		this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
 	}
@@ -259,16 +265,12 @@ class AdvancedToolTipGui
 		}		
 		this.applicationHwnd := applicationHwnd
 		
-		; default cursor size, changed cursors (yolomouse) are not recognised
-		SysGet, CursorW, 13
-		SysGet, CursorH, 14
-
 		; get monitor info
 		monitors := MDMF_Enum()
 		; get the display monitor that has the largest area of intersection with the specified window
 		; returned 0 = no intersection/no specified window
 		appOnMonitorHwnd := MDMF_FromHWND(applicationHwnd)
-
+		
 		boundingRectangle := {}
 		For, key, monitor in monitors {
 			useMonitor := false
@@ -296,8 +298,17 @@ class AdvancedToolTipGui
 				boundingRectangle.bottom := monitor.bottom
 				boundingRectangle.right := monitor.right
 				boundingRectangle.h := monitor.name
-			}			
+			}		
 		}
+		
+		; cursor size
+		SysGet, CursorW, 13
+		SysGet, CursorH, 14
+		
+		; position the tooltip beneath the cursor and try to center it horizontally
+		originalCursorY := TTY
+		TTY := TTY + CursorH + 3
+		TTX := TTX - (Round(TTW / 2) - Round(CursorW / 2))	
 		
 		nTTX := TTX
 		nTTY := TTY
@@ -323,12 +334,19 @@ class AdvancedToolTipGui
 		}
 		
 		yOffset := boundingRectangle.bottom - (TTY + TTH)
-		If (yOffset < boundingRectangle.top) {
-			nTTY := TTY + yOffset
-		}		
+		yOffsetTop := originalCursorY - TTH - 3
+		If (yOffset < boundingRectangle.top) {			
+			If (yOffsetTop >= boundingRectangle.top) {
+				; move tooltip over cursor
+				nTTY := yOffsetTop
+			}
+			Else {
+				nTTY := TTY + yOffset
+			}
+		}
 		If (TTY < boundingRectangle.top) {
 			nTTY := boundingRectangle.top
-		}		
+		}
 		
 		If (nTTX != TTX or nTTY != TTY) {
 			this.xPos := nTTX
@@ -337,6 +355,7 @@ class AdvancedToolTipGui
 		} Else {
 			this.xPos := TTX
 			this.yPos := TTY
+			WinMove, ahk_id %TTHwnd%, , TTX, TTY
 		}
 	}
 	
@@ -444,12 +463,17 @@ class AdvancedToolTipGui
 		If (not GuiName and parentHwnd) {		
 			DefGui := A_DefaultGui ; save the current default GUI		
 		}
-		
-		Gui, %GuiName%Border:New, +Parent%parentHwnd% +LastFound -Caption +hwndBorderW
-		Gui, %GuiName%Border:Color, %Color%
-		X1 := Width, X2 := pW - Width, Y1 := Width, Y2 := pH - Width
-		WinSet, Region, 0-0 %pW%-0 %pW%-%pH% 0-%pH% 0-0   %X1%-%Y1% %X2%-%Y1% %X2%-%Y2% %X1%-%Y2% %X1%-%Y1%, ahk_id %BorderW%
-		Gui, %GuiName%Border:Show, x0 y0 w%pW% h%pH%
+
+		Try {
+			Gui, %GuiName%Border:New, +Parent%parentHwnd% +LastFound -Caption +hwndBorderW
+			Gui, %GuiName%Border:Color, %Color%
+			X1 := Width, X2 := pW - Width, Y1 := Width, Y2 := pH - Width
+			WinSet, Region, 0-0 %pW%-0 %pW%-%pH% 0-%pH% 0-0   %X1%-%Y1% %X2%-%Y1% %X2%-%Y2% %X1%-%Y2% %X1%-%Y1%, ahk_id %BorderW%
+			Gui, %GuiName%Border:Show, x0 y0 w%pW% h%pH%
+			createdBorder := true
+		} Catch e {
+			Msgbox Creating ToolTip border failed because target window doesn't exist.
+		}
 		
 		If (not GuiName and parentHwnd) {	
 			Gui, %DefGui%:Default ; restore the default Gui
