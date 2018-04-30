@@ -8,116 +8,127 @@
 #SingleInstance,force
 #Include, %A_ScriptDir%\DebugPrintArray.ahk
 
-item := {}
-item.name := "Gloom Bite"
-item.basetype := "Ceremonial Axe"
-item.lvl := 61
-item.baselvl := 51
-item.msockets := 3
-item.dps := {}
-item.dps.ele := 36.0
-item.dps.phys := 147.0
-item.dps.total := 183.0
-item.dps.chaos := 0.0
-item.dps.qphys := 162.3
-item.dps.qtotal := 198.3
+GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile.exe
+GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExileSteam.exe
+GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64.exe
+GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64Steam.exe
 
-/*
-	init tooltip gui
-*/
-AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
-AdvTT.CreateGui()
+Return
 
-/*
-	add tables/content to the tooltip
-*/
-;-------------- table 01 ------------------------------------------------------------
-table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", false)
-
-table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
-table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
-
-;-------------- table 02 ------------------------------------------------------------
-table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
-
-table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
-table02.AddCell(1, 2,  item.lvl, "right", "", "", true, "", "")
-table02.AddCell(1, 3,  "", "", "", "", true, "", "")
-table02.AddCell(1, 4,  "Base Level:", "", "bold", "", true, "", "")
-table02.AddCell(1, 5,  item.baselvl, "right", "", "", true, "", "")
-
-table02.AddCell(2, 1,  "Max Sockets:", "", "", "", true, "", "")
-table02.AddCell(2, 2,  item.msockets, "right", "", "", true, "", "")
-table02.AddCell(2, 3,  "", "", "", "", true, "", "")
-table02.AddCell(2, 4,  "")
-table02.AddCell(2, 5,  "")
+^XButton1::
 	
-table02.AddCell(3, 1,  "Ele DPS:", "", "", "", true, "", "")
-table02.AddCell(3, 2,  item.dps.ele, "right", "", "", true, "", "")
-table02.AddCell(3, 3,  "", "", "", "", true, "", "")
-table02.AddCell(3, 4,  "Chaos DPS:", "", "italic", "", true, "", "")
-table02.AddCell(3, 5,  item.dps.chaos, "right", "", "", true, "", "")
 
-table02.AddCell(4, 1,  "Phys DPS:", "", "", "", true, "", "Consolas")
-table02.AddCell(4, 2,  item.dps.phys, "right", "", "", true, "", "")
-table02.AddCell(4, 3,  "", "", "", "", true, "", "")
-table02.AddCell(4, 4,  "Q20 Phys:", "", "underline", "", true, "", "")
-table02.AddCell(4, 5,  item.dps.qphys, "right", "", "", true, "", "")
 
-table02.AddCell(5, 1,  "Total DPS:", "", "", "", true, "", "")
-table02.AddCell(5, 2,  item.dps.total, "right", "", "", true, "", "")
-table02.AddCell(5, 3,  "", "", "", "", true, "", "")
-table02.AddCell(5, 4,  "Q20 Total:", "", "strike", "", true, "", "")
-table02.AddCell(5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
+	item := {}
+	item.name := "Gloom Bite"
+	item.basetype := "Ceremonial Axe"
+	item.lvl := 61
+	item.baselvl := 51
+	item.msockets := 3
+	item.dps := {}
+	item.dps.ele := 36.0
+	item.dps.phys := 147.0
+	item.dps.total := 183.0
+	item.dps.chaos := 0.0
+	item.dps.qphys := 162.3
+	item.dps.qtotal := 198.3
 
-;-------------- table 03 ------------------------------------------------------------
-table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
+	/*
+		init tooltip gui
+	*/
+	AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
+	AdvTT.CreateGui()
 
-table03.AddCell(1, 1,  "Mod", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
-table03.AddCell(1, 3,  "Stuff", "", "bold", "26292d", true, "", "")
+	/*
+		add tables/content to the tooltip
+	*/
+	;-------------- table 01 ------------------------------------------------------------
+	table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", false)
 
-table03.AddCell(2, 1,  "+20 to Maximum Life", "", "", "", true, "", "")
-table03.AddCell(2, 2,  "test", "", "", "", "", false, "", "")
-table03.AddSubCell(2, 2, 1,  "6", "", "", "", true)
-table03.AddSubCell(2, 2, 2,  "P", "center", "", "red", true, "", "", true)
-table03.AddSubCell(2, 2, 3,  "S", "center", "", "blue", true, "", "", true)
-table03.AddCell(2, 3,  "text", "", "", "", true, "", "")
+	table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
+	table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
 
-;-------------- table 04 ------------------------------------------------------------
-table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "", false)
+	;-------------- table 02 ------------------------------------------------------------
+	table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
-multilineText := "Multiline Text (no auto breaks):`n`n"
-multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-table04.AddCell(1, 1,  multilineText, "", "", "", true, "", "")
+	table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
+	table02.AddCell(1, 2,  item.lvl, "right", "", "", true, "", "")
+	table02.AddCell(1, 3,  "", "", "", "", true, "", "")
+	table02.AddCell(1, 4,  "Base Level:", "", "bold", "", true, "", "")
+	table02.AddCell(1, 5,  item.baselvl, "right", "", "", true, "", "")
 
-/*
-	(optional) add all tables to an array to handle table drawing via loops, instead of simply calling
-	".drawTable()" for every single table.
-*/
-tooltipContents := []
-tooltipContents.push({"table": table01, "drawTableParams" : []})
-tooltipContents.push({"table": table02, "drawTableParams" : []})
-tooltipContents.push({"table": table03, "drawTableParams" : [5, 10]})
-tooltipContents.push({"table": table04, "drawTableParams" : [5, 10]})
+	table02.AddCell(2, 1,  "Max Sockets:", "", "", "", true, "", "")
+	table02.AddCell(2, 2,  item.msockets, "right", "", "", true, "", "")
+	table02.AddCell(2, 3,  "", "", "", "", true, "", "")
+	table02.AddCell(2, 4,  "")
+	table02.AddCell(2, 5,  "")
+		
+	table02.AddCell(3, 1,  "Ele DPS:", "", "", "", true, "", "")
+	table02.AddCell(3, 2,  item.dps.ele, "right", "", "", true, "", "")
+	table02.AddCell(3, 3,  "", "", "", "", true, "", "")
+	table02.AddCell(3, 4,  "Chaos DPS:", "", "italic", "", true, "", "")
+	table02.AddCell(3, 5,  item.dps.chaos, "right", "", "", true, "", "")
 
-/*
-	draw tables onto the tooltip gui, function not part of this class
-*/
-drawAllToolTipTables(tooltipContents)
+	table02.AddCell(4, 1,  "Phys DPS:", "", "", "", true, "", "Consolas")
+	table02.AddCell(4, 2,  item.dps.phys, "right", "", "", true, "", "")
+	table02.AddCell(4, 3,  "", "", "", "", true, "", "")
+	table02.AddCell(4, 4,  "Q20 Phys:", "", "underline", "", true, "", "")
+	table02.AddCell(4, 5,  item.dps.qphys, "right", "", "", true, "", "")
 
-; alternative:
-; table01.drawTable()
-; table02.drawTable()
-; table03.drawTable(5, 10)
-; table04.drawTable(5, 10)
+	table02.AddCell(5, 1,  "Total DPS:", "", "", "", true, "", "")
+	table02.AddCell(5, 2,  item.dps.total, "right", "", "", true, "", "")
+	table02.AddCell(5, 3,  "", "", "", "", true, "", "")
+	table02.AddCell(5, 4,  "Q20 Total:", "", "strike", "", true, "", "")
+	table02.AddCell(5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
 
-/*
-	auto-size, position and show the tooltip
-	(or set absolute position)
-*/
-AdvTT.ShowToolTip(1000, 100)
+	;-------------- table 03 ------------------------------------------------------------
+	table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
 
+	table03.AddCell(1, 1,  "Mod", "", "bold", "26292d", true, "", "")
+	table03.AddCell(1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
+	table03.AddCell(1, 3,  "Stuff", "", "bold", "26292d", true, "", "")
+
+	table03.AddCell(2, 1,  "+20 to Maximum Life", "", "", "", true, "", "")
+	table03.AddCell(2, 2,  "test", "", "", "", "", false, "", "")
+	table03.AddSubCell(2, 2, 1,  "6", "", "", "", true)
+	table03.AddSubCell(2, 2, 2,  "P", "center", "", "red", true, "", "", true)
+	table03.AddSubCell(2, 2, 3,  "S", "center", "", "blue", true, "", "", true)
+	table03.AddCell(2, 3,  "text", "", "", "", true, "", "")
+
+	;-------------- table 04 ------------------------------------------------------------
+	table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "", false)
+
+	multilineText := "Multiline Text (no auto breaks):`n`n"
+	multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
+	table04.AddCell(1, 1,  multilineText, "", "", "", true, "", "")
+
+	/*
+		(optional) add all tables to an array to handle table drawing via loops, instead of simply calling
+		".drawTable()" for every single table.
+	*/
+	tooltipContents := []
+	tooltipContents.push({"table": table01, "drawTableParams" : []})
+	tooltipContents.push({"table": table02, "drawTableParams" : []})
+	tooltipContents.push({"table": table03, "drawTableParams" : [5, 10]})
+	tooltipContents.push({"table": table04, "drawTableParams" : [5, 10]})
+
+	/*
+		draw tables onto the tooltip gui, function not part of this class
+	*/
+	drawAllToolTipTables(tooltipContents)
+
+	; alternative:
+	; table01.drawTable()
+	; table02.drawTable()
+	; table03.drawTable(5, 10)
+	; table04.drawTable(5, 10)
+
+	/*
+		auto-size, position and show the tooltip
+		(or set absolute position)
+	*/
+	;AdvTT.ShowToolTip(true, 1000, 100)
+	AdvTT.ShowToolTip()
 Return
 
 drawAllToolTipTables(tooltipContents) {
@@ -159,7 +170,7 @@ class AdvancedToolTipGui
 	__New(params*)
 	{
 		c := params.MaxIndex()
-		If (c > 12) {
+		If (c > 15) {
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
 		}
 		
@@ -173,10 +184,15 @@ class AdvancedToolTipGui
 		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 1000 : params[7]
 		this.mouseMoveThreshold	:= (params[8] = "" or not params[8]) ? 50 : params[8]
 		this.useToolTipTimeout	:= (params[9] = "" or not params[9]) ? false : params[9]
-		this.toolTipTimeoutSec	:= (params[10] = "" or not params[10]) ? 15 : params[10]
+		this.toolTipTimeoutSec	:= (params[10] = "" or not params[10]) ? 15 : params[10]		
 		this.xPos				:= (params[11] = "" or not params[11]) ? 0 : params[11]
 		this.yPos				:= (params[12] = "" or not params[12]) ? 0 : params[12]
+		this.usedFixedCoords	:= (params[13] = "" or not params[13]) ? false : params[13]
+		this.appAHKGroup		:= (not params[14]) ? "PoEWindowGrp" : params[14]
+		this.appAHKID			:= (not params[15]) ? "" : params[15]
 		
+		this.fixedXPos			:= this.xPos
+		this.fixedYPos			:= this.yPos
 		this.guiMargin			:= this.borderWidth + 5
 		this.parentWindow		:= 
 		this.startMouseXPos		:=
@@ -233,8 +249,57 @@ class AdvancedToolTipGui
 		this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
 	}
 	
-	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {		
-		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
+	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {
+		appAHKGroup	:= this.appAHKGroup
+		
+		If (appAHKGroup) {
+			WinGet, applicationHwnd, ID, ahk_group %appAHKGroup%
+		} Else If (this.appAHKID) {
+			applicationHwnd := this.appAHKID
+		}		
+		this.applicationHwnd := applicationHwnd
+		
+		; default cursor size, changed cursors (yolomouse) are not recognised
+		SysGet, CursorW, 13
+		SysGet, CursorH, 14
+
+		; get monitor info
+		monitors := MDMF_Enum()
+		; get the display monitor that has the largest area of intersection with the specified window
+		; returned 0 = no intersection/no specified window
+		appOnMonitorHwnd := MDMF_FromHWND(applicationHwnd)
+
+		boundingRectangle := {}
+		For, key, monitor in monitors {
+			useMonitor := false
+			isOnMonitorX := (this.xPos >= monitor.Left) and (this.xPos <= monitor.Right)
+			isOnMonitorY := (this.yPos >= monitor.top) and (this.yPos <= monitor.bottom)
+			isOnMonitor  := isOnMonitorX and isOnMonitorY
+			useAppTarget := ((appAHKGroup or applicationHwnd) and appOnMonitorHwnd)
+			
+			If (not this.useFixedCoords) {
+				; if we don't use fixed coords, use the monitor where the application is on to draw the tooltip, no matter where the mouse is,
+				; unless there is no application specified
+				If ((appOnMonitorHwnd = monitor.handle) or (not useAppTarget and isOnMonitor)) {
+					useMonitor := true					
+				}
+			}
+			Else {				
+				If (isOnMonitor) {
+					useMonitor := true
+				}
+			}
+			
+			If (useMonitor) {
+				boundingRectangle.top := monitor.top
+				boundingRectangle.left := monitor.left
+				boundingRectangle.bottom := monitor.bottom
+				boundingRectangle.right := monitor.right
+				boundingRectangle.h := monitor.name
+			}			
+		}
+		debugprintarray([monitors, appOnMonitor, applicationHwnd, boundingRectangle])
+		
 		nTTX := TTX
 		nTTY := TTY
 		
@@ -264,11 +329,24 @@ class AdvancedToolTipGui
 		}
 	}
 	
-	ShowToolTip(x = 0, y = 0) {
-		this.xPos := x
-		this.yPos := y
+	ShowToolTip(useFixedCoords = false, x = false, y = false) {
+		CoordMode, Mouse, Screen
+		MouseGetPos, startMouseXPos, startMouseYPos
+		
+		If ((useFixedCoords and x and y) or this.useFixedCoords) {
+			this.useFixedCoords := true
+			this.xPos := x ? x : this.fixedXPos
+			this.yPos := y ? y : this.fixedYPos
+		} Else If (x and y) {
+			this.xPos := x === false ? 0 : x
+			this.yPos := y === false ? 0 : y
+		} Else {
+			this.xPos := startMouseXPos
+			this.yPos := startMouseYPos
+		}
+		
 		Opacity := this.opacity
-		TTHwnd := this.parentWindow
+		TTHwnd := this.parentWindow		
 		
 		this.SetToolTipSizeAndPosition()
 		
@@ -276,7 +354,6 @@ class AdvancedToolTipGui
 		WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
 		
 		; set tooltip timeout/timer
-		MouseGetPos, startMouseXPos, startMouseYPos
 		this.startMouseXPos := startMouseXPos
 		this.startMouseYPos := startMouseYPos
 		this.startTimer()
@@ -298,15 +375,39 @@ class AdvancedToolTipGui
 		timer := this.timer		
 		this.toolTipTimeout += (this.timeoutInterval / 1000)
 		
-		If (not instantly) {
+		CoordMode, Mouse, Screen
+		If (not instantly) {			
 			MouseGetPos, CurrX, CurrY
 			MouseMoved := (CurrX - this.startMouseXPos) ** 2 + (CurrY - this.startMouseYPos) ** 2 > this.mouseMoveThreshold ** 2
 		}
 		
-		If (instantly or MouseMoved or (this.useToolTipTimeout and (this.tooltipTimeout >= this.toolTipTimeoutSec))) {	
+		If (instantly or MouseMoved or (this.useToolTipTimeout and (this.tooltipTimeout >= this.toolTipTimeoutSec))) {
 			Gui, %GuiName%:Destroy
 			SetTimer % timer, Off
 		}
+	}
+	
+	MonitorInfo() {		
+		SysGet, iMonCnt, MonitorCount
+		
+		aDictMonInfo := []
+		Loop, %iMonCnt%
+		{
+			vDictMonInfo := {}
+
+			SysGet, Mon, Monitor, %A_Index%
+
+			vDictMonInfo.Insert("Left", MonLeft)
+			vDictMonInfo.Insert("Right", MonRight)
+			vDictMonInfo.Insert("Top", MonTop)
+			vDictMonInfo.Insert("Bottom", MonBottom)
+			vDictMonInfo.Insert("W", Abs(MonRight-MonLeft))
+			vDictMonInfo.Insert("H", Abs(MonTop-MonBottom))
+			vDictMonInfo.Insert("Num", A_Index)
+			aDictMonInfo.Insert(vDictMonInfo)
+		}
+		
+		return aDictMonInfo
 	}
 		
 	getF() {
@@ -773,4 +874,87 @@ class AdvancedToolTipGui
 			return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
 		} 
 	}
+}
+
+
+; ======================================================================================================================
+; Multiple Display Monitors Functions -> msdn.microsoft.com/en-us/library/dd145072(v=vs.85).aspx =======================
+; ======================================================================================================================
+; Enumerates display monitors and returns an object containing the properties of all monitors or the specified monitor.
+; ======================================================================================================================
+MDMF_Enum(HMON := "") {
+   Static EnumProc := RegisterCallback("MDMF_EnumProc")	   
+   Static Monitors := {}
+   If (HMON = "") ; new enumeration
+	  Monitors := {}
+   If (Monitors.MaxIndex() = "") ; enumerate
+	  If !DllCall("User32.dll\EnumDisplayMonitors", "Ptr", 0, "Ptr", 0, "Ptr", EnumProc, "Ptr", &Monitors, "UInt")
+		 Return False
+   Return (HMON = "") ? Monitors : Monitors.HasKey(HMON) ? Monitors[HMON] : False
+}
+; ======================================================================================================================
+;  Callback function that is called by the MDMF_Enum function.
+; ======================================================================================================================
+MDMF_EnumProc(HMON, HDC, PRECT, ObjectAddr) {
+   Monitors := Object(ObjectAddr)
+   Monitors[HMON] := MDMF_GetInfo(HMON)
+   Return True
+}
+; ======================================================================================================================
+;  Retrieves the display monitor that has the largest area of intersection with a specified window.
+; ======================================================================================================================
+MDMF_FromHWND(HWND) {
+   Return DllCall("User32.dll\MonitorFromWindow", "Ptr", HWND, "UInt", 0, "UPtr")
+}
+; ======================================================================================================================
+; Retrieves the display monitor that contains a specified point.
+; If either X or Y is empty, the function will use the current cursor position for this value.
+; ======================================================================================================================
+MDMF_FromPoint(X := "", Y := "") {
+   VarSetCapacity(PT, 8, 0)
+   If (X = "") || (Y = "") {
+	  DllCall("User32.dll\GetCursorPos", "Ptr", &PT)
+	  If (X = "")
+		 X := NumGet(PT, 0, "Int")
+	  If (Y = "")
+		 Y := NumGet(PT, 4, "Int")
+   }
+   Return DllCall("User32.dll\MonitorFromPoint", "Int64", (X & 0xFFFFFFFF) | (Y << 32), "UInt", 0, "UPtr")
+}
+; ======================================================================================================================
+; Retrieves the display monitor that has the largest area of intersection with a specified rectangle.
+; Parameters are consistent with the common AHK definition of a rectangle, which is X, Y, W, H instead of
+; Left, Top, Right, Bottom.
+; ======================================================================================================================
+MDMF_FromRect(X, Y, W, H) {
+   VarSetCapacity(RC, 16, 0)
+   NumPut(X, RC, 0, "Int"), NumPut(Y, RC, 4, Int), NumPut(X + W, RC, 8, "Int"), NumPut(Y + H, RC, 12, "Int")
+   Return DllCall("User32.dll\MonitorFromRect", "Ptr", &RC, "UInt", 0, "UPtr")
+}
+; ======================================================================================================================
+; Retrieves information about a display monitor.
+; ======================================================================================================================
+MDMF_GetInfo(HMON) {
+   NumPut(VarSetCapacity(MIEX, 40 + (32 << !!A_IsUnicode)), MIEX, 0, "UInt")
+   If DllCall("User32.dll\GetMonitorInfo", "Ptr", HMON, "Ptr", &MIEX) {
+	  MonName := StrGet(&MIEX + 40, 32)    ; CCHDEVICENAME = 32
+	  MonNum := RegExReplace(MonName, ".*(\d+)$", "$1")
+	  obj := {Name:      (Name := StrGet(&MIEX + 40, 32))
+			, Handle:	 HMON
+			, Num:       RegExReplace(Name, ".*(\d+)$", "$1")
+			, Left:      NumGet(MIEX, 4, "Int")    ; display rectangle
+			, Top:       NumGet(MIEX, 8, "Int")    ; "
+			, Right:     NumGet(MIEX, 12, "Int")   ; "
+			, Bottom:    NumGet(MIEX, 16, "Int")   ; "
+			;, WALeft:    NumGet(MIEX, 20, "Int")   ; work area
+			;, WATop:     NumGet(MIEX, 24, "Int")   ; "
+			;, WARight:   NumGet(MIEX, 28, "Int")   ; "
+			;, WABottom:  NumGet(MIEX, 32, "Int")   ; "
+			, Primary:   NumGet(MIEX, 36, "UInt")} ; contains a non-zero value for the primary monitor.
+		
+		obj.W := Abs(obj.Right - obj.Left)   ; "
+		obj.H := Abs(obj.Top - obj.Bottom)   ; "	
+		return obj
+   }
+   Return False
 }
