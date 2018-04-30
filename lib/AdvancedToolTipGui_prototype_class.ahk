@@ -298,28 +298,39 @@ class AdvancedToolTipGui
 				boundingRectangle.h := monitor.name
 			}			
 		}
-		debugprintarray([monitors, appOnMonitor, applicationHwnd, boundingRectangle])
 		
 		nTTX := TTX
 		nTTY := TTY
-		
-		xOffset := A_ScreenWidth - (TTX + TTW)
-		If (xOffset < 0) {
-			nTTX := TTX + xOffset
+
+		; negative left = left non-primary monitor
+		If (boundingRectangle.left < 0) {
+			xOffset := boundingRectangle.right + (TTX + TTW)
+			If (xOffset > boundingRectangle.right) {
+				nTTX := TTX - xOffset
+			}
+			If (TTX < boundingRectangle.left) {
+				nTTX := boundingRectangle.left
+			}
 		}
-		If (TTX < 0) {
-			nTTX := 0
+		Else {
+			xOffset := boundingRectangle.right - (TTX + TTW)
+			If (xOffset < boundingRectangle.left) {
+				nTTX := TTX + xOffset
+			}
+			If (TTX < boundingRectangle.left) {
+				nTTX := boundingRectangle.left
+			}
 		}
 		
-		yOffset := A_ScreenHeight - (TTY + TTH)
-		If (yOffset < 0) {
+		yOffset := boundingRectangle.bottom - (TTY + TTH)
+		If (yOffset < boundingRectangle.top) {
 			nTTY := TTY + yOffset
 		}		
-		If (TTY < 0) {
-			nTTY := 0
+		If (TTY < boundingRectangle.top) {
+			nTTY := boundingRectangle.top
 		}		
 		
-		If (nTTX != TTX or nTTY != TTY) {			
+		If (nTTX != TTX or nTTY != TTY) {
 			this.xPos := nTTX
 			this.yPos := nTTY
 			WinMove, ahk_id %TTHwnd%, , nTTX, nTTY
