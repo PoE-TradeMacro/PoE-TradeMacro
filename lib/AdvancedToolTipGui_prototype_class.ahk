@@ -21,9 +21,9 @@ AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
 Return
 
 ^XButton1::
-	
-
-
+	/*
+		test data
+	*/
 	item := {}
 	item.name := "Gloom Bite"
 	item.basetype := "Ceremonial Axe"
@@ -46,86 +46,70 @@ Return
 	/*
 		add tables/content to the tooltip
 	*/
-	;-------------- table 01 ------------------------------------------------------------
-	table01 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", false)
+	;-------------- table 01 ------------------------------------------------------------	
+	AdvTT.AddTable(-1, "", "FEFEFE", false)
 
-	table01.AddCell(1, 1, item.name, "", "", "", true, "", "")
-	table01.AddCell(2, 1, item.basetype, "", "", "", true, "", "")
+	AdvTT.AddCell(1, 1, 1, item.name, "", "", "", true, "", "")
+	AdvTT.AddCell(1, 2, 1, item.basetype, "", "", "", true, "", "")
 
 	;-------------- table 02 ------------------------------------------------------------
-	table02 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
+	AdvTT.AddTable(-1, "", "FEFEFE", true)	
 
-	table02.AddCell(1, 1, "Item Level:", "", "", "", true, "", "")
-	table02.AddCell(1, 2,  item.lvl, "right", "", "", true, "", "")
-	table02.AddCell(1, 3,  "", "", "", "", true, "", "")
-	table02.AddCell(1, 4,  "Base Level:", "", "bold", "", true, "", "")
-	table02.AddCell(1, 5,  item.baselvl, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 1, 1, "Item Level:", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 1, 2,  item.lvl, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 1, 3,  "", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 1, 4,  "Base Level:", "", "bold", "", true, "", "")
+	AdvTT.AddCell(2, 1, 5,  item.baselvl, "right", "", "", true, "", "")
 
-	table02.AddCell(2, 1,  "Max Sockets:", "", "", "", true, "", "")
-	table02.AddCell(2, 2,  item.msockets, "right", "", "", true, "", "")
-	table02.AddCell(2, 3,  "", "", "", "", true, "", "")
-	table02.AddCell(2, 4,  "")
-	table02.AddCell(2, 5,  "")
+	AdvTT.AddCell(2, 2, 1,  "Max Sockets:", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 2, 2,  item.msockets, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 2, 3,  "", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 2, 4,  "")
+	AdvTT.AddCell(2, 2, 5,  "")
 		
-	table02.AddCell(3, 1,  "Ele DPS:", "", "", "", true, "", "")
-	table02.AddCell(3, 2,  item.dps.ele, "right", "", "", true, "", "")
-	table02.AddCell(3, 3,  "", "", "", "", true, "", "")
-	table02.AddCell(3, 4,  "Chaos DPS:", "", "italic", "", true, "", "")
-	table02.AddCell(3, 5,  item.dps.chaos, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 3, 1,  "Ele DPS:", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 3, 2,  item.dps.ele, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 3, 3,  "", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 3, 4,  "Chaos DPS:", "", "italic", "", true, "", "")
+	AdvTT.AddCell(2, 3, 5,  item.dps.chaos, "right", "", "", true, "", "")
 
-	table02.AddCell(4, 1,  "Phys DPS:", "", "", "", true, "", "Consolas")
-	table02.AddCell(4, 2,  item.dps.phys, "right", "", "", true, "", "")
-	table02.AddCell(4, 3,  "", "", "", "", true, "", "")
-	table02.AddCell(4, 4,  "Q20 Phys:", "", "underline", "", true, "", "")
-	table02.AddCell(4, 5,  item.dps.qphys, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 4, 1,  "Phys DPS:", "", "", "", true, "", "Consolas")
+	AdvTT.AddCell(2, 4, 2,  item.dps.phys, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 4, 3,  "", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 4, 4,  "Q20 Phys:", "", "underline", "", true, "", "")
+	AdvTT.AddCell(2, 4, 5,  item.dps.qphys, "right", "", "", true, "", "")
 
-	table02.AddCell(5, 1,  "Total DPS:", "", "", "", true, "", "")
-	table02.AddCell(5, 2,  item.dps.total, "right", "", "", true, "", "")
-	table02.AddCell(5, 3,  "", "", "", "", true, "", "")
-	table02.AddCell(5, 4,  "Q20 Total:", "", "strike", "", true, "", "")
-	table02.AddCell(5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 5, 1,  "Total DPS:", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 5, 2,  item.dps.total, "right", "", "", true, "", "")
+	AdvTT.AddCell(2, 5, 3,  "", "", "", "", true, "", "")
+	AdvTT.AddCell(2, 5, 4,  "Q20 Total:", "", "strike", "", true, "", "")
+	AdvTT.AddCell(2, 5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
 
 	;-------------- table 03 ------------------------------------------------------------
-	table03 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "FEFEFE", true)
+	AdvTT.AddTable(-1, "", "FEFEFE", true)	
 
-	table03.AddCell(1, 1,  "Mod", "", "bold", "26292d", true, "", "")
-	table03.AddCell(1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
-	table03.AddCell(1, 3,  "Stuff", "", "bold", "26292d", true, "", "")
+	AdvTT.AddCell(3, 1, 1,  "Mod", "", "bold", "26292d", true, "", "")
+	AdvTT.AddCell(3, 1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
+	AdvTT.AddCell(3, 1, 3,  "Stuff", "", "bold", "26292d", true, "", "")
 
-	table03.AddCell(2, 1,  "+20 to Maximum Life", "", "", "", true, "", "")
-	table03.AddCell(2, 2,  "test", "", "", "", "", false, "", "")
-	table03.AddSubCell(2, 2, 1,  "6", "", "", "", true)
-	table03.AddSubCell(2, 2, 2,  "P", "center", "", "red", true, "", "", true)
-	table03.AddSubCell(2, 2, 3,  "S", "center", "", "blue", true, "", "", true)
-	table03.AddCell(2, 3,  "text", "", "", "", true, "", "")
+	AdvTT.AddCell(3, 2, 1,  "+20 to Maximum Life", "", "", "", true, "", "")
+	AdvTT.AddCell(3, 2, 2,  "test", "", "", "", "", false, "", "")
+	AdvTT.AddSubCell(3, 2, 2, 1,  "6", "", "", "", true)
+	AdvTT.AddSubCell(3, 2, 2, 2,  "P", "center", "", "red", true, "", "", true)
+	AdvTT.AddSubCell(3, 2, 2, 3,  "S", "center", "", "blue", true, "", "", true)
+	AdvTT.AddCell(3, 2, 3,  "text", "", "", "", true, "", "")
 
-	;-------------- table 04 ------------------------------------------------------------
-	table04 := new AdvTT.Table(AdvTT.getF(), AdvTT.getFS(), -1, "", "", false)
+	;-------------- table 04 ------------------------------------------------------------	
+	AdvTT.AddTable(-1, "", "FEFEFE", false)	
 
 	multilineText := "Multiline Text (no auto breaks):`n`n"
 	multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
-	table04.AddCell(1, 1,  multilineText, "", "", "", true, "", "")
+	AdvTT.AddCell(4, 1, 1,  multilineText, "", "", "", true, "", "")	
 
 	/*
-		(optional) add all tables to an array to handle table drawing via loops, instead of simply calling
-		".drawTable()" for every single table.
+		draw tables onto the tooltip gui
 	*/
-	tooltipContents := []
-	tooltipContents.push({"table": table01, "drawTableParams" : []})
-	tooltipContents.push({"table": table02, "drawTableParams" : []})
-	tooltipContents.push({"table": table03, "drawTableParams" : [5, 10]})
-	tooltipContents.push({"table": table04, "drawTableParams" : [5, 10]})
-
-	/*
-		draw tables onto the tooltip gui, function not part of this class
-	*/
-	drawAllToolTipTables(tooltipContents)
-
-	; alternative:
-	; table01.drawTable()
-	; table02.drawTable()
-	; table03.drawTable(5, 10)
-	; table04.drawTable(5, 10)
+	AdvTT.DrawTables()
 
 	/*
 		auto-size, position and show the tooltip
@@ -134,35 +118,6 @@ Return
 	;AdvTT.ShowToolTip(true, 1000, 100)
 	AdvTT.ShowToolTip()
 Return
-
-drawAllToolTipTables(tooltipContents) {
-	For key, val in tooltipContents {
-		p := val.drawTableParams
-		
-		If (key = 1) {
-			If (not p[2]) {
-				p[2] := 5
-				p[1] := p[1] ? p[1] : 5
-			}
-		}
-		
-		If (p.length() = 0) {
-			val.table.drawTable()
-		}
-		Else If (p.length() = 1) {
-			val.table.drawTable(p[1])
-		} 
-		Else If (p.length() = 2) {
-			val.table.drawTable(p[1], p[2])
-		}
-		Else If (p.length() = 3) {
-			val.table.drawTable(p[1], p[2], p[3])
-		}
-		Else If (p.length() = 4) {
-			val.table.drawTable(p[1], p[2], p[3], p[4])
-		}
-	}
-}
 
 GuiClose:
 ExitApp
@@ -202,11 +157,17 @@ class AdvancedToolTipGui
 		this.startMouseXPos		:=
 		this.startMouseYPos		:=
 		this.timer			:= ObjBindMethod(this, "destroyToolTip")
-		this.toolTipTimeout		:= 0		
+		this.toolTipTimeout		:= 0
+
+		this.tables := []
 	}
 	
 	CreateGui()
 	{
+		If (this.tables.MaxIndex()) {
+			this.tables := []
+		}
+		
 		GuiMargin := this.guiMargin
 		GuiName := this.guiName
 		Gui, %GuiName%:Destroy
@@ -257,7 +218,7 @@ class AdvancedToolTipGui
 	
 	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {
 		appAHKGroup	:= this.appAHKGroup
-		
+
 		If (appAHKGroup) {
 			WinGet, applicationHwnd, ID, ahk_group %appAHKGroup%
 		} Else If (this.appAHKID) {
@@ -389,18 +350,17 @@ class AdvancedToolTipGui
 		this.startTimer()
 	}
 
-	startTimer() {
+	StartTimer() {
 		timer := this.timer
 		this.toolTipTimeout := 0
 		SetTimer % timer, % this.timeoutInterval
 	}
-	/*
-	stopTimer() {
-		timer := this.timer
-		SetTimer % timer, Off
+	
+	StopTimer() {
+		this.DestroyToolTip(true)
 	}
-	*/
-	destroyToolTip(instantly = false) {
+	
+	DestroyToolTip(instantly = false) {
 		GuiName := this.guiName
 		timer := this.timer		
 		this.toolTipTimeout += (this.timeoutInterval / 1000)
@@ -439,14 +399,8 @@ class AdvancedToolTipGui
 		
 		return aDictMonInfo
 	}
-		
-	getF() {
-		return this.defTTFont
-	}
-	getFS() {
-		return this.defTTFontSize
-	}
-	getHwnd() {
+
+	getToolTipWindowHwnd() {
 		return this.parentWindow
 	}
 	
@@ -483,7 +437,14 @@ class AdvancedToolTipGui
 			WinExist(LFW)
 	}
 	
-	class Table {
+	DrawTables() {
+		tables := this.tables
+		For key, val in tables {
+			this.DrawTable(key)
+		}
+	}
+	
+	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {
 		/*
 			Table class
 
@@ -493,315 +454,345 @@ class AdvancedToolTipGui
 			font			: table-wide font, if "-1" the tooltip gui default font is being used
 			color		: table-wide font color in hex or a valid name like "white"
 			grid			: show table grid/borders
+			guiMargin	: left and right table margins
+			topMargin	: top table margin
+			tableXPos	: table x coordinate origin, don't use for relative positioning
+			tableYPos	: table y coordinate origin, don't use for relative positioning
 			assocVar		: 
+		*/		
+		
+		table := {}
+		If (assocVar) {
+			table.assocVar := "v" assocVar
+			table.assocHwnd := "hwnd" assocVar "H"
+		}		
+		
+		table.font := (font >= 0 or StrLen(font)) ? font : this.defTTFont
+		table.fontSize := (fontSize >= 0) ? fontSize : this.defTTFontSize
+		table.fColor := color
+
+		table.showGrid := grid
+		table.guiMargin := guiMargin
+		table.topMargin := topMargin
+		table.tableXPos := tableXPos
+		table.tableYPos := tableYPos		
+		
+		table.rows := []
+		table.maxColumns := 0
+		
+		this.tables.push(table)
+	}
+
+	AddCell(tableIndex, rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
+		/*
+			rowIndex		:
+			cellIndex		:
+			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+			value		: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor		: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
+			fColor		: font color in hex or a valid name like "white"
+			font			: font family
 		*/
 		
-		__New(guiDefFont, guiDefFontSize, fontSize = -1, font = -1, color = "Default", grid = false, assocVar = "") {
-			class_parent := SubStr(this.__class,1,InStr(this.__class,".",0,-1)-1)
-			
-			this.guiName := %class_parent%.guiName ":"
-
-			this.assocVar := "v" assocVar
-			this.assocHwnd := "hwnd" assocVar "H"
-			
-			this.defaultFont := guiDefFont
-			this.defaultFontSize := guiDefFontSize		
-			this.font := (font >= 0 or StrLen(font)) ? font : this.defaultFont
-			this.fontSize := (fontSize >= 0) ? fontSize : this.defaultFontSize
-			this.fColor := color
-			
-			this.rows := []
-			this.maxColumns := 0
-			this.showGrid := grid
-		}
-
-		AddCell(rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
-			/*
-				rowIndex		:
-				cellIndex		:
-				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-				value		: cell contents
-				alignment		: horizontal text-alignment (left, right, center)
-				fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-				bgColor		: background color in hex or a valid name like "red"
-				isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
-				fColor		: font color in hex or a valid name like "white"
-				font			: font family
-			*/
-			
-			If (not this.rows[rowIndex]) {
-				this.rows[rowIndex] := []
-			}
-			
-			this.rows[rowIndex][cellIndex] := {}
-			this.rows[rowIndex][cellIndex].subCells := []
-			this.rows[rowIndex][cellIndex].font := StrLen(font) ? font : this.font
-			
-			this.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
-			this.rows[rowIndex][cellIndex].color := fColor
-			this.rows[rowIndex][cellIndex].bgColor := bgColor
-			this.rows[rowIndex][cellIndex].fontOptions := fontOptions
-			this.maxColumns := cellIndex >= this.maxColumns ? cellIndex : cellIndex > this.maxColumns
-			
-			/*
-				text width and height measuring for single and multiline text (no auto line breaks)
-			*/
-			newValue := ""
-			width := 0
-			height := 0
-			value := Trim(value)
-
-			Loop, Parse, value, `n, `r
-			{
-				string := A_LoopField			
-				StringReplace, string, string, `r,, All
-				StringReplace, string, string, `n,, All
-				
-				emptyLine := false
-				If (not StrLen(string)) {
-					string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
-					emptyLine := true				
-				}
-				string := " " Trim(string) " "	; add spaces as table padding
-				
-				If (emptyLine) {
-					newValue .= "`n"
-				} Else {
-					newValue .= string "`n"
-				}		
-				
-				If (StrLen(string)) {
-					size := this.Font_DrawText(string, "", "s" this.fontSize ", " this.rows[rowIndex][cellIndex].font, "CALCRECT SINGLELINE NOCLIP")
-					width := width > size.W ? width : size.W
-					height += size.H
-				}
-			}
-			
-			this.rows[rowIndex][cellIndex].value := newValue
-			this.rows[rowIndex][cellIndex].height := height
-			this.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? this.fontSize *4 : width
+		table := this.tables[tableIndex]
+		
+		If (not table.rows[rowIndex]) {
+			table.rows[rowIndex] := []
 		}
 		
-		AddSubCell(rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
-			/*
-				rowIndex		:
-				cellIndex		:
-				measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-				value		: cell contents
-				alignment		: horizontal text-alignment (left, right, center)
-				fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-				bgColor		: background color in hex or a valid name like "red"
-				isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-				fColor		: font color in hex or a valid name like "white"
-				font			: font family
-				noSpacing		: don't add table padding (left/right)
-			*/
-			
-			If (not this.rows[rI]) {
-				this.rows[rI] := []
-			}
-			
-			If (not this.rows[rI][cI].haskey("value")) {
-				this.AddCell(rI, cI)			
-			}
-			this.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
-			this.rows[rI][cI].subCells[sCI] := {}
-			this.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
-			
-			; font priority: subcell > cell > table
-			this.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : this.rows[rI][cI]
-			If (not StrLen(this.rows[rI][cI].subCells[sCI].font)) {
-				this.rows[rI][cI].subCells[sCI].font := this.font
-			}		
-			
-			this.rows[rI][cI].subCells[sCI].alignment := StrLen(alignment) ? alignment : "left"		
-			this.rows[rI][cI].subCells[sCI].color := fColor
-			this.rows[rI][cI].subCells[sCI].bgColor := bgColor
-			this.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
-
-			/*
-				text width and height measuring for singleline text
-			*/
-			measuringText := noSpacing ? this.rows[rI][cI].subCells[sCI].value " " : this.rows[rI][cI].subCells[sCI].value
-			size := this.Font_DrawText(measuringText, "", "s" this.fontSize ", " this.rows[rI][cI].subCells[sCI].font, "CALCRECT SINGLELINE NOCLIP")
-			this.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
-			this.rows[rI][cI].subCells[sCI].height := size.H
-
-			For key, subcell in this.rows[rI][cI].subCells {
-				If (key = 1) {
-					this.rows[rI][cI].width := 0
-				}
-				this.rows[rI][cI].width += subcell.width
-			}
-		}
+		table.rows[rowIndex][cellIndex] := {}
+		table.rows[rowIndex][cellIndex].subCells := []
+		table.rows[rowIndex][cellIndex].font := StrLen(font) ? font : table.font
 		
-		DrawTable(guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "") {	
-			/*
-				guiMargin	: left and right table margins
-				topMargin	: top table margin
-				tableXPos	: table x coordinate origin, don't use for relative positioning
-				tableYPos	: table y coordinate origin, don't use for relative positioning
-			*/
-			
-			columnWidths := []		
-			rowHeights := []		
-			Loop, % this.maxColumns {
-				w := 0
-				i := A_Index
-				For key, row in this.rows {
-					w := (w >= row[i].width) ? w : row[i].width
-				}
-				columnWidths[i] := w
-			}
-			For key, row in this.rows {
-				h := 0
-				For k, cell in row {
-					h := (h >= cell.height) ? h : cell.height
-				}
-				rowHeights.push(h)
-			}
-			
-			guiName := this.GuiName
-			guiFontOptions := " s" this.fontSize
-			guiFontOptions .= StrLen(this.fColor) ? " c" this.fColor : ""
-			Gui, %guiName%Font, %guiFontOptions%, % this.font 
-			
-			shiftY := 0
-			If (not StrLen(tableXPos)) {
-				If (this.showGrid) {
-					tableXPos := "x" guiMargin + 5
-				} Else {
-					tableXPos := "x" guiMargin
-				}
-			}
-			tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
-			
-			For key, row in this.rows {
-				height := rowHeights[key] + Round((this.fontSize / 3))
-				shiftY := height - 1
-				
-				; shiftY needs to be changed further if the previous row has a different height than the current one
-				If (key >= 2 and rowHeights[key] != rowHeights[key-1]) {
-					shiftY := shiftY - (rowHeights[key] - rowHeights[key-1])
-				}
-				
-				For k, cell in row {
-					width := columnWidths[k] + Round(this.fontSize * 2.3)
-					this.DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)				
-				}
-			}		
-		}
-		
-		DrawCell(cell, guiName, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
-			/*
-				cell			: cell object
-				guiName		: name of the tooltip gui
-				k			: cell index
-				key			: row index
-				guiFontOptions	: font options like font, size, style and color
-				tableXPos		: table x coordinate origin
-				tableYPos		: table y coordinate origin
-				shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
-				width		: cell width in px
-				height		: cell height in px
-				recurse		: cells use this option to recursively draw subcells
-			*/
-			
-			addedBackground := false
-			
-			; loop to overlay an empty cell over all subcells (easier positioning of the following column in the row)
-			Loop, 2 {
-				If (k = 1 and key = 1) {
-					yPos := " " tableYPos
-					yPosProgress := yPos
-				} Else If (k = 1) {
-					yPos := " yp+" shiftY
-					yPosProgress := yPos
-				} Else {
-					yPos := (recurse and tableYPos != "null") ? " yp+" tableYPos : " yp+0"
-					yPos := A_Index = 2 ? " ys+0" : yPos
-					
-					If (recurse) {
-						yPosProgress := (tableYPos != "null") ? " yp+" tableYPos + 1 : " yp+1"				
-					} Else {
-						yPosProgress := "yp+0"
-					}				
-				}
-
-				If (k = 1 and not recurse) {
-					xPos := " " tableXPos
-					xPos := A_Index = 2 ? xPos : xPos
-				} Else {
-					xPos := (recurse and tableXPos != "null") ? tableXPos : " x+-1"
-					xPos := A_Index = 2 ? " xs+0" : xPos
-				}
-				
-				If (A_Index = 2) {
-					cell.bgColor := "Trans"
-				}
-				
-				options := ""
-				options .= StrLen(cell.color) ? " c" cell.color : ""				
-				options .= " w" width 
-				options .= " h" height
-				
-				If (cell.subCells.length() and not recurse and not A_Index = 2) {
-					options .= " Section"
-				}
-
-				If (cell.bgColor = "Trans") {
-					options .= " BackGroundTrans"
-				} Else If (StrLen(cell.bgColor)) {
-					options .= " BackGroundTrans"
-					bgColor := cell.bgColor
-					Gui, %guiName%Add, Progress, w%width% h%height% %yPosProgress% %xPos% Background%bgColor%		
-					options .= recurse ? " xp yp-1" : " xp yp"
-					addedBackground := true
-				}
-				
-				If (not addedBackground) {
-					options .= yPos
-					options .= xPos
-				}
-				
-				If (this.showGrid and not recurse) {
-					options .= " +Border"
-				}
-
-				If (cell.fColor or cell.font or cell.fontOptions) {
-					elementFontOptions := StrLen(cell.fColor) ? " c" cell.fColor : ""
-					elementFontOptions .= StrLen(cell.fontOptions) ? " " cell.fontOptions : ""
-					elementFont := StrLen(cell.font) ? cell.font : this.font
-					Gui, %guiName%Font, %elementFontOptions%, % elementFont 
-				}
-				
-				If (RegExMatch(cell.alignment, "i)left|center|right")) {
-					options .= " " cell.alignment
-				}
-				
-				Gui, %guiName%Add, Text, %options%, % cell.value
-				If (cell.fColor or cell.font) {
-					Gui, %guiName%Font, %guiFontOptions% " norm", % this.font 
-				}
-				
-				If (cell.subCells.length() and not recurse and A_Index = 1) {
-					For j, subcell in cell.subcells {
-						_recurse := true
-						_width := subcell.width
-						_xPosShift := (j = 1) ? " xs+0" : "null"
-						_yPosShift := (j = 1) ? 1 : "null"		
-						_height := height - 4
-						this.DrawCell(subcell, guiName, 0, 0, guiFontOptions, _xPosShift, _yPosShift, shiftY, _width, _height, _recurse)	
-					}
-				}
-				
-				If (not cell.subCells.length()) {
-					Break
-				}
-			}
-		}
+		table.rows[rowIndex][cellIndex].alignment := StrLen(alignment) ? alignment : "left"		
+		table.rows[rowIndex][cellIndex].color := fColor
+		table.rows[rowIndex][cellIndex].bgColor := bgColor
+		table.rows[rowIndex][cellIndex].fontOptions := fontOptions
+		table.maxColumns := cellIndex >= table.maxColumns ? cellIndex : cellIndex > table.maxColumns
 		
 		/*
+			text width and height measuring for single and multiline text (no auto line breaks)
+		*/
+		newValue := ""
+		width := 0
+		height := 0
+		value := Trim(value)
+
+		Loop, Parse, value, `n, `r
+		{
+			string := A_LoopField			
+			StringReplace, string, string, `r,, All
+			StringReplace, string, string, `n,, All
+			
+			emptyLine := false
+			If (not StrLen(string)) {
+				string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
+				emptyLine := true				
+			}
+			string := " " Trim(string) " "	; add spaces as table padding
+			
+			If (emptyLine) {
+				newValue .= "`n"
+			} Else {
+				newValue .= string "`n"
+			}		
+			
+			If (StrLen(string)) {
+				size := this.Font_DrawText(string, "", "s" table.fontSize ", " table.rows[rowIndex][cellIndex].font, "CALCRECT SINGLELINE NOCLIP")
+				width := width > size.W ? width : size.W
+				height += size.H
+			}
+		}
+		
+		table.rows[rowIndex][cellIndex].value := newValue
+		table.rows[rowIndex][cellIndex].height := height
+		table.rows[rowIndex][cellIndex].width := (not StrLen(value) and isSpacingCell) ? table.fontSize * 4 : width
+		
+		this.tables[tableIndex] := table
+	}
+	
+	AddSubCell(tI, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
+		/*
+			rowIndex		:
+			cellIndex		:
+			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+			value		: cell contents
+			alignment		: horizontal text-alignment (left, right, center)
+			fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+			bgColor		: background color in hex or a valid name like "red"
+			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+			fColor		: font color in hex or a valid name like "white"
+			font			: font family
+			noSpacing		: don't add table padding (left/right)
+		*/
+		
+		table := this.tables[tableIndex]
+		
+		If (not table.rows[rI]) {
+			table.rows[rI] := []
+		}
+		
+		If (not table.rows[rI][cI].haskey("value")) {
+			table.AddCell(rI, cI)			
+		}
+		table.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
+		table.rows[rI][cI].subCells[sCI] := {}
+		table.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
+		
+		; font priority: subcell > cell > table
+		table.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : table.rows[rI][cI]
+		If (not StrLen(table.rows[rI][cI].subCells[sCI].font)) {
+			table.rows[rI][cI].subCells[sCI].font := table.font
+		}		
+		
+		table.rows[rI][cI].subCells[sCI].alignment := StrLen(alignment) ? alignment : "left"		
+		table.rows[rI][cI].subCells[sCI].color := fColor
+		table.rows[rI][cI].subCells[sCI].bgColor := bgColor
+		table.rows[rI][cI].subCells[sCI].fontOptions := fontOptions
+
+		/*
+			text width and height measuring for singleline text
+		*/
+		measuringText := noSpacing ? table.rows[rI][cI].subCells[sCI].value " " : table.rows[rI][cI].subCells[sCI].value
+		size := this.Font_DrawText(measuringText, "", "s" table.fontSize ", " table.rows[rI][cI].subCells[sCI].font, "CALCRECT SINGLELINE NOCLIP")
+		table.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
+		table.rows[rI][cI].subCells[sCI].height := size.H
+
+		For key, subcell in table.rows[rI][cI].subCells {
+			If (key = 1) {
+				table.rows[rI][cI].width := 0
+			}
+			table.rows[rI][cI].width += subcell.width
+		}
+		
+		this.tables[tableIndex] := table
+	}
+	
+	DrawTable(tableIndex) {	
+		/*
+		*/
+		
+		table := this.tables[tableIndex]
+
+		If (tableIndex = 1) {
+			If (not table.topMargin) {
+				table.topMargin := 5				
+			}
+		}
+
+		guiMargin := table.guiMargin
+		topMargin := table.topMargin
+		tableXPos := table.tableXPos
+		tableYPos := table.tableYPos
+
+		columnWidths := []		
+		rowHeights := []		
+		Loop, % table.maxColumns {
+			w := 0
+			i := A_Index
+			For key, row in table.rows {
+				w := (w >= row[i].width) ? w : row[i].width
+			}
+			columnWidths[i] := w
+		}
+		For key, row in table.rows {
+			h := 0
+			For k, cell in row {
+				h := (h >= cell.height) ? h : cell.height
+			}
+			rowHeights.push(h)
+		}
+		
+		guiName := this.GuiName
+		guiFontOptions := " s" table.fontSize
+		guiFontOptions .= StrLen(table.fColor) ? " c" table.fColor : ""
+		Gui, %guiName%:Font, %guiFontOptions%, % table.font 
+		
+		shiftY := 0
+		If (not StrLen(tableXPos)) {
+			If (table.showGrid) {
+				tableXPos := "x" guiMargin + 5
+			} Else {
+				tableXPos := "x" guiMargin
+			}
+		}
+		tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
+		
+		For key, row in table.rows {
+			height := rowHeights[key] + Round((table.fontSize / 3))
+			shiftY := height - 1
+			
+			; shiftY needs to be changed further if the previous row has a different height than the current one
+			If (key >= 2 and rowHeights[key] != rowHeights[key-1]) {
+				shiftY := shiftY - (rowHeights[key] - rowHeights[key-1])
+			}
+			
+			For k, cell in row {
+				width := columnWidths[k] + Round(table.fontSize * 2.3)
+				this.DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)				
+			}
+		}
+
+		this.tables[tableIndex] := table
+	}
+	
+	DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
+		/*
+			tableIndex	:
+			cell			: cell object
+			k			: cell index
+			key			: row index
+			guiFontOptions	: font options like font, size, style and color
+			tableXPos		: table x coordinate origin
+			tableYPos		: table y coordinate origin
+			shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
+			width		: cell width in px
+			height		: cell height in px
+			recurse		: cells use this option to recursively draw subcells
+		*/
+		
+		table := this.tables[tableIndex]
+		guiName := this.GuiName
+		addedBackground := false
+
+		; loop to overlay an empty cell over all subcells (easier positioning of the following column in the row)
+		Loop, 2 {
+			If (k = 1 and key = 1) {
+				yPos := " " tableYPos
+				yPosProgress := yPos
+			} Else If (k = 1) {
+				yPos := " yp+" shiftY
+				yPosProgress := yPos
+			} Else {
+				yPos := (recurse and tableYPos != "null") ? " yp+" tableYPos : " yp+0"
+				yPos := A_Index = 2 ? " ys+0" : yPos
+				
+				If (recurse) {
+					yPosProgress := (tableYPos != "null") ? " yp+" tableYPos + 1 : " yp+1"				
+				} Else {
+					yPosProgress := "yp+0"
+				}				
+			}
+
+			If (k = 1 and not recurse) {
+				xPos := " " tableXPos
+				xPos := A_Index = 2 ? xPos : xPos
+			} Else {
+				xPos := (recurse and tableXPos != "null") ? tableXPos : " x+-1"
+				xPos := A_Index = 2 ? " xs+0" : xPos
+			}
+			
+			If (A_Index = 2) {
+				cell.bgColor := "Trans"
+			}
+
+			options := ""
+			options .= StrLen(cell.color) ? " c" cell.color : ""				
+			options .= " w" width 
+			options .= " h" height
+
+			If (cell.subCells.length() and not recurse and not A_Index = 2) {
+				options .= " Section"
+			}
+
+			If (cell.bgColor = "Trans") {
+				options .= " BackGroundTrans"
+			} Else If (StrLen(cell.bgColor)) {
+				options .= " BackGroundTrans"
+				bgColor := cell.bgColor
+				Gui, %guiName%:Add, Progress, w%width% h%height% %yPosProgress% %xPos% Background%bgColor%		
+				options .= recurse ? " xp yp-1" : " xp yp"
+				addedBackground := true
+			}
+			;msgbox % "1 :" options
+			If (not addedBackground) {
+				options .= yPos
+				options .= xPos
+			}
+			;msgbox % "2 :" options
+			If (table.showGrid and not recurse) {
+				options .= " +Border"
+			}
+
+			If (cell.fColor or cell.font or cell.fontOptions) {
+				elementFontOptions := StrLen(cell.fColor) ? " c" cell.fColor : ""
+				elementFontOptions .= StrLen(cell.fontOptions) ? " " cell.fontOptions : ""
+				elementFont := StrLen(cell.font) ? cell.font : table.font
+				Gui, %guiName%:Font, %elementFontOptions%, % elementFont 
+			}
+
+			If (RegExMatch(cell.alignment, "i)left|center|right")) {
+				options .= " " cell.alignment
+			}
+			
+			options := RegExReplace(options, "s\d+")
+			;msgbox % options
+			Gui, %guiName%:Add, Text, %options%, % cell.value
+			If (cell.fColor or cell.font) {
+				Gui, %guiName%:Font, %guiFontOptions% " norm", % table.font 
+			}
+			
+			If (cell.subCells.length() and not recurse and A_Index = 1) {
+				For j, subcell in cell.subcells {
+					_recurse := true
+					_width := subcell.width
+					_xPosShift := (j = 1) ? " xs+0" : "null"
+					_yPosShift := (j = 1) ? 1 : "null"		
+					_height := height - 4
+					this.DrawCell(tableIndex, subcell, 0, 0, guiFontOptions, _xPosShift, _yPosShift, shiftY, _width, _height, _recurse)	
+				}
+			}
+			
+			If (not cell.subCells.length()) {
+				Break
+			}
+		}
+	}
+	
+	/*
 		Original script by majkinetor.
 		Fixed by Eruyome.
 		
@@ -815,99 +806,98 @@ class AdvancedToolTipGui
 					bRedraw	  - If this parameter is TRUE, the control redraws itself. By default 1.
 		 Returns:	
 					Font handle.
-		 */
-		CreateFont(HCtrl="", Font="", BRedraw=1) {
-			static WM_SETFONT := 0x30
+	 */
+	CreateFont(HCtrl="", Font="", BRedraw=1) {
+		static WM_SETFONT := 0x30
 
-			;if Font is not integer
-			if (not RegExMatch(Trim(Font), "^\d+$"))
-			{
-				StringSplit, Font, Font, `,,%A_Space%%A_Tab%
-				fontStyle := Font1, fontFace := Font2
+		;if Font is not integer
+		if (not RegExMatch(Trim(Font), "^\d+$"))
+		{
+			StringSplit, Font, Font, `,,%A_Space%%A_Tab%
+			fontStyle := Font1, fontFace := Font2
 
-			  ;parse font 
-				italic      := InStr(Font1, "italic")    ?  1    :  0 
-				underline   := InStr(Font1, "underline") ?  1    :  0 
-				strikeout   := InStr(Font1, "strikeout") ?  1    :  0 
-				weight      := InStr(Font1, "bold")      ? 700   : 400 
+		  ;parse font 
+			italic      := InStr(Font1, "italic")    ?  1    :  0 
+			underline   := InStr(Font1, "underline") ?  1    :  0 
+			strikeout   := InStr(Font1, "strikeout") ?  1    :  0 
+			weight      := InStr(Font1, "bold")      ? 700   : 400 
 
-			  ;height 
+		  ;height 
 
-				RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
-				ifEqual, height,, SetEnv, height, 10
-				RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
-				height := -DllCall("MulDiv", "int", Height, "int", LogPixels, "int", 72) 
-			
-				IfEqual, Font2,,SetEnv Font2, MS Sans Serif
-			 ;create font 
-				hFont   := DllCall("CreateFont", "int",  height, "int",  0, "int",  0, "int", 0
-								  ,"int",  weight,   "Uint", italic,   "Uint", underline 
-								  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", Font2, "Uint")
-			} else hFont := Font
-			ifNotEqual, HCtrl,,SendMessage, WM_SETFONT, hFont, BRedraw,,ahk_id %HCtrl%
-			return hFont
+			RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
+			ifEqual, height,, SetEnv, height, 10
+			RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
+			height := -DllCall("MulDiv", "int", Height, "int", LogPixels, "int", 72) 
+		
+			IfEqual, Font2,,SetEnv Font2, MS Sans Serif
+		 ;create font 
+			hFont   := DllCall("CreateFont", "int",  height, "int",  0, "int",  0, "int", 0
+							  ,"int",  weight,   "Uint", italic,   "Uint", underline 
+							  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", Font2, "Uint")
+		} else hFont := Font
+		ifNotEqual, HCtrl,,SendMessage, WM_SETFONT, hFont, BRedraw,,ahk_id %HCtrl%
+		return hFont
+	}
+
+	/*
+	Original script by majkinetor.
+	Fixed by Eruyome.
+	
+	https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+	
+	 Function: DrawText
+			   Draws text using specified font on device context or calculates width and height of the text.
+	 Parameters: 
+			Text	- Text to be drawn or measured. 
+			DC		- Device context to use. If omitted, function will use Desktop's DC.
+			Font	- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
+			Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
+			Rect	- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
+					  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
+					
+	 Flags:
+			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
+	 Returns:
+			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
+	 */    
+	Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
+		static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
+
+		hFlag := (Rect = "") ? DT_NOCLIP : 0
+
+		StringSplit, Rect, Rect, %A_Space%
+		loop, parse, Flags, %A_Space%
+			ifEqual, A_LoopField,,continue
+			else hFlag |= DT_%A_LoopField%
+
+		if (RegExMatch(Trim(Font), "^\d+$")) {
+			hFont := Font, bUserHandle := 1
+		}
+		else if (Font != "") {
+			hFont := this.CreateFont( "", Font)
+		}
+		else {
+			hFlag |= DT_INTERNAL
 		}
 
-		/*
-		Original script by majkinetor.
-		Fixed by Eruyome.
+		IfEqual, hDC,,SetEnv, hDC, % DllCall("GetDC", "Uint", 0, "Uint")
+		ifNotEqual, hFont,, SetEnv, hOldFont, % DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
+
+		VarSetCapacity(RECT, 16)
+		if (Rect0 != 0)
+			loop, 4
+				NumPut(Rect%A_Index%, RECT, (A_Index-1)*4)
+
+		h := DllCall("DrawTextA", "Uint", hDC, "Str", Text, "int", StrLen(Text), "uint", &RECT, "uint", hFlag)
+
+		;clean
+		ifNotEqual, hOldFont,,DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont) 
+		ifNotEqual, bUserHandle, 1, DllCall("DeleteObject", "Uint", hFont)
+		ifNotEqual, DC,,DllCall("ReleaseDC", "Uint", 0, "Uint", hDC) 
 		
-		https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+		w	:= NumGet(RECT, 8, "Int")
 		
-		 Function: DrawText
-				   Draws text using specified font on device context or calculates width and height of the text.
-		 Parameters: 
-				Text	- Text to be drawn or measured. 
-				DC		- Device context to use. If omitted, function will use Desktop's DC.
-				Font	- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
-				Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
-				Rect	- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
-						  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
-						
-		 Flags:
-				CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
-		 Returns:
-				Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
-		 */    
-		Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
-			static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
-
-			hFlag := (Rect = "") ? DT_NOCLIP : 0
-
-			StringSplit, Rect, Rect, %A_Space%
-			loop, parse, Flags, %A_Space%
-				ifEqual, A_LoopField,,continue
-				else hFlag |= DT_%A_LoopField%
-
-			if (RegExMatch(Trim(Font), "^\d+$")) {
-				hFont := Font, bUserHandle := 1
-			}
-			else if (Font != "") {
-				hFont := this.CreateFont( "", Font)
-			}
-			else {
-				hFlag |= DT_INTERNAL
-			}
-
-			IfEqual, hDC,,SetEnv, hDC, % DllCall("GetDC", "Uint", 0, "Uint")
-			ifNotEqual, hFont,, SetEnv, hOldFont, % DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
-
-			VarSetCapacity(RECT, 16)
-			if (Rect0 != 0)
-				loop, 4
-					NumPut(Rect%A_Index%, RECT, (A_Index-1)*4)
-
-			h := DllCall("DrawTextA", "Uint", hDC, "Str", Text, "int", StrLen(Text), "uint", &RECT, "uint", hFlag)
-
-			;clean
-			ifNotEqual, hOldFont,,DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont) 
-			ifNotEqual, bUserHandle, 1, DllCall("DeleteObject", "Uint", hFont)
-			ifNotEqual, DC,,DllCall("ReleaseDC", "Uint", 0, "Uint", hDC) 
-			
-			w	:= NumGet(RECT, 8, "Int")
-			
-			return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
-		} 
+		return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
 	}
 }
 
