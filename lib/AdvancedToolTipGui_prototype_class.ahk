@@ -16,7 +16,7 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 /*
 	init tooltip gui, don't do this for every tooltip call
 */
-AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
+AdvTT := new AdvancedToolTipGui("", "", "", "", "", "Verdana", 8)
 
 Return
 
@@ -124,8 +124,6 @@ ExitApp
 
 class AdvancedToolTipGui
 {
-	static guiName := "AdvancedToolTipGuiWindow"
-
 	__New(params*)
 	{
 		c := params.MaxIndex()
@@ -133,22 +131,23 @@ class AdvancedToolTipGui
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
 		}
 		
-		; set defaults
-		this.borderColor		:= (params[1] = "" or not params[1]) ? "a65b24" : params[1]
-		this.backgroundColor	:= (params[2] = "" or not params[2]) ? "000000" : params[2]
-		this.borderWidth		:= (params[3] = "" or not params[3]) ? 2 : params[3]
-		this.opacity			:= (params[4] = "" or not params[4]) ? 215 : params[4]
-		this.defTTFont			:= (params[5] = "" or not params[5]) ? "Consolas" : params[5]
-		this.defTTFontSize		:= (params[6] = "" or not params[6]) ? 9 : params[6]
-		this.timeoutInterval	:= (params[7] = "" or not params[7]) ? 1000 : params[7]
-		this.mouseMoveThreshold	:= (params[8] = "" or not params[8]) ? 50 : params[8]
-		this.useToolTipTimeout	:= (params[9] = "" or not params[9]) ? false : params[9]
-		this.toolTipTimeoutSec	:= (params[10] = "" or not params[10]) ? 15 : params[10]		
-		this.xPos				:= (params[11] = "" or not params[11]) ? 0 : params[11]
-		this.yPos				:= (params[12] = "" or not params[12]) ? 0 : params[12]
-		this.usedFixedCoords	:= (params[13] = "" or not params[13]) ? false : params[13]
-		this.appAHKGroup		:= (not params[14]) ? "PoEWindowGrp" : params[14]
-		this.appAHKID			:= (not params[15]) ? "" : params[15]
+		; set defaults		
+		this.guiName			:= (params[1] = "" or not params[1]) ? "AdvancedToolTipGuiWindow" : params[1]
+		this.borderColor		:= (params[2] = "" or not params[2]) ? "a65b24" : params[2]
+		this.backgroundColor	:= (params[3] = "" or not params[3]) ? "000000" : params[3]
+		this.borderWidth		:= (params[4] = "" or not params[4]) ? 2 : params[4]
+		this.opacity			:= (params[5] = "" or not params[5]) ? 215 : params[5]
+		this.defTTFont			:= (params[6] = "" or not params[6]) ? "Consolas" : params[6]
+		this.defTTFontSize		:= (params[7] = "" or not params[7]) ? 9 : params[7]
+		this.timeoutInterval	:= (params[8] = "" or not params[8]) ? 1000 : params[8]
+		this.mouseMoveThreshold	:= (params[9] = "" or not params[9]) ? 50 : params[9]
+		this.useToolTipTimeout	:= (params[10] = "" or not params[10]) ? false : params[10]
+		this.toolTipTimeoutSec	:= (params[11] = "" or not params[11]) ? 15 : params[11]		
+		this.xPos				:= (params[12] = "" or not params[12]) ? 0 : params[12]
+		this.yPos				:= (params[13] = "" or not params[13]) ? 0 : params[13]
+		this.usedFixedCoords	:= (params[14] = "" or not params[14]) ? false : params[14]
+		this.appAHKGroup		:= (not params[15]) ? "PoEWindowGrp" : params[15]
+		this.appAHKID			:= (not params[16]) ? "" : params[16]
 		
 		this.fixedXPos			:= this.xPos
 		this.fixedYPos			:= this.yPos
