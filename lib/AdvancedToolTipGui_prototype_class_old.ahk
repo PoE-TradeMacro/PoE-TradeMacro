@@ -21,9 +21,6 @@ AdvTT := new AdvancedToolTipGui("", "", "", "", "Verdana", 8)
 Return
 
 ^XButton1::
-	
-
-
 	item := {}
 	item.name := "Gloom Bite"
 	item.basetype := "Ceremonial Axe"
@@ -708,7 +705,7 @@ class AdvancedToolTipGui
 			*/
 			
 			addedBackground := false
-			debugprintarray([guiName, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height])
+			
 			; loop to overlay an empty cell over all subcells (easier positioning of the following column in the row)
 			Loop, 2 {
 				If (k = 1 and key = 1) {
@@ -778,7 +775,7 @@ class AdvancedToolTipGui
 				If (RegExMatch(cell.alignment, "i)left|center|right")) {
 					options .= " " cell.alignment
 				}
-				debugprintarray([guiName, options, cell])
+
 				Gui, %guiName%Add, Text, %options%, % cell.value
 				If (cell.fColor or cell.font) {
 					Gui, %guiName%Font, %guiFontOptions% " norm", % this.font 

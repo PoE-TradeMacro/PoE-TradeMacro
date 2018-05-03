@@ -86,7 +86,7 @@ Return
 	AdvTT.AddCell(2, 5, 5,  item.dps.qtotal, "right", "", "", true, "", "")
 
 	;-------------- table 03 ------------------------------------------------------------
-	AdvTT.AddTable(-1, "", "FEFEFE", true)	
+	AdvTT.AddTable(-1, "", "FEFEFE", true, 5, 10)	
 
 	AdvTT.AddCell(3, 1, 1,  "Mod", "", "bold", "26292d", true, "", "")
 	AdvTT.AddCell(3, 1, 2,  "Tier/Affix", "", "bold", "26292d", true, "", "")
@@ -100,7 +100,7 @@ Return
 	AdvTT.AddCell(3, 2, 3,  "text", "", "", "", true, "", "")
 
 	;-------------- table 04 ------------------------------------------------------------	
-	AdvTT.AddTable(-1, "", "FEFEFE", false)	
+	AdvTT.AddTable(-1, "", "FEFEFE", false, 5, 10)	
 
 	multilineText := "Multiline Text (no auto breaks):`n`n"
 	multilineText .= "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ut ex arcu.`nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus, `nMaecenas elit dui, ullamcorper tempus cursus eu, gravida eu lacus."
