@@ -127,7 +127,7 @@ class AdvancedToolTipGui
 	__New(params*)
 	{
 		c := params.MaxIndex()
-		If (c > 15) {
+		If (c > 16) {
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
 		}
 		
@@ -375,29 +375,6 @@ class AdvancedToolTipGui
 			SetTimer % timer, Off
 		}
 	}
-	
-	MonitorInfo() {		
-		SysGet, iMonCnt, MonitorCount
-		
-		aDictMonInfo := []
-		Loop, %iMonCnt%
-		{
-			vDictMonInfo := {}
-
-			SysGet, Mon, Monitor, %A_Index%
-
-			vDictMonInfo.Insert("Left", MonLeft)
-			vDictMonInfo.Insert("Right", MonRight)
-			vDictMonInfo.Insert("Top", MonTop)
-			vDictMonInfo.Insert("Bottom", MonBottom)
-			vDictMonInfo.Insert("W", Abs(MonRight-MonLeft))
-			vDictMonInfo.Insert("H", Abs(MonTop-MonBottom))
-			vDictMonInfo.Insert("Num", A_Index)
-			aDictMonInfo.Insert(vDictMonInfo)
-		}
-		
-		return aDictMonInfo
-	}
 
 	getToolTipWindowHwnd() {
 		return this.parentWindow
@@ -412,6 +389,7 @@ class AdvancedToolTipGui
 		; parentHwnd   -  the ahk_id of the parent window.
 		;                 You should not pass other control options!
 		; -------------------------------------------------------------------------------------------------------------------------------
+		
 		LFW := WinExist() ; save the last-found window, if any
 		If (not GuiName and parentHwnd) {		
 			DefGui := A_DefaultGui ; save the current default GUI		
@@ -443,22 +421,22 @@ class AdvancedToolTipGui
 		}
 	}
 	
-	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {
-		/*
-			Table class
-
-			guiDefFont	: default font used by the entire tooltip gui
-			guiDefFontSize	: default font size used by the entire tooltip gui
-			fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
-			font			: table-wide font, if "-1" the tooltip gui default font is being used
-			color		: table-wide font color in hex or a valid name like "white"
-			grid			: show table grid/borders
-			guiMargin	: left and right table margins
-			topMargin	: top table margin
-			tableXPos	: table x coordinate origin, don't use for relative positioning
-			tableYPos	: table y coordinate origin, don't use for relative positioning
-			assocVar		: 
-		*/		
+	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {		
+		; -------------------------------------------------------------------------------------------------------------------------------
+		;	Table class
+		;
+		;	guiDefFont	: default font used by the entire tooltip gui
+		;	guiDefFontSize	: default font size used by the entire tooltip gui
+		;	fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
+		;	font			: table-wide font, if "-1" the tooltip gui default font is being used
+		;	color		: table-wide font color in hex or a valid name like "white"
+		;	grid			: show table grid/borders
+		;	guiMargin	: left and right table margins
+		;	topMargin	: top table margin
+		;	tableXPos	: table x coordinate origin, don't use for relative positioning
+		;	tableYPos	: table y coordinate origin, don't use for relative positioning
+		;	assocVar		: 
+		; -------------------------------------------------------------------------------------------------------------------------------
 		
 		table := {}
 		If (assocVar) {
@@ -483,18 +461,18 @@ class AdvancedToolTipGui
 	}
 
 	AddCell(tableIndex, rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
-		/*
-			rowIndex		:
-			cellIndex		:
-			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-			value		: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor		: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
-			fColor		: font color in hex or a valid name like "white"
-			font			: font family
-		*/
+		; -------------------------------------------------------------------------------------------------------------------------------
+		;	rowIndex		:
+		;	cellIndex		:
+		;	measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+		;	value		: cell contents
+		;	alignment		: horizontal text-alignment (left, right, center)
+		;	fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+		;	bgColor		: background color in hex or a valid name like "red"
+		;	isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
+		;	fColor		: font color in hex or a valid name like "white"
+		;	font			: font family
+		; -------------------------------------------------------------------------------------------------------------------------------
 		
 		table := this.tables[tableIndex]
 		
@@ -554,19 +532,19 @@ class AdvancedToolTipGui
 	}
 	
 	AddSubCell(tI, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
-		/*
-			rowIndex		:
-			cellIndex		:
-			measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-			value		: cell contents
-			alignment		: horizontal text-alignment (left, right, center)
-			fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-			bgColor		: background color in hex or a valid name like "red"
-			isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-			fColor		: font color in hex or a valid name like "white"
-			font			: font family
-			noSpacing		: don't add table padding (left/right)
-		*/
+		; -------------------------------------------------------------------------------------------------------------------------------
+		;	rowIndex		:
+		;	cellIndex		:
+		;	measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+		;	value		: cell contents
+		;	alignment		: horizontal text-alignment (left, right, center)
+		;	fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
+		;	bgColor		: background color in hex or a valid name like "red"
+		;	isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
+		;	fColor		: font color in hex or a valid name like "white"
+		;	font			: font family
+		;	noSpacing		: don't add table padding (left/right)
+		; -------------------------------------------------------------------------------------------------------------------------------
 		
 		table := this.tables[tableIndex]
 		
@@ -679,19 +657,19 @@ class AdvancedToolTipGui
 	}
 	
 	DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
-		/*
-			tableIndex	:
-			cell			: cell object
-			k			: cell index
-			key			: row index
-			guiFontOptions	: font options like font, size, style and color
-			tableXPos		: table x coordinate origin
-			tableYPos		: table y coordinate origin
-			shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
-			width		: cell width in px
-			height		: cell height in px
-			recurse		: cells use this option to recursively draw subcells
-		*/
+		; -------------------------------------------------------------------------------------------------------------------------------
+		;	tableIndex	:
+		;	cell			: cell object
+		;	k			: cell index
+		;	key			: row index
+		;	guiFontOptions	: font options like font, size, style and color
+		;	tableXPos		: table x coordinate origin
+		;	tableYPos		: table y coordinate origin
+		;	shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
+		;	width		: cell width in px
+		;	height		: cell height in px
+		;	recurse		: cells use this option to recursively draw subcells
+		; -------------------------------------------------------------------------------------------------------------------------------
 		
 		table := this.tables[tableIndex]
 		guiName := this.GuiName
@@ -791,7 +769,8 @@ class AdvancedToolTipGui
 		}
 	}
 	
-	/*
+	; -------------------------------------------------------------------------------------------------------------------------------
+		/*
 		Original script by majkinetor.
 		Fixed by Eruyome.
 		
@@ -805,7 +784,8 @@ class AdvancedToolTipGui
 					bRedraw	  - If this parameter is TRUE, the control redraws itself. By default 1.
 		 Returns:	
 					Font handle.
-	 */
+		*/
+	; -------------------------------------------------------------------------------------------------------------------------------
 	CreateFont(HCtrl="", Font="", BRedraw=1) {
 		static WM_SETFONT := 0x30
 
@@ -838,7 +818,8 @@ class AdvancedToolTipGui
 		return hFont
 	}
 
-	/*
+	; -------------------------------------------------------------------------------------------------------------------------------
+		/*
 	Original script by majkinetor.
 	Fixed by Eruyome.
 	
@@ -858,7 +839,8 @@ class AdvancedToolTipGui
 			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
 	 Returns:
 			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
-	 */    
+		*/
+	; -------------------------------------------------------------------------------------------------------------------------------	
 	Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
 		static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
 
