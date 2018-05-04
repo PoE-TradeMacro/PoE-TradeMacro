@@ -182,11 +182,13 @@ class AdvancedToolTipGui
 	
 	; ==================================================================================================================================
 	; Function	CreateGui
-	;			Initializes the ToolTip gui and changes its appearance and interactions (clickthrough, no border).
+	;			Initializes the ToolTip gui and changes its appearance and interactions (clickthrough, no border).	
+	; Parameters:
+	; 		reCreate	- Create gui without resetting the table array.
 	; ==================================================================================================================================
-	CreateGui()
+	CreateGui(reCreate = false)
 	{
-		If (this.tables.MaxIndex()) {
+		If (this.tables.MaxIndex() and not reCreate) {
 			this.tables := []
 		}
 		
@@ -886,18 +888,18 @@ class AdvancedToolTipGui
 	}
 	
 	; ==================================================================================================================================
-	;	Original script by majkinetor.
-	;	Fixed by Eruyome.
+	; Original script by majkinetor.
+	; Fixed by Eruyome.
 	;	
-	;	https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+	; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
 	;	
-	;	Function:		CreateFont
+	; Function:		CreateFont
 	;				Creates the font and optinally, sets it for the control.
-	;	Parameters:
+	; Parameters:
 	;				hCtrl 	- Handle of the control. If omitted, function will create font and return its handle.
 	;				Font  	- AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
 	;				bRedraw	- If this parameter is TRUE, the control redraws itself. By default 1.
-	;	Returns:	
+	; Returns:	
 	;				Font handle.
 	; ==================================================================================================================================
 	CreateFont(HCtrl="", Font="", BRedraw=1) {
