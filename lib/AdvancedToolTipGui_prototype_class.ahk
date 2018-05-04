@@ -227,6 +227,8 @@ class AdvancedToolTipGui
 	; ==================================================================================================================================
 	; Function	SetToolTipSizeAndPosition
 	;			Restores window to actual size (AutoSize) and calls functions to add a border and check/correct its positioning.
+	; Return:	
+	;			1 if the ToolTip fits on the screen, 0 if not.
 	; ==================================================================================================================================
 	SetToolTipSizeAndPosition() {
 		xPos := this.xPos
@@ -241,7 +243,7 @@ class AdvancedToolTipGui
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 
 		this.GuiAddBorder(this.borderColor, this.borderWidth, TTW, TTH, GuiName, TTHWnd)
-		this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
+		Return this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
 	}
 	
 	; ==================================================================================================================================
@@ -258,7 +260,7 @@ class AdvancedToolTipGui
 	;		TTH		- ToolTip height.
 	;
 	; Return: 
-	;			Nothing.
+	;			1 if the ToolTip fits on the screen, 0 if not.
 	; ==================================================================================================================================
 	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {
 		appAHKGroup	:= this.appAHKGroup
@@ -304,6 +306,11 @@ class AdvancedToolTipGui
 				boundingRectangle.right := monitor.right
 				boundingRectangle.h := monitor.name
 			}		
+		}
+		
+		; recalculate the tooltip if it is bigger than the screen
+		If (TTW > Abs(boundingRectangle.left - boundingRectangle.right) or TTH > Abs(boundingRectangle.top - boundingRectangle.bottom)) {
+			Return 0
 		}
 		
 		; cursor size
@@ -362,6 +369,8 @@ class AdvancedToolTipGui
 			this.yPos := TTY
 			WinMove, ahk_id %TTHwnd%, , TTX, TTY
 		}
+		
+		Return 1
 	}
 	
 	; ==================================================================================================================================
@@ -394,15 +403,28 @@ class AdvancedToolTipGui
 		Opacity := this.opacity
 		TTHwnd := this.parentWindow		
 		
-		this.SetToolTipSizeAndPosition()
-		
-		; make window visible again
-		WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
-		
-		; set tooltip timeout/timer
-		this.startMouseXPos := startMouseXPos
-		this.startMouseYPos := startMouseYPos
-		this.startTimer()
+		validToolTipDimensions := this.SetToolTipSizeAndPosition()
+		If (not validToolTipDimensions) {
+			; recalculate the tooltip if it is bigger than the screen
+			this.RecalculateToolTip()
+		} 
+		Else {				
+			; make window visible again
+			WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
+			
+			; set tooltip timeout/timer
+			this.startMouseXPos := startMouseXPos
+			this.startMouseYPos := startMouseYPos
+			this.startTimer()
+		}		
+	}
+	
+	; ==================================================================================================================================
+	; Function	RecalculateToolTip
+	;			
+	; ==================================================================================================================================
+	RecalculateToolTip() {
+		msgbox hey
 	}
 
 	; ==================================================================================================================================
@@ -504,6 +526,7 @@ class AdvancedToolTipGui
 	; ==================================================================================================================================
 	DrawTables() {
 		tables := this.tables
+		;debugprintarray(tables)
 		For key, val in tables {
 			this.DrawTable(key)
 		}
@@ -597,32 +620,8 @@ class AdvancedToolTipGui
 		width := 0
 		height := 0
 		value := Trim(value)
-
-		Loop, Parse, value, `n, `r
-		{
-			string := A_LoopField			
-			StringReplace, string, string, `r,, All
-			StringReplace, string, string, `n,, All
-			
-			emptyLine := false
-			If (not StrLen(string)) {
-				string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
-				emptyLine := true				
-			}
-			string := " " Trim(string) " "	; add spaces as table padding
-			
-			If (emptyLine) {
-				newValue .= "`n"
-			} Else {
-				newValue .= string "`n"
-			}		
-			
-			If (StrLen(string)) {
-				size := this.Font_DrawText(string, "", "s" table.fontSize ", " table.rows[rowIndex][cellIndex].font, "CALCRECT SINGLELINE NOCLIP")
-				width := width > size.W ? width : size.W
-				height += size.H
-			}
-		}
+		
+		this.CalculateCellTextDimensions(value, table.fontSize, table.rows[rowIndex][cellIndex].font, height, width, newValue)
 		
 		table.rows[rowIndex][cellIndex].value := newValue
 		table.rows[rowIndex][cellIndex].height := height
@@ -682,9 +681,13 @@ class AdvancedToolTipGui
 			text width and height measuring for singleline text
 		*/
 		measuringText := noSpacing ? table.rows[rI][cI].subCells[sCI].value " " : table.rows[rI][cI].subCells[sCI].value
-		size := this.Font_DrawText(measuringText, "", "s" table.fontSize ", " table.rows[rI][cI].subCells[sCI].font, "CALCRECT SINGLELINE NOCLIP")
-		table.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : size.W
-		table.rows[rI][cI].subCells[sCI].height := size.H
+		
+		width := 0
+		height := 0
+		this.CalculateCellTextDimensions(measuringText, table.fontSize, table.rows[rI][cI].subCells[sCI].font, height, width)
+		
+		table.rows[rI][cI].subCells[sCI].width := (not StrLen(value) and isSpacingCell) ? 10 : width
+		table.rows[rI][cI].subCells[sCI].height := height
 
 		For key, subcell in table.rows[rI][cI].subCells {
 			If (key = 1) {
@@ -694,6 +697,49 @@ class AdvancedToolTipGui
 		}
 
 		this.tables[tableIndex] := table
+	}
+	
+	; ==================================================================================================================================
+	; Function:	CalculateCellTextDimensions	 
+	;  			Calculates width and height of a cells text contents. Multiline support for normal cells, singleline support for subcells.
+	; Parameters:	
+	;			value		- text to measure. 
+	;			fontSize	- texts font size.
+	;			font		- texts font family.
+	;			height		- ByRef variable, calculated height.
+	;			width		- ByRef variable, calculated width.
+	;			newValue	- ByRef variable, new value (for multiline text).
+	; Returns:
+	;			Height, width and newValue as ByRef variables.
+	; ==================================================================================================================================
+	CalculateCellTextDimensions(value, fontSize, font, ByRef height = 0, ByRef width = 0, ByRef newValue = "") {
+		Loop, Parse, value, `n, `r
+		{
+			string := A_LoopField			
+			StringReplace, string, string, `r,, All
+			StringReplace, string, string, `n,, All
+			
+			emptyLine := false
+			If (not StrLen(string)) {
+				string := "A"				; don't prevent emtpy lines, just having a linebreak will break the text measuring 
+				emptyLine := true				
+			}
+			string := " " Trim(string) " "	; add spaces as table padding
+			
+			If (emptyLine) {
+				newValue .= "`n"
+			} Else {
+				newValue .= string "`n"
+			}		
+			
+			If (StrLen(string)) {
+				size := this.Font_DrawText(string, "", "s" fontSize ", " font, "CALCRECT SINGLELINE NOCLIP")
+				width := width > size.W ? width : size.W
+				height += size.H
+			}
+		}
+		
+		Return 
 	}
 	
 	; ==================================================================================================================================
@@ -842,12 +888,12 @@ class AdvancedToolTipGui
 				options .= recurse ? " xp yp-1" : " xp yp"
 				addedBackground := true
 			}
-			;msgbox % "1 :" options
+
 			If (not addedBackground) {
 				options .= yPos
 				options .= xPos
 			}
-			;msgbox % "2 :" options
+
 			If (table.showGrid and not recurse) {
 				options .= " +Border"
 			}
@@ -863,8 +909,7 @@ class AdvancedToolTipGui
 				options .= " " cell.alignment
 			}
 			
-			options := RegExReplace(options, "s\d+")
-			;msgbox % options
+			options := RegExReplace(options, " s\d+")
 			Gui, %guiName%:Add, Text, %options%, % cell.value
 			If (cell.fColor or cell.font) {
 				Gui, %guiName%:Font, %guiFontOptions% " norm", % table.font 
