@@ -115,7 +115,6 @@ Return
 		auto-size, position and show the tooltip
 		(or set absolute position)
 	*/
-	;AdvTT.ShowToolTip(true, 1000, 100)
 	AdvTT.ShowToolTip()
 Return
 
@@ -124,14 +123,34 @@ ExitApp
 
 class AdvancedToolTipGui
 {
+	; ==================================================================================================================================
+	; Function	__New
+	;			Creates a new ToolTip instance.
+	; Parameters:
+	; 		GuiName			- Name of the ToolTip gui.
+	;		borderColor		- ToolTip border color.
+	;		backgroundColor	- ToolTip background color.
+	;		borderWidth		- ToolTip border width.
+	;		opacity			- ToolTip window opacity (0 - 255).
+	;		defTTFont			- Default ToolTip font (family).
+	;		defTTFontSize		- Default ToolTip font size.
+	;		timeoutInterval	- ToolTip timeout/timer interval.
+	;		mouseMoveThreshold	- Distance in pixel that have to be moved to remove the ToolTip.
+	;		useToolTipTimeout	- Whether to timeout the ToolTip after a certain time.
+	;		toolTipTimeoutSec	- ToolTip timeout time in seconds.
+	;		xPos				- Default ToolTip x coordinate (used in case of using fixed coordinates).
+	;		yPos				- Default ToolTip y coordinate (used in case of using fixed coordinates).
+	;		usedFixedCoords	- Whether to draw the ToolTip at fixed coordinates or use the current mouse position.
+	;		appAHKGroup		- Name of the ahk_group that contains the target application, optional.
+	;		appAHKID			- ahk_id of the target application, optional.
+	; ==================================================================================================================================
 	__New(params*)
 	{
 		c := params.MaxIndex()
 		If (c > 16) {
 			throw "Too many parameters passed to AdvancedToolTipGui.New()"
 		}
-		
-		; set defaults		
+	
 		this.guiName			:= (params[1] = "" or not params[1]) ? "AdvancedToolTipGuiWindow" : params[1]
 		this.borderColor		:= (params[2] = "" or not params[2]) ? "a65b24" : params[2]
 		this.backgroundColor	:= (params[3] = "" or not params[3]) ? "000000" : params[3]
@@ -161,6 +180,10 @@ class AdvancedToolTipGui
 		this.tables := []
 	}
 	
+	; ==================================================================================================================================
+	; Function	CreateGui
+	;			Initializes the ToolTip gui and changes its appearance and interactions (clickthrough, no border).
+	; ==================================================================================================================================
 	CreateGui()
 	{
 		If (this.tables.MaxIndex()) {
@@ -199,6 +222,10 @@ class AdvancedToolTipGui
 		this.parentWindow := TTHwnd
 	}
 	
+	; ==================================================================================================================================
+	; Function	SetToolTipSizeAndPosition
+	;			Restores window to actual size (AutoSize) and calls functions to add a border and check/correct its positioning.
+	; ==================================================================================================================================
 	SetToolTipSizeAndPosition() {
 		xPos := this.xPos
 		yPos := this.yPos
@@ -215,6 +242,22 @@ class AdvancedToolTipGui
 		this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
 	}
 	
+	; ==================================================================================================================================
+	; Function	CheckAndCorrectWindowPosition
+	;			Checks on which monitor the ToolTIp should be drawn.
+	;			Checks whether the ToolTip can be drawn at current mouseposition while making sure that the ToolTip is visible entirely.
+	;			Corrects positioning as needed.
+	; Parameters:
+	; 		GuiName	- Name of the ToolTip gui.
+	;		TTHwnd	- Handle of the ToolTip Gui.
+	;		TTX		- ToolTip x coordinate.
+	;		TTY		- ToolTip y coordinate.
+	;		TTW		- ToolTip width.
+	;		TTH		- ToolTip height.
+	;
+	; Return: 
+	;			Nothing.
+	; ==================================================================================================================================
 	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {
 		appAHKGroup	:= this.appAHKGroup
 
@@ -319,6 +362,17 @@ class AdvancedToolTipGui
 		}
 	}
 	
+	; ==================================================================================================================================
+	; Function	ShowToolTip
+	;			Shows the ToolTip after checking and setting its position. Starts the ToolTip timer.
+	; Parameters:
+	; 		useFixedCoords	- Draw the ToolTip at fixed coordinates instead of at mouseposition 
+	;		x			- fixed x coordinate
+	;		y			- fixed y coordinate
+	;
+	; Return: 
+	;			Nothing.
+	; ==================================================================================================================================
 	ShowToolTip(useFixedCoords = false, x = false, y = false) {
 		CoordMode, Mouse, Screen
 		MouseGetPos, startMouseXPos, startMouseYPos
@@ -349,16 +403,33 @@ class AdvancedToolTipGui
 		this.startTimer()
 	}
 
+	; ==================================================================================================================================
+	; Function	StartTimer
+	;			Start a timer to let the ToolTip timeout or check mousemovment to close the ToolTip.
+	; ==================================================================================================================================
 	StartTimer() {
 		timer := this.timer
 		this.toolTipTimeout := 0
 		SetTimer % timer, % this.timeoutInterval
 	}
 	
+	; ==================================================================================================================================
+	; Function	StopTimer
+	;			Stops the tooltip timer instantly, ignores mousemovement checks.
+	; ==================================================================================================================================
 	StopTimer() {
 		this.DestroyToolTip(true)
 	}
 	
+	; ==================================================================================================================================
+	; Function	DestroyToolTip
+	;			Draws a region onto th Gui to create a border around it.
+	; Parameters:
+	; 		instantly    -  ignore mousemovement checks, simply stop/destroy tooltip
+	;
+	; Return: 
+	;			Nothing.
+	; ==================================================================================================================================
 	DestroyToolTip(instantly = false) {
 		GuiName := this.guiName
 		timer := this.timer		
@@ -376,23 +447,34 @@ class AdvancedToolTipGui
 		}
 	}
 
+	; ==================================================================================================================================
+	; Function	getToolTipWindowHwnd
+	;
+	; Return: 
+	;			ToolTip window handle.
+	; ==================================================================================================================================
 	getToolTipWindowHwnd() {
 		return this.parentWindow
 	}
 	
-	GuiAddBorder(Color, Width, pW, pH, GuiName = "", parentHwnd = "") {
-		; -------------------------------------------------------------------------------------------------------------------------------
-		; Color        -  border color as used with the 'Gui, Color, ...' command, must be a "string"
-		; Width        -  the width of the border in pixels
-		; pW, pH	   -  the width and height of the parent window.
-		; GuiName	   -  the name of the parent window.
-		; parentHwnd   -  the ahk_id of the parent window.
-		;                 You should not pass other control options!
-		; -------------------------------------------------------------------------------------------------------------------------------
-		
-		LFW := WinExist() ; save the last-found window, if any
+	; ==================================================================================================================================
+	; Function	GuiAddBorder
+	;			Draws a region onto th Gui to create a border around it.
+	; Parameters:
+	; 		Color        -  border color as used with the 'Gui, Color, ...' command, must be a "string"
+	; 		Width        -  the width of the border in pixels
+	; 		pW, pH	   -  the width and height of the parent window.
+	; 		GuiName	   -  the name of the parent window.
+	; 		parentHwnd   -  the ahk_id of the parent window.
+	;                 			You should not pass other control options!
+	;
+	; Return: 
+	;			Nothing. Changes an existing Gui window.
+	; ==================================================================================================================================
+	GuiAddBorder(Color, Width, pW, pH, GuiName = "", parentHwnd = "") {		
+		LFW := WinExist() 				; save the last-found window, if any
 		If (not GuiName and parentHwnd) {		
-			DefGui := A_DefaultGui ; save the current default GUI		
+			DefGui := A_DefaultGui 		; save the current default GUI		
 		}
 
 		Try {
@@ -407,37 +489,44 @@ class AdvancedToolTipGui
 		}
 		
 		If (not GuiName and parentHwnd) {	
-			Gui, %DefGui%:Default ; restore the default Gui
+			Gui, %DefGui%:Default 		; restore the default Gui
 		}
 		
-		If (LFW) ; restore the last-found window, if any
+		If (LFW)						; restore the last-found window, if any
 			WinExist(LFW)
 	}
 	
+	; ==================================================================================================================================
+	; Function	DrawTables
+	;			Loops over all tables to draw them.
+	; ==================================================================================================================================
 	DrawTables() {
 		tables := this.tables
 		For key, val in tables {
 			this.DrawTable(key)
 		}
 	}
-	
-	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {		
-		; -------------------------------------------------------------------------------------------------------------------------------
-		;	Table class
-		;
-		;	guiDefFont	: default font used by the entire tooltip gui
-		;	guiDefFontSize	: default font size used by the entire tooltip gui
-		;	fontSize		: table-wide font size, if "-1" the tooltip gui default font size is being used
-		;	font			: table-wide font, if "-1" the tooltip gui default font is being used
-		;	color		: table-wide font color in hex or a valid name like "white"
-		;	grid			: show table grid/borders
-		;	guiMargin	: left and right table margins
-		;	topMargin	: top table margin
-		;	tableXPos	: table x coordinate origin, don't use for relative positioning
-		;	tableYPos	: table y coordinate origin, don't use for relative positioning
-		;	assocVar		: 
-		; -------------------------------------------------------------------------------------------------------------------------------
-		
+
+	; ==================================================================================================================================
+	; Function	AddTable
+	;			Adds a new table object to the global table array (this.tables).
+	; Parameters:
+	;		guiDefFont	- default font used by the entire tooltip gui
+	;		guiDefFontSize	- default font size used by the entire tooltip gui
+	;		fontSize		- table-wide font size, if "-1" the tooltip gui default font size is being used
+	;		font			- table-wide font, if "-1" the tooltip gui default font is being used
+	;		color		- table-wide font color in hex or a valid name like "white"
+	;		grid			- show table grid/borders
+	;		guiMargin		- left and right table margins
+	;		topMargin		- top table margin
+	;		tableXPos		- table x coordinate origin, don't use for relative positioning
+	;		tableYPos		- table y coordinate origin, don't use for relative positioning
+	;		assocVar		- 
+	; 
+	; Returns:
+	;			Nothing. Sets/changes global tables array (this.tables).
+	; ==================================================================================================================================
+	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {				
 		table := {}
 		If (assocVar) {
 			table.assocVar := "v" assocVar
@@ -460,21 +549,30 @@ class AdvancedToolTipGui
 		this.tables.push(table)
 	}
 
-	AddCell(tableIndex, rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {					
-		; -------------------------------------------------------------------------------------------------------------------------------
-		;	rowIndex		:
-		;	cellIndex		:
-		;	measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-		;	value		: cell contents
-		;	alignment		: horizontal text-alignment (left, right, center)
-		;	fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-		;	bgColor		: background color in hex or a valid name like "red"
-		;	isSpacingCell	: if the cell is empty, make it a fontSize * 4 pixel width spacing cell
-		;	fColor		: font color in hex or a valid name like "white"
-		;	font			: font family
-		; -------------------------------------------------------------------------------------------------------------------------------
-		
+	; ==================================================================================================================================
+	; Function	AddCell
+	;			Adds cells to a table, sets some style options and calculates text height/width.
+	; Parameters:
+	;		rowIndex		-
+	;		cellIndex		-
+	;		measurementObj	- object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+	;		value		- cell contents
+	;		alignment		- horizontal text-alignment (left, right, center)
+	;		fontOptions	- additional options like "bold", "italic", "strikethrough", "underline"
+	;		bgColor		- background color in hex or a valid name like "red"
+	;		isSpacingCell	- if the cell is empty, make it a fontSize * 4 pixel width spacing cell
+	;		fColor		- font color in hex or a valid name like "white"
+	;		font			- font family
+	;
+	; Returns:
+	;			Nothing. Sets/changes global table array (this.tables)
+	; ==================================================================================================================================
+	AddCell(tableIndex, rowIndex, cellIndex, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "") {		
 		table := this.tables[tableIndex]
+		
+		If (not table) {
+			this.AddTable()
+		}
 		
 		If (not table.rows[rowIndex]) {
 			table.rows[rowIndex] := []
@@ -531,23 +629,32 @@ class AdvancedToolTipGui
 		this.tables[tableIndex] := table
 	}
 	
-	AddSubCell(tableIndex, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
-		; -------------------------------------------------------------------------------------------------------------------------------
-		;	rowIndex		:
-		;	cellIndex		:
-		;	measurementObj	: object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
-		;	value		: cell contents
-		;	alignment		: horizontal text-alignment (left, right, center)
-		;	fontOptions	: additional options like "bold", "italic", "strikethrough", "underline"
-		;	bgColor		: background color in hex or a valid name like "red"
-		;	isSpacingCell	: if the cell is empty, make it a 10 pixel width spacing cell
-		;	fColor		: font color in hex or a valid name like "white"
-		;	font			: font family
-		;	noSpacing		: don't add table padding (left/right)
-		; -------------------------------------------------------------------------------------------------------------------------------
-		
+	; ==================================================================================================================================
+	; Function	AddSubCell
+	;			Adds subcells to a table, sets some style options and calculates text height/width.
+	; Parameters:
+	;		rowIndex		-
+	;		cellIndex		-
+	;		measurementObj	- object with saved text measurements, will only be used when the default fons and fontsize are used for text output, should be global in the calling script
+	;		value		- cell contents
+	;		alignment		- horizontal text-alignment (left, right, center)
+	;		fontOptions	- additional options like "bold", "italic", "strikethrough", "underline"
+	;		bgColor		- background color in hex or a valid name like "red"
+	;		isSpacingCell	- if the cell is empty, make it a 10 pixel width spacing cell
+	;		fColor		- font color in hex or a valid name like "white"
+	;		font			- font family
+	;		noSpacing		- don't add table padding (left/right)
+	;
+	; Returns:
+	;			Nothing. Sets/changes global table array (this.tables)
+	; ==================================================================================================================================
+	AddSubCell(tableIndex, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {		
 		table := this.tables[tableIndex]
 
+		If (not table) {
+			this.AddTable()
+		}
+		
 		If (not table.rows[rI]) {
 			table.rows[rI] := []
 		}
@@ -555,12 +662,11 @@ class AdvancedToolTipGui
 		If (not table.rows[rI][cI].haskey("value")) {
 			table.AddCell(rI, cI)			
 		}
-		table.rows[rI][cI].value := " " ; empty cell, only show subcell contents		
+		table.rows[rI][cI].value := " " 											; empty cell, only show subcell contents		
 		table.rows[rI][cI].subCells[sCI] := {}
-		table.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " ; add spaces as table padding
+		table.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " 		; add spaces as table padding
 		
-		; font priority: subcell > cell > table
-		table.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : table.rows[rI][cI]
+		table.rows[rI][cI].subCells[sCI].font := StrLen(font) ? font : table.rows[rI][cI] 	; font priority: subcell > cell > table
 		If (not StrLen(table.rows[rI][cI].subCells[sCI].font)) {
 			table.rows[rI][cI].subCells[sCI].font := table.font
 		}		
@@ -588,10 +694,15 @@ class AdvancedToolTipGui
 		this.tables[tableIndex] := table
 	}
 	
-	DrawTable(tableIndex) {	
-		/*
-		*/
-		
+	; ==================================================================================================================================
+	; Function:	DrawTable	 
+	;  			Loops over global table array (this.tables) and draws them by calling DrawCell() for every cell.
+	; Parameters:	
+	;			None.
+	; Returns:
+	;			Nothing. Sets/changes global table array (this.tables)
+	; ==================================================================================================================================
+	DrawTable(tableIndex) {		
 		table := this.tables[tableIndex]
 
 		If (tableIndex = 1) {
@@ -655,22 +766,27 @@ class AdvancedToolTipGui
 
 		this.tables[tableIndex] := table
 	}
-	
+
+	; ==================================================================================================================================
+	; Function:	DrawCell
+	;			Draws single table cells (text fields) onto the gui.
+	; Parameters:
+	;		tableIndex	- table index
+	;		cell			- cell object
+	;		k			- cell index
+	;		key			- row index
+	;		guiFontOptions	- font options like font, size, style and color
+	;		tableXPos		- table x coordinate origin
+	;		tableYPos		- table y coordinate origin
+	;		shiftY		- cell y shift (used to overlap cell borders, creating a 1px border)
+	;		width		- cell width in px
+	;		height		- cell height in px
+	;		recurse		- cells use this option to recursively draw subcells
+	;
+	; Returns:
+	;			Nothing.
+	; ==================================================================================================================================
 	DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
-		; -------------------------------------------------------------------------------------------------------------------------------
-		;	tableIndex	:
-		;	cell			: cell object
-		;	k			: cell index
-		;	key			: row index
-		;	guiFontOptions	: font options like font, size, style and color
-		;	tableXPos		: table x coordinate origin
-		;	tableYPos		: table y coordinate origin
-		;	shiftY		: cell y shift (used to overlap cell borders, creating a 1px border)
-		;	width		: cell width in px
-		;	height		: cell height in px
-		;	recurse		: cells use this option to recursively draw subcells
-		; -------------------------------------------------------------------------------------------------------------------------------
-		
 		table := this.tables[tableIndex]
 		guiName := this.GuiName
 		addedBackground := false
@@ -769,23 +885,21 @@ class AdvancedToolTipGui
 		}
 	}
 	
-	; -------------------------------------------------------------------------------------------------------------------------------
-		/*
-		Original script by majkinetor.
-		Fixed by Eruyome.
-		
-		https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
-		
-		 Function:  CreateFont
-					Creates the font and optinally, sets it for the control.
-		 Parameters:
-					hCtrl - Handle of the control. If omitted, function will create font and return its handle.
-					Font  - AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
-					bRedraw	  - If this parameter is TRUE, the control redraws itself. By default 1.
-		 Returns:	
-					Font handle.
-		*/
-	; -------------------------------------------------------------------------------------------------------------------------------
+	; ==================================================================================================================================
+	;	Original script by majkinetor.
+	;	Fixed by Eruyome.
+	;	
+	;	https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+	;	
+	;	Function:		CreateFont
+	;				Creates the font and optinally, sets it for the control.
+	;	Parameters:
+	;				hCtrl 	- Handle of the control. If omitted, function will create font and return its handle.
+	;				Font  	- AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
+	;				bRedraw	- If this parameter is TRUE, the control redraws itself. By default 1.
+	;	Returns:	
+	;				Font handle.
+	; ==================================================================================================================================
 	CreateFont(HCtrl="", Font="", BRedraw=1) {
 		static WM_SETFONT := 0x30
 
@@ -818,29 +932,28 @@ class AdvancedToolTipGui
 		return hFont
 	}
 
-	; -------------------------------------------------------------------------------------------------------------------------------
-		/*
-	Original script by majkinetor.
-	Fixed by Eruyome.
-	
-	https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
-	
-	 Function: DrawText
-			   Draws text using specified font on device context or calculates width and height of the text.
-	 Parameters: 
-			Text	- Text to be drawn or measured. 
-			DC		- Device context to use. If omitted, function will use Desktop's DC.
-			Font	- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
-			Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
-			Rect	- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
-					  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
-					
-	 Flags:
-			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
-	 Returns:
-			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
-		*/
-	; -------------------------------------------------------------------------------------------------------------------------------	
+	; ==================================================================================================================================
+	;
+	; Original script by majkinetor.
+	; Fixed by Eruyome.
+	;
+	; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+	;
+	; Function:	DrawText
+	;			Draws text using specified font on device context or calculates width and height of the text.
+	; Parameters: 
+	;		Text		- Text to be drawn or measured. 
+	;		DC		- Device context to use. If omitted, function will use Desktop's DC.
+	;		Font		- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
+	;		Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
+	;		Rect		- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
+	;				  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
+	;				
+	; Flags:
+	;			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
+	; Returns:
+	;			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
+	; ==================================================================================================================================	
 	Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
 		static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
 
