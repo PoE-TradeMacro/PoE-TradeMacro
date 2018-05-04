@@ -531,7 +531,7 @@ class AdvancedToolTipGui
 		this.tables[tableIndex] := table
 	}
 	
-	AddSubCell(tI, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
+	AddSubCell(tableIndex, rI, cI, sCI, value, alignment = "left", fontOptions = "", bgColor = "Trans", isSpacingCell = false, fColor = "", font = "", noSpacing = false) {
 		; -------------------------------------------------------------------------------------------------------------------------------
 		;	rowIndex		:
 		;	cellIndex		:
@@ -547,7 +547,7 @@ class AdvancedToolTipGui
 		; -------------------------------------------------------------------------------------------------------------------------------
 		
 		table := this.tables[tableIndex]
-		
+
 		If (not table.rows[rI]) {
 			table.rows[rI] := []
 		}
@@ -584,7 +584,7 @@ class AdvancedToolTipGui
 			}
 			table.rows[rI][cI].width += subcell.width
 		}
-		
+
 		this.tables[tableIndex] := table
 	}
 	
