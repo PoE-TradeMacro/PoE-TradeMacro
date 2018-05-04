@@ -424,7 +424,44 @@ class AdvancedToolTipGui
 	;			
 	; ==================================================================================================================================
 	RecalculateToolTip() {
-		msgbox hey
+		this.CreateGui(true)
+		tables := this.tables
+		
+		For tI, table in tables {
+			fontSizeReduction := Round(table.fontSize / 10)
+			table.fontSize := fontSizeReduction < 1 ? table.fontSize - 1 : table.fontSize - fontSizeReduction
+			
+			For rI, row in table.rows {
+				For cI, cell in row {
+					value := cell.value
+					height := 0
+					width := 0
+					
+					this.CalculateCellTextDimensions(cell.value, table.fontSize, cell.font, height, width, value, true)
+
+					cell.height := height
+					cell.width := width
+					
+					For scI, subcell in cell {
+						If (subcell.value) {
+							value := subcell.value
+							height := 0
+							width := 0
+							
+							this.CalculateCellTextDimensions(subcell.value, table.fontSize, subcell.font, subcell.height, subcell.width)
+							
+							subcell.value := value
+							subcell.height := height
+							subcell.width := width
+						}						
+					}
+				}	
+			}
+		}
+
+		this.tables := tables
+		this.DrawTables()
+		this.ShowToolTip()
 	}
 
 	; ==================================================================================================================================
@@ -663,7 +700,7 @@ class AdvancedToolTipGui
 		If (not table.rows[rI][cI].haskey("value")) {
 			table.AddCell(rI, cI)			
 		}
-		table.rows[rI][cI].value := " " 											; empty cell, only show subcell contents		
+		table.rows[rI][cI].value := " " 													; empty cell, only show subcell contents		
 		table.rows[rI][cI].subCells[sCI] := {}
 		table.rows[rI][cI].subCells[sCI].value := noSpacing ? value : " " value "  " 		; add spaces as table padding
 		
@@ -713,6 +750,7 @@ class AdvancedToolTipGui
 	;			Height, width and newValue as ByRef variables.
 	; ==================================================================================================================================
 	CalculateCellTextDimensions(value, fontSize, font, ByRef height = 0, ByRef width = 0, ByRef newValue = "") {
+		value := RegExReplace(value, "\r|\n$")
 		Loop, Parse, value, `n, `r
 		{
 			string := A_LoopField			
@@ -733,7 +771,7 @@ class AdvancedToolTipGui
 			}		
 			
 			If (StrLen(string)) {
-				size := this.Font_DrawText(string, "", "s" fontSize ", " font, "CALCRECT SINGLELINE NOCLIP")
+				size := this.Font_DrawText(string, "", "s" fontSize ", " font, "CALCRECT SINGLELINE NOCLIP")								
 				width := width > size.W ? width : size.W
 				height += size.H
 			}
