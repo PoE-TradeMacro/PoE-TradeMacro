@@ -178,6 +178,7 @@ class AdvancedToolTipGui
 		this.toolTipTimeout		:= 0
 
 		this.tables := []
+		this.handles := []
 	}
 	
 	; ==================================================================================================================================
@@ -410,13 +411,13 @@ class AdvancedToolTipGui
 		} 
 		Else {				
 			; make window visible again
-			WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%
+			WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%			
 			
 			; set tooltip timeout/timer
 			this.startMouseXPos := startMouseXPos
 			this.startMouseYPos := startMouseYPos
 			this.startTimer()
-		}		
+		}
 	}
 	
 	; ==================================================================================================================================
@@ -567,7 +568,7 @@ class AdvancedToolTipGui
 			this.DrawTable(key)
 		}
 		
-		debugprintarray(tables)
+		;debugprintarray(tables)
 	}
 
 	; ==================================================================================================================================
@@ -806,22 +807,31 @@ class AdvancedToolTipGui
 		tableYPos := table.tableYPos
 
 		columnWidths := []		
-		rowHeights := []		
+		rowHeights := []
+		tableWidth := 0
+		tableHeight := 0		
 		Loop, % table.maxColumns {
 			w := 0
 			i := A_Index
 			For key, row in table.rows {
-				w := (w >= row[i].width) ? w : row[i].width
+				rowW := row[i].width + Round(table.fontSize * 2.3)
+				w := (w >= rowW) ? w : rowW
 			}
 			columnWidths[i] := w
+			tableWidth += w
 		}
 		For key, row in table.rows {
 			h := 0
 			For k, cell in row {
-				h := (h >= cell.height) ? h : cell.height
+				cellH := cell.height + Round((table.fontSize / 3))
+				h := (h >= cellH) ? h : cellH
 			}
 			rowHeights.push(h)
+			tableHeight += h
 		}
+		table.columnWidths := columnWidths
+		table.rowHeights := rowHeights
+		
 		
 		guiName := this.GuiName
 		guiFontOptions := " s" table.fontSize
@@ -839,7 +849,7 @@ class AdvancedToolTipGui
 		tableYPos := not StrLen(tableYPos) ? "y+" guiMargin + topMargin : tableYPos + topMargin
 		
 		For key, row in table.rows {
-			height := rowHeights[key] + Round((table.fontSize / 3))
+			height := rowHeights[key]
 			shiftY := height - 1
 			
 			; shiftY needs to be changed further if the previous row has a different height than the current one
@@ -848,9 +858,54 @@ class AdvancedToolTipGui
 			}
 			
 			For k, cell in row {
-				width := columnWidths[k] + Round(table.fontSize * 2.3)
+				width := columnWidths[k]
 				this.DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height)				
 			}
+		}
+
+		; draw borders/lines if we don't use a full grid (which uses the text controls "+Border" option)
+		If (table.showGrid and not Trim(table.gridType) = "fullGrid") {
+			guiName := this.guiName
+			; add empty text field with option "section" at the end of the table
+			; can't add section to the tables first control since subcells use them also
+			Gui, %guiName%:Add, Text, w0 h0 %tableXPos% y+0 Section
+			
+			; draw lines
+			row_y := tableYPos			
+			For rI, rowHeight in table.rowHeights {
+				row_y += rowHeight - 1
+				
+				If (Trim(table.gridType) = "innerGrid") {
+					If (not table.rowHeights.MaxIndex() = rI) {
+						lineY := "ys-" tableHeight - row_y - 2
+						lineX := tableXPos
+						Gui, %guiName%:Add, Text, %lineX% %lineY% w%tableWidth% h1 0x7  ;Horizontal Line
+					}
+				}
+				; simpleGrid
+				Else {
+					If (rI = 1) {
+						lineY := "ys-" tableHeight - row_y - 3
+						lineX := tableXPos
+						Gui, %guiName%:Add, Text, %lineX% %lineY% w%tableWidth% h1 0x7  ;Horizontal Line
+					}
+				}
+			}
+			
+			cell_x := 0
+			For cI, columnWidth in table.columnWidths {
+				cell_x += columnWidth - 1
+			
+				If (not cI = table.columnWidths.MaxIndex()) {
+					lineY := "ys-" tableHeight
+					lineX := "xs+" cell_x
+					Gui, %guiName%:Add, Text, %lineX% %lineY% w1 h%tableHeight% 0x7  ;Vertical Line
+				}
+			}		
+			
+			; add another empty control at the position of the last section to act as the the endpoint of the table
+			; this allows other GUI controls/tables to use coordinates like "y+10".
+			Gui, %guiName%:Add, Text, w0 h0 xs+0 ys+0
 		}
 
 		this.tables[tableIndex] := table
@@ -935,13 +990,9 @@ class AdvancedToolTipGui
 				options .= xPos
 			}
 			
-			controlHandle := "gui" guiName "t" tableIndex "r" rowI "c" cI
 			If (table.showGrid and not recurse) {
 				If (Trim(table.gridType) = "fullGrid") {
 					options .= " +Border"
-				}
-				Else {
-					options .= " hwnd" controlHandle
 				}
 			}
 
@@ -962,20 +1013,10 @@ class AdvancedToolTipGui
 				Gui, %guiName%:Font, %guiFontOptions% " norm", % table.font 
 			}
 			
+			/*
 			; save border line coordinates (starting point (x,y) and orientation)
 			If (table.showGrid and not recurse and not Trim(table.gridType) = "fullGrid") {
-				DetectHiddenWindows, On
-				ErrorLevel := 0
-				
-				ControlGetPos , cX, cY, cW, cH, , ahk_id %controlHandle%
-				GuiControlGet , myText, %guiName%:Pos, ahk_id %controlHandle%
-				If (ErrorLevel) {
-					errorL := "fuck"
-				}
-				
-				id := ahk_id %controlHandle%
-				msgbox % "options: " options "`n`n" "handle: " controlHandle "`n`n" "controlID: " id "`n`n" "ControlGetPos (x,y): " cX ", " cY "`n`n" "GuiControlGet (x,y): " myTextX ", " myTextY  "`n`n" "GuiControlGet Error: " (StrLen(ErrorL) ? "Yes" : "No")
-				
+				debugprintarray(table)
 				If (Trim(table.gridType) = "innerGrid") {
 					If (cI = 1) {
 						table.borders.horizontal.push({ "x" : xPos, "y" : yPos})
@@ -993,6 +1034,7 @@ class AdvancedToolTipGui
 					}
 				}
 			}
+			*/
 			
 			If (cell.subCells.length() and not recurse and A_Index = 1) {
 				For j, subcell in cell.subcells {
