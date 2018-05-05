@@ -18,9 +18,9 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 */
 AdvTT := new AdvancedToolTipGui("", "", "", "", "", "Verdana", 8)
 
-Return
+;Return
 
-^XButton1::
+;^XButton1::
 	/*
 		test data
 	*/
@@ -53,7 +53,7 @@ Return
 	AdvTT.AddCell(1, 2, 1, item.basetype, "", "", "", true, "", "")
 
 	;-------------- table 02 ------------------------------------------------------------
-	AdvTT.AddTable(-1, "", "FEFEFE", true)	
+	AdvTT.AddTable(-1, "", "FEFEFE", "simpleGrid")	
 
 	AdvTT.AddCell(2, 1, 1, "Item Level:", "", "", "", true, "", "")
 	AdvTT.AddCell(2, 1, 2,  item.lvl, "right", "", "", true, "", "")
@@ -421,7 +421,7 @@ class AdvancedToolTipGui
 	
 	; ==================================================================================================================================
 	; Function	RecalculateToolTip
-	;			
+	;			Recalculates the ToolTip dimensions and redraws it in case of it not fitting onto the screen. Reduces the font size.
 	; ==================================================================================================================================
 	RecalculateToolTip() {
 		this.CreateGui(true)
@@ -514,7 +514,7 @@ class AdvancedToolTipGui
 	; Return: 
 	;			ToolTip window handle.
 	; ==================================================================================================================================
-	getToolTipWindowHwnd() {
+	GetToolTipWindowHwnd() {
 		return this.parentWindow
 	}
 	
@@ -563,10 +563,11 @@ class AdvancedToolTipGui
 	; ==================================================================================================================================
 	DrawTables() {
 		tables := this.tables
-		;debugprintarray(tables)
 		For key, val in tables {
 			this.DrawTable(key)
 		}
+		
+		debugprintarray(tables)
 	}
 
 	; ==================================================================================================================================
@@ -578,7 +579,7 @@ class AdvancedToolTipGui
 	;		fontSize		- table-wide font size, if "-1" the tooltip gui default font size is being used
 	;		font			- table-wide font, if "-1" the tooltip gui default font is being used
 	;		color		- table-wide font color in hex or a valid name like "white"
-	;		grid			- show table grid/borders
+	;		grid			- show table grid/borders: fullGrid/innerGrid/simpleGrid
 	;		guiMargin		- left and right table margins
 	;		topMargin		- top table margin
 	;		tableXPos		- table x coordinate origin, don't use for relative positioning
@@ -588,7 +589,7 @@ class AdvancedToolTipGui
 	; Returns:
 	;			Nothing. Sets/changes global tables array (this.tables).
 	; ==================================================================================================================================
-	AddTable(fontSize = -1, font = "", color = "Default", grid = false, guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {				
+	AddTable(fontSize = -1, font = "", color = "Default", grid = "fullGrid", guiMargin = 5, topMargin = 0, tableXPos = "", tableYPos = "", assocVar = "") {				
 		table := {}
 		If (assocVar) {
 			table.assocVar := "v" assocVar
@@ -599,12 +600,13 @@ class AdvancedToolTipGui
 		table.fontSize := (fontSize >= 0) ? fontSize : this.defTTFontSize
 		table.fColor := color
 
-		table.showGrid := grid
+		table.showGrid := (RegExMatch(grid, "i)fullGrid|simpleGrid|innerGrid") or grid) ? true : false
+		table.gridType := (not RegExMatch(grid, "i)[a-zA-Z]") and grid) ? "fullGrid" : grid
 		table.guiMargin := guiMargin
 		table.topMargin := topMargin
 		table.tableXPos := tableXPos
-		table.tableYPos := tableYPos		
-		
+		table.tableYPos := tableYPos
+
 		table.rows := []
 		table.maxColumns := 0
 		
@@ -790,7 +792,8 @@ class AdvancedToolTipGui
 	; ==================================================================================================================================
 	DrawTable(tableIndex) {		
 		table := this.tables[tableIndex]
-
+		table.borders := {"vertical" : [], "horizontal" : []}		
+		
 		If (tableIndex = 1) {
 			If (not table.topMargin) {
 				table.topMargin := 5				
@@ -859,8 +862,8 @@ class AdvancedToolTipGui
 	; Parameters:
 	;		tableIndex	- table index
 	;		cell			- cell object
-	;		k			- cell index
-	;		key			- row index
+	;		cI			- cell index
+	;		rowI			- row index
 	;		guiFontOptions	- font options like font, size, style and color
 	;		tableXPos		- table x coordinate origin
 	;		tableYPos		- table y coordinate origin
@@ -872,17 +875,17 @@ class AdvancedToolTipGui
 	; Returns:
 	;			Nothing.
 	; ==================================================================================================================================
-	DrawCell(tableIndex, cell, k, key, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
+	DrawCell(tableIndex, cell, cI, rowI, guiFontOptions, tableXPos, tableYPos, shiftY, width, height, recurse = false) {
 		table := this.tables[tableIndex]
 		guiName := this.GuiName
 		addedBackground := false
 
 		; loop to overlay an empty cell over all subcells (easier positioning of the following column in the row)
 		Loop, 2 {
-			If (k = 1 and key = 1) {
+			If (cI = 1 and rowI = 1) {
 				yPos := " " tableYPos
 				yPosProgress := yPos
-			} Else If (k = 1) {
+			} Else If (cI = 1) {
 				yPos := " yp+" shiftY
 				yPosProgress := yPos
 			} Else {
@@ -896,7 +899,7 @@ class AdvancedToolTipGui
 				}				
 			}
 
-			If (k = 1 and not recurse) {
+			If (cI = 1 and not recurse) {
 				xPos := " " tableXPos
 				xPos := A_Index = 2 ? xPos : xPos
 			} Else {
@@ -931,9 +934,15 @@ class AdvancedToolTipGui
 				options .= yPos
 				options .= xPos
 			}
-
+			
+			controlHandle := "gui" guiName "t" tableIndex "r" rowI "c" cI
 			If (table.showGrid and not recurse) {
-				options .= " +Border"
+				If (Trim(table.gridType) = "fullGrid") {
+					options .= " +Border"
+				}
+				Else {
+					options .= " hwnd" controlHandle
+				}
 			}
 
 			If (cell.fColor or cell.font or cell.fontOptions) {
@@ -947,10 +956,42 @@ class AdvancedToolTipGui
 				options .= " " cell.alignment
 			}
 			
-			options := RegExReplace(options, " s\d+")
+			options := RegExReplace(options, "i) s\d+")
 			Gui, %guiName%:Add, Text, %options%, % cell.value
 			If (cell.fColor or cell.font) {
 				Gui, %guiName%:Font, %guiFontOptions% " norm", % table.font 
+			}
+			
+			; save border line coordinates (starting point (x,y) and orientation)
+			If (table.showGrid and not recurse and not Trim(table.gridType) = "fullGrid") {
+				DetectHiddenWindows, On
+				ErrorLevel := 0
+				
+				ControlGetPos , cX, cY, cW, cH, , ahk_id %controlHandle%
+				GuiControlGet , myText, %guiName%:Pos, ahk_id %controlHandle%
+				If (ErrorLevel) {
+					errorL := "fuck"
+				}
+				
+				id := ahk_id %controlHandle%
+				msgbox % "options: " options "`n`n" "handle: " controlHandle "`n`n" "controlID: " id "`n`n" "ControlGetPos (x,y): " cX ", " cY "`n`n" "GuiControlGet (x,y): " myTextX ", " myTextY  "`n`n" "GuiControlGet Error: " (StrLen(ErrorL) ? "Yes" : "No")
+				
+				If (Trim(table.gridType) = "innerGrid") {
+					If (cI = 1) {
+						table.borders.horizontal.push({ "x" : xPos, "y" : yPos})
+					}
+					If (cI > 1) {
+						table.borders.vertical.push({ "x" : xPos, "y" : yPos})
+					}
+				}
+				Else {												; simpleGrid
+					If (cI = 1 and rowI = 1) {
+						table.borders.horizontal.push({ "x" : xPos, "y" : yPos})
+					}
+					Else If (cI > 1 and rowI = 1) {
+						table.borders.vertical.push({ "x" : xPos, "y" : yPos})
+					}
+				}
 			}
 			
 			If (cell.subCells.length() and not recurse and A_Index = 1) {
