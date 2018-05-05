@@ -18,9 +18,9 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 */
 AdvTT := new AdvancedToolTipGui("", "", "", "", "", "Verdana", 8)
 
-;Return
+Return
 
-;^XButton1::
+^XButton1::
 	/*
 		test data
 	*/
@@ -53,7 +53,7 @@ AdvTT := new AdvancedToolTipGui("", "", "", "", "", "Verdana", 8)
 	AdvTT.AddCell(1, 2, 1, item.basetype, "", "", "", true, "", "")
 
 	;-------------- table 02 ------------------------------------------------------------
-	AdvTT.AddTable(-1, "", "FEFEFE", "simpleGrid")	
+	AdvTT.AddTable(-1, "", "FEFEFE", "innerGrid")	
 
 	AdvTT.AddCell(2, 1, 1, "Item Level:", "", "", "", true, "", "")
 	AdvTT.AddCell(2, 1, 2,  item.lvl, "right", "", "", true, "", "")
@@ -877,7 +877,7 @@ class AdvancedToolTipGui
 				
 				If (Trim(table.gridType) = "innerGrid") {
 					If (not table.rowHeights.MaxIndex() = rI) {
-						lineY := "ys-" tableHeight - row_y - 2
+						lineY := "ys-" tableHeight - row_y - 3
 						lineX := tableXPos
 						Gui, %guiName%:Add, Text, %lineX% %lineY% w%tableWidth% h1 0x7  ;Horizontal Line
 					}
@@ -1012,29 +1012,6 @@ class AdvancedToolTipGui
 			If (cell.fColor or cell.font) {
 				Gui, %guiName%:Font, %guiFontOptions% " norm", % table.font 
 			}
-			
-			/*
-			; save border line coordinates (starting point (x,y) and orientation)
-			If (table.showGrid and not recurse and not Trim(table.gridType) = "fullGrid") {
-				debugprintarray(table)
-				If (Trim(table.gridType) = "innerGrid") {
-					If (cI = 1) {
-						table.borders.horizontal.push({ "x" : xPos, "y" : yPos})
-					}
-					If (cI > 1) {
-						table.borders.vertical.push({ "x" : xPos, "y" : yPos})
-					}
-				}
-				Else {												; simpleGrid
-					If (cI = 1 and rowI = 1) {
-						table.borders.horizontal.push({ "x" : xPos, "y" : yPos})
-					}
-					Else If (cI > 1 and rowI = 1) {
-						table.borders.vertical.push({ "x" : xPos, "y" : yPos})
-					}
-				}
-			}
-			*/
 			
 			If (cell.subCells.length() and not recurse and A_Index = 1) {
 				For j, subcell in cell.subcells {
