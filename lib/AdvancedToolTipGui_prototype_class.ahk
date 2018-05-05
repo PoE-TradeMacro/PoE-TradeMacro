@@ -118,6 +118,7 @@ Return
 	AdvTT.ShowToolTip()
 Return
 
+
 GuiClose:
 ExitApp
 
