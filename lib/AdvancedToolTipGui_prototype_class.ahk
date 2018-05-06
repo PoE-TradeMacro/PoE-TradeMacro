@@ -228,10 +228,13 @@ class AdvancedToolTipGui
 	; ==================================================================================================================================
 	; Function	SetToolTipSizeAndPosition
 	;			Restores window to actual size (AutoSize) and calls functions to add a border and check/correct its positioning.
+	; Parameters:
+	; 		centered	- Centers the ToolTip on the screen, vertically and horizontally.
+	;
 	; Return:	
 	;			1 if the ToolTip fits on the screen, 0 if not.
 	; ==================================================================================================================================
-	SetToolTipSizeAndPosition() {
+	SetToolTipSizeAndPosition(centered = false) {
 		xPos := this.xPos
 		yPos := this.yPos
 		GuiName := this.guiName
@@ -244,7 +247,7 @@ class AdvancedToolTipGui
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 
 		this.GuiAddBorder(this.borderColor, this.borderWidth, TTW, TTH, GuiName, TTHWnd)
-		Return this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH)
+		Return this.CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH, centered)
 	}
 	
 	; ==================================================================================================================================
@@ -259,11 +262,12 @@ class AdvancedToolTipGui
 	;		TTY		- ToolTip y coordinate.
 	;		TTW		- ToolTip width.
 	;		TTH		- ToolTip height.
+	; 		centered	- Centers the ToolTip on the screen, vertically and horizontally.
 	;
 	; Return: 
 	;			1 if the ToolTip fits on the screen, 0 if not.
 	; ==================================================================================================================================
-	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH) {
+	CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH, centered) {
 		appAHKGroup	:= this.appAHKGroup
 
 		If (appAHKGroup) {
@@ -319,9 +323,17 @@ class AdvancedToolTipGui
 		SysGet, CursorH, 14
 		
 		; position the tooltip beneath the cursor and try to center it horizontally
-		originalCursorY := TTY
-		TTY := TTY + CursorH + 3
-		TTX := TTX - (Round(TTW / 2) - Round(CursorW / 2))	
+		If (not centered) {
+			originalCursorY := TTY
+			TTY := TTY + CursorH + 3
+			TTX := TTX - (Round(TTW / 2) - Round(CursorW / 2))	
+		}
+		Else {
+			midX := Round((boundingRectangle.left + boundingRectangle.right) / 2)
+			midY := Round((boundingRectangle.top + boundingRectangle.bottom) / 2)
+			TTX := Round(midX - (TTW / 2))
+			TTY := Round(midY - (TTH / 2))
+		}
 		
 		nTTX := TTX
 		nTTY := TTY
@@ -360,7 +372,7 @@ class AdvancedToolTipGui
 		If (TTY < boundingRectangle.top) {
 			nTTY := boundingRectangle.top
 		}
-		
+
 		If (nTTX != TTX or nTTY != TTY) {
 			this.xPos := nTTX
 			this.yPos := nTTY
@@ -381,11 +393,12 @@ class AdvancedToolTipGui
 	; 		useFixedCoords	- Draw the ToolTip at fixed coordinates instead of at mouseposition 
 	;		x			- fixed x coordinate
 	;		y			- fixed y coordinate
+	; 		centered		- Centers the ToolTip on the screen, vertically and horizontally.
 	;
 	; Return: 
 	;			Nothing.
 	; ==================================================================================================================================
-	ShowToolTip(useFixedCoords = false, x = false, y = false) {
+	ShowToolTip(centered = false, useFixedCoords = false, x = false, y = false) {
 		CoordMode, Mouse, Screen
 		MouseGetPos, startMouseXPos, startMouseYPos
 		
@@ -404,7 +417,7 @@ class AdvancedToolTipGui
 		Opacity := this.opacity
 		TTHwnd := this.parentWindow		
 		
-		validToolTipDimensions := this.SetToolTipSizeAndPosition()
+		validToolTipDimensions := this.SetToolTipSizeAndPosition(centered)
 		If (not validToolTipDimensions) {
 			; recalculate the tooltip if it is bigger than the screen
 			this.RecalculateToolTip()
