@@ -498,9 +498,9 @@ class AdvancedToolTipGui
 	
 	; ==================================================================================================================================
 	; Function	DestroyToolTip
-	;			Draws a region onto th Gui to create a border around it.
+	;			Draws a region onto the Gui to create a border around it.
 	; Parameters:
-	; 		instantly    -  ignore mousemovement checks, simply stop/destroy tooltip
+	; 		instantly    -  ignore mousemovement checks, simply stop/destroy tooltip.
 	;
 	; Return: 
 	;			Nothing.
@@ -534,7 +534,7 @@ class AdvancedToolTipGui
 	
 	; ==================================================================================================================================
 	; Function	GuiAddBorder
-	;			Draws a region onto th Gui to create a border around it.
+	;			Draws a region onto the Gui to create a border around it.
 	; Parameters:
 	; 		Color        -  border color as used with the 'Gui, Color, ...' command, must be a "string"
 	; 		Width        -  the width of the border in pixels
@@ -580,8 +580,6 @@ class AdvancedToolTipGui
 		For key, val in tables {
 			this.DrawTable(key)
 		}
-		
-		;debugprintarray(tables)
 	}
 
 	; ==================================================================================================================================
@@ -756,11 +754,11 @@ class AdvancedToolTipGui
 	; Function:	CalculateCellTextDimensions	 
 	;  			Calculates width and height of a cells text contents. Multiline support for normal cells, singleline support for subcells.
 	; Parameters:	
-	;			value		- text to measure. 
+	;			value	- text to measure. 
 	;			fontSize	- texts font size.
 	;			font		- texts font family.
-	;			height		- ByRef variable, calculated height.
-	;			width		- ByRef variable, calculated width.
+	;			height	- ByRef variable, calculated height.
+	;			width	- ByRef variable, calculated width.
 	;			newValue	- ByRef variable, new value (for multiline text).
 	; Returns:
 	;			Height, width and newValue as ByRef variables.
