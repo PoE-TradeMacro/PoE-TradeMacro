@@ -3064,6 +3064,12 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
 			}
+			
+			; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.
+			; It's also not available on poe.trade as a mod but as a seperate form option.		
+			If (RegExMatch(_item.mods[k].name, "i)Has # Abyssal (Socket|Sockets)")) {
+				_item.mods[k].showModAsSeperateOption := true
+			}
 		}
 	}
 
