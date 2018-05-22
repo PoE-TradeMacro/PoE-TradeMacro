@@ -19,7 +19,8 @@ TradeFunc_PriceCheckHotkey(priceCheckTest = false, itemData = "") {
 		Clipboard :=
 		Clipboard := itemData
 	} Else {
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 	}
 	Sleep 250
 	TradeFunc_Main()
@@ -44,7 +45,8 @@ TradeFunc_AdvancedPriceCheckHotkey(priceCheckTest = false, itemData = "") {
 		Clipboard :=
 		CLipboard := itemData
 	} Else {
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 	}
 	Sleep 250
 	TradeFunc_Main(false, true)
@@ -69,7 +71,8 @@ TradeFunc_OpenSearchOnPoeTradeHotkey(priceCheckTest = false, itemData = "") {
 		Clipboard :=
 		Clipboard := itemData
 	} Else {
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 	}
 	Sleep 250
 	TradeFunc_Main(true)
@@ -96,7 +99,8 @@ TradeFunc_OpenSearchOnPoeAppHotkey(priceCheckTest = false, itemData = "") {
 		Clipboard := itemData
 	} Else {
 		clipPrev := Clipboard
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 	}
 	Sleep 250
 	
@@ -122,7 +126,8 @@ ShowItemAge:
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 		TradeFunc_PreventClipboardGarbageAfterInit()
 		
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 		Sleep 250
 		TradeFunc_Main(false, false, false, true)
 		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
@@ -145,7 +150,8 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 		Clipboard :=
 		CLipboard := itemData
 	} Else {
-		Send ^{sc02E}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}
 	}
 	Sleep 250
 	TradeFunc_DoParseClipboard()
@@ -225,7 +231,8 @@ TradeFunc_SetCurrencyRatio() {
 	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 	TradeFunc_PreventClipboardGarbageAfterInit()
-	Send ^{sc02E}
+	scancode_c := Globals.Get("Scancodes").c
+	Send ^{%scancode_c%}
 	Sleep 250
 	TradeFunc_DoParseClipboard()
 	

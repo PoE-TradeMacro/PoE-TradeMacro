@@ -56,6 +56,7 @@ Globals.Set("GithubUser", "aRTy42")
 Globals.Set("ScriptList", [A_ScriptDir "\POE-ItemInfo"])
 Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\resources\updates.txt","ItemInfo"]])
 Globals.Set("SettingsScriptList", ["ItemInfo", "Additional Macros"])
+Globals.Set("ScanCodes", GetScanCodes())
 argumentProjectName		= %1%
 argumentUserDirectory	= %2%
 argumentIsDevVersion	= %3%
@@ -10337,7 +10338,13 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 
 		ClipBoardTemp := Clipboard
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
-
+		
+		scancode_c := Globals.Get("ScanCodes").c
+		scancode_v := Globals.Get("ScanCodes").v
+		scancode_a := Globals.Get("ScanCodes").a
+		scancode_f := Globals.Get("ScanCodes").f
+		scancode_enter := Globals.Get("ScanCodes").enter
+		
 		; Parse the clipboard contents twice.
 		; If the clipboard contains valid item data before we send ctrl + c to try and parse an item via ctrl + f then don't restore that clipboard data later on.
 		; This prevents the highlighting function to fill search fields with data from previous item parsings/manual data copying since
@@ -10345,7 +10352,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 		Loop, 2 {
 			If (A_Index = 2) {
 				Clipboard :=
-				Send ^{sc02E}	; ^{c}
+				Send ^{%scancode_c%}	; ^{c}
 				Sleep 100
 			}
 			CBContents := GetClipboardContents()
@@ -10502,7 +10509,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 		}
 
 		If (terms.length() > 0) {
-			SendInput ^{sc021} ; sc021 = f
+			SendInput ^{%scancode_f%} ; sc021 = f
 			searchText =
 			For key, val in terms {
 				searchText = %searchText% "%val%"
@@ -10519,15 +10526,15 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 			}
 
 			Clipboard := searchText
-			Sleep 10
-			SendEvent ^{sc02f}		; ctrl + v
+			Sleep 10		
+			SendEvent ^{%scancode_v%}		; ctrl + v
 			If (leaveSearchField) {
-				SendInput {sc01c}	; enter
+				SendInput {%scancode_enter%}	; enter
 			} Else {
-				SendInput ^{sc01e}	; ctrl + a
+				SendInput ^{%scancode_a%}	; ctrl + a
 			}
 		} Else {
-			SendInput ^{sc021}		; send ctrl + f in case we don't have information to input
+			SendInput ^{%scancode_f%}		; send ctrl + f in case we don't have information to input
 		}
 
 		Sleep, 10
@@ -10547,7 +10554,8 @@ AdvancedItemInfoExt() {
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
-		Send ^{sc02E}	; ^{c}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}	; ^{c}
 		Sleep 100
 
 		CBContents := GetClipboardContents()
@@ -10573,7 +10581,8 @@ OpenItemOnPoEAntiquary() {
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
-		Send ^{sc02E}	; ^{c}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}	; ^{c}
 		Sleep 100
 
 		CBContents := GetClipboardContents()
@@ -10762,7 +10771,8 @@ LookUpAffixes() {
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
-		Send ^{sc02E}	; ^{c}
+		scancode_c := Globals.Get("Scancodes").c
+		Send ^{%scancode_c%}	; ^{c}
 		Sleep 100
 
 		CBContents := GetClipboardContents()
@@ -11528,6 +11538,33 @@ TogglePOEItemScript()
 		SuspendPOEItemScript = 0
 		ShowToolTip("Item parsing ENABLED")
 	}
+}
+
+GetScanCodes() {
+	SetFormat, Integer, H
+	WinGet, WinID,, A
+	ThreadID:=DllCall("GetWindowThreadProcessId", "UInt", WinID, "UInt", 0)
+	InputLocaleID:=DllCall("GetKeyboardLayout", "UInt", ThreadID, "UInt")	
+	
+	; example results: 0xF0020809/0xF01B0809/0xF01A0809
+	; 0809 is for "English United Kingdom"
+	; 0xF002 = "Dvorak"
+	; 0xF01B = "Dvorak right handed"
+	; 0xF01A = "Dvorak left handed"
+	
+	If (RegExMatch(InputLocaleID, "i)^(0xF002|0xF01B|0xF01A).*")) {
+		; dvorak
+		sc := {"c" : "sc017", "v" : "sc034", "f" : "sc015", "a" : "sc01E", "enter" : "sc01C"}
+		project := Globals.Set("ProjectName")
+		msg := "Using Dvorak keyboard layout mode!`n`nMsgBox closes after 15s."
+		MsgBox, 0, %project%, %msg%, 15
+		
+		Return sc
+	} Else {
+		; default
+		sc := {"c" : "sc02E", "v" : "sc02f", "f" : "sc021", "a" : "sc01E", "enter" : "sc01C"}
+		Return sc
+	}	
 }
 
 ; ############ (user) macros #############
