@@ -9733,9 +9733,10 @@ CreateSettingsUI()
 	GuiAddButton("Defaults", "xp-5 y+8 w90 h23", "SettingsUI_AM_BtnDefaults")
 	GuiAddButton("OK", "Default x+5 yp+0 w90 h23", "SettingsUI_BtnOK")
 	GuiAddButton("Cancel", "x+5 yp+0 w90 h23", "SettingsUI_BtnCancel")
+	GuiAddText("Any change here currently requires a script restart!", ButtonsShiftX "y+10 w280 h50 cGreen")
 	
 	If (SkipItemInfoUpdateCall) {
-		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+10 w280 h50 cRed")
+		GuiAddText("Use these buttons to change ItemInfo and AdditionalMacros settings (TradeMacro has it's own buttons).", ButtonsShiftX "y+5 w280 h50 cRed")
 	}
 	
 	GuiAddText("Experimental Feature!", ButtonsShiftX "y+35 w280 h200 cRed")
