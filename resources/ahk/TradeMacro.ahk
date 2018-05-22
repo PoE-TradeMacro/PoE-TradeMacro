@@ -241,16 +241,18 @@ TradeFunc_SetCurrencyRatio() {
 	windowPosX := Round(A_ScreenWidth / 2)
 	windowTitle := "Set currency ratio"
 	
+	color := "000000"
+	
 	Gui, CurrencyRatio:Destroy
 	Gui, CurrencyRatio:New, +hwndCurrencyRatioHwnd
-	Gui, CurrencyRatio:Font, s8, Verdana
-	Gui, CurrencyRatio:Color, ffffff
+	Gui, CurrencyRatio:Font, s8 c%color%, Verdana
+	Gui, CurrencyRatio:Color, ffffff, ffffff
 	
 	Gui, CurrencyRatio:Add, Text, x10, % "You want to sell your"
 	Gui, CurrencyRatio:Font, cGreen bold
 	itemName := Item.BaseName ? Item.name " " Item.BaseName "." : Item.Name "(s)."
 	Gui, CurrencyRatio:Add, Text, x+5 yp+0, % itemName
-	Gui, CurrencyRatio:Font, cDefault norm
+	Gui, CurrencyRatio:Font, c%color% norm
 	
 	;Gui, CurrencyRatio:Add, Text, x10, % "Select what you want to receive for the amount of currency that you want to sell."	
 	Gui, CurrencyRatio:Add, Text, x10 y+10, % "Input the "
@@ -297,14 +299,14 @@ TradeFunc_SetCurrencyRatio() {
 	
 	Gui, CurrencyRatio:Font, bold
 	Gui, CurrencyRatio:Add, Text, x15 y+15 w60, % "Sell:"
-	Gui, CurrencyRatio:Font, cDefault norm
+	Gui, CurrencyRatio:Font, c%color% norm
 	Gui, CurrencyRatio:Add, Edit, x+10 yp-3 w55 vSelectCurrencyRatioSellAmount
 	Gui, CurrencyRatio:Add, Text, x+14 yp+3 w276, % Item.name
 	
 	Gui, CurrencyRatio:Add, GroupBox, x7 y+10 w485 h83,
 	Gui, CurrencyRatio:Font, bold
 	Gui, CurrencyRatio:Add, Text, x15 yp+15 w60, % "Receive:"
-	Gui, CurrencyRatio:Font, cDefault norm
+	Gui, CurrencyRatio:Font, c%color% norm
 	Gui, CurrencyRatio:Add, Edit, x+10 yp-3 w55 vSelectCurrencyRatioReceiveAmount
 	Gui, CurrencyRatio:Add, DropDownList, x+10 yp+0 w280 vSelectCurrencyRatioReceiveCurrency, % delimitedListString
 	
