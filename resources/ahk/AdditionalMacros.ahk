@@ -170,8 +170,8 @@ setAfkMessage(){
 }
 
 AM_SetHotkeys() {
-	Global AM_Config
-
+	Global AM_Config	
+	
 	If (AM_Config.General.EnableState) {
 		For labelIndex, labelName in StrSplit(AM_Config.GetSections("|", "C"), "|") {
 			If (labelName != "General") {
@@ -183,17 +183,20 @@ AM_SetHotkeys() {
 						; TODO: Fix hotkeys not being set without restart
 						If (stateValue = "on" and not AM_Config.General.finishedInit) {
 							; set hotkeys on init, only set enabled hotkeys to prevent key conflicts with other macros/applications
-							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue	
-						} Else {
-							; change hotkey states/keys without a restart (currently not working without the restart)
 							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue
-							AM_Config.General.finishedInit := true
+						} Else If (AM_Config.General.finishedInit) {
+							; change hotkey states/keys without a restart (currently not working without the restart)
+							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue							
 							;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " "AM_" labelName "_HKey, " stateValue ", " ErrorLevel)
 						}		
 					}
 				}
 			}
 		}
+		
+		If (not AM_Config.General.finishedInit) {
+			AM_Config.General.finishedInit := true	
+		}		
 	}
 }
 
