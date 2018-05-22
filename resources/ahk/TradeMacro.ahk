@@ -384,7 +384,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 	iLvl     := Item.Level
 
-	; cancel search If Item is empty
+	; cancel search if Item is empty
 	If (!Item.Name) {
 		If (TradeOpts.OpenUrlsOnEmptyItem and openSearchInBrowser) {
 			TradeFunc_OpenUrlInBrowser("https://poe.trade")
@@ -420,7 +420,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	RequestParams.league	:= LeagueName
 	RequestParams.has_buyout	:= "1"
 
-	; ignore item name in certain cases
+	/*
+		ignore item name in certain cases
+		*/ 
 	If (!Item.IsJewel and !Item.IsLeaguestone and Item.RarityLevel > 1 and Item.RarityLevel < 4 and !Item.IsFlask or (Item.IsJewel and isAdvancedPriceCheckRedirect)) {
 		IgnoreName := true
 	}
@@ -442,7 +444,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ItemData.Affixes := TradeFunc_AddCustomModsToLeaguestone(ItemData.Affixes, Item.Charges)
 	}
 
-	; check if the item implicit mod is an enchantment or corrupted. retrieve this mods data.
+	/*
+		check if the item implicit mod is an enchantment or corrupted. retrieve this mods data.
+		*/	
 	Enchantment := false
 	Corruption  := false
 
@@ -461,6 +465,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Item.IsUnique 	:= false
 	}
 
+	/*
+		further item parsing and preparation
+		*/	
 	If (!Item.IsUnique or Item.IsBeast) {
 		; TODO: improve this
 		If (Item.IsBeast) {
@@ -593,7 +600,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; ignore mod rolls unless the TradeFunc_AdvancedPriceCheckGui is used to search
+	/*
+		ignore mod rolls unless the TradeFunc_AdvancedPriceCheckGui is used to search
+		*/
 	AdvancedPriceCheckItem := TradeGlobals.Get("AdvancedPriceCheckItem")
 	If (isAdvancedPriceCheckRedirect) {
 		; submitting the AdvancedPriceCheck Gui sets TradeOpts.Set("AdvancedPriceCheckItem") with the edited item (selected mods and their min/max values)
@@ -711,7 +720,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; prepend the item.subtype to match the options used on poe.trade
+	
+	/*
+		prepend the item.subtype to match the options used on poe.trade
+		*/	
 	If (RegExMatch(Item.SubType, "i)Mace|Axe|Sword")) {
 		If (Item.IsThreeSocket) {
 			If (RegExMatch(Item.BaseName, "i)Sceptre")) {
@@ -725,12 +737,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; Fix Body Armour subtype
+	/*
+		Fix Body Armour subtype
+		*/	
 	If (RegExMatch(Item.SubType, "i)BodyArmour")) {
 		Item.xtype := "Body Armour"
 	}
 
-	; remove "Superior" from item name to exclude it from name search
+	/*
+		remove "Superior" from item name to exclude it from name search
+		*/
 	If (!IgnoreName) {
 		RequestParams.name   := Trim(StrReplace(Name, "Superior", ""))
 		If (Item.IsRelic) {
@@ -803,12 +819,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}		
 	}
 
-	; make sure to not look for unique items when searching rare/white/magic items
+	/*
+		make sure to not look for unique items when searching rare/white/magic items
+		*/
 	If (!Item.IsUnique) {
 		RequestParams.rarity := "non_unique"
 	}
 	
-	; handle beasts
+	/*
+		handle beasts
+		*/
 	If (Item.IsBeast) {
 		If (!Item.IsUnique) {
 			RequestParams.Name := ""
@@ -894,7 +914,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 	
-	; league stones
+	/*
+		league stones
+		*/
 	If (Item.IsLeagueStone) {
 		; only manually add these mods if they don't already exist (created by advanced search)
 		temp_name := "(leaguestone) Can only be used in Areas with Monster Level # or below"
@@ -940,7 +962,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; don't overwrite advancedItemPriceChecks decision to include/exclude sockets/links
+	/*
+		don't overwrite advancedItemPriceChecks decision to include/exclude sockets/links
+		*/ 
 	If (not isAdvancedPriceCheckRedirect) {
 		; handle item sockets
 		; maybe don't use this for unique-items as default
@@ -959,7 +983,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; handle corruption
+	/*
+		handle corruption
+		*/
 	If (Item.IsCorrupted and TradeOpts.CorruptedOverride and not Item.IsDivinationCard) {
 		If (TradeOpts.Corrupted = "Either") {
 			RequestParams.corrupted := ""
@@ -987,6 +1013,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Item.UsedInSearch.Corruption := "No"
 	}
 
+	/*
+		maps
+		*/
 	If (Item.IsMap) {		
 		; add Item.subtype to make sure to only find maps
 		RegExMatch(Item.Name, "i)The Beachhead.*", isHarbingerMap)
@@ -1026,7 +1055,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; handle gems
+	/*
+		gems
+		*/
 	If (Item.IsGem) {
 		RequestParams.xtype := Item.BaseType
 		RequestParams.xbase := TradeFunc_CompareGemNames(Trim(RegExReplace(Item.Name, "i)support|superior", "")))
@@ -1062,7 +1093,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}	
 	}
 
-	; handle divination cards and jewels
+	/*
+		divination cards and jewels
+		*/
 	If (Item.IsDivinationCard or Item.IsJewel) {
 		RequestParams.xtype := Item.BaseType
 		If (Item.IsJewel and Item.IsUnique) {
@@ -1075,7 +1108,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
-	; predicted pricing (poeprices.info - machine learning)
+	/*
+		predicted pricing (poeprices.info - machine learning)
+		*/
 	If (Item.RarityLevel > 2 and Item.RarityLevel < 4 and not (Item.IsCurrency or Item.IsDivinationCard or Item.IsEssence or Item.IsProphecy or Item.IsMap or Item.IsMapFragment or Item.IsGem or Item.IsBeast)) {		
 		If ((Item.IsJewel or Item.IsFlask or Item.IsLeaguestone)) {
 			If (Item.RarityLevel = 2) {
@@ -1089,7 +1124,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}		
 	}
 
-	; show item age
+	/*
+		show item age
+		*/
 	If (isItemAgeRequest) {
 		RequestParams.name        := Item.Name
 		RequestParams.has_buyout      := ""
@@ -1127,12 +1164,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.has_buyout := ""
 		}
 	}
-	If (TradeOpts.Debug) {
-		;console.log(RequestParams)
-	}
 
 	Payload := RequestParams.ToPayload()
 	
+	/*
+		decide how to handle the request (open in browser on a specific site or make a POST/GET request to parse the results)
+		*/
+		
 	If (openSearchInBrowser) {
 		ShowToolTip("Opening search in your browser... ")
 	} Else If (not (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing)) {
