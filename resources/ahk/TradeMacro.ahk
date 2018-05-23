@@ -3534,6 +3534,7 @@ TradeFunc_GetNonUniqueModValueGivenPoeTradeMod(itemModifiers, poeTradeMod, ByRef
 TradeFunc_CustomSearchGui() {
 	Global
 	Gui, CustomSearch:Destroy
+	Gui, CustomSearch:Color, ffffff, ffffff
 	customSearchItemTypes := TradeGlobals.Get("ItemTypeList")
 
 	CustomSearchTypeList := ""
@@ -3601,6 +3602,7 @@ TradeFunc_CustomSearchGui() {
 TradeFunc_CreateItemPricingTestGUI() {
 	Global
 	Gui, PricingTest:Destroy
+	Gui, PricingTest:Color, ffffff, ffffff
 
 	Gui, PricingTest:Add, Text, x10 y10 w480, Input item information/data
 	Gui, PricingTest:Add, Edit, x10 w480 y+10 R30 vPricingTestItemInput
@@ -3645,6 +3647,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	
 	
 	Gui, PredictedPricing:Destroy
+	Gui, PredictedPricing:Color, ffffff, ffffff
 	
 	Gui, PredictedPricing:Margin, 10, 10
 
@@ -3721,6 +3724,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	ValueRangeMax := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMax : TradeOpts.AdvancedSearchModValueRangeMax / 2
 
 	Gui, SelectModsGui:Destroy
+	Gui, SelectModsGui:Color, ffffff, ffffff
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values (halved for non-unique items):
 	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRangeMin "`% / " ValueRangeMax "`%"
 	Gui, SelectModsGui:Add, Text, x10 y+8, This calculation considers the (unique) item's mods difference between their min and max value as 100`%.

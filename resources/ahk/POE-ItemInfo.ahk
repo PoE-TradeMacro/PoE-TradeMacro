@@ -9513,6 +9513,8 @@ CreateSettingsUI()
 {
 	Global
 	
+	Gui, Color, ffffff, ffffff
+	
 	; ItemInfo is not included in other scripts
 	If (not SkipItemInfoUpdateCall) {	
 		Fonts.SetUIFont()
@@ -9892,6 +9894,7 @@ ShowUpdateNotes()
 	}
 	ToolTip
 	Gui, UpdateNotes:Destroy
+	Gui, UpdateNotes:Color, ffffff, ffffff
 	Fonts.SetUIFont(9)
 
 	Files := Globals.Get("UpdateNoteFileList")
@@ -9924,6 +9927,7 @@ ShowUpdateNotes()
 ShowChangedUserFiles()
 {
 	Gui, ChangedUserFiles:Destroy
+	Gui, ChangedUserFiles:Color, ffffff, ffffff
 
 	Gui, ChangedUserFiles:Add, Text, , Following user files were changed in the last update and `nwere overwritten (old files were backed up):
 
@@ -10272,6 +10276,7 @@ ShowAssignedHotkeys() {
 		}
 	}
 
+	Gui, ShowHotkeys:Color, ffffff, ffffff
 	Gui, ShowHotkeys:Add, Text, , List of this scripts assigned hotkeys.
 	Gui, ShowHotkeys:Default
 	Gui, Font, , Courier New
@@ -10902,6 +10907,7 @@ ShowTranslationUI() {
 	Global 
 	
 	Gui, Translate:Destroy
+	Gui, Translate:Color, ffffff, ffffff
 	
 	Gui, Translate:Margin, 10 , 10
 	Gui, Translate:Add, Text, , Add your copied item information to translate it to english. The rightmost column shows some debug information. 
@@ -11250,6 +11256,7 @@ MenuTray_About:
 		Authors := GetContributors(0)
 		RelVer := Globals.get("ReleaseVersion")
 		Gui, About:+owner1 -Caption +Border
+		Gui, About:Color, ffffff, ffffff
 		Gui, About:Font, S10 CA03410,verdana
 		Gui, About:Add, Text, x260 y27 w170 h20 Center, Release %RelVer%
 		Gui, About:Add, Button, 0x8000 x316 y300 w70 h21, Close
