@@ -1166,7 +1166,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	Payload := RequestParams.ToPayload()
-	
+
 	/*
 		decide how to handle the request (open in browser on a specific site or make a POST/GET request to parse the results)
 		*/
@@ -1178,7 +1178,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	ParsingError	:= ""
-	currencyUrl	:= ""
+	currencyUrl	:= ""	
 	If (Item.IsCurrency and not Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
 		If (!TradeOpts.AlternativeCurrencySearch) {
 			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)
@@ -1205,25 +1205,32 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	If (openSearchInBrowser) {
-		If (Item.isCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
-			ParsedUrl1 := currencyUrl
-		}
-		Else {
-			; using GET request instead of preventing the POST request redirect and parsing the url
-			parsedUrl1 := "http://poe.trade/search?" Payload
-			; redirect was prevented to get the url and open the search on poe.trade instead
-			;RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
-		}
-
-		If (StrLen(ParsingError)) {
-			ShowToolTip("")
-			ShowToolTip(ParsingError)
-		} Else {
-			TradeFunc_OpenUrlInBrowser(ParsedUrl1)
+		If (TradeOpts.PoENinjaSearch and (url := TradeFunc_GetPoENinjaItemUrl(TradeOpts.SearchLeague, Item))) {
+			TradeFunc_OpenUrlInBrowser(url)
 			If (not TradeOpts.CopyUrlToClipboard) {
 				SetClipboardContents("")	
 			}
-		}
+		} Else {
+			If (Item.IsCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
+				ParsedUrl1 := currencyUrl
+			}
+			Else {
+				; using GET request instead of preventing the POST request redirect and parsing the url
+				parsedUrl1 := "http://poe.trade/search?" Payload
+				; redirect was prevented to get the url and open the search on poe.trade instead
+				;RegExMatch(Html, "i)href=""(https?:\/\/.*?)""", ParsedUrl)
+			}
+
+			If (StrLen(ParsingError)) {
+				ShowToolTip("")
+				ShowToolTip(ParsingError)
+			} Else {
+				TradeFunc_OpenUrlInBrowser(ParsedUrl1)
+				If (not TradeOpts.CopyUrlToClipboard) {
+					SetClipboardContents("")	
+				}
+			}
+		}	
 	}
 	Else If (Item.isCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
 		; Default currency search
@@ -1271,6 +1278,63 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	}
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
+}
+
+TradeFunc_GetPoENinjaItemUrl(league, item) {	
+	url := "http://poe.ninja/"
+	
+	If (league = "tmpstandard") {
+		url .= "challenge/"
+	} Else If (league = "tmphardcore") {
+		url .= "challengehc/"
+	} Else If (league = "standard") {
+		url .= "standard/"
+	} Else If (league = "hardcore") {
+		url .= "hardcore/"
+	} Else If (RegExMatch(league, "i)hc") and RegExMatch(league, "i)event")) {
+		url .= "eventhc/"
+	} Else If (RegExMatch(league, "i)event")) {
+		url .= "event/"
+	}
+	
+	url_suffix := ""
+	If (item.IsDivinationCard) {
+		url_suffix := "divinationcards"
+	} Else If (item.IsProphecy) {
+		url_suffix := "prophecies"
+	} Else If (item.IsFragment) {
+		url_suffix := "fragments"
+	} Else If (item.IsEssence) {
+		url_suffix := "essences"
+	} Else If (item.IsUnique) {
+		If (item.IsMap) {
+			url_suffix := "unique-maps"
+		} Else If (item.IsJewel) {
+			url_suffix := "unique-jewels"
+		} Else If (item.IsFlask) {
+			url_suffix := "unique-flasks"
+		} Else If (item.IsWeapon or item.IsQuiver) {
+			url_suffix := "unique-weapons"
+		} Else If (item.IsArmour) {
+			url_suffix := "unique-armours"
+		} Else If (item.IsRing or Item.IsBelt or Item.IsAmulet) {
+			url_suffix := "unique-accessories"
+		}
+	}
+	
+	; item filter parameter
+	url_param := "?filter="
+	If (item.IsMap) {
+		url_param := Item.BaseName
+	} Else {
+		url_param := Item.Name
+	}
+	
+	If (url_suffix) {
+		Return url . url_suffix . TradeUtils.UriEncode(url_param)
+	} Else {
+		Return false
+	}
 }
 
 TradeFunc_AddCustomModsToLeaguestone(ItemAffixes, Charges) {
