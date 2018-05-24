@@ -7197,8 +7197,13 @@ AssembleDamageDetails(FullItemData)
 }
 
 ; ParseItemName fixed by user: uldo_.  Thanks!
-ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = "")
+ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = "", ItemData = "")
 {
+	isVaalGem := false
+	If (RegExMatch(Trim(ItemData.Parts[1]), "i)^Rarity: Gem") and RegExMatch(Trim(ItemData.Parts[2]), "i)Vaal")) {
+		isVaalGem := true
+	}
+
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
 		If (A_Index == 1)
@@ -7228,6 +7233,9 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 			Else
 			{
 				ItemName := A_LoopField
+				If (isVaalGem and not RegExMatch(ItemName, "i)^Vaal ")) {
+					ItemName := "Vaal " ItemName
+				}
 			}
 			; Normal items don't have a third line and the item name equals the BaseName if we sanitize it ("superior").
 			If (RegExMatch(ItemDataChunk, "i)Rarity.*?:.*?Normal"))
@@ -7767,7 +7775,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	; ItemData.Requirements := GetItemDataChunk(ItemDataText, "Requirements:")
 	; ParseRequirements(ItemData.Requirements, RequiredLevel, RequiredAttributes, RequiredAttributeValues)
 	
-	ParseItemName(ItemData.NamePlate, ItemName, ItemBaseName)
+	ParseItemName(ItemData.NamePlate, ItemName, ItemBaseName, "", ItemData)
 	If (Not ItemName)
 	{
 		return
@@ -8022,7 +8030,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	NumTotalAffixesMax	:= NumFormatPointFiveOrInt( (AffixTotals.NumTotalMax > AffixTotals.NumTotal) ? AffixTotals.NumTotalMax : AffixTotals.NumTotal)
 	AffixTotals.NumTotalMax := NumTotalAffixesMax
 	; We need to call this function a second time because now we know the AffixCount.
-	ParseItemName(ItemData.NamePlate, ItemName, ItemBaseName, NumTotalAffixes)
+	ParseItemName(ItemData.NamePlate, ItemName, ItemBaseName, NumTotalAffixes, ItemData)
 	Item.BaseName := ItemBaseName
 	
 	pseudoMods := PreparePseudoModCreation(ItemData.Affixes, Item.Implicit, RarityLevel, Item.isMap)
