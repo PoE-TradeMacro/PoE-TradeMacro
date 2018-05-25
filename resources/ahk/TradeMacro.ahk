@@ -1893,13 +1893,16 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 		LeagueName := TradeGlobals.Get("LeagueName")
 		IDs := TradeGlobals.Get("CurrencyIDs")
 		Have:= TradeOpts.CurrencySearchHave
+		If (Have = currencyName) {
+			Have := TradeOpts.CurrencySearchHave2
+		}
 
 		; currently not necessary
 		; idWant := TradeFunc_MapCurrencyNameToID(currencyName)
 		; idHave := TradeFunc_MapCurrencyNameToID(TradeOpts.CurrencySearchHave)
 
-		idWant := TradeGlobals.Get("CurrencyIDs")[currencyName]
-		idHave := TradeGlobals.Get("CurrencyIDs")[TradeOpts.CurrencySearchHave]
+		idWant := IDs[currencyName]
+		idHave := IDs[Have]
 
 		If (idWant and idHave) {
 			Url := "http://currency.poe.trade/search?league=" . TradeUtils.UriEncode(LeagueName) . "&online=x&want=" . idWant . "&have=" . idHave

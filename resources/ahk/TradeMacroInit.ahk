@@ -582,7 +582,7 @@ CreateTradeSettingsUI()
 		Search
 	*/
 
-	GuiAddGroupBox("[TradeMacro] Search", "x327 y35 w310 h625")
+	GuiAddGroupBox("[TradeMacro] Search", "x327 y35 w310 h643")
 
 	GuiAddText("League:", "x337 yp+28 w160 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
 	AddToolTip(LblSearchLeagueH, "Defaults to ""Standard"" or ""TmpStandard"" If there is a`nTemp-League active at the time of script execution.`n`n""TmpStandard"" and ""TmpHardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
@@ -633,6 +633,10 @@ CreateTradeSettingsUI()
 	GuiAddText("Currency Search:", "x337 yp+30 w160 h20 0x0100", "LblCurrencySearchHave", "LblCurrencySearchHaveH")
 	AddToolTip(LblCurrencySearchHaveH, "This settings sets the currency that you`nwant to use as ""have"" for the currency search.")
 	GuiAddDropDownList(CurrencyList, "x+10 yp-4", TradeOpts.CurrencySearchHave, "CurrencySearchHave", "CurrencySearchHaveH")
+
+	GuiAddText("Secondary Currency:", "x337 yp+30 w160 h20 0x0100", "LblCurrencySearchHave2", "LblCurrencySearchHave2H")
+	AddToolTip(LblCurrencySearchHave2H, "This setting sets the currency that you`nwant to use as ""have"" when searching for`nthe above selected currency.")
+	GuiAddDropDownList(CurrencyList, "x+10 yp-4", TradeOpts.CurrencySearchHave2, "CurrencySearchHave2", "CurrencySearchHave2H")
 
 	; option group start
 	GuiAddCheckbox("Online only", "x337 yp+27 w145 h30 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
@@ -844,7 +848,7 @@ UpdateTradeSettingsUI()
 		else if (keyName == "SearchLeague") {
 			GuiUpdateDropdownList(TradeFunc_GetDelimitedLeagueList(), keyVal, keyName)
 		}
-		else if (keyName == "CurrencySearchHave") {
+		else if (keyName == "CurrencySearchHave" || keyName == "CurrencySearchHave2") {
 			GuiUpdateDropdownList(TradeFunc_GetDelimitedCurrencyListString(), keyVal, keyName)
 		}
 		else {
