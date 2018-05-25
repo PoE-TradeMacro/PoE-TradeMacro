@@ -7196,6 +7196,42 @@ AssembleDamageDetails(FullItemData)
 	return Result
 }
 
+AssembleProphecyDetails(name) {
+	parsedJSON := {}
+	prophecy := {}
+	
+	If (not Globals.Get("ProphecyData")) {
+		Try {
+			FileRead, JSONFile, %A_ScriptDir%\data_trade\prophecy_details.json
+			parsedJSON := JSON.Load(JSONFile)
+			prophecy := parsedJSON.prophecy_details[name]
+			
+			If (not prophecy.text) {
+				Return
+			}
+		} Catch error {
+			Return
+		}
+		
+		Globals.Set("ProphecyData", parsedJSON.prophecy_details)
+	} Else {
+		prophecy := Globals.Get("ProphecyData")[name]
+	}
+	
+	TT := ""
+	If (prophecy.objective) {
+		TT .= "`n" "Objective:" "`n" prophecy.objective "`n"
+	}
+	If (prophecy.reward) {
+		TT .= "`n" "Reward:" "`n" prophecy.reward "`n"
+	}
+	If (StrLen(prophecy["seal cost"])) {
+		TT .= "`n" "Seal Cost:" " " prophecy["seal cost"] "`n"
+	}
+	
+	Return TT
+}
+
 ; ParseItemName fixed by user: uldo_.  Thanks!
 ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = "", ItemData = "")
 {
@@ -8158,13 +8194,14 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		TT := TT . "`n--------`n" . CardDescription
 	}
 
-	/*
 	If (Item.IsProphecy)
 	{
+		/*
 		Restriction := StrLen(Item.DifficultyRestriction) > 0 ? Item.DifficultyRestriction : "None"
 		TT := TT . "`n--------`nDifficulty Restriction: " Restriction
+		*/
+		TT .= AssembleProphecyDetails(Item.Name)
 	}
-	*/
 	
 	If (Item.IsMap)
 	{
