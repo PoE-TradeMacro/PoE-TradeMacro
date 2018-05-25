@@ -7480,7 +7480,7 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 	result		:= []
 
 	CurrencyDataRates := Globals.Get("CurrencyDataRates")
-	For idx, league in ["tmpstandard", "tmphardcore", "Standard", "Hardcore"] {
+	For idx, league in ["tmpstandard", "tmphardcore", "Standard", "Hardcore", "Event", "EventHC"] {
 		ninjaRates	:= CurrencyDataRates[league]
 		ChaosRatio	:= ninjaRates[ItemName].OwnQuantity ":" ninjaRates[ItemName].ChaosQuantity
 		ChaosMult		:= ninjaRates[ItemName].ChaosQuantity / ninjaRates[ItemName].OwnQuantity
@@ -7488,6 +7488,9 @@ ConvertCurrency(ItemName, ItemStats, ByRef dataSource)
 		
 		If (league == "tmpstandard" or league == "tmphardcore" ) {
 			leagueName := InStr(league, "standard") ? "Challenge Standard" : "Challenge Hardcore"
+		}
+		Else If (league = "event" or league = "eventhc") {
+			leagueName := league
 		}
 		Else {
 			leagueName := "Permanent " . league
@@ -11453,7 +11456,7 @@ CurrencyDataDowloadURLtoJSON(url, sampleValue, critical = false, league = "", pr
 
 FetchCurrencyData:
 	_CurrencyDataJSON	:= {}
-	currencyLeagues	:= ["Standard", "Hardcore", "tmpstandard", "tmphardcore"]
+	currencyLeagues	:= ["Standard", "Hardcore", "tmpstandard", "tmphardcore", "event", "eventhc"]
 	sampleValue		:= "ff"
 	
 	Loop, % currencyLeagues.Length() {

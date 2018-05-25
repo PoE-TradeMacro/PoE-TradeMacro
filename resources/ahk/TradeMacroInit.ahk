@@ -62,8 +62,9 @@ TradeOpts_New := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\config_
 MakeOldTradeOptsAndVars(TradeOpts_New)
 
 
-; Check If Temp-Leagues are active and set defaultLeague accordingly
+; Check if Temp-Leagues are active and set defaultLeague accordingly
 TradeGlobals.Set("TempLeagueIsRunning", TradeFunc_CheckIfTempLeagueIsRunning())
+TradeGlobals.Set("EventLeagueIsRunning", TradeFunc_CheckIfTempLeagueIsRunning("event"))
 TradeGlobals.Set("DefaultLeague", (TradeFunc_CheckIfTempLeagueIsRunning() > 0) ? "tmpstandard" : "standard")
 TradeGlobals.Set("GithubUser", "POE-TradeMacro")
 TradeGlobals.Set("GithubRepo", "POE-TradeMacro")
@@ -113,8 +114,11 @@ global overwrittenUserFiles	:= argumentOverwrittenFiles
 ; }
 
 TradeFunc_CheckIfCloudFlareBypassNeeded()
+
+TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 Sleep, 200
-ReadTradeConfig()
+ReadTradeConfig("", "config_trade.ini", _updateConfigWrite)
+TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[SearchLeague])
 
 ; set this variable to skip the update check in "PoE-ItemInfo.ahk"
 SkipItemInfoUpdateCall := 1
@@ -122,9 +126,6 @@ firstUpdateCheck := true
 TradeFunc_ScriptUpdate()
 
 firstUpdateCheck := false
-
-TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
-TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[SearchLeague])
 
 If (TradeOpts.AlternativeCurrencySearch) {
 	GoSub, ReadPoeNinjaCurrencyData
@@ -147,29 +148,35 @@ If (TradeOpts.DownloadDataFiles and not TradeOpts.Debug) {
 }
 
 CreateTradeSettingsUI()
+If (_updateConfigWrite) {
+	; some value needs to be written to config because it was invalid and was therefore changed
+	WriteTradeConfig()
+}
 TradeFunc_StopSplashScreen()
 
 ; ----------------------------------------------------------- Functions ----------------------------------------------------------------
 
 ; TODO: rewrite/remove after refactoring UI
-ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
+ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef updateWriteConfig = false)
 {
 	Global
+
 	If (StrLen(TradeConfigDir) < 1) {
 		TradeConfigDir := userDirectory
 	}
 	TradeConfigPath := StrLen(TradeConfigDir) > 0 ? TradeConfigDir . "\" . TradeConfigFile : TradeConfigFile
-	if (FileExist(TradeConfigPath)) {
+	If (FileExist(TradeConfigPath)) {
 		TradeOpts_New := class_EasyIni(TradeConfigPath)
 		TradeOpts_New.Update(A_ScriptDir "\resources\default_UserFiles\config_trade.ini")
+		_temp_SearchLeague := TradeOpts_New.Search.SearchLeague
 	}
-	if (!TradeFunc_CheckBrowserPath(TradeOpts_New.General.BrowserPath, false)) {
+	If (!TradeFunc_CheckBrowserPath(TradeOpts_New.General.BrowserPath, false)) {
 		TradeOpts_New.General.BrowserPath := ""
 	}
-	if (!TradeFunc_CheckLeague(TradeOpts_New.Search.SearchLeague)) {
+	If (!TradeFunc_CheckLeague(TradeOpts_New.Search.SearchLeague)) {
 		TradeOpts_New.Search.SearchLeague := TradeGlobals.Get("DefaultLeague")
 	}
-	else {
+	Else {
 		TradeOpts_New.Search.SearchLeague := TradeFunc_CheckIfLeagueIsActive(Format("{:L}", TradeOpts_New.Search.SearchLeague))
 	}
 
@@ -178,21 +185,25 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini")
 	MakeOldTradeOptsAndVars(TradeOpts_New)
 	TradeFunc_SyncUpdateSettings()
 	TradeFunc_AssignAllHotkeys()
-	return
+	If (_temp_SearchLeague != TradeOpts_New.Search.SearchLeague) {
+		updateWriteConfig := true
+	}
+	
+	Return
 }
 
 TradeFunc_AssignAllHotkeys()
 {
 	Global
-	for keyName, keyVal in TradeOpts_New.Hotkeys {
-		if (TradeOpts_New.HotkeyStates[keyName]) {
+	For keyName, keyVal in TradeOpts_New.Hotkeys {
+		If (TradeOpts_New.HotkeyStates[keyName]) {
 			TradeFunc_AssignHotkey(keyVal, keyName)
 		}
-		else {
+		Else {
 			Hotkey, %keyVal%, off, UseErrorLevel
 		}
 	}
-	return
+	Return
 }
 
 ; TODO: rewrite/remove after refactoring UI
@@ -204,7 +215,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	TradeConfigPath := StrLen(TradeConfigDir) > 0 ? TradeConfigDir . "\" . TradeConfigFile : TradeConfigFile
 
 
-	if (!TradeFunc_CheckBrowserPath(BrowserPath, true)) {
+	If (!TradeFunc_CheckBrowserPath(BrowserPath, true)) {
 		BrowserPath := ""
 	}
 	oldLeague := TradeOpts.SearchLeague
@@ -229,7 +240,8 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	TradeFunc_SyncUpdateSettings()
 	TradeFunc_AssignAllHotkeys()
 	TradeOpts_New.Save(TradeConfigPath)
-	return
+	
+	Return
 }
 
 ; NB: this is temporary hack
@@ -289,17 +301,18 @@ UpdateOldTradeOptsFromVars()
 
 TradeFunc_CheckLeague(LeagueName)
 {
-	LeagueName := Format("{:L}", LeagueName)
-	for key, val in TradeGlobals.Get("AvailableLeagues") {
+	LeagueName := Format("{:L}", LeagueName)	
+	For key, val in TradeGlobals.Get("Leagues") {
 		temp_LeagueName := Format("{:L}",  RegExReplace(val, "i)\s", ""))
-		if (LeagueName == temp_LeagueName) {
-			return true
+		If (LeagueName == temp_LeagueName) {
+			Return true
 		}
 	}
-	if (RegExMatch(LeagueName, "i)Standard|Hardcore|TmpStandard|TmpHardcore")) {
-		return true
+	
+	If (RegExMatch(LeagueName, "i)Standard|Hardcore|TmpStandard|TmpHardcore")) {
+		Return true
 	}
-	return false
+	Return false
 }
 
 CopyDefaultTradeConfig() {
@@ -319,10 +332,14 @@ CreateDefaultTradeConfig() {
 
 TradeFunc_CheckIfLeagueIsActive(LeagueName) {
 	; Check if league from Ini is set to an inactive league and change it to the corresponding active one, for example tmpstandard to standard
-	; Leagues not supported with any API (beta leagues) and events (week races) are being removed while reading the config when they are not supported by poe.trade anymore
+	; Leagues not supported with any API (beta leagues) and events (some races and SSF events) are being removed while reading the config when they are not supported by poe.trade anymore
 	If (RegExMatch(LeagueName, "i)tmp(standard)|tmp(hardcore)", match) and not TradeGlobals.Get("TempLeagueIsRunning")) {
 		LeagueName := match1 ? "standard" : "hardcore"
+	} 
+	If (RegExMatch(LeagueName, "i)(hc|hardcore).*event|(event)", match) and not RegExMatch(LeagueName, "i)ssf") and not TradeGlobals.Get("EventLeagueIsRunning")) {
+		LeagueName := match1 ? "hardcore" : "standard"
 	}
+	
 	return LeagueName
 }
 
@@ -390,7 +407,7 @@ TradeFunc_GetLeagues() {
 	}
 
 	; add additional supported leagues like beta leagues (no league API for them)
-	; make sure there are no deuplicate temp leagues (hardcoded keys)
+	; make sure there are no duplicate temp leagues (hardcoded keys)
 	For j, value in poeTradeLeagues {
 		trimmedValue := Format("{:L}", RegExReplace(value, "i)\s", ""))
 		If (not leagues[trimmedValue]) {
@@ -405,16 +422,18 @@ TradeFunc_GetLeagues() {
 			}
 		}
 	}
-
+	
 	Return leagues
 }
 
 ; ------------------ CHECK IF A TEMP-LEAGUE IS ACTIVE ------------------
-TradeFunc_CheckIfTempLeagueIsRunning() {
-	tempLeagueDates := TradeFunc_GetTempLeagueDates()
+; ltype : event for flashback and similiar events, "" otherwise
+TradeFunc_CheckIfTempLeagueIsRunning(ltype = "") {
+	tempLeagueDates := TradeFunc_GetTempLeagueDates(ltype)
 
 	If (!tempLeagueDates) {
-		defaultLeague := (InStr(TradeOpts.SearchLeague, "standard")) ? "standard" : "hardcore"
+		hcEvent := RegExMatch(TradeOpts.SearchLeague, "i)(hardcore|hc).*event")
+		defaultLeague := (RegExMatch(TradeOpts.SearchLeague, "i)standard|event") and not hcEvent) ? "standard" : "hardcore"
 		Return 0
 	}
 
@@ -426,8 +445,8 @@ TradeFunc_CheckIfTempLeagueIsRunning() {
 	timeDiffEnd   := TradeFunc_DateParse(TimeStr) - TradeFunc_DateParse(tempLeagueDates["end"])
 
 	If (timeDiffStart > 0 && timeDiffEnd < 0) {
-        ; Current datetime is between temp league start and end date
-		defaultLeague := "tmpstandard"
+		; Current datetime is between temp league start and end date
+		defaultLeague := (not RegExMatch(TradeOpts.SearchLeague, "i)event")) ? "tmpstandard" : "event"
 		Return 1
 	}
 	Else {
@@ -454,14 +473,30 @@ TradeFunc_DateParse(str) {
 	Return str
 }
 
-TradeFunc_GetTempLeagueDates() {
+TradeFunc_GetTempLeagueDates(ltype = "") {
 	tempLeagueDates := []
 
 	For key, val in LeaguesData {
-		If (val.endAt and val.startAt and not val.event) {
-			tempLeagueDates["start"] := val.startAt
-			tempLeagueDates["end"] := val.endAt
-			Return tempLeagueDates
+		If (val.endAt and val.startAt) {
+			If (not val.event and (not ltype or ltype != "event")) {
+				tempLeagueDates["start"] := val.startAt
+				tempLeagueDates["end"] := val.endAt
+				Return tempLeagueDates	
+			}
+			Else If (ltype = "event") {
+				ssf := false
+				Loop, % val.rules.Length() {
+					If (val.rules[A_Index].name = "Solo" or InStr(val.id, "SSF ")) {
+						ssf := true
+					}
+				}
+				
+				If (not ssf) {
+					tempLeagueDates["start"] := val.startAt
+					tempLeagueDates["end"] := val.endAt
+					Return tempLeagueDates
+				}
+			}			
 		}
 	}
 	Return 0
