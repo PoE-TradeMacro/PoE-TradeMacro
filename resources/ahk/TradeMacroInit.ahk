@@ -1520,7 +1520,8 @@ TradeFunc_GetOSInfo() {
 TradeFunc_StartSplashScreen() {
 	;SplashTextOn, , 20, PoE-TradeMacro, Initializing script...
 	welcome := chr(27426)chr(36814)	; 欢迎
-	SplashTextOn, 300, 20, PoE-TradeMacro, % "Welcoming the new overlords (" welcome ")..."
+	;SplashTextOn, 300, 20, PoE-TradeMacro, % "Welcoming the new overlords (" welcome ")..."
+	SplashTextOn, 300, 20, PoE-TradeMacro, % "Paying respects to the Cynical Brit..."
 }
 
 TradeFunc_StopSplashScreen() {
