@@ -639,40 +639,37 @@ CreateTradeSettingsUI()
 	GuiAddDropDownList(CurrencyList, "x+10 yp-4", TradeOpts.CurrencySearchHave2, "CurrencySearchHave2", "CurrencySearchHave2H")
 
 	; option group start
-	GuiAddCheckbox("Online only", "x337 yp+27 w145 h30 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
+	GuiAddCheckbox("Use the ""exact currency"" option.", "x337 yp+27 w280 h20", TradeOpts.ExactCurrencySearch, "ExactCurrencySearch", "ExactCurrencySearchH")
+	AddToolTip(ExactCurrencySearchH, "Searches for exact currencies, will ignore results not listed as these.`nOnly applicable to searches using poe.trade.`n`nUses the selected currencies from the ""Currency Search"" and ""Secondary Search"" option.`nSecondary currency will be used for a second search if no results are found.")
+	
+	; option group start
+	GuiAddCheckbox("Show prices as chaos equivalent.", "x337 yp+25 w280 h20", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
+	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaos equivalent.")
 
-	GuiAddCheckbox("Buyout only", "x482 yp0 w145 h30 0x0100", TradeOpts.BuyoutOnly, "BuyoutOnly", "BuyoutOnlyH")
+	; option group start
+	GuiAddCheckbox("Online only", "x337 yp+25 w145 h20 0x0100", TradeOpts.OnlineOnly, "OnlineOnly", "OnlineOnlyH")
+
+	GuiAddCheckbox("Buyout only", "x482 yp0 w145 h20 0x0100", TradeOpts.BuyoutOnly, "BuyoutOnly", "BuyoutOnlyH")
 	AddToolTip(BuyoutOnlyH, "This option only takes affect when opening the search on poe.trade.")
 
 	; option group start
-	GuiAddCheckbox("Pre-Fill Min-Values", "x337 yp+25 w145 h40", TradeOpts.PrefillMinValue, "PrefillMinValue", "PrefillMinValueH")
-	AddToolTip(PrefillMinValueH, "Automatically fill the min-values in the advanced search GUI.")
-
-	GuiAddCheckbox("Pre-Fill Max-Values", "x482 yp0 w145 h40", TradeOpts.PrefillMaxValue, "PrefillMaxValue", "PrefillMaxValueH")
-	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
-
-	; option group start
-	GuiAddCheckbox("Force max links (certain corrupted items).", "x337 yp+30 w280 h40", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
+	GuiAddCheckbox("Force max links (certain corrupted items).", "x337 yp+25 w280 h20", TradeOpts.ForceMaxLinks, "ForceMaxLinks", "ForceMaxLinksH")
 	AddToolTip(ForceMaxLinksH, "Searches for corrupted 3/4 max-socket unique items always use`nthe maximum amount of links if your item is fully linked.")
 	
 	; option group start
-	GuiAddCheckbox("Remove multiple Listings from same Account.", "x337 yp+30 w280 h40", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
+	GuiAddCheckbox("Remove multiple Listings from same Account.", "x337 yp+25 w280 h20", TradeOpts.RemoveMultipleListingsFromSameAccount, "RemoveMultipleListingsFromSameAccount", "RemoveMultipleListingsFromSameAccountH")
 	AddToolTip(RemoveMultipleListingsFromSameAccountH, "Removes multiple listings from the same account from`nyour search results (to combat market manipulators).`n`nThe removed items are also removed from the average and`nmedian price calculations.")
-
-	; option group start
-	GuiAddCheckbox("Show prices as chaos equivalent.", "x337 yp+30 w280 h40", TradeOpts.ShowPricesAsChaosEquiv, "ShowPricesAsChaosEquiv", "ShowPricesAsChaosEquivH")
-	AddToolTip(ShowPricesAsChaosEquivH, "Shows all prices as their chaos equivalent.")
 	
 	; option group start
-	GuiAddCheckbox("Alternative currency search.", "x337 yp+30 w280 h40", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
+	GuiAddCheckbox("Alternative currency search.", "x337 yp+25 w280 h20", TradeOpts.AlternativeCurrencySearch, "AlternativeCurrencySearch", "AlternativeCurrencySearchH")
 	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
 	
 	; option group start
-	GuiAddCheckbox("Use predicted item pricing (experimental).", "x337 yp+30 w280 h40", TradeOpts.UsePredictedItemPricing, "UsePredictedItemPricing", "UsePredictedItemPricingH")
+	GuiAddCheckbox("Use predicted pricing.", "x337 yp+25 w145 h20", TradeOpts.UsePredictedItemPricing, "UsePredictedItemPricing", "UsePredictedItemPricingH")
 	AddToolTip(UsePredictedItemPricingH, "Use predicted item pricing via machine-learning algorithms.`nReplaces the default search, works with magic/rare/unique items.`n`nProvided by poeprices.info.")
 
 	; option group start
-	GuiAddCheckbox("Predicted item pricing: Use feedback Gui.", "x337 yp+30 w280 h40", TradeOpts.UsePredictedItemPricingGui, "UsePredictedItemPricingGui", "UsePredictedItemPricingGuiH")
+	GuiAddCheckbox("Use feedback Gui.", "x482 yp+0 w120 h20", TradeOpts.UsePredictedItemPricingGui, "UsePredictedItemPricingGui", "UsePredictedItemPricingGuiH")
 	AddToolTip(UsePredictedItemPricingGuiH, "Use a Gui instead of the default tooltip to display results.`nYou can send some feedback to improve this feature.")
 
 	; header
@@ -680,7 +677,14 @@ CreateTradeSettingsUI()
 	GuiAddText("-------------------------------------------------------------", "x337 yp+6 w280 h20 0x0100 cDA4F49", "", "")
 
 	; option group start
-	GuiAddCheckbox("Normal mods", "x337 yp+16 w135 h20", TradeOpts.AdvancedSearchCheckMods, "AdvancedSearchCheckMods", "AdvancedSearchCheckModsH")
+	GuiAddCheckbox("Pre-Fill Min-Values", "x337 yp+16 w145 h20", TradeOpts.PrefillMinValue, "PrefillMinValue", "PrefillMinValueH")
+	AddToolTip(PrefillMinValueH, "Automatically fill the min-values in the advanced search GUI.")
+
+	GuiAddCheckbox("Pre-Fill Max-Values", "x482 yp0 w145 h20", TradeOpts.PrefillMaxValue, "PrefillMaxValue", "PrefillMaxValueH")
+	AddToolTip(PrefillMaxValueH, "Automatically fill the max-values in the advanced search GUI.")
+
+	; option group start
+	GuiAddCheckbox("Normal mods", "x337 yp+20 w135 h20", TradeOpts.AdvancedSearchCheckMods, "AdvancedSearchCheckMods", "AdvancedSearchCheckModsH")
 	AddToolTip(AdvancedSearchCheckModsH, "Selects all normal mods (no pseudo mods)`nwhen creating the advanced search GUI.")
 
 	GuiAddCheckbox("Total Ele Resistances", "x482 yp0 w145 h20", TradeOpts.AdvancedSearchCheckTotalEleRes, "AdvancedSearchCheckTotalEleRes", "AdvancedSearchCheckTotalEleResH")
@@ -981,20 +985,31 @@ TradeFunc_CheckBrowserPath(path, showMsg) {
 TradeFunc_ParseSearchFormOptions() {
 	FileRead, html, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 
-	RegExMatch(html, "i)(var)?\s*(items_types\s*=\s*{.*?})", match)
-	itemTypes := RegExReplace(match2, "i)items_types\s*=", "{""items_types"" :")
+	RegExMatch(html, "i)(var)?\s*(items_types\s*=\s*{.*?})", types)
+	itemTypes := RegExReplace(types2, "i)items_types\s*=", "{""items_types"" :")
 	itemTypes .= "}"
 	parsedJSON := JSON.Load(itemTypes)
 
 	availableLeagues := []
-	RegExMatch(html, "isU)select.*name=""league"".*<\/select>", match)
+	RegExMatch(html, "isU)<select.*name=""league"".*<\/select>", leagues)
 	Pos := 0
-	While Pos := RegExMatch(match, "iU)option.*value=""(.*)"".*>", option, Pos + (StrLen(option) ? StrLen(option) : 1)) {
+	While Pos := RegExMatch(leagues, "iU)option.*value=""(.*)"".*>", option, Pos + (StrLen(option) ? StrLen(option) : 1)) {
 		availableLeagues.push(option1)
 	}
+	
+	exactCurrencyOptions := {}
+	exactCurrencyOptions.poetrade := {}
+	RegExMatch(html, "i)(<select.*?name=""buyout_currency"".*<\/select>)", currencies)
+	Pos := 0
+	While Pos := RegExMatch(currencies1, "iU)option.*value=""(.*)"".*>(.*)<\/option>", option, Pos + (StrLen(option) ? StrLen(option) : 1)) {
+		If (not RegExMatch(option1, "i)^(1|0)$") and option1) {
+			exactCurrencyOptions.poetrade[RegExReplace(option2, "i)&#39;", "'")] := option1	
+		}		
+	}	
 
 	TradeGlobals.Set("ItemTypeList", parsedJSON.items_types)
 	TradeGlobals.Set("GemNameList", parsedJSON.items_types.gem)
+	TradeGlobals.Set("ExactCurrencySearchOptions", exactCurrencyOptions)
 	TradeGlobals.Set("AvailableLeagues", availableLeagues)
 	itemTypes :=
 	availableLeagues :=

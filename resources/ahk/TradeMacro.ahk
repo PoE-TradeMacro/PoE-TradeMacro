@@ -105,7 +105,6 @@ TradeFunc_OpenSearchOnPoeAppHotkey(priceCheckTest = false, itemData = "") {
 	Sleep 250
 	
 	TradeFunc_DoParseClipboard()
-	
 	If (Item.Name or Item.BaseName) {
 		itemContents := TradeUtils.UriEncode(Clipboard)
 		url := "https://poeapp.com?utm_source=poe-trademacro#/item-import/" + itemContents
@@ -1165,12 +1164,30 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 
+	/*
+		create payload
+		*/
 	Payload := RequestParams.ToPayload()
-
+	
+	/*
+		Create second payload for exact currency search (backup search if no results were found with primary currency)
+		*/		
+	If (not Item.IsCurrency and TradeOpts.ExactCurrencySearch) {
+		Payload_alt := Payload
+		Item.UsedInSearch.ExactCurrency := true
+		
+		ExactCurrencySearchOptions := TradeGlobals.Get("ExactCurrencySearchOptions").poetrade
+		If (buyout_currency := ExactCurrencySearchOptions[TradeOpts.CurrencySearchHave]) {
+			Payload .= "&buyout_currency=" TradeUtils.UriEncode(buyout_currency)
+		}
+		If (buyout_currency := ExactCurrencySearchOptions[TradeOpts.CurrencySearchHave2]) {
+			Payload_alt .= "&buyout_currency=" TradeUtils.UriEncode(buyout_currency)
+		}
+	}	
+	
 	/*
 		decide how to handle the request (open in browser on a specific site or make a POST/GET request to parse the results)
-		*/
-		
+		*/		
 	If (openSearchInBrowser) {
 		ShowToolTip("Opening search in your browser... ")
 	} Else If (not (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing)) {
@@ -1270,7 +1287,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			Item.UsedInSearch.SearchType := "Default"
 		}
-		ParsedData := TradeFunc_ParseHtml(Html, Payload, iLvl, Enchantment, isItemAgeRequest, isAdvancedPriceCheckRedirect)
+		
+		; add second request for payload_alt (exact currency search fallback request)		
+		searchResults := TradeFunc_ParseHtmlToObj(Html, Payload, iLvl, Enchantment, isItemAgeRequest, isAdvancedPriceCheckRedirect)
+		If (not searchResults.results and StrLen(Payload_alt)) {
+			Html := TradeFunc_DoPostRequest(Payload_alt, openSearchInBrowser)
+			ParsedData := TradeFunc_ParseHtml(Html, Payload_alt, iLvl, Enchantment, isItemAgeRequest, isAdvancedPriceCheckRedirect)
+		}
+		Else {
+			ParsedData := TradeFunc_ParseHtml(Html, Payload, iLvl, Enchantment, isItemAgeRequest, isAdvancedPriceCheckRedirect)	
+		}		
 
 		SetClipboardContents("")
 		ShowToolTip("")
@@ -2344,6 +2370,113 @@ TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName) {
 	Return mappedCurrencyName
 }
 
+; Parse poe.trade search result html to object
+TradeFunc_ParseHtmlToObj(html, payload, iLvl = "", ench = "", isItemAgeRequest = false, isAdvancedSearch = false) {
+	Global Item, ItemData, TradeOpts
+	LeagueName := TradeGlobals.Get("LeagueName")
+	
+	;median_average := TradeFunc_GetMeanMedianPrice(html, payload, error)	
+	
+	; Target HTML Looks like the ff:
+     ; <tbody id="item-container-97" class="item" data-seller="Jobo" data-sellerid="458008"
+	; data-buyout="15 chaos" data-ign="Lolipop_Slave" data-league="Essence" data-name="Tabula Rasa Simple Robe"
+	; data-tab="This is a buff" data-x="10" data-y="9"> <tr class="first-line">
+	
+
+	NoOfItemsToShow := TradeOpts.ShowItemResults
+	results := []
+	accounts := {}
+	
+	While A_Index < NoOfItemsToShow {
+		result := {}
+		
+		ItemBlock 	:= TradeUtils.HtmlParseItemData(html, "<tbody id=""item-container-" A_Index - 1 """(.*?)<\/tbody>", html)
+		AccountName 	:= TradeUtils.HtmlParseItemData(ItemBlock, "data-seller=""(.*?)""")
+		AccountName	:= RegexReplace(AccountName, "i)^\+", "")
+		Buyout 		:= TradeUtils.HtmlParseItemData(ItemBlock, "data-buyout=""(.*?)""")
+		IGN			:= TradeUtils.HtmlParseItemData(ItemBlock, "data-ign=""(.*?)""")
+		AFK			:= TradeUtils.HtmlParseItemData(ItemBlock, "class="".*?(label-afk).*?"".*?>")
+
+		If (not AccountName) {
+			continue
+		}
+		Else {
+			itemsListed++
+		}
+
+		; skip multiple results from the same account
+		If (TradeOpts.RemoveMultipleListingsFromSameAccount and not isItemAgeRequest) {
+			If (accounts[AccountName]) {
+				NoOfItemsToShow += 1
+				accounts[AccountName] += 1
+				continue
+			} Else {
+				accounts[AccountName] := 1
+			}
+		}
+		result.accountName := AccountName
+		result.ign := IGN
+		result.afk := StrLen(AFK) ? true : false
+
+		; get item age
+		Pos := RegExMatch(ItemBlock, "i)class=""found-time-ago"">(.*?)<", Age)
+		result.age := Age1
+		
+		Pos := RegExMatch(ItemBlock, "i)data-name=""ilvl"">.*: ?(\d+?)<", iLvl, Pos)
+		result.itemLevel := iLvl1
+		
+		If (Item.IsGem) {
+			; get gem quality, level and xp
+			RegExMatch(ItemBlock, "i)data-name=""progress"".*<b>\s?(\d+)\/(\d+)\s?<\/b>", GemXP_Flat)
+			RegExMatch(ItemBlock, "i)data-name=""progress"">\s*?Experience:.*?([0-9.]+)\s?%", GemXP_Percent)
+			Pos := RegExMatch(ItemBlock, "i)data-name=""q"".*?data-value=""(.*?)""", Q, Pos)
+			Pos := RegExMatch(ItemBlock, "i)data-name=""level"".*?data-value=""(.*?)""", LVL, Pos)
+			
+			result.gemData := {}
+			result.gemData.xpFlat := GemXP_Flat1
+			result.gemData.xpPercent := GemXP_Percent1
+			result.gemData.quality := Q1
+			result.gemData.level := LVL1
+		}
+
+		; buyout price
+		RegExMatch(Buyout, "i)([-.0-9]+) (.*)", BuyoutText)
+		RegExMatch(BuyoutText1, "i)(\d+)(.\d+)?", BuyoutPrice)
+		
+		If (TradeOpts.ShowPricesAsChaosEquiv and not TradeOpts.ExactCurrencySearch) {
+			; translate buyout to chaos equivalent
+			RegExMatch(Buyout, "i)\d+(\.|,?\d+)?(.*)", match)
+			CurrencyName := TradeUtils.Cleanup(match2)
+
+			mappedCurrencyName		:= TradeFunc_MapCurrencyPoeTradeNameToIngameName(CurrencyName)
+			chaosEquivalentSingle	:= ChaosEquivalents[mappedCurrencyName]
+			chaosEquivalent		:= BuyoutPrice * chaosEquivalentSingle
+			RegExMatch(chaosEquivalent, "i)(\d+)(.\d+)?", BuyoutPrice)
+
+			If (chaosEquivalentSingle) {
+				BuyoutPrice    := (BuyoutPrice2) ? BuyoutPrice1 . BuyoutPrice2 : BuyoutPrice1
+				BuyoutCurrency := "chaos"
+			}
+		}
+		Else {
+			BuyoutPrice    := (BuyoutPrice2) ? BuyoutPrice1 . BuyoutPrice2 : BuyoutPrice1
+			BuyoutCurrency := BuyoutText2
+		}
+		
+		result.buyoutPrice := BuyoutPrice
+		result.buyoutCurrency := BuyoutCurrency	
+
+		results.push(result)
+	}
+	
+	data := {}
+	data.results := results
+	data.accounts := accounts
+
+	Return data
+}
+
+
 ; Parse poe.trade html to display the search result tooltip with X listings
 TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = false, isAdvancedSearch = false) {
 	Global Item, ItemData, TradeOpts
@@ -2438,7 +2571,10 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Added special bestiary mods to the search !!" : ""	
 			} Else {
 				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Mod rolls are being ignored !!" : ""
-			}			
+				If (Item.UsedInSearch.ExactCurrency) {
+					Title .= "`n" . "!! Using exact currency option !!"
+				}
+			}
 		}
 		Title .= seperatorBig
 	}
@@ -2834,6 +2970,7 @@ class RequestParams_ {
 	buyout_min 	:= ""
 	buyout_max 	:= ""
 	buyout_currency:= ""
+	exact_currency	:= (TradeOpts.ExactCurrencySearch == 0) ? "" : "x"
 	crafted		:= ""
 	enchanted 	:= ""
 	progress_min	:= ""
@@ -2843,7 +2980,6 @@ class RequestParams_ {
 	shaper		:= ""
 	elder		:= ""
 	map_series 	:= ""
-	exact_currency := ""
 
 	ToPayload() {
 		modGroupStr := ""
@@ -4537,6 +4673,17 @@ class TradeUtils {
 	; and https://autohotkey.com/boards/viewtopic.php?f=6&t=53
 	IsArray(obj) {
 		Return !!obj.MaxIndex()
+	}
+	
+	; careful : circular references crash the script.
+	; https://autohotkey.com/board/topic/69542-objectclone-doesnt-create-a-copy-keeps-references/#entry440561
+	ObjFullyClone(obj)
+	{
+		nobj := obj.Clone()
+		for k,v in nobj
+			if IsObject(v)
+				nobj[k] := A_ThisFunc.(v)
+		return nobj
 	}
 
 	; Trim trailing zeros from numbers
