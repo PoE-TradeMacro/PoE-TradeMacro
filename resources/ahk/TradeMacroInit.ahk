@@ -665,6 +665,10 @@ CreateTradeSettingsUI()
 	AddToolTip(AlternativeCurrencySearchH, "Shows historical data of the searched currency.`nProvided by poe.ninja.")
 	
 	; option group start
+	GuiAddCheckbox("Open items on poe.ninja.", "x337 yp+25 w280 h20", TradeOpts.PoENinjaSearch, "PoENinjaSearch", "PoENinjaSearchH")
+	AddToolTip(PoENinjaSearchH, "Opens items on poe.ninja instead of poe.trade when using the ""Search (poe.trade)"" hotkey.`n`nOnly works on certain supported item types:`nDiv cards, prophecies, maps, uniques, essences.")
+	
+	; option group start
 	GuiAddCheckbox("Use predicted pricing.", "x337 yp+25 w145 h20", TradeOpts.UsePredictedItemPricing, "UsePredictedItemPricing", "UsePredictedItemPricingH")
 	AddToolTip(UsePredictedItemPricingH, "Use predicted item pricing via machine-learning algorithms.`nReplaces the default search, works with magic/rare/unique items.`n`nProvided by poeprices.info.")
 

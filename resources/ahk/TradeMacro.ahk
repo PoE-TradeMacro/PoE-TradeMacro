@@ -1318,9 +1318,9 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 	} Else If (league = "hardcore") {
 		url .= "hardcore/"
 	} Else If (RegExMatch(league, "i)hc") and RegExMatch(league, "i)event")) {
-		url .= "eventhardcore/"
+		url .= "eventhc/"
 	} Else If (RegExMatch(league, "i)event")) {
-		url .= "eventstandard/"
+		url .= "event/"
 	}
 	
 	url_suffix := ""
@@ -1329,7 +1329,9 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 	} Else If (item.IsProphecy) {
 		url_suffix := "prophecies"
 	} Else If (item.IsFragment) {
-		url_suffix := "fragments"
+		;url_suffix := "fragments"	; currently not supported (no filter)
+	} Else If (item.IsGem) {
+		;url_suffix := "skill-gems"	; supported but using poe.trade for this may be the better choice
 	} Else If (item.IsEssence) {
 		url_suffix := "essences"
 	} Else If (item.IsUnique) {
@@ -1346,18 +1348,20 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 		} Else If (item.IsRing or Item.IsBelt or Item.IsAmulet) {
 			url_suffix := "unique-accessories"
 		}
+	} Else If (item.IsMap) {
+		url_suffix := "maps"
 	}
 	
 	; item filter parameter
 	url_param := "?filter="
 	If (item.IsMap) {
-		url_param := Item.BaseName
+		url_param_arg := Item.BaseName
 	} Else {
-		url_param := Item.Name
+		url_param_arg := Item.Name
 	}
 	
 	If (url_suffix) {
-		Return url . url_suffix . TradeUtils.UriEncode(url_param)
+		Return url . url_suffix . url_param . TradeUtils.UriEncode(url_param_arg)
 	} Else {
 		Return false
 	}
