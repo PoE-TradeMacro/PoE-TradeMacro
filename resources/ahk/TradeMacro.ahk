@@ -1318,9 +1318,9 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 	} Else If (league = "hardcore") {
 		url .= "hardcore/"
 	} Else If (RegExMatch(league, "i)hc") and RegExMatch(league, "i)event")) {
-		url .= "eventhc/"
+		url .= "eventhardcore/"
 	} Else If (RegExMatch(league, "i)event")) {
-		url .= "event/"
+		url .= "eventstandard/"
 	}
 	
 	url_suffix := ""
