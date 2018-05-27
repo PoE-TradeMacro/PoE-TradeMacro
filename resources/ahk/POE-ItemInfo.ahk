@@ -487,7 +487,7 @@ Menu, Tray, Add, About..., MenuTray_About
 Menu, Tray, Add, Show all assigned Hotkeys, ShowAssignedHotkeys
 Menu, Tray, Add, % Globals.Get("SettingsUITitle", "PoE ItemInfo Settings"), ShowSettingsUI
 Menu, Tray, Add, Check for updates, CheckForUpdates
-Menu, Tray, Add, Update Notes, ShowUpdateNotes
+Menu, Tray, Add, Show Update Notes, ShowUpdateNotes
 Menu, Tray, Add ; Separator
 Menu, Tray, Add, Edit Files, :TextFiles
 Menu, Tray, Add, Preview Files, :PreviewTextFiles
@@ -9944,7 +9944,8 @@ ShowUpdateNotes()
 	Gui, UpdateNotes:Destroy
 	Gui, UpdateNotes:Color, ffffff, ffffff
 	Fonts.SetUIFont(9)
-
+	Gui, UpdateNotes:Font, , Verdana
+	
 	Files := Globals.Get("UpdateNoteFileList")
 
 	TabNames := ""
@@ -9960,13 +9961,13 @@ ShowUpdateNotes()
 	Loop, % Files.Length() {
 		file := Files[A_Index][1]
 		FileRead, notes, %file%
-		Gui, UpdateNotes:Add, Edit, r50 ReadOnly w700 BackgroundTrans, %notes%
+		Gui, UpdateNotes:Add, Edit, r50 ReadOnly w900 BackgroundTrans, %notes%
 		NextTab := A_Index + 1
 		Gui, UpdateNotes:Tab, %NextTab%
 	}
 	Gui, UpdateNotes:Tab
 
-	SettingsUIWidth := 745
+	SettingsUIWidth := 945
 	SettingsUIHeight := 710
 	SettingsUITitle := "Update Notes"
 	Gui, UpdateNotes:Show, w%SettingsUIWidth% h%SettingsUIHeight%, %SettingsUITitle%
