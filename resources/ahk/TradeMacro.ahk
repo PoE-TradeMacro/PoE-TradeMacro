@@ -1308,7 +1308,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 TradeFunc_GetPoENinjaItemUrl(league, item) {	
 	url := "http://poe.ninja/"
-	
+
 	If (league = "tmpstandard") {
 		url .= "challenge/"
 	} Else If (league = "tmphardcore") {
@@ -1323,6 +1323,10 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 		url .= "event/"
 	}
 	
+	If (Item.hasImplicit) {
+		Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
+	}
+	
 	url_suffix := ""
 	If (item.IsDivinationCard) {
 		url_suffix := "divinationcards"
@@ -1334,6 +1338,8 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 		;url_suffix := "skill-gems"	; supported but using poe.trade for this may be the better choice
 	} Else If (item.IsEssence) {
 		url_suffix := "essences"
+	} Else If (item.SubType = "Helmet" and Enchantment.name) {
+		url_suffix := "helmet-enchants"
 	} Else If (item.IsUnique) {
 		If (item.IsMap) {
 			url_suffix := "unique-maps"
@@ -1352,16 +1358,28 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 		url_suffix := "maps"
 	}
 	
-	; item filter parameter
-	url_param := "?filter="
+	; filters
+	url_params := "?"
+	url_param_1 := "filter="
+	url_param_2 := "&tier="
+	
 	If (item.IsMap) {
-		url_param_arg := Item.BaseName
-	} Else {
-		url_param_arg := Item.Name
+		url_param_arg_1 := TradeUtils.UriEncode(Item.BaseName)
+		url_param_arg_2 := TradeUtils.UriEncode(Item.MapTier)
+		url_params .= url_param_1 . url_param_arg_1 . url_param_2 . url_param_arg_2
+	}
+	Else If (item.SubType = "Helmet" and Enchantment) {
+		url_param_arg_1 := TradeUtils.UriEncode(Enchantment.name)
+		url_params .= url_param_1 . url_param_arg_1
+	}
+	Else {
+		url_param_arg_1 := TradeUtils.UriEncode(Item.Name)
+		url_params .= url_param_1 . url_param_arg_1
 	}
 	
 	If (url_suffix) {
-		Return url . url_suffix . url_param . TradeUtils.UriEncode(url_param_arg)
+		console.log(url . url_suffix . url_params)
+		Return url . url_suffix . url_params
 	} Else {
 		Return false
 	}

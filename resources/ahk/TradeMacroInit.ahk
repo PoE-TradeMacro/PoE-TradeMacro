@@ -666,7 +666,7 @@ CreateTradeSettingsUI()
 	
 	; option group start
 	GuiAddCheckbox("Open items on poe.ninja.", "x337 yp+25 w280 h20", TradeOpts.PoENinjaSearch, "PoENinjaSearch", "PoENinjaSearchH")
-	AddToolTip(PoENinjaSearchH, "Opens items on poe.ninja instead of poe.trade when using the ""Search (poe.trade)"" hotkey.`n`nOnly works on certain supported item types:`nDiv cards, prophecies, maps, uniques, essences.")
+	AddToolTip(PoENinjaSearchH, "Opens items on poe.ninja instead of poe.trade when using the ""Search (poe.trade)"" hotkey.`n`nOnly works on certain supported item types:`nDiv cards, prophecies, maps, uniques, essences, helmet enchants (have priority over item).")
 	
 	; option group start
 	GuiAddCheckbox("Use predicted pricing.", "x337 yp+25 w145 h20", TradeOpts.UsePredictedItemPricing, "UsePredictedItemPricing", "UsePredictedItemPricingH")
