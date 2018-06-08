@@ -3974,7 +3974,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		
 		image := A_ScriptDir "\resources\images\" iPic ".png"
 		If (FileExist(image)) {
-			Gui, SelectModsGui:Add, Picture, w700 h30 x0 yp+20, %image%
+			Gui, SelectModsGui:Add, Picture, w800 h30 x0 yp+20, %image%
 		}		
 		Gui, SelectModsGui:Add, Text, x14 yp+9 %tColor% BackgroundTrans, %itemName%
 		If (advItem.Rarity > 2 or advItem.isUnique) {
@@ -3994,7 +3994,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			Gui, SelectModsGui:Add, Text, x+10 yp+0 cc8c8c8 BackgroundTrans, %tLinksSockets%
 		}
 
-		Gui, SelectModsGui:Add, Text, x0 w700 yp+13 cBlack BackgroundTrans, %line%
+		Gui, SelectModsGui:Add, Text, x0 w800 yp+13 cBlack BackgroundTrans, %line%
 	}
 
 	ValueRangeMin	:= ValueRangeMin / 100
@@ -4016,8 +4016,12 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			modGroupBox := modLengthMax * 6
 		}
 	}
-	If (!advItem.mods.Length() and ChangedImplicit) {
-		modGroupBox := StrLen(ChangedImplicit.name) * 6
+	Loop % ChangedImplicit.Length() {
+		tempValue := StrLen(ChangedImplicit[A_Index].param)
+		If (modLengthMax < tempValue ) {
+			modLengthMax := tempValue
+			modGroupBox := modLengthMax * 6
+		}
 	}
 	modGroupBox := modGroupBox + 10
 	modCount := advItem.mods.Length()
@@ -4186,7 +4190,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	e := 0
 	If (ChangedImplicit.Length()) {		
 		xPosMin := modGroupBox + 25
-		yPosFirst := ( j > 1 ) ? 20 : 30
+		yPosFirst := 20 ; ( j > 1 ) ? 20 : 30
 		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 ; edit/text field widths and offsets
 		
 		For key, val in ChangedImplicit {
