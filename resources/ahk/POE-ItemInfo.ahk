@@ -8482,6 +8482,10 @@ GetNegativeAffixOffset(Item)
 	{
 		NegativeAffixOffset += 1
 	}
+	If (RegExMatch(Item.Name, "i)Tabula Rasa")) ; no mods, no flavour text
+	{
+		NegativeAffixOffset -= 2
+	}
 	return NegativeAffixOffset
 }
 
@@ -10578,7 +10582,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 							}
 						}
 					}
-				} Else {					
+				} Else {			
 					If (Item.BaseName) {
 						terms.push(Item.BaseName)	
 					} Else {
