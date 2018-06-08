@@ -14,6 +14,9 @@
 	*/
 
 	; https://curl.haxx.se/download.html -> https://bintray.com/vszakats/generic/curl/
+	
+	starttime := A_TickCount
+	
 	Loop, 2 
 	{
 		curl		:= """" A_ScriptDir "\lib\curl.exe"" "	
@@ -45,6 +48,9 @@
 				}
 				If (RegExMatch(A_LoopField, "i)Redirect:\sFalse")) {
 					redirect := ""
+				}
+				If (RegExMatch(A_LoopField, "i)parseJSON:\sTrue")) {
+					ignoreRetCodeForJSON := true
 				}
 				If (RegExMatch(A_LoopField, "i)PreventErrorMsg")) {
 					PreventErrorMsg := true
@@ -81,7 +87,8 @@
 			} Else {
 				commandData .= " -" redirect "ks --compressed "
 				If (requestType = "GET") {
-					commandHdr  .= " -k" redirect "s "
+					;commandHdr  .= " -k" redirect "s "
+					commandHdr  .= " -s" redirect " -D - -o /dev/null " 
 				} Else {
 					commandHdr  .= " -I" redirect "ks "
 				}
@@ -109,14 +116,16 @@
 			If (binaryDL) {
 				commandData	.= "--connect-timeout " timeout " "
 				commandData	.= "--connect-timeout " timeout " "
-			} Else {				
+			} Else {
 				commandData	.= "--max-time " timeout " "
 				commandHdr	.= "--max-time " timeout " "
 			}
-
+			
+			dataStart := A_TickCount
 			; get data
 			html	:= StdOutStream(curl """" url """" commandData)
 			;html := ReadConsoleOutputFromFile(commandData """" url """", "commandData") ; alternative function
+			dataEnd := A_TickCount
 			
 			If (returnCurl) {
 				returnCurl := "curl " """" url """" commandData
@@ -129,8 +138,13 @@
 				} Else {
 					commandHdr := curl """" url """" commandHdr
 				}
+				headerStart := A_TickCount
 				ioHdr := StdOutStream(commandHdr)
 				;ioHrd := ReadConsoleOutputFromFile(commandHdr, "commandHdr") ; alternative function
+				headerEnd := A_TickCount
+			} Else If (skipRetHeaders) {
+				commandHdr := curl """" url """" commandHdr
+				ioHdr := html
 			} Else {
 				ioHdr := html
 			}
@@ -147,10 +161,14 @@
 		} Catch er {
 			
 		}
-		
+
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {		
 			Break	; only go into the second loop if the respone is empty or has a bad status code (possible problem with the added host header)
 		}
+	}
+	
+	If (true) {
+		reqEndtime := A_TickCount	
 	}
 
 	;goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
@@ -199,6 +217,20 @@
 		}
 	} Else {
 		ThrowError(e, false, ioHdr, PreventErrorMsg)
+	}
+	
+	If (true) {
+		endtime := A_TickCount
+		headerText := StrLen(headerEnd - headerStart) ? headerEnd - headerStart "ms `n" : "Skipped`n"
+		
+		time := url "`n" 
+		time .= "Downloading process duration: " reqEndTime - starttime "ms `n"
+		time .= "Data request duration	  : " dataEnd - dataStart "ms `n"
+		time .= "Header request duration	  : " headerText
+		time .= "Validating result duration  : " endTime - reqEndTime "ms `n"
+		time .= "=================================================================================================================`n"
+		
+		FileAppend, %time%, %A_ScriptDir%\temp\timings.txt 
 	}
 	
 	Return html
