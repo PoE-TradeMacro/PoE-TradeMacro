@@ -54,6 +54,7 @@ reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8"
 reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")
 reqHeaders.push("User-Agent: Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36")
 parsedLeagueJSON := PoEScripts_Download("http://api.pathofexile.com/leagues?type=main", postData, reqHeaders, options, true, true, false, "", reqHeadersCurl)
+TradeFunc_WriteToLogFile("Requesting leagues from api.pathofexile.com...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer: " reqHeaders)
 FileDelete, %A_ScriptDir%\temp\currentLeagues.json, 1
 FileAppend, %parsedLeagueJSON%, %A_ScriptDir%\temp\currentLeagues.json
 
@@ -66,16 +67,13 @@ Try {
 	If (test) {
 		FileRead, JSONFile, %A_ScriptDir%\temp\currentLeagues.json
 		parsedJSON := JSON.Load(JSONFile)
-		TradeFunc_WriteToLogFile("Requesting leagues from api.pathofexile.com...`n`n" "cURL command:`n" reqHeadersCurl "`n`nSuccessfully parsed returned data as JSON.`n")
 		global LeaguesData := parsedJSON
 	}
 	Else	{
-		TradeFunc_WriteToLogFile("Requesting leagues from api.pathofexile.com...`n`n" "cURL command:`n" reqHeadersCurl "`n`nFailed to parse returned data as JSON.`n")
 		MsgBox, 16, PoE-TradeMacro - Error, %errorMsg%	
 		ExitApp
 	}
 } Catch error {
-	TradeFunc_WriteToLogFile("Requesting leagues from api.pathofexile.com...`n`n" "cURL command:`n" reqHeadersCurl "`n`nFailed to parse returned data as JSON.`n")
 	MsgBox, 16, PoE-TradeMacro - Error, %errorMsg%	
 	ExitApp
 }
