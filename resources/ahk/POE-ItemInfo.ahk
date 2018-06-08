@@ -10521,7 +10521,11 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 				If (broadTerms) {
 					terms.push(Item.BaseType)
 				} Else {
-					terms.push(Item.BaseName)
+					If (Item.BaseName) {
+						terms.push(Item.BaseName)	
+					} Else {
+						terms.push("Jewel")
+					}					
 					terms.push(rarity)
 				}
 			}
@@ -10574,8 +10578,12 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 							}
 						}
 					}
-				} Else {
-					terms.push(Item.BaseName)
+				} Else {					
+					If (Item.BaseName) {
+						terms.push(Item.BaseName)	
+					} Else {
+						terms.push(Trim(RegExReplace(Item.Name, "Superior")))
+					}
 				}
 			}
 		}
