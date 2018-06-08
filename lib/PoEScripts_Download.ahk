@@ -17,6 +17,8 @@
 	
 	starttime := A_TickCount
 	reqLoops := 0
+	curl1 := ""
+	curl2 := ""
 	
 	Loop, 2 
 	{
@@ -127,7 +129,7 @@
 			dataStart := A_TickCount
 			; get data
 			html	:= StdOutStream(curl """" url """" commandData)
-			;html := ReadConsoleOutputFromFile(commandData """" url """", "commandData") ; alternative function
+			;html := ReadConsoleOutputFromFile(curl """" url """" commandData, "commandData") ; alternative function
 			dataEnd := A_TickCount
 			
 			If (returnCurl) {
@@ -153,6 +155,7 @@
 			}
 			
 			reqHeadersCurl := commandHdr
+			curl%A_Index% := reqHeadersCurl
 		} Catch e {
 
 		}
@@ -166,7 +169,7 @@
 		}
 		t7_%A_Index% := A_TickCount
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {		
-			Break	; only go into the second loop if the respone is empty or has a bad status code (possible problem with the added host header)
+			Break	; only go into the second loop if the response is empty or has a bad status code (possible problem with the added host header)
 		}
 	}
 	
@@ -228,6 +231,8 @@
 		headerText := StrLen(headerEnd - headerStart) ? headerEnd - headerStart "ms `n" : "Skipped`n"
 		
 		time := url "`n" 
+		time := curl1 "`n" 
+		time := curl2 "`n" 
 		time .= "Loops: " reqLoops "`n"
 		time .= "Downloading process duration: " reqEndTime - starttime "ms `n"
 		time .= "Data request duration	  : " dataEnd - dataStart "ms `n"
