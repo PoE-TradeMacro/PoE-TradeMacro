@@ -1849,7 +1849,6 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	options	:= ""
 
 	reqHeaders	:= []
-	reqHeaders.push("Host: poe.trade")
 	reqHeaders.push("Connection: keep-alive")
 	reqHeaders.push("Cache-Control: max-age=0")
 	reqHeaders.push("Origin: http://poe.trade")
@@ -1883,8 +1882,7 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	options	.= "`n" "ReturnHeaders: skip"
 	options	.= "`n" "TimeOut: 20"
 	reqHeaders := []
-	
-	reqHeaders.push("Host: www.poeprices.info")
+
 	reqHeaders.push("Connection: keep-alive")
 	reqHeaders.push("Cache-Control: max-age=0")
 	reqHeaders.push("Origin: https://poeprices.info")
@@ -1985,7 +1983,6 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 	reqHeaders.push("Accept-Encoding:gzip, deflate")
 	reqHeaders.push("Accept-Language:de-DE,de;q=0.8,en-US;q=0.6,en;q=0.4")
 	reqHeaders.push("Connection:keep-alive")
-	reqHeaders.push("Host:currency.poe.trade")
 	reqHeaders.push("Referer:http://poe.trade/")
 	reqHeaders.push("Upgrade-Insecure-Requests:1")
 
@@ -5495,7 +5492,6 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, p
 	options	.= "`n" "ValidateResponse: false"
 	
 	reqHeaders	:= []
-	reqHeaders.push("Host: www.poeprices.info")
 	reqHeaders.push("Connection: keep-alive")
 	reqHeaders.push("Cache-Control: max-age=0")
 	reqHeaders.push("Origin: https://poeprices.info")

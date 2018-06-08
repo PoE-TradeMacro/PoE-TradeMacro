@@ -14,33 +14,26 @@
 	*/
 
 	; https://curl.haxx.se/download.html -> https://bintray.com/vszakats/generic/curl/
-	
-	starttime := A_TickCount
-	reqLoops := 0
-	curl1 := ""
-	curl2 := ""
-	
 	Loop, 2 
 	{
-		t1_%A_Index% := A_TickCount
 		reqLoops++
 		curl		:= """" A_ScriptDir "\lib\curl.exe"" "	
 		headers	:= ""
 		cookies	:= ""
 		For key, val in ioHdr {
 			val := Trim(RegExReplace(val, "i)(.*?)\s*:\s*(.*)", "$1:$2"))
-			If (RegExMatch(val, "i)^Host:.*")) {
+			If (A_Index = 2 and RegExMatch(val, "i)^Host:.*")) {
 				; make sure that the host header is not included on the second try (empty first response)
 			} Else {
 				headers .= "-H """ val """ "	
 			}		
-			
+
 			If (RegExMatch(val, "i)^Cookie:(.*)", cookie)) {
 				cookies .= cookie1 " "		
 			}
 		}
 		cookies := StrLen(cookies) ? "-b """ Trim(cookies) """ " : ""
-		t2_%A_Index% := A_TickCount
+
 		redirect := "L"
 		PreventErrorMsg := false
 		validateResponse := 1
@@ -79,7 +72,7 @@
 		If (not timeout) {
 			timeout := 30
 		}
-		t3_%A_Index% := A_TickCount
+		
 		e := {}
 		Try {		
 			commandData	:= ""		; console curl command to return data/content 
@@ -125,17 +118,14 @@
 				commandData	.= "--max-time " timeout " "
 				commandHdr	.= "--max-time " timeout " "
 			}
-			t4_%A_Index% := A_TickCount
-			dataStart := A_TickCount
 			; get data
 			html	:= StdOutStream(curl """" url """" commandData)
 			;html := ReadConsoleOutputFromFile(curl """" url """" commandData, "commandData") ; alternative function
-			dataEnd := A_TickCount
 			
 			If (returnCurl) {
 				returnCurl := "curl " """" url """" commandData
 			}
-			t5_%A_Index% := A_TickCount
+
 			; get return headers in seperate request
 			If (not binaryDL and not skipRetHeaders) {
 				If (StrLen(ioData) and not requestType = "GET") {
@@ -143,10 +133,8 @@
 				} Else {
 					commandHdr := curl """" url """" commandHdr
 				}
-				headerStart := A_TickCount
 				ioHdr := StdOutStream(commandHdr)
 				;ioHrd := ReadConsoleOutputFromFile(commandHdr, "commandHdr") ; alternative function
-				headerEnd := A_TickCount
 			} Else If (skipRetHeaders) {
 				commandHdr := curl """" url """" commandHdr
 				ioHdr := html
@@ -155,11 +143,10 @@
 			}
 			
 			reqHeadersCurl := commandHdr
-			curl%A_Index% := reqHeadersCurl
 		} Catch e {
 
 		}
-		t6_%A_Index% := A_TickCount
+		
 		; check if response has a good status code or is valid JSON (shouldn't be an erroneous response in that case)
 		goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
 		Try {
@@ -167,16 +154,12 @@
 		} Catch er {
 			
 		}
-		t7_%A_Index% := A_TickCount
+		
 		If ((Strlen(ioHdr) and goodStatusCode) or (StrLen(ioHdr) and isJSON) or not validateResponse) {		
 			Break	; only go into the second loop if the response is empty or has a bad status code (possible problem with the added host header)
 		}
 	}
-	
-	If (true) {
-		reqEndtime := A_TickCount	
-	}
-	t8 := A_TickCount
+
 	;goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
 	If (RegExMatch(ioHdr, "i)HTTP\/1.1 403 Forbidden") and not handleAccessForbidden) {
 		PreventErrorMsg		:= true
@@ -223,66 +206,6 @@
 		}
 	} Else {
 		ThrowError(e, false, ioHdr, PreventErrorMsg)
-	}
-	t9 := A_TickCount
-	
-	If (true) {
-		endtime := A_TickCount
-		headerText := StrLen(headerEnd - headerStart) ? headerEnd - headerStart "ms `n" : "Skipped`n"
-		
-		time := url "`n" 
-		time .= curl1 "`n" 
-		time .= curl2 "`n" 
-		time .= "Loops: " reqLoops "`n"
-		time .= "Downloading process duration: " reqEndTime - starttime "ms `n"
-		time .= "Data request duration	  : " dataEnd - dataStart "ms `n"
-		time .= "Header request duration	  : " headerText
-		time .= "Validating result duration  : " endTime - reqEndTime "ms `n"
-		
-		line := "=================================================================================================================`n"
-		
-		time1 := time . line
-		FileAppend, %time1%, %A_ScriptDir%\temp\timings.txt 
-		
-		If (url = "http://poe.trade") {
-			time .= 
-			Loop, 9 {
-				index := A_Index
-				Loop, 2 {
-					If (A_Index = 1) {
-						t := t%index%
-						If (StrLen(t%index%_%A_Index%)) {
-							time .= "t_" index "_" A_Index ": " t%index%_%A_Index% - starttime "`n"	
-						}
-					}
-				}
-	
-				If (StrLen(t%index%)) {
-					time .= "t_" index ": " t%index%  - starttime "`n"		
-				}	
-			}
-			
-			If (reqLoops > 1) {
-				time .= "`n"
-				Loop, 9 {
-					index := A_Index				
-					Loop, 2 {
-						If (A_index = 2) {
-							t := t%index%
-							If (StrLen(t%index%_%A_Index%)) {
-								time .= "t_" index "_" A_Index ": " t%index%_%A_Index%  - starttime "`n"	
-							}	
-						}
-					}
-					If (StrLen(t%index%)) {
-						time .= "t_" index ": " t%index%  - starttime "`n"		
-					}	
-				}
-			}
-			
-			time2 := time . line
-			FileAppend, %time2%, %A_ScriptDir%\temp\timingsDetail.txt 
-		}
 	}
 	
 	Return html

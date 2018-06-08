@@ -11468,7 +11468,6 @@ CurrencyDataDowloadURLtoJSON(url, sampleValue, critical = false, league = "", pr
 
 	errors := 0
 	Try {
-		reqHeaders.push("Host: poe.ninja")
 		reqHeaders.push("Connection: keep-alive")
 		reqHeaders.push("Cache-Control: max-age=0")
 		;reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8")
