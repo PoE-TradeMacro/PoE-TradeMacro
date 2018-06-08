@@ -29,7 +29,7 @@
 		cookies	:= ""
 		For key, val in ioHdr {
 			val := Trim(RegExReplace(val, "i)(.*?)\s*:\s*(.*)", "$1:$2"))
-			If (A_Index = 2 and RegExMatch(val, "i)^Host:.*")) {
+			If (RegExMatch(val, "i)^Host:.*")) {
 				; make sure that the host header is not included on the second try (empty first response)
 			} Else {
 				headers .= "-H """ val """ "	
@@ -231,8 +231,8 @@
 		headerText := StrLen(headerEnd - headerStart) ? headerEnd - headerStart "ms `n" : "Skipped`n"
 		
 		time := url "`n" 
-		time := curl1 "`n" 
-		time := curl2 "`n" 
+		time .= curl1 "`n" 
+		time .= curl2 "`n" 
 		time .= "Loops: " reqLoops "`n"
 		time .= "Downloading process duration: " reqEndTime - starttime "ms `n"
 		time .= "Data request duration	  : " dataEnd - dataStart "ms `n"
