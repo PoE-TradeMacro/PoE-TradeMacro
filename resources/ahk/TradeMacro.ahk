@@ -5063,7 +5063,7 @@ ReadPoeNinjaCurrencyData:
 
 		url			:= "http://poe.ninja/api/Data/GetCurrencyOverview?league=" . league
 		parsedJSON	:= TradeFunc_DowloadURLtoJSON(url, sampleValue, true, league)
-	}
+	}	
 	global CurrencyHistoryData := parsedJSON.lines
 	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
 
@@ -5073,7 +5073,7 @@ ReadPoeNinjaCurrencyData:
 		ChaosEquivalents[currencyBaseName] := val.chaosEquivalent
 	}
 	ChaosEquivalents["Chaos Orb"] := 1
-
+	
 	If (TempChangingLeagueInProgress) {
 		msg := "Changing league to " . TradeOpts.SearchLeague " (" . TradeGlobals.Get("LeagueName") . ") finished."
 		msg .= "`n- Requested chaos equivalents and currency history from poe.ninja."
