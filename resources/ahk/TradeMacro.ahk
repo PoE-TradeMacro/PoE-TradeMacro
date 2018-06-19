@@ -1185,6 +1185,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.ilvl_max := Item.Level
 		}
 	}
+	
+	/*
+		parameter fixes
+	*/
+	If (RequestParams.xtype and RequestParams.base) {
+		; Some type and base combinations on poe.trade are different than the ones in-game (Tyrant's Sekhem for example)
+		; If we have the base we don't need the type though.
+		RequestParams.xtype := ""
+	}
 
 	If (openSearchInBrowser) {
 		If (!TradeOpts.BuyoutOnly) {
@@ -2850,7 +2859,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 TradeFunc_LogPoePricesRequest(response, request) {
 	text := "#####"
 	text .= "`n### " "Please post this log file below to https://www.pathofexile.com/forum/view-thread/1216141/."	
-	text .= "`n### " "Try not to ""spam"" their thread if other reports with the same error description were posted in the last hours."	
+	text .= "`n### " "Try not to ""spam"" their thread if a few other reports with the same error description were posted in the last hours."	
 	text .= "`n#####"	
 	
 	text .= "`n`n"
