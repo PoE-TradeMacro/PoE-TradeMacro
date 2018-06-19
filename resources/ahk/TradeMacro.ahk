@@ -2849,7 +2849,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 
 TradeFunc_LogPoePricesRequest(response, request) {
 	text := "#####"
-	text .= "`n### " "Please post this log file to https://www.pathofexile.com/forum/view-thread/1216141/."	
+	text .= "`n### " "Please post this log file below to https://www.pathofexile.com/forum/view-thread/1216141/."	
 	text .= "`n### " "Try not to ""spam"" their thread if other reports with the same error description were posted in the last hours."	
 	text .= "`n#####"	
 	
