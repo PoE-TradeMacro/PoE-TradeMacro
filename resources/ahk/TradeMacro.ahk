@@ -1902,7 +1902,7 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 
 	options	:= "RequestType: GET"
 	options	.= "`n" "ReturnHeaders: skip"
-	options	.= "`n" "TimeOut: 20"
+	options	.= "`n" "TimeOut: 10"
 	reqHeaders := []
 
 	reqHeaders.push("Connection: keep-alive")
