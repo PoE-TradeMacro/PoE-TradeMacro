@@ -2807,7 +2807,7 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 	If (not response or not response.HasKey("error")) {
 		ShowToolTip("")
-		ShowTooltip("ERROR: Request to poeprices.info timed out or`nreturned an invalid response! ")
+		ShowTooltip("ERROR: Request to poeprices.info timed out or`nreturned an invalid response! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
 		TradeFunc_LogPoePricesRequest(response, request)
 		Return 0
 	}
@@ -2818,7 +2818,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 	}
 	Else If (response.error = "2") {
 		ShowToolTip("")
-		ShowTooltip("ERROR: Predicted search has encountered an unknown error! ")
+		ShowTooltip("ERROR: Predicted search has encountered an unknown error! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
 		TradeFunc_LogPoePricesRequest(response, request)
 		Return 0
 	}	
@@ -2837,7 +2837,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 			}
 		} Else If (not StrLen(min_value) and not StrLen(max_value)) {
 			ShowToolTip("")
-			ShowTooltip("ERROR: Request to poeprices.info failed,`nno prices were returned! ")
+			ShowTooltip("ERROR: Request to poeprices.info failed,`nno prices were returned! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
 			TradeFunc_LogPoePricesRequest(response, request)
 			Return 0
 		}
@@ -2850,6 +2850,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 TradeFunc_LogPoePricesRequest(response, request) {
 	text := "#####"
 	text .= "`n### " "Please post this log file to https://www.pathofexile.com/forum/view-thread/1216141/."	
+	text .= "`n### " "Try not to ""spam"" their thread if other reports with the same error description were posted in the last hours."	
 	text .= "`n#####"	
 	
 	text .= "`n`n"
