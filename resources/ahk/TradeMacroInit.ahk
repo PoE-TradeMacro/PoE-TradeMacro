@@ -1039,7 +1039,8 @@ TradeFunc_DownloadDataFiles() {
 		FileCopy, %filePath%, %filePath%.bak
 		output := PoEScripts_Download(url . file, postData := "", ioHdr := reqHeaders := "", options := "", false, false, false, "", reqHeadersCurl)
 		If (A_Index = 1) {
-			TradeFunc_WriteToLogFile("Data file download from " url "...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer:`n" ioHdr)
+			logMsg := "Data file download from " url "...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer:`n" ioHdr
+			WriteToLogFile(logMsg, "StartupLog.txt", "PoE-TradeMacro")
 		}
 
 		FileDelete, %filePath%
@@ -1420,7 +1421,8 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 
 	html := ""
 	html := PoEScripts_Download(Url, ioData := postData, ioHdr := reqHeaders, options, false, false, false, "", reqHeadersCurl, handleAccessForbidden := false)
-	TradeFunc_WriteToLogFile("Testing CloudFlare bypass, connecting to " url "...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer:`n" ioHdr)
+	logMsg := "Testing CloudFlare bypass, connecting to " url "...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer:`n" ioHdr
+	WriteToLogFile(logMsg, "StartupLog.txt", "PoE-TradeMacro")
 
 	; pathofexile.com link in page footer (forum thread)
 	RegExMatch(html, "i)pathofexile", match)
@@ -1483,24 +1485,6 @@ TradeFunc_ClearWebHistory() {
 		RunWait %comspec% /c "chcp 1251 & "%A_ScriptDir%\lib\clearWebHistoryAll.bat"", , Hide
 	}
 
-}
-
-TradeFunc_WriteToLogFile(data) {
-	logFile	:= A_ScriptDir "\temp\StartupLog.txt"
-	If (not FileExist(logFile)) {
-		FileAppend, Starting up PoE-TradeMacro....`n`n, %logFile%
-	}
-
-	line		:= "----------------------------------------------------------"
-	timeStamp	:= ""
-	UTCTimestamp := GetTimestampUTC()
-	UTCFormatStr := "yyyy-MM-dd'T'HH:mm'Z'"
-	FormatTime, TimeStr, %UTCTimestamp%, %UTCFormatStr%
-
-	entry	:= line "`n" TimeStr "`n" line "`n`n"
-	entry	:= entry . data "`n`n"
-
-	FileAppend, %entry%, %logFile%
 }
 
 TradeFunc_GetOSInfo() {

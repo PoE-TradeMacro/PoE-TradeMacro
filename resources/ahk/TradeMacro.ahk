@@ -5052,18 +5052,25 @@ Return
 ReadPoeNinjaCurrencyData:
 	; Disable hotkey until currency data was parsed
 	key := TradeOpts.ChangeLeagueHotKey
-
+	loggedCurrencyRequestAtStartup := loggedCurrencyRequestAtStartup ? loggedCurrencyRequestAtStartup : false
+	loggedTempLeagueCurrencyRequest := loggedTempLeagueCurrencyRequest ? loggedTempLeagueCurrencyRequest : false
+	usedFallback := false
+	
 	If (TempChangingLeagueInProgress) {
 		ShowToolTip("Changing league to " . TradeOpts.SearchLeague " (" . TradeGlobals.Get("LeagueName") . ")...", true)
 	}
 	sampleValue	:= ChaosEquivalents["Chaos Orb"]
 	league		:= TradeUtils.UriEncode(TradeGlobals.Get("LeagueName"))
 	fallback		:= ""
+	isFallback	:= false
+	file			:= A_ScriptDir . "\temp\currencyData.json"
+	fallBackDir	:= A_ScriptDir . "\data_trade"
 	url			:= "http://poe.ninja/api/Data/GetCurrencyOverview?league=" . league
-	parsedJSON 	:= TradeFunc_DowloadURLtoJSON(url, sampleValue)
+	parsedJSON	:= CurrencyDataDowloadURLtoJSON(url, sampleValue, false, isFallback, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, loggedCurrencyRequestAtStartup, loggedTempLeagueCurrencyRequest)
 
 	; fallback to Standard and Hardcore league if used league seems to not be available
-	If (!parsedjson.currencyDetails.length()) {
+	If (!parsedJSON.currencyDetails.length()) {
+		isFallback	:= true
 		If (InStr(league, "Hardcore", 0) or RegExMatch(league, "HC")) {
 			league	:= "Hardcore"
 			fallback	:= "Hardcore"
@@ -5073,11 +5080,11 @@ ReadPoeNinjaCurrencyData:
 		}
 
 		url			:= "http://poe.ninja/api/Data/GetCurrencyOverview?league=" . league
-		parsedJSON	:= TradeFunc_DowloadURLtoJSON(url, sampleValue, true, league)
+		parsedJSON	:= CurrencyDataDowloadURLtoJSON(url, sampleValue, true, isFallback, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, loggedCurrencyRequestAtStartup, loggedTempLeagueCurrencyRequest)
 	}	
 	global CurrencyHistoryData := parsedJSON.lines
 	TradeGlobals.Set("LastAltCurrencyUpdate", A_NowUTC)
-
+	
 	global ChaosEquivalents	:= {}
 	For key, val in CurrencyHistoryData {
 		currencyBaseName	:= RegexReplace(val.currencyTypeName, "[^a-z A-Z]", "")
