@@ -86,6 +86,13 @@ argumentOverwrittenFiles = %4%
 
 ; when using the fallback exe we're missing the parameters passed by the merge script
 If (!StrLen(argumentProjectName) > 0) {
+	fallbackExeMsg := "You're using a compiled version (.exe) of the script which is only intended to be used if the normal version (.ahk script) doesn't work for you."
+	fallbackExeMsg .= "`n`nThis version can possibly cause issues that you wouldn't have with the normal script though."
+	fallbackExeMsg .= "`n`nUse ""Run_TradeMacro.ahk"" if possible and try it before reporting any issues!"
+	fallbackExeMsg .= "`n`n(closes after 10s)..."
+	SplashTextOff
+	MsgBox, 0x1030, PoE-TradeMacro Fallback, % fallbackExeMsg, 10
+	
 	argumentProjectName		:= "PoE-TradeMacro"
 	FilesToCopyToUserFolder	:= A_ScriptDir . "\resources\default_UserFiles"
 	argumentOverwrittenFiles	:= PoEScripts_HandleUserSettings(argumentProjectName, A_MyDocuments, argumentProjectName, FilesToCopyToUserFolder, A_ScriptDir)
