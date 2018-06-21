@@ -11500,13 +11500,18 @@ CurrencyDataDowloadURLtoJSON(url, sampleValue, critical = false, isFallbackReque
 	errorMsg .= "`n`n"
 
 	errors := 0
-	parsingError := false
+	parsingError := false	
 	Try {
 		reqHeaders.push("Connection: keep-alive")
 		reqHeaders.push("Cache-Control: max-age=0")
 		reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8")	
 		reqHeaders.push("User-Agent: Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36")
 		currencyData := PoEScripts_Download(url, postData, reqHeaders, options, true, true, false, "", reqHeadersCurl)
+		
+		If (FileExist(A_ScriptDir "\temp\currencyHistory_" league ".json")) {
+			FileDelete, % A_ScriptDir "\temp\currencyHistory_" league ".json"	
+		}
+		FileAppend, %currencyData%, % A_ScriptDir "\temp\currencyHistory_" league ".json"
 		
 		Try {
 			parsedJSON := JSON.Load(currencyData)
