@@ -1188,8 +1188,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	
 	/*
 		parameter fixes
-	*/
-	If (StrLen(RequestParams.xtype) and StrLen(RequestParams.base)) {
+		*/
+	If (StrLen(RequestParams.xtype) and StrLen(RequestParams.xbase)) {
 		; Some type and base combinations on poe.trade are different than the ones in-game (Tyrant's Sekhem for example)
 		; If we have the base we don't need the type though.
 		RequestParams.xtype := ""
@@ -1942,6 +1942,15 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	
 	If (not StrLen(response)) {
 		responseObj.failed := "ERROR: Parsing response failed, empty response! "
+	}
+	
+	; temporary debug log
+	If (true) {
+		arr := {}
+		arr.RawItemData := RawItemData
+		arr.EncodedItemata := EncodedItemData
+		arr.League := TradeGlobals.Get("LeagueName")
+		TradeFunc_LogPoePricesRequest(arr, request, "poe_prices_debug_log.txt")
 	}
 
 	responseObj.added := {}
@@ -2831,7 +2840,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 		ShowTooltip("ERROR: Predicted search has encountered an unknown error! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
 		TradeFunc_LogPoePricesRequest(response, request)
 		Return 0
-	}	
+	}
 	Else If (response.error = "0") {
 		min := response.HasKey("min") or response.HasKey("min_price") ? true : false
 		max := response.HasKey("max") or response.HasKey("max_price") ? true : false		
@@ -2857,7 +2866,7 @@ TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
 	Return 0
 }
 
-TradeFunc_LogPoePricesRequest(response, request) {
+TradeFunc_LogPoePricesRequest(response, request, filename = "poeprices_log.txt") {
 	text := "#####"
 	text .= "`n### " "Please post this log file below to https://www.pathofexile.com/forum/view-thread/1216141/."	
 	text .= "`n### " "Try not to ""spam"" their thread if a few other reports with the same error description were posted in the last hours."	
@@ -2869,9 +2878,10 @@ TradeFunc_LogPoePricesRequest(response, request) {
 		text .= JSON.Dump(response, "", 4)
 	} Catch e {
 		text .= response
-	}	
-	FileDelete, %A_ScriptDir%\temp\poeprices_log.txt	
-	FileAppend, %text%, %A_ScriptDir%\temp\poeprices_log.txt
+	}
+	
+	FileDelete, %A_ScriptDir%\temp\%filename%
+	FileAppend, %text%, %A_ScriptDir%\temp\%filename%
 	
 	Return
 }
