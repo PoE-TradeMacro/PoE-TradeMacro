@@ -2,8 +2,8 @@ The following is a list of what has been updated, starting with 1.1.0
 
 2.10.7
 ================================================================================================
-* Fixed an recently introduced issue with the url used by the currency search (new minimum stock size parameter required).
-* Excluded unidentified rare items for the predicted pricing.
+* Fixed a recently introduced issue with the url used by the currency search (new minimum stock size parameter required).
+* Excluded unidentified rare items from predicted pricing.
 
 2.10.6
 ================================================================================================
