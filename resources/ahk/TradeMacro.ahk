@@ -1146,7 +1146,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				itemEligibleForPredictedPricing := true
 			}
 		}
-		Else {
+		Else If (not (Item.RarityLevel = 3 and Item.IsUnidentified)) { ; filter out unid rare items
 			itemEligibleForPredictedPricing := true	
 		}		
 	}
