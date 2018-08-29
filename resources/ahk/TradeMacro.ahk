@@ -3869,34 +3869,25 @@ TradeFunc_CreateItemPricingTestGUI() {
 
 TradeFunc_PreparePredictedPricingContributionDetails(details, nameLength) {
 	arr := []
-	totalAbs := 0
-	totalPositive := 0
-	
- 	For key, val in details {
+	longest := 0
+
+	For key, val in details {
 		obj := {}
-		shortened := RegExReplace(Trim(key), "^\(.*?\)")
+		name := val[1]
+		shortened := RegExReplace(Trim(name), "^\(.*?\)")
 		obj.name := shortened
-		obj.name := (StrLen(shortened) > nameLength ) ? SubStr(obj.name, 1, nameLength) "..." : StrPad(obj.name, nameLength + 3)
-		obj.contribution := Round(val, 2)
-		obj.prefixedContribution := (RegExMatch(obj.contribution, "^-")) ? obj.contribution : " " obj.contribution
+		obj.name := (StrLen(shortened) > nameLength ) ? Trim(SubStr(obj.name, 1, nameLength) "...") : Trim(StrPad(obj.name, nameLength + 3))
+		obj.contribution := val[2] * 100 
+		obj.percentage := Trim(obj.contribution " %")
+		longest := (longest > StrLen(obj.percentage)) ? longest : StrLen(obj.percentage)
 		
-		totalPositive := (obj.contribution > 0) ? totalPositive + obj.contribution : totalPositive
-		totalAbs := total + Abs(obj.contribution)
-		obj.percentage := 0
 		arr.push(obj)
 	}
 
 	For key, val in arr {
-		If (val.contribution < 0) {
-			val.percentage := ((totalPositive + Abs(val.contribution)) * 100) / totalPositive - 100
-			val.percentage := (val.percentage > 0) ? val.percentage * -1 : val.percentage
-		} Else {
-			val.percentage := (val.contribution * 100) / totalPositive
-		}
-		val.percentage := val.percentage "%"
+		val.percentage := StrPad(val.percentage, longest, "left", " ")
 	}
 
-	; TODO: sort the array by contribution value
 	Return arr
 }
 
@@ -3938,7 +3929,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	
 	_details := TradeFunc_PreparePredictedPricingContributionDetails(data.pred_explanation, 40)
 	_contributionOffset := _details.Length() * 24
-	_groupBoxHeight := _contributionOffset + 90
+	_groupBoxHeight := _contributionOffset + 83
 	
 	Gui, PredictedPricing:Add, GroupBox, w400 h%_groupBoxHeight% y+10 x10, Results
 	Gui, PredictedPricing:Font, norm s10, Consolas
@@ -3952,8 +3943,10 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	; mod importance graph
 	Gui, PredictedPricing:Font, s8
 	For _k, _v in _details {
-		_line := _v.percentage " -> " _v.name 
-		Gui, PredictedPricing:Add, Text, x30 w350 y+4 BackgroundTrans, % _line
+		If (StrLen(_v.name)) {
+			_line := _v.percentage " -> " _v.name 
+			Gui, PredictedPricing:Add, Text, x30 w350 y+4 BackgroundTrans, % _line	
+		}		
 	}
 	
 	; browser url
