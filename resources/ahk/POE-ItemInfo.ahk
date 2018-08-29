@@ -7960,7 +7960,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		; Don't do this on Divination Cards or this script crashes on trying to do the ParseItemLevel
 		Else If (Not Item.IsCurrency and Not Item.IsDivinationCard and Not Item.IsProphecy)
 		{
-			regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key"]
+			regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key"]
 			For key, val in regex {
 				If (RegExMatch(Item.Name, "i)" val "")) {
 					Item.IsMapFragment := True
@@ -10551,7 +10551,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 					terms.push(rarity)
 				}
 			}
-			; offerings / sacrifice and mortal fragments / guardian fragments / council keys / breachstones
+			; offerings / sacrifice and mortal fragments / guardian fragments / council keys / breachstones / reliquary keys
 			Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone") or RegExMatch(Item.Name, "i)Reliquary Key")) {
 				If (broadTerms) {
 					tmpName := RegExReplace(Item.Name, "i)(Sacrifice At).*|(Fragment of).*|(Mortal).*|.*('s Key)|.*(Breachstone)|(Reliquary Key)", "$1$2$3$4$5$6")

@@ -1,5 +1,9 @@
 The following is a list of what has been updated, starting with 1.1.0
 
+2.10.8
+================================================================================================
+* 
+
 2.10.7
 ================================================================================================
 * Fixed a recently introduced issue with the url used by the currency search (new minimum stock size parameter required).
