@@ -2863,16 +2863,16 @@ ParseMapAffixes(ItemDataAffixes)
 				AppendAffixInfo(MakeMapAffixLine(A_LoopField, Index_MonstMoveAttCastSpeed), A_Index)
 				Continue
 			}
-			Else If InStr (Index_MonstMoveAttCastSpeed, "a")
+			Else If InStr(Index_MonstMoveAttCastSpeed, "a")
 			{
 				Index_MonstMoveAttCastSpeed := StrReplace(Index_MonstMoveAttCastSpeed, "a", "b")
 				AppendAffixInfo(MakeMapAffixLine(A_LoopField, Index_MonstMoveAttCastSpeed), A_Index)
 				Continue
 			}
-			Else If InStr (Index_MonstMoveAttCastSpeed, "b")
+			Else If InStr(Index_MonstMoveAttCastSpeed, "b")
 			{
-				Index_MonstMoveAttCastSpeed := StrReplace(Index_MonstMoveAttCastSpeed, "b", "")
-				AppendAffixInfo(MakeMapAffixLine(A_LoopField, Index_MonstMoveAttCastSpeed . "c"), A_Index)
+				Index_MonstMoveAttCastSpeed := StrReplace(Index_MonstMoveAttCastSpeed, "b", "c")
+				AppendAffixInfo(MakeMapAffixLine(A_LoopField, Index_MonstMoveAttCastSpeed), A_Index)
 				Continue
 			}
 		}
@@ -2939,16 +2939,19 @@ ParseMapAffixes(ItemDataAffixes)
 			}
 		}
 	}
-
+	
 	If (Flag_TwoAdditionalProj and Flag_SkillsChain)
 	{
 		MapModWarnings := MapModWarnings . "`nAdditional Projectiles & Skills Chain"
 	}
-
+	
 	If (Count_DmgMod >= 1.5)
 	{
-		String_DmgMod := SubStr(String_DmgMod, 3)
-		MapModWarnings := MapModWarnings . "`nMulti Damage: " . String_DmgMod
+		If (MapModWarn.MultiDmgWarning)
+		{
+			String_DmgMod := SubStr(String_DmgMod, 3)
+			MapModWarnings := MapModWarnings . "`nMulti Damage: " . String_DmgMod
+		}
 	}
 	
 	If (Not Opts.EnableMapModWarnings)
