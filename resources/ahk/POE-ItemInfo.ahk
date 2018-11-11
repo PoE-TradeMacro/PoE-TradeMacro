@@ -11686,7 +11686,7 @@ GetScanCodes() {
 	; 0xF01A = "Dvorak left handed"
 	; 0xF01C0809 = some other Dvorak layout
 	
-	If (RegExMatch(InputLocaleID, "i)^(0xF002|0xF01B|0xF01A|0xF01C0809).*")) {
+	If (RegExMatch(InputLocaleID, "i)^(0xF002|0xF01B|0xF01A|0xF01C0809|0xF01C0409).*")) {
 		; dvorak
 		sc := {"c" : "sc017", "v" : "sc034", "f" : "sc015", "a" : "sc01E", "enter" : "sc01C"}
 		project := Globals.Set("ProjectName")
