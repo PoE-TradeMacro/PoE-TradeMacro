@@ -11756,6 +11756,10 @@ GetCurrentItemFilterPath() {
 }
 
 ShowItemFilterFormatting(Item) {
+	If (not Item.Name) {
+		Return
+	}
+	
 	filterFile := GetCurrentItemFilterPath()
 	
 	search := {}
@@ -11782,7 +11786,7 @@ ShowItemFilterFormatting(Item) {
 	} Else If (Item.RarityLevel = 3) {
 		search.Rarity := "Rare"	
 	} Else If (Item.RarityLevel = 4) {
-		search.Rarity := "Unique"	
+		search.Rarity := "Unique"
 	}
 	
 	; classes
@@ -11833,7 +11837,15 @@ ShowItemFilterFormatting(Item) {
 		search.Classes.push(class)
 		search.Classes.push(class "s")
 	}
+	
+	debugprintarray(search)
+	
+	ParseItemLootFilter(filterFile) 
 }
 
+
+ParseItemLootFilter(s) {
+	
+}
 ; ############ (user) macros #############
 ; macros are being appended here by merge script
