@@ -69,6 +69,26 @@ global overwrittenUserFiles	:= overwrittenUserFiles ? overwrittenUserFiles : arg
 
 global SuspendPOEItemScript = 0
 
+/*
+	Import item bases
+*/
+ItemBaseList := {}
+FileRead, JSONFile, %A_ScriptDir%\data\item_bases.json
+parsedJSON := JSON.Load(JSONFile)
+ItemBaseList.general := parsedJSON.item_bases
+
+FileRead, JSONFile, %A_ScriptDir%\data\item_bases_weapon.json
+parsedJSON := JSON.Load(JSONFile)
+ItemBaseList.weapons := parsedJSON.item_bases_weapon
+
+FileRead, JSONFile, %A_ScriptDir%\data\item_bases_armour.json
+parsedJSON := JSON.Load(JSONFile)
+ItemBaseList.armours := parsedJSON.item_bases_armour
+
+Globals.Set("ItemBaseList", ItemBaseList)
+/*
+*/
+
 class UserOptions {	
 	ScanUI()
 	{
@@ -6930,7 +6950,7 @@ ParseClipBoardChanges(debug = false)
 	}
 	
 	ShowToolTip(ParsedData, false, Opts.GDIConditionalColors)
-	;ShowItemFilterFormatting(Item)
+	ShowItemFilterFormatting(Item)
 }
 
 AddLogEntry(ParsedData, RawData) {
@@ -11751,7 +11771,9 @@ GetCurrentItemFilterPath() {
 			Break
 		}
 	}
-
+	
+	filter := iniPath "\" filter
+	
 	Return filter
 }
 
@@ -11761,6 +11783,7 @@ ShowItemFilterFormatting(Item) {
 	}
 	
 	filterFile := GetCurrentItemFilterPath()
+	ItemBaseList := Globals.Get("ItemBaseList")
 	
 	search := {}
 	search.LinkedSockets := Item.Links
@@ -11770,7 +11793,6 @@ ShowItemFilterFormatting(Item) {
 	search.BaseType := Item.BaseName
 	search.HasExplicitMod :=			; 	HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
 	search.Identified := Item.IsUnidentified ? "False" : "True"
-	search.DropLevel := 			; needs data from the wiki
 	search.Corrupted := Item.IsCorrupted ? "True" : "False"
 	search.Quality := Item.Quality
 	search.Sockets := Item.Sockets
@@ -11781,12 +11803,16 @@ ShowItemFilterFormatting(Item) {
 	; rarity
 	If (Item.RarityLevel = 1) {
 		search.Rarity := "Normal"
+		search.RarityLevel := 1
 	} Else If (Item.RarityLevel = 2) {
-		search.Rarity := "Magic"	
+		search.Rarity := "Magic"
+		search.RarityLevel := 2
 	} Else If (Item.RarityLevel = 3) {
-		search.Rarity := "Rare"	
+		search.Rarity := "Rare"
+		search.RarityLevel := 3
 	} Else If (Item.RarityLevel = 4) {
 		search.Rarity := "Unique"
+		search.RarityLevel := 4
 	}
 	
 	; classes
@@ -11836,16 +11862,109 @@ ShowItemFilterFormatting(Item) {
 	If (not search.Classes.MaxIndex()) {		
 		search.Classes.push(class)
 		search.Classes.push(class "s")
+	}	
+	
+	;debugprintarray(Item)
+	
+	For key,  val in ItemBaseList {
+		For k, v in val {
+			If (k = Item.BaseName) {
+				search.DropLevel := v["Drop Level"]
+				search.Width := v["Width"]
+				search.Height := v["Height"]
+				Break
+			}
+		}
 	}
 	
-	debugprintarray(search)
-	
-	ParseItemLootFilter(filterFile) 
+	;debugprintarray(search)
+	ParseItemLootFilter(filterFile, search) 
 }
 
 
-ParseItemLootFilter(s) {
+ParseItemLootFilter(filter, attributes) {
+	rules := []
 	
+	Loop, Read, %filter%
+	{
+		If (RegExMatch(A_LoopReadLine, "i)^#") or not StrLen(A_LoopReadLine)) {
+			continue
+		}
+		
+		If (RegExMatch(Trim(A_LoopReadLine), "i)^(Show|Hide)(\s|#)?", match)) {
+			rule := {}
+			rule.Display := match1
+			rule.Conditions := []
+			rules.push(rule)
+		} Else  {
+			line := RegExReplace(Trim(A_LoopReadLine), "i)#.*")
+			
+			/*
+				Styles (last line is valid)
+			*/
+			If (RegExMatch(line, "i)^.*?Color\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)
+				rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
+			}
+			
+			Else If (RegExMatch(line, "i)^.*?(PlayAlertSound|MinimapIcon|PlayEffect)\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)
+				params := StrSplit(Trim(match2), " ")
+				rules[rules.MaxIndex()][Trim(match1)] := params
+			}
+			
+			/*
+				Conditions (everything must match, lines don't overwrite each other)
+			*/
+			Else If (RegExMatch(line, "i)^.*?(Class|BaseType|HasExplicitMod)\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)
+				
+				;temp := RegExReplace(match2, "i)(""\s+"")", """,""")
+				temp := RegExReplace(match2, "i)(\s)\s+", "\s")
+				temp := RegExReplace(temp, "i)(\s+)|""(.*?)""", "$1,$2")
+				temp := RegExReplace(temp, "i)(,,+)", ",")
+				temp := RegExReplace(temp, "i)(\s,)", ",")
+				temp := RegExReplace(temp, "i)(^,)|(, $)")
+				
+				arr := StrSplit(temp, ",")
+				
+				condition := {}
+				condition.name := match1
+				condition.values := arr
+				rules[rules.MaxIndex()].conditions.push(condition)
+			}
+			
+			Else If (RegExMatch(line, "i)^.*?(DropLevel|ItemLevel|Rarity|LinkedSockets|Sockets|Quality|Height|Width|StackSize|GemLevel|MapTier)\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)
+				paramsTemp := StrSplit(Trim(match2), " ")				
+				params := {}
+				params.operator := ParamsTemp.MaxIndex() = 2 ? paramsTemp[1] : "=" 
+				params.value := ParamsTemp.MaxIndex() = 2 ? paramsTemp[2] : paramsTemp[1]			
+				
+				condition := {}
+				condition.name := match1
+				condition.values := params
+				rules[rules.MaxIndex()].conditions.push(condition)
+			}
+			
+			/*
+				the rest
+			*/			
+			Else {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)			
+				rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
+			}
+		}
+	}
+	
+	json := JSON.Dump(rules)
+	FileDelete, %A_ScriptDir%\temp\itemFilterParsed.json
+	FileAppend, %json%, %A_ScriptDir%\temp\itemFilterParsed.json
+	
+	For k, rule in rules {
+		
+	}
 }
+
 ; ############ (user) macros #############
 ; macros are being appended here by merge script
