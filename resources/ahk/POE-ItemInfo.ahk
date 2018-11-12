@@ -307,6 +307,9 @@ class Item_ {
 		This.MapLevel		:= ""
 		This.MapTier		:= ""
 		This.MaxSockets	:= ""
+		This.Sockets		:= ""
+		This.SocketGroups	:= []
+		This.Links		:= ""
 		This.SubType		:= ""		
 		This.DifficultyRestriction := ""
 		This.Implicit		:= []
@@ -6903,7 +6906,7 @@ PostProcessData(ParsedData)
 
 ParseClipBoardChanges(debug = false)
 {
-	Global Opts, Globals
+	Global Opts, Globals, Item
 	
 	CBContents := GetClipboardContents()
 	CBContents := PreProcessContents(CBContents)
@@ -6927,6 +6930,7 @@ ParseClipBoardChanges(debug = false)
 	}
 	
 	ShowToolTip(ParsedData, false, Opts.GDIConditionalColors)
+	;ShowItemFilterFormatting(Item)
 }
 
 AddLogEntry(ParsedData, RawData) {
@@ -7416,6 +7420,28 @@ ParseSockets(ItemDataText)
 	return SocketsCount
 }
 
+ParseSocketGroups(ItemDataText)
+{
+	groups := []
+	Loop, Parse, ItemDataText, `n, `r
+	{
+		IfInString, A_LoopField, Sockets
+		{
+			RegExMatch(A_LoopField, "i)Sockets:\s?(.*)", socketString)
+			
+			sockets := socketString1 " "	; add a space at the end for easier regex
+			If (StrLen(sockets)) {
+				Pos		:= 0
+				While Pos	:= RegExMatch(sockets, "i)(.*?)\s+", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
+					s := Trim(value1)
+					groups.push(StrSplit(s, "-"))
+				}
+			}
+		}
+	}
+	return groups
+}
+
 ParseCharges(stats)
 {
 	charges := {}
@@ -7876,7 +7902,10 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	ItemData.Rarity	:= ParseRarity(ItemData.NamePlate)
 	
 	ItemData.Links		:= ParseLinks(ItemDataText)
-	ItemData.Sockets	:= ParseSockets(ItemDataText)
+	Item.Links		:= ItemData.Links
+	ItemData.Sockets	:= ParseSockets(ItemDataText)	
+	Item.Sockets		:= ItemData.Sockets
+	Item.SocketGroups	:= ParseSocketGroups(ItemDataText)
 
 	Item.Charges		:= ParseCharges(ItemData.Stats)
 
@@ -11698,6 +11727,112 @@ GetScanCodes() {
 		sc := {"c" : "sc02E", "v" : "sc02f", "f" : "sc021", "a" : "sc01E", "enter" : "sc01C"}
 		Return sc
 	}	
+}
+
+GetCurrentItemFilterPath() {
+	iniPath		:= A_MyDocuments . "\My Games\Path of Exile\"
+	configs 		:= []
+	productionIni	:= iniPath . "production_Config.ini"
+	betaIni		:= iniPath . "beta_Config.ini"	
+	
+	configs.push(productionIni)
+	configs.push(betaIni)
+	If (not FileExist(productionIni) and not FileExist(betaIni)) {
+		Loop %iniPath%\*.ini
+		{
+			configs.push(iniPath . A_LoopFileName)		
+		}	
+	}
+
+	readFile		:= ""
+	For key, val in configs {
+		IniRead, filter, %val%, UI, item_filter_loaded_successfully
+		If (filter != "ERROR" and FileExist(iniPath . filter)) {
+			Break
+		}
+	}
+
+	Return filter
+}
+
+ShowItemFilterFormatting(Item) {
+	filterFile := GetCurrentItemFilterPath()
+	
+	search := {}
+	search.LinkedSockets := Item.Links
+	search.ShaperItem := Item.IsShaperBase ? "True" : "False"
+	search.ElderItem := Item.IsElderBase ? "True" : "False"
+	search.ItemLevel := Item.Level
+	search.BaseType := Item.BaseName
+	search.HasExplicitMod :=			; 	HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
+	search.Identified := Item.IsUnidentified ? "False" : "True"
+	search.DropLevel := 			; needs data from the wiki
+	search.Corrupted := Item.IsCorrupted ? "True" : "False"
+	search.Quality := Item.Quality
+	search.Sockets := Item.Sockets
+	search.SocketGroup := Item.SocketGroups	; 	SocketGroup RGB for example
+	search.Width :=
+	search.Height :=
+	
+	; rarity
+	If (Item.RarityLevel = 1) {
+		search.Rarity := "Normal"
+	} Else If (Item.RarityLevel = 2) {
+		search.Rarity := "Magic"	
+	} Else If (Item.RarityLevel = 3) {
+		search.Rarity := "Rare"	
+	} Else If (Item.RarityLevel = 4) {
+		search.Rarity := "Unique"	
+	}
+	
+	; classes
+	class := Item.SubType
+	search.Classes := []
+	If (RegExMatch(class, "i)BodyArmour")) {
+		search.Classes.push("Body Armour")
+		search.Classes.push("Body Armours")
+	}
+	If (RegExMatch(class, "i)Sword|Mace|Axe")) {
+		If (Item.GripType = "2H") {
+			search.Classes.push(class)
+			search.Classes.push("Two Hand " class)
+			search.Classes.push("Two Hand " class "s")
+			search.Classes.push("Two Hand")
+		} Else {
+			search.Classes.push(class)
+			search.Classes.push("One Hand " class)
+			search.Classes.push("One Hand " class "s")
+			search.Classes.push("One Hand")
+		}
+	}
+	If (RegExMatch(class, "i)Flask")) {
+		If (RegExMatch(Item.BaseName, "i) (Life|Mana) ", match)) {
+			search.Classes.push(match1 " Flasks") 
+			search.Classes.push(match1 " Flask") 
+			search.Classes.push("Flask") 
+		} Else {
+			search.Class := "Utility Flasks"
+			search.Classes.push("Utility Flasks") 
+			search.Classes.push("Utility Flask") 
+			search.Classes.push("Flask") 
+		}
+	}
+	If (RegExMatch(class, "i)Jewel")) {
+		class := "Jewel"
+		search.Classes.push(class)
+		search.Classes.push(class "s")
+		
+		If (RegExMatch(Item.SubType, "i)Murderous Eye|Hypnotic Eye|Searching Eye")) {
+			class := "Abyss Jewel"
+			search.Classes.push(class)
+			search.Classes.push(class "s")
+		}
+	}
+
+	If (not search.Classes.MaxIndex()) {		
+		search.Classes.push(class)
+		search.Classes.push(class "s")
+	}
 }
 
 ; ############ (user) macros #############
