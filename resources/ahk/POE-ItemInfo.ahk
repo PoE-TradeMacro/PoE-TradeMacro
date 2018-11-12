@@ -11882,9 +11882,14 @@ ShowItemFilterFormatting(Item) {
 }
 
 
-ParseItemLootFilter(filter, attributes) {
+ParseItemLootFilter(filter, item) {
+	; https://pathofexile.gamepedia.com/Item_filter
 	rules := []
+	matchedRule := {}
 	
+	/*
+		Parse filter rules to object
+	*/
 	Loop, Read, %filter%
 	{
 		If (RegExMatch(A_LoopReadLine, "i)^#") or not StrLen(A_LoopReadLine)) {
@@ -11936,14 +11941,33 @@ ParseItemLootFilter(filter, attributes) {
 			
 			Else If (RegExMatch(line, "i)^.*?(DropLevel|ItemLevel|Rarity|LinkedSockets|Sockets|Quality|Height|Width|StackSize|GemLevel|MapTier)\s")) {
 				RegExMatch(line, "i)(.*?)\s(.*)", match)
-				paramsTemp := StrSplit(Trim(match2), " ")				
-				params := {}
-				params.operator := ParamsTemp.MaxIndex() = 2 ? paramsTemp[1] : "=" 
-				params.value := ParamsTemp.MaxIndex() = 2 ? paramsTemp[2] : paramsTemp[1]			
+				paramsTemp := StrSplit(Trim(match2), " ")
 				
 				condition := {}
 				condition.name := match1
-				condition.values := params
+				condition.operator := ParamsTemp.MaxIndex() = 2 ? paramsTemp[1] : "=" 
+				condition.value := ParamsTemp.MaxIndex() = 2 ? paramsTemp[2] : paramsTemp[1]
+				
+				; rarity
+				If (condition.value = "Normal") {
+					condition.value := 1
+				} Else If (condition.value = "Magic") {
+					condition.value := 2
+				} Else If (condition.value = "Rare") {
+					condition.value := 3
+				} Else If (condition.value = "Unique") {
+					condition.value := 4
+				}
+				
+				rules[rules.MaxIndex()].conditions.push(condition)
+			}
+			
+			Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap)\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)		
+				
+				condition := {}
+				condition.name := Trim(match1)
+				condition.value := Trim(match2) = "True" ? true : false			
 				rules[rules.MaxIndex()].conditions.push(condition)
 			}
 			
@@ -11961,9 +11985,73 @@ ParseItemLootFilter(filter, attributes) {
 	FileDelete, %A_ScriptDir%\temp\itemFilterParsed.json
 	FileAppend, %json%, %A_ScriptDir%\temp\itemFilterParsed.json
 	
+	/*
+		Match item againt rules
+	*/
 	For k, rule in rules {
+		totalConditions := rule.conditions.MaxIndex()
+		matchingConditions := 0
 		
+		For i, condition in rule.conditions {
+			
+			If (RegExMatch(condition.name, "i)(LinkedSockets|DropLevel|ItemLevel|Rarity|Sockets|Quality|Height|Width|StackSize|GemLevel|MapTier)", match1)) {
+				If (match1 = "Rarity") {
+					If (CompareNumValues(item["RarityLevel"], condition.value, condition.operator)) {
+						matchingConditions++
+					}
+				} Else {
+					If (CompareNumValues(item[match1], condition.value, condition.operator)) {
+						matchingConditions++
+					}	
+				}				
+			}
+			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap)", match1)) {
+				If (item[match1] == condition.value) {
+					matchingConditions++
+				}
+			}
+			Else If (RegExMatch(condition.name, "i)(Class|BaseType|HasExplicitMod)", match1)) {
+				For j, value in condition.values {
+					foundMatch := 0
+					For l, v in item[match1] {
+						If (RegExMatch(v, "i)" value "")) {
+							matchingConditions++
+							foundMatch := 1
+							Break
+						}
+					}
+					If (foundMatch) {
+						Break
+					}
+				}
+			}
+		}
+		
+		If (totalConditions = matchingConditions) {
+			matchedRule := rule
+			Break
+		}
 	}
+	
+	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
+}
+
+CompareNumValues(num1, num2, operator = "=") {
+	res := 0
+	If (operator = "=") {
+		res := num1 = num2
+	} Else If (operator = "==") {
+		res := num1 == num2
+	} Else If (operator = ">=") {
+		res := num1 >= num2
+	} Else If (operator = ">") {
+		res := num1 > num2
+	} Else If (operator = "<=") {
+		res := num1 <= num2
+	} Else If (operator = "<") {
+		res := num1 < num2
+	}
+	Return res
 }
 
 ; ############ (user) macros #############
