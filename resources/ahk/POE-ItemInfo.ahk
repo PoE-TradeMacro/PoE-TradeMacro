@@ -10997,7 +10997,7 @@ ToolTipTimer:
 		
 		; close item filter nameplate
 		fullScriptPath := A_ScriptDir "\lib\PoEScripts_ItemFilterNamePlate.ahk"
-		DetectHiddenWindows, On 
+		DetectHiddenWindows, On
 		WinClose, %fullScriptPath% ahk_class AutoHotkey
 		WinKill, %fullScriptPath% ahk_class AutoHotkey
 	}
@@ -11882,6 +11882,15 @@ ShowItemFilterFormatting(Item) {
 	search.SetBackGroundColor	:= GetItemDefaultColor(Item, "BackGround")
 	search.SetBorderColor		:= GetItemDefaultColor(Item, "Border")
 	search.SetTextColor			:= GetItemDefaultColor(Item, "Text")
+	
+	search.LabelLines := []
+	_line := (Item.Quality > 0) ? "Superior " Item.Name : Item.Name
+	_line .= (Item.IsGem and Item.Level > 1) ? " (Level " Item.Level ")" : "" 
+	search.LabelLines.push(_line)
+	If (Item.RarityLevel >= 3) {
+		_line := Item.BaseName
+		search.LabelLines.push(_line)
+	}	
 
 	ParseItemLootFilter(filterFile, search) 
 }
@@ -12091,7 +12100,6 @@ ParseItemLootFilter(filter, item) {
 	json := JSON.Dump(rules)
 	FileDelete, %A_ScriptDir%\temp\itemFilterParsed.json
 	FileAppend, %json%, %A_ScriptDir%\temp\itemFilterParsed.json
-	
 	/*
 		Match item againt rules
 	*/
@@ -12148,8 +12156,7 @@ ParseItemLootFilter(filter, item) {
 			Break
 		}
 	}
-	
-	debugprintarray(matchedRule)
+	;debugprintarray(matchedRule)
 	
 	If (not StrLen(matchedRule.SetBackgroundColor)) {
 		matchedRule.SetBackgroundColor := item.SetBackgroundColor
@@ -12163,16 +12170,16 @@ ParseItemLootFilter(filter, item) {
 	If (not StrLen(matchedRule.SetFontSize)) {
 		matchedRule.SetFontSize := 32
 	}
-	
-	itemName		:= item.Name
-	ItemBase		:= item.BaseType
+
+	itemName		:= item.LabelLines[1]
+	itemBase		:= item.LabelLines[2]
 	bgColor		:= matchedRule.SetBackgroundColor
 	borderColor	:= matchedRule.SetBorderColor
 	fontColor 	:= matchedRule.SetTextColor
 	fontSize		:= matchedRule.SetFontSize
 	
 	MouseGetPos, CurrX, CurrY
-	
+
 	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
 	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
 }

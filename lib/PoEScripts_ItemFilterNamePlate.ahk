@@ -18,6 +18,7 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 
 ;msgbox % itemName "`n" itemBase "`n" bgColor  "`n" borderColor "`n" fontColor "`n" fontSize
 
+global itemText := itemName "`n" itemBase
 global appAHKGroup := "PoEWindowGroup"
 global applicationHwnd := 
 global xPos := 0
@@ -26,6 +27,8 @@ global winWidth := 0
 global winHeight := 0
 global mousePosX := mouseX
 global mousePosY := mouseY
+GuiMargin := 2
+global borderWidth := 1
 
 /*
 	font / text calculations
@@ -35,11 +38,11 @@ fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
 fS	:= Round(fontSize / 3)
 font := "Arial"
 
-text := itemName "`n" itemBase
+
 width := 0
 height := 0
 size := {}
-Loop, Parse, text, `n, `r
+Loop, Parse, itemText, `n, `r
 {
 	string := A_LoopField			
 	StringReplace, string, string, `r,, All
@@ -78,9 +81,6 @@ bgClr:= rgbToRGBHex(bgC[1], bgC[2], bgC[3])
 ; border
 bC	:= StrSplit(borderColor, " ")
 bClr	:= rgbToRGBHex(bC[1], bC[2], bC[3])
-
-GuiMargin := 2
-borderWidth := 1
 
 ; Loop 1 = background
 ; Loop 2 = border
@@ -169,7 +169,7 @@ Loop, 3 {
 		WinSet, TransColor, %bgClr% 255, ahk_id %TTHWnd%
 		
 		; add a border to the window, has to be done after auto-resizing the window
-		GuiAddBorder(bClr, 2, bwWidth, bwHeight, A_Index, TTHWnd)
+		GuiAddBorder(bClr, borderWidth, bwWidth, bwHeight, A_Index, TTHWnd)
 		WinMove, ahk_id %TTHwnd%, , xPos, yPos, bwWidth, bwHeight  
 	} Else If (A_Index = 3) {
 		fTrans := fC[4]
@@ -179,7 +179,14 @@ Loop, 3 {
 	}
 }
 
+; automatically close the windows after 6 seconds
+SetTimer, CloseWindows, 4000
+
 Return 
+
+CloseWindows:
+	ExitApp
+Return
 
 rgbToRGBHex(r, g = 0, b = 0) {	
 	; won't work without IntegerFast when called from a Label
