@@ -7449,7 +7449,7 @@ ParseSocketGroups(ItemDataText)
 				Pos		:= 0
 				While Pos	:= RegExMatch(sockets, "i)(.*?)\s+", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
 					s := Trim(value1)
-					groups.push(StrSplit(s, "-"))
+					groups.push(RegExReplace(s, "i)-"))
 				}
 			}
 		}
@@ -11797,8 +11797,7 @@ ShowItemFilterFormatting(Item) {
 	search.Identified := Item.IsUnidentified ? "False" : "True"
 	search.Corrupted := Item.IsCorrupted ? "True" : "False"
 	search.Quality := Item.Quality
-	search.Sockets := Item.Sockets
-	search.SocketGroup := Item.SocketGroups	; 	SocketGroup RGB for example
+	search.Sockets := Item.Sockets	
 	search.Width :=
 	search.Height :=
 	search.name := Item.Name
@@ -11879,12 +11878,26 @@ ShowItemFilterFormatting(Item) {
 		}
 	}
 	
+	search.SocketGroup := [] 	; 	SocketGroups, RGB for example
+	For key, val in Item.SocketGroups {
+		sGroup := {}
+		_r := RegExReplace(val, "i)r" , "", rCount)
+		_g := RegExReplace(val, "i)g" , "", gCount)
+		_b := RegExReplace(val, "i)b" , "", bCount)
+		_w := RegExReplace(val, "i)w" , "", wCount)
+		sGroup.r := rCount
+		sGroup.g := gCount
+		sGroup.b := bCount
+		sGroup.w := wCount
+		search.SocketGroup.push(sGroup)
+	}	
+	
 	search.SetBackGroundColor	:= GetItemDefaultColor(Item, "BackGround")
 	search.SetBorderColor		:= GetItemDefaultColor(Item, "Border")
 	search.SetTextColor			:= GetItemDefaultColor(Item, "Text")
 	
 	search.LabelLines := []
-	_line := (Item.Quality > 0) ? "Superior " Item.Name : Item.Name
+	_line := (Item.Quality > 0) ? "Superior " RegExReplace(Item.Name, "i)Superior (.*)", "$1") : Item.Name
 	_line .= (Item.IsGem and Item.Level > 1) ? " (Level " Item.Level ")" : "" 
 	search.LabelLines.push(_line)
 	If (Item.RarityLevel >= 3) {
@@ -12026,9 +12039,9 @@ ParseItemLootFilter(filter, item) {
 			}
 			
 			/*
-				Conditions (everything must match, lines don't overwrite each other)
+				Conditions (every condition must match, lines don't overwrite each other)
 			*/
-			Else If (RegExMatch(line, "i)^.*?(Class|BaseType|HasExplicitMod)\s")) {
+			Else If (RegExMatch(line, "i)^.*?(Class|BaseType|HasExplicitMod|SocketGroup)\s")) {
 				RegExMatch(line, "i)(.*?)\s(.*)", match)
 				
 				;temp := RegExReplace(match2, "i)(""\s+"")", """,""")
@@ -12076,16 +12089,7 @@ ParseItemLootFilter(filter, item) {
 				condition.name := Trim(match1)
 				condition.value := Trim(match2) = "True" ? true : false			
 				rules[rules.MaxIndex()].conditions.push(condition)
-			}
-			
-			Else If (RegExMatch(line, "i)^.*?(SocketGroup)\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)		
-				
-				condition := {}
-				condition.name := Trim(match1)
-				condition.value := Trim(match2)		
-				rules[rules.MaxIndex()].conditions.push(condition)
-			}
+			}		
 			
 			/*
 				the rest
@@ -12148,6 +12152,28 @@ ParseItemLootFilter(filter, item) {
 					}
 				}
 			}
+			Else If (RegExMatch(condition.name, "i)(SocketGroup)", match1)) {
+				For j, value in condition.values {
+					foundMatch := 0
+					
+					For l, v in item[match1] {
+						_r := RegExReplace(value, "i)r" , "", rCount)
+						_g := RegExReplace(value, "i)g" , "", gCount)
+						_b := RegExReplace(value, "i)b" , "", bCount)
+						_w := RegExReplace(value, "i)w" , "", wCount)
+						
+						If (v.r = rCount and v.g = gCount and v.b = bCount and v.w = wCount) {
+							matchingConditions++
+							matching_rules.push(condition.name)
+							foundMatch := 1
+							Break
+						}
+					}
+					If (foundMatch) {
+						Break
+					}
+				}
+			}
 		}
 		
 		If (totalConditions = matchingConditions) {
@@ -12156,7 +12182,7 @@ ParseItemLootFilter(filter, item) {
 			Break
 		}
 	}
-	;debugprintarray(matchedRule)
+	;debugprintarray([matchedRule, item])
 	
 	If (not StrLen(matchedRule.SetBackgroundColor)) {
 		matchedRule.SetBackgroundColor := item.SetBackgroundColor

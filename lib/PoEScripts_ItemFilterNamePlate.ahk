@@ -38,7 +38,6 @@ fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
 fS	:= Round(fontSize / 3)
 font := "Arial"
 
-
 width := 0
 height := 0
 size := {}
