@@ -80,7 +80,7 @@ bC	:= StrSplit(borderColor, " ")
 bClr	:= rgbToRGBHex(bC[1], bC[2], bC[3])
 
 GuiMargin := 2
-borderWidth := 2
+borderWidth := 1
 
 ; Loop 1 = background
 ; Loop 2 = border
@@ -445,159 +445,110 @@ MDMF_GetInfo(HMON) {
 }
 
 ; ==================================================================================================================================
-	; Original script by majkinetor.
-	; Fixed by Eruyome.
-	;	
-	; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
-	;	
-	; Function:		CreateFont
-	;				Creates the font and optinally, sets it for the control.
-	; Parameters:
-	;				hCtrl 	- Handle of the control. If omitted, function will create font and return its handle.
-	;				Font  	- AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
-	;				bRedraw	- If this parameter is TRUE, the control redraws itself. By default 1.
-	; Returns:	
-	;				Font handle.
-	; ==================================================================================================================================
-	CreateFont(HCtrl="", Font="", BRedraw=1) {
-		static WM_SETFONT := 0x30
+; Original script by majkinetor.
+; Fixed by Eruyome.
+;	
+; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+;	
+; Function:		CreateFont
+;				Creates the font and optinally, sets it for the control.
+; Parameters:
+;				hCtrl 	- Handle of the control. If omitted, function will create font and return its handle.
+;				Font  	- AHK font defintion ("s10 italic, Courier New"). If you already have created font, pass its handle here.
+;				bRedraw	- If this parameter is TRUE, the control redraws itself. By default 1.
+; Returns:	
+;				Font handle.
+; ==================================================================================================================================
+CreateFont(HCtrl="", Font="", BRedraw=1) {
+	static WM_SETFONT := 0x30
 
-		;if Font is not integer
-		if (not RegExMatch(Trim(Font), "^\d+$"))
-		{
-			StringSplit, Font, Font, `,,%A_Space%%A_Tab%
-			fontStyle := Font1, fontFace := Font2
+	;if Font is not integer
+	if (not RegExMatch(Trim(Font), "^\d+$"))
+	{
+		StringSplit, Font, Font, `,,%A_Space%%A_Tab%
+		fontStyle := Font1, fontFace := Font2
 
-		  ;parse font 
-			italic      := InStr(Font1, "italic")    ?  1    :  0 
-			underline   := InStr(Font1, "underline") ?  1    :  0 
-			strikeout   := InStr(Font1, "strikeout") ?  1    :  0 
-			weight      := InStr(Font1, "bold")      ? 700   : 400 
+	  ;parse font 
+		italic      := InStr(Font1, "italic")    ?  1    :  0 
+		underline   := InStr(Font1, "underline") ?  1    :  0 
+		strikeout   := InStr(Font1, "strikeout") ?  1    :  0 
+		weight      := InStr(Font1, "bold")      ? 700   : 400 
 
-		  ;height 
+	  ;height 
 
-			RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
-			ifEqual, height,, SetEnv, height, 10
-			RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
-			height := -DllCall("MulDiv", "int", Height, "int", LogPixels, "int", 72) 
-		
-			IfEqual, Font2,,SetEnv Font2, MS Sans Serif
-		 ;create font 
-			hFont   := DllCall("CreateFont", "int",  height, "int",  0, "int",  0, "int", 0
-							  ,"int",  weight,   "Uint", italic,   "Uint", underline 
-							  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", Font2, "Uint")
-		} else hFont := Font
-		ifNotEqual, HCtrl,,SendMessage, WM_SETFONT, hFont, BRedraw,,ahk_id %HCtrl%
-		return hFont
+		RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
+		ifEqual, height,, SetEnv, height, 10
+		RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
+		height := -DllCall("MulDiv", "int", Height, "int", LogPixels, "int", 72) 
+	
+		IfEqual, Font2,,SetEnv Font2, MS Sans Serif
+	 ;create font 
+		hFont   := DllCall("CreateFont", "int",  height, "int",  0, "int",  0, "int", 0
+						  ,"int",  weight,   "Uint", italic,   "Uint", underline 
+						  ,"uint", strikeOut, "Uint", nCharSet, "Uint", 0, "Uint", 0, "Uint", 0, "Uint", 0, "str", Font2, "Uint")
+	} else hFont := Font
+	ifNotEqual, HCtrl,,SendMessage, WM_SETFONT, hFont, BRedraw,,ahk_id %HCtrl%
+	return hFont
+}
+
+; ==================================================================================================================================
+;
+; Original script by majkinetor.
+; Fixed by Eruyome.
+;
+; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
+;
+; Function:	DrawText
+;			Draws text using specified font on device context or calculates width and height of the text.
+; Parameters: 
+;		Text		- Text to be drawn or measured. 
+;		DC		- Device context to use. If omitted, function will use Desktop's DC.
+;		Font		- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
+;		Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
+;		Rect		- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
+;				  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
+;				
+; Flags:
+;			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
+; Returns:
+;			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
+; ==================================================================================================================================	
+Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
+	static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
+
+	hFlag := (Rect = "") ? DT_NOCLIP : 0
+
+	StringSplit, Rect, Rect, %A_Space%
+	loop, parse, Flags, %A_Space%
+		ifEqual, A_LoopField,,continue
+		else hFlag |= DT_%A_LoopField%
+
+	if (RegExMatch(Trim(Font), "^\d+$")) {
+		hFont := Font, bUserHandle := 1
+	}
+	else if (Font != "") {
+		hFont := CreateFont( "", Font)
+	}
+	else {
+		hFlag |= DT_INTERNAL
 	}
 
-	; ==================================================================================================================================
-	;
-	; Original script by majkinetor.
-	; Fixed by Eruyome.
-	;
-	; https://github.com/majkinetor/mm-autohotkey/blob/master/Font/Font.ahk
-	;
-	; Function:	DrawText
-	;			Draws text using specified font on device context or calculates width and height of the text.
-	; Parameters: 
-	;		Text		- Text to be drawn or measured. 
-	;		DC		- Device context to use. If omitted, function will use Desktop's DC.
-	;		Font		- If string, font description in AHK syntax. If number, font handle. If omitted, uses the system font to calculate text metrics.
-	;		Flags	- Drawing/Calculating flags. Space separated combination of flag names. For the description of the flags see <http://msdn.microsoft.com/en-us/library/ms901121.aspx>.
-	;		Rect		- Bounding rectangle. Space separated list of left,top,right,bottom coordinates. 
-	;				  Width could also be used with CALCRECT WORDBREAK style to calculate word-wrapped height of the text given its width.
-	;				
-	; Flags:
-	;			CALCRECT, BOTTOM, CALCRECT, CENTER, VCENTER, TABSTOP, SINGLELINE, RIGHT, NOPREFIX, NOCLIP, INTERNAL, EXPANDTABS, AHKSIZE.
-	; Returns:
-	;			Decimal number. Width "." Height of text. If AHKSIZE flag is set, the size will be returned as w%w% h%h%
-	; ==================================================================================================================================	
-	Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
-		static DT_AHKSIZE=0, DT_CALCRECT=0x400, DT_WORDBREAK=0x10, DT_BOTTOM=0x8, DT_CENTER=0x1, DT_VCENTER=0x4, DT_TABSTOP=0x80, DT_SINGLELINE=0x20, DT_RIGHT=0x2, DT_NOPREFIX=0x800, DT_NOCLIP=0x100, DT_INTERNAL=0x1000, DT_EXPANDTABS=0x40
+	IfEqual, hDC,,SetEnv, hDC, % DllCall("GetDC", "Uint", 0, "Uint")
+	ifNotEqual, hFont,, SetEnv, hOldFont, % DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
 
-		hFlag := (Rect = "") ? DT_NOCLIP : 0
+	VarSetCapacity(RECT, 16)
+	if (Rect0 != 0)
+		loop, 4
+			NumPut(Rect%A_Index%, RECT, (A_Index-1)*4)
 
-		StringSplit, Rect, Rect, %A_Space%
-		loop, parse, Flags, %A_Space%
-			ifEqual, A_LoopField,,continue
-			else hFlag |= DT_%A_LoopField%
+	h := DllCall("DrawTextA", "Uint", hDC, "Str", Text, "int", StrLen(Text), "uint", &RECT, "uint", hFlag)
 
-		if (RegExMatch(Trim(Font), "^\d+$")) {
-			hFont := Font, bUserHandle := 1
-		}
-		else if (Font != "") {
-			hFont := CreateFont( "", Font)
-		}
-		else {
-			hFlag |= DT_INTERNAL
-		}
-
-		IfEqual, hDC,,SetEnv, hDC, % DllCall("GetDC", "Uint", 0, "Uint")
-		ifNotEqual, hFont,, SetEnv, hOldFont, % DllCall("SelectObject", "Uint", hDC, "Uint", hFont)
-
-		VarSetCapacity(RECT, 16)
-		if (Rect0 != 0)
-			loop, 4
-				NumPut(Rect%A_Index%, RECT, (A_Index-1)*4)
-
-		h := DllCall("DrawTextA", "Uint", hDC, "Str", Text, "int", StrLen(Text), "uint", &RECT, "uint", hFlag)
-
-		;clean
-		ifNotEqual, hOldFont,,DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont) 
-		ifNotEqual, bUserHandle, 1, DllCall("DeleteObject", "Uint", hFont)
-		ifNotEqual, DC,,DllCall("ReleaseDC", "Uint", 0, "Uint", hDC) 
-		
-		w	:= NumGet(RECT, 8, "Int")
-		
-		return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
-	}
-	/*
-	; ==================================================================================================================================
-	; Function	ShowToolTip
-	;			Shows the ToolTip after checking and setting its position. Starts the ToolTip timer.
-	; Parameters:
-	; 		useFixedCoords	- Draw the ToolTip at fixed coordinates instead of at mouseposition 
-	;		x			- fixed x coordinate
-	;		y			- fixed y coordinate
-	; 		centered		- Centers the ToolTip on the screen, vertically and horizontally.
-	;
-	; Return: 
-	;			Nothing.
-	; ==================================================================================================================================
-	ShowToolTip(centered = false, useFixedCoords = false, x = false, y = false) {
-		Global useFixedCoords, xPos, yPos, startMouseXPos, startMouseYPos, fixedXPos, fixedYPos
-		CoordMode, Mouse, Screen
-		MouseGetPos, startMouseXPos, startMouseYPos
-		
-		If ((useFixedCoords and x and y) or this.useFixedCoords) {
-			useFixedCoords := true
-			xPos := x ? x : fixedXPos
-			yPos := y ? y : fixedYPos
-		} Else If (x and y) {
-			xPos := x === false ? 0 : x
-			yPos := y === false ? 0 : y
-		} Else {
-			xPos := startMouseXPos
-			yPos := startMouseYPos
-		}
-		
-		Opacity := this.opacity
-		TTHwnd := this.parentWindow		
-		
-		validToolTipDimensions := this.SetToolTipSizeAndPosition(centered)
-		If (not validToolTipDimensions) {
-			; recalculate the tooltip if it is bigger than the screen
-			this.RecalculateToolTip()
-		} 
-		Else {				
-			; make window visible again
-			WinSet, Transparent, %Opacity%, ahk_id %TTHWnd%			
-			
-			; set tooltip timeout/timer
-			this.startMouseXPos := startMouseXPos
-			this.startMouseYPos := startMouseYPos
-			this.startTimer()
-		}
-	}
-	*/
+	;clean
+	ifNotEqual, hOldFont,,DllCall("SelectObject", "Uint", hDC, "Uint", hOldFont) 
+	ifNotEqual, bUserHandle, 1, DllCall("DeleteObject", "Uint", hFont)
+	ifNotEqual, DC,,DllCall("ReleaseDC", "Uint", 0, "Uint", hDC) 
+	
+	w	:= NumGet(RECT, 8, "Int")
+	
+	return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
+}

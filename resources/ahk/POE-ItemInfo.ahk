@@ -672,7 +672,7 @@ CheckRarityLevel(RarityString)
 	return 0 ; unknown rarity. shouldn't happen!
 }
 
-ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, ByRef GripType, IsMapFragment, RarityLevel)
+ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, ByRef GripType,  RarityLevel)
 {
 	; Grip type only matters for weapons at this point. For all others it will be 'None'.
 	; Note that shields are armour and not weapons, they are not 1H.
@@ -936,11 +936,6 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			SubType = BodyArmour
 			return
 		}
-	}
-
-	If (IsMapFragment) {
-		SubType = MapFragment
-		return
 	}
 }
 
@@ -7968,7 +7963,16 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
 	Item.IsCurrency:= (InStr(ItemData.Rarity, "Currency"))
 	
-	If (Not (InStr(ItemDataText, "Itemlevel:") or InStr(ItemDataText, "Item Level:")) and Not Item.IsGem and Not Item.IsCurrency and Not Item.IsDivinationCard and Not Item.IsProphecy)
+	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key"]
+	For key, val in regex {
+		If (RegExMatch(Item.Name, "i)" val "")) {
+			Item.IsMapFragment := True
+			Item.SubType := "MapFragment"
+			Break
+		}
+	}	
+	
+	If (Not (InStr(ItemDataText, "Itemlevel:") or InStr(ItemDataText, "Item Level:")) and not Item.IsGem and not Item.IsCurrency and not Item.IsDivinationCard and not Item.IsProphecy)
 	{
 		return Item.Name
 	}
@@ -8012,19 +8016,11 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		; Don't do this on Divination Cards or this script crashes on trying to do the ParseItemLevel
 		Else If (Not Item.IsCurrency and Not Item.IsDivinationCard and Not Item.IsProphecy)
 		{
-			regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key"]
-			For key, val in regex {
-				If (RegExMatch(Item.Name, "i)" val "")) {
-					Item.IsMapFragment := True
-					Break
-				}
-			}
-
 			RarityLevel	:= CheckRarityLevel(ItemData.Rarity)
 			Item.Level	:= ParseItemLevel(ItemDataText)
 			ItemLevelWord	:= "Item Level:"
 			If (Not Item.IsBeast) {
-				ParseItemType(ItemData.Stats, ItemData.NamePlate, ItemBaseType, ItemSubType, ItemGripType, Item.IsMapFragment, RarityLevel)
+				ParseItemType(ItemData.Stats, ItemData.NamePlate, ItemBaseType, ItemSubType, ItemGripType, RarityLevel)
 				Item.BaseType	:= ItemBaseType
 				Item.SubType	:= ItemSubType
 				Item.GripType	:= ItemGripType
@@ -8055,7 +8051,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsMirrored	:= (ItemIsMirrored(ItemDataText) and Not Item.IsCurrency)
 	Item.IsEssence		:= Item.IsCurrency and RegExMatch(Item.Name, "i)Essence of |Remnant of Corruption")
 	Item.Note			:= Globals.Get("ItemNote")
-	
+
 	If (Item.IsLeaguestone) {
 		Item.AreaMonsterLevelReq	:= ParseAreaMonsterLevelRequirement(ItemData.Stats)
 	}
@@ -8361,7 +8357,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		If (Itemdata.Rarity = "Magic"){
 			PrefixLimit := 1
 			SuffixLimit := 1
-		}Else{
+		} Else {
 			PrefixLimit := 3
 			SuffixLimit := 3
 		}
@@ -8507,7 +8503,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			TT .= "`n--------`nNotation:" Notation
 		}
 	}
-	
+
 	return TT
 }
 
@@ -11796,7 +11792,7 @@ ShowItemFilterFormatting(Item) {
 	search.ShaperItem := Item.IsShaperBase ? "True" : "False"
 	search.ElderItem := Item.IsElderBase ? "True" : "False"
 	search.ItemLevel := Item.Level
-	search.BaseType := Item.BaseName
+	search.BaseType := [Item.BaseName]
 	search.HasExplicitMod :=			; 	HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
 	search.Identified := Item.IsUnidentified ? "False" : "True"
 	search.Corrupted := Item.IsCorrupted ? "True" : "False"
@@ -11847,8 +11843,7 @@ ShowItemFilterFormatting(Item) {
 			search.Classes.push(match1 " Flasks") 
 			search.Classes.push(match1 " Flask") 
 			search.Classes.push("Flask") 
-		} Else {
-			search.Class := "Utility Flasks"
+		} Else {			
 			search.Classes.push("Utility Flasks") 
 			search.Classes.push("Utility Flask") 
 			search.Classes.push("Flask") 
@@ -11884,10 +11879,106 @@ ShowItemFilterFormatting(Item) {
 		}
 	}
 	
-	;debugprintarray(search)
+	search.SetBackGroundColor	:= GetItemDefaultColor(Item, "BackGround")
+	search.SetBorderColor		:= GetItemDefaultColor(Item, "Border")
+	search.SetTextColor			:= GetItemDefaultColor(Item, "Text")
+
 	ParseItemLootFilter(filterFile, search) 
 }
 
+GetItemDefaultColor(item, cType) {
+	If (cType = "Border") {
+		; labyrinth map item or map fragment
+		If (item.IsMapFragment) {
+			return "200 200 200 1" ; // white
+		}
+
+		; Quest Item / labyrinth item
+		If (item.IsQuestItem or item.IsLabyrinthItem) { ; these variables don't exist yet
+			return "74 230 58 1" ; // green
+		}
+
+		; map rarity
+		Else If (item.IsMap) {
+			If (item.RarityLevel = 1) {
+				return "200 200 200 1"
+			} Else If (item.RarityLevel = 2) {
+				return "136 136 255 1"
+			} Else If (item.RarityLevel = 3) {
+				return "255 255 119 1"
+			} Else If (item.RarityLevel = 4) {
+				return " 175 96 37 1"
+			} Else {
+				return "255 255 255 0"
+			}
+		}
+		
+		; default border color: none
+		Else  {
+			return s:= "0 0 0 0"
+		}
+	}
+	
+	; background is always black
+	Else If (cType = "BackGround") {		
+		return  "0 0 0 255"
+	}
+	
+	Else If (cType = "Text") {
+		; create text color based gem class
+		If (item.IsGem)
+		{
+			return "27 162 155 1"
+		}
+
+		; create text color based on currency class
+		Else If (item.IsCurrency)
+		{
+			return "170 158 130 1"
+		}
+
+		; create text color based on map fragments classes
+		Else If (RegExMatch(item.Name, "i)Offering of the Goddess") or item.IsMap)
+		{
+			return "200 200 200 1"
+		}
+
+		; quest / lab item
+		Else If (item.IsQuestItem or item.IsLabyrinthItem) ; these variables don't exist yet
+		{
+			return "74 230 58 1"
+		}
+
+		; div card
+		Else If (item.IsDivinationCard)
+		{
+			return "14 186 255 1"
+		}
+		
+		; create text color based on rarity
+		Else If (item.RarityLevel)
+		{
+			If (item.RarityLevel = 1) {
+				return "200 200 200 1"
+			} Else If (item.RarityLevel = 2) {
+				return "136 136 255 1"
+			} Else If (item.RarityLevel = 3) {
+				return "255 255 119 1"
+			} Else If (item.RarityLevel = 4) {
+				return " 175 96 37 1"
+			} Else {
+				return "255 255 255 0"
+			}
+		}
+
+		; creating default text color (white)
+		Else {
+			return "255 255 255 1"
+		}
+	}
+	
+	Return
+}
 
 ParseItemLootFilter(filter, item) {
 	; https://pathofexile.gamepedia.com/Item_filter
@@ -11978,6 +12069,15 @@ ParseItemLootFilter(filter, item) {
 				rules[rules.MaxIndex()].conditions.push(condition)
 			}
 			
+			Else If (RegExMatch(line, "i)^.*?(SocketGroup)\s")) {
+				RegExMatch(line, "i)(.*?)\s(.*)", match)		
+				
+				condition := {}
+				condition.name := Trim(match1)
+				condition.value := Trim(match2)		
+				rules[rules.MaxIndex()].conditions.push(condition)
+			}
+			
 			/*
 				the rest
 			*/			
@@ -11995,9 +12095,13 @@ ParseItemLootFilter(filter, item) {
 	/*
 		Match item againt rules
 	*/
+	match := ""
+	match1 := ""
+	match2 := ""
 	For k, rule in rules {
 		totalConditions := rule.conditions.MaxIndex()
-		matchingConditions := 0
+		matchingConditions := 0		
+		matching_rules := []
 		
 		For i, condition in rule.conditions {
 			
@@ -12005,16 +12109,19 @@ ParseItemLootFilter(filter, item) {
 				If (match1 = "Rarity") {
 					If (CompareNumValues(item["RarityLevel"], condition.value, condition.operator)) {
 						matchingConditions++
+						matching_rules.push(condition.name)
 					}
 				} Else {
 					If (CompareNumValues(item[match1], condition.value, condition.operator)) {
 						matchingConditions++
+						matching_rules.push(condition.name)
 					}	
 				}				
 			}
 			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap)", match1)) {
 				If (item[match1] == condition.value) {
 					matchingConditions++
+					matching_rules.push(condition.name)
 				}
 			}
 			Else If (RegExMatch(condition.name, "i)(Class|BaseType|HasExplicitMod)", match1)) {
@@ -12023,6 +12130,7 @@ ParseItemLootFilter(filter, item) {
 					For l, v in item[match1] {
 						If (RegExMatch(v, "i)" value "")) {
 							matchingConditions++
+							matching_rules.push(condition.name)
 							foundMatch := 1
 							Break
 						}
@@ -12036,8 +12144,24 @@ ParseItemLootFilter(filter, item) {
 		
 		If (totalConditions = matchingConditions) {
 			matchedRule := rule
+			matchedRule["matching_rules"] := matching_rules
 			Break
 		}
+	}
+	
+	debugprintarray(matchedRule)
+	
+	If (not StrLen(matchedRule.SetBackgroundColor)) {
+		matchedRule.SetBackgroundColor := item.SetBackgroundColor
+	}
+	If (not StrLen(matchedRule.SetBorderColor)) {
+		matchedRule.SetBorderColor := item.SetBorderColor
+	}
+	If (not StrLen(matchedRule.SetTextColor)) {
+		matchedRule.SetTextColor := item.SetTextColor
+	}
+	If (not StrLen(matchedRule.SetFontSize)) {
+		matchedRule.SetFontSize := 32
 	}
 	
 	itemName		:= item.Name
@@ -12049,8 +12173,8 @@ ParseItemLootFilter(filter, item) {
 	
 	MouseGetPos, CurrX, CurrY
 	
-	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
 	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
+	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
 }
 
 CompareNumValues(num1, num2, operator = "=") {
