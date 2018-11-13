@@ -11799,6 +11799,7 @@ ShowItemFilterFormatting(Item) {
 	search.SocketGroup := Item.SocketGroups	; 	SocketGroup RGB for example
 	search.Width :=
 	search.Height :=
+	search.name := Item.Name
 	
 	; rarity
 	If (Item.RarityLevel = 1) {
@@ -12033,6 +12034,14 @@ ParseItemLootFilter(filter, item) {
 		}
 	}
 	
+	itemName		:= item.Name
+	ItemBase		:= item.BaseType
+	bgColor		:= matchedRule.SetBackgroundColor
+	borderColor	:= matchedRule.SetBorderColor
+	fontColor 	:= matchedRule.SetTextColor
+	fontSize		:= matchedRule.SetFontSize
+	
+	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" 
 	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
 }
 
