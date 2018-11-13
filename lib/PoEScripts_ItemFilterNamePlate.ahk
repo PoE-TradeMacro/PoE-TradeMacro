@@ -1,4 +1,5 @@
 ﻿#SingleInstance, force
+#NoTrayIcon
 
 itemName		= %1%
 itemBase		= %2%
@@ -6,6 +7,8 @@ bgColor		= %3%
 borderColor	= %4%
 fontColor 	= %5%
 fontSize		= %6%
+mouseX		= %7%
+mouseY		= %8%
 
 ;Define window criteria for the regular and steam version, for later use at the very end of the script. This needs to be done early, in the "auto-execute section".
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile.exe
@@ -21,6 +24,8 @@ global xPos := 0
 global yPos := 0
 global winWidth := 0
 global winHeight := 0
+global mousePosX := mouseX
+global mousePosY := mouseY
 
 /*
 	font / text calculations
@@ -138,12 +143,17 @@ Loop, 3 {
 	;WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
 	If (A_Index != 2) {
 		WinGetPos, TTX, TTY, TTW, TTH, ahk_id %TTHwnd%
-		xPos := TTX
-		yPos := TTY
+		xPos := mousePosX
+		yPos := mousePosY
 		winWidth := TTW
 		winHeight := TTH
 	}
 }
+
+; border window size and position
+bwWidth := winWidth + (borderWidth * 2)
+bwHeight := winHeight + (borderWidth * 2)
+CheckAndCorrectWindowPosition(winHwnds[2], borderWidth, xPos, yPos, bwWidth, bwHeight)
 
 Loop, 3 {
 	TTHwnd := winHwnds[A_Index]
@@ -159,8 +169,6 @@ Loop, 3 {
 		WinSet, TransColor, %bgClr% 255, ahk_id %TTHWnd%
 		
 		; add a border to the window, has to be done after auto-resizing the window
-		bwWidth := winWidth + (borderWidth * 2)
-		bwHeight := winHeight + (borderWidth * 2)
 		GuiAddBorder(bClr, 2, bwWidth, bwHeight, A_Index, TTHWnd)
 		WinMove, ahk_id %TTHwnd%, , xPos, yPos, bwWidth, bwHeight  
 	} Else If (A_Index = 3) {
@@ -169,7 +177,6 @@ Loop, 3 {
 		WinSet, TransColor, %bgClr% 255, ahk_id %TTHWnd%
 		WinMove, ahk_id %TTHwnd%, , xPos + borderWidth, yPos + borderWidth, 
 	}
-	;CheckAndCorrectWindowPosition(GuiName, parentWindow, TTX, TTY, TTW, TTH, centered)
 }
 
 Return 
@@ -247,12 +254,11 @@ GuiAddBorder(Color, Width, pW, pH, GuiName = "", parentHwnd = "") {
 ; Return: 
 ;			1 if the ToolTip fits on the screen, 0 if not.
 ; ==================================================================================================================================
-CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH, centered) {
-	Global appAHKGroup, applicationHwnd, xPos, yPos, useFixedCoords
+; 	CheckAndCorrectWindowPosition(GuiIDs, parentWindow, xPos, yPos, bwWidth, bwHeight)
+CheckAndCorrectWindowPosition(GuiID, borderWidth, TTX, TTY, TTW, TTH) {
+	Global xPos, yPos, mousePosX, mousePosY
 	
-	If (appAHKGroup) {
-		WinGet, applicationHwnd, ID, ahk_group %appAHKGroup%
-	}
+	WinGet, applicationHwnd, ID, ahk_group PoEWindowGroup
 	
 	; get monitor info
 	monitors := MDMF_Enum()
@@ -288,33 +294,21 @@ CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH, centered) {
 			boundingRectangle.right := monitor.right
 			boundingRectangle.h := monitor.name
 		}		
-	}
-	
-	; recalculate the tooltip if it is bigger than the screen
-	If (TTW > Abs(boundingRectangle.left - boundingRectangle.right) or TTH > Abs(boundingRectangle.top - boundingRectangle.bottom)) {
-		Return 0
-	}
+	}	
 	
 	; cursor size
 	SysGet, CursorW, 13
 	SysGet, CursorH, 14
 	
-	; position the tooltip beneath the cursor and try to center it horizontally
-	If (not centered) {
-		originalCursorY := TTY
-		TTY := TTY + CursorH + 3
-		TTX := TTX - (Round(TTW / 2) - Round(CursorW / 2))	
-	}
-	Else {
-		midX := Round((boundingRectangle.left + boundingRectangle.right) / 2)
-		midY := Round((boundingRectangle.top + boundingRectangle.bottom) / 2)
-		TTX := Round(midX - (TTW / 2))
-		TTY := Round(midY - (TTH / 2))
-	}
+	; position the tooltip beside the cursor
+	originalCursorY := mousePosY
+	TTY := mousePosY
+	TTY := TTY - Round(TTH / 3)
+	TTX := TTX + CursorW + 3
 	
 	nTTX := TTX
 	nTTY := TTY
-
+	
 	; negative left = left non-primary monitor
 	If (boundingRectangle.left < 0) {
 		xOffset := boundingRectangle.right + (TTX + TTW)
@@ -350,16 +344,21 @@ CheckAndCorrectWindowPosition(GuiName, TTHwnd, TTX, TTY, TTW, TTH, centered) {
 		nTTY := boundingRectangle.top
 	}
 
+	TTHwnd := GuiID
 	If (nTTX != TTX or nTTY != TTY) {
-		xPos := nTTX
-		yPos := nTTY
-		WinMove, ahk_id %TTHwnd%, , nTTX, nTTY
+		yPos := nTTY		
+		
+		If (nTTX + TTW > mousePosX){
+			xPos := nTTX - ((nTTX + TTW + 5) - mousePosX)
+		} 
+		Else {
+			xPos := nTTX	
+		}		
 	} Else {
 		xPos := TTX
 		yPos := TTY
-		WinMove, ahk_id %TTHwnd%, , TTX, TTY
 	}
-	
+		
 	Return 1
 }
 

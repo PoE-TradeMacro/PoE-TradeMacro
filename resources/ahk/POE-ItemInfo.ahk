@@ -10998,6 +10998,12 @@ ToolTipTimer:
 		{
 			ToolTip
 		}
+		
+		; close item filter nameplate
+		fullScriptPath := A_ScriptDir "\lib\PoEScripts_ItemFilterNamePlate.ahk"
+		DetectHiddenWindows, On 
+		WinClose, %fullScriptPath% ahk_class AutoHotkey
+		WinKill, %fullScriptPath% ahk_class AutoHotkey
 	}
 	return
 
@@ -12041,7 +12047,9 @@ ParseItemLootFilter(filter, item) {
 	fontColor 	:= matchedRule.SetTextColor
 	fontSize		:= matchedRule.SetFontSize
 	
-	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" 
+	MouseGetPos, CurrX, CurrY
+	
+	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
 	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
 }
 
