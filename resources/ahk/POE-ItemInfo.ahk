@@ -7288,10 +7288,10 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 		isVaalGem := true
 	}
 
-	If (RegExMatch(ItemData.NamePlate, "i)Rarity\s?+:\s?+Currency")) {		
+	If (RegExMatch(ItemData.NamePlate, "i)Rarity\s?+:\s?+(Currency|Divination Card)")) {		
 		ItemBaseName := Trim(ItemName)
 	}
-
+	
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
 		If (A_Index == 1)
@@ -7335,8 +7335,10 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 					}
 				}
 			}
+
 			; Normal items don't have a third line and the item name equals the BaseName if we sanitize it ("superior").
-			If (RegExMatch(ItemDataChunk, "i)Rarity.*?:.*?Normal"))
+			; Also unidentified items.
+			If (RegExMatch(ItemDataChunk, "i)Rarity.*?:.*?Normal") or RegExMatch(ItemData.PartsLast, "i)Unidentified"))
 			{
 				ItemBaseName := Trim(RegExReplace(ItemName, "i)Superior", ""))
 				Return
@@ -11795,19 +11797,19 @@ ShowItemFilterFormatting(Item) {
 	
 	search := {}
 	search.LinkedSockets := Item.Links
-	search.ShaperItem := Item.IsShaperBase ? "True" : "False"
-	search.ElderItem := Item.IsElderBase ? "True" : "False"
+	search.ShaperItem := Item.IsShaperBase
+	search.ElderItem := Item.IsElderBase
 	search.ItemLevel := Item.Level
 	search.BaseType := [Item.BaseName]
 	search.HasExplicitMod :=			; 	HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
-	search.Identified := Item.IsUnidentified ? "False" : "True"
-	search.Corrupted := Item.IsCorrupted ? "True" : "False"
+	search.Identified := Item.IsUnidentified
+	search.Corrupted := Item.IsCorrupted
 	search.Quality := Item.Quality
 	search.Sockets := Item.Sockets	
 	search.Width :=
 	search.Height :=
 	search.name := Item.Name
-	
+
 	; rarity
 	If (Item.RarityLevel = 1) {
 		search.Rarity := "Normal"
@@ -11907,7 +11909,9 @@ ShowItemFilterFormatting(Item) {
 	_line := (Item.Quality > 0) ? "Superior " RegExReplace(Item.Name, "i)Superior (.*)", "$1") : Item.Name
 	_line .= (Item.IsGem and Item.Level > 1) ? " (Level " Item.Level ")" : "" 
 	search.LabelLines.push(_line)
-	If (Item.RarityLevel >= 3) {
+	
+	; Unidentified rare/unique items have the same baseName as their name
+	If (Item.RarityLevel >= 3 and (RegExReplace(Item.Name, "i)Superior (.*)", "$1") != Item.BaseName)) {
 		_line := Item.BaseName
 		search.LabelLines.push(_line)
 	}	
@@ -12014,7 +12018,7 @@ ParseItemLootFilter(filter, item) {
 	; https://pathofexile.gamepedia.com/Item_filter
 	rules := []
 	matchedRule := {}
-	
+
 	/*
 		Parse filter rules to object
 	*/
