@@ -35,6 +35,7 @@ global borderWidth := 1
 */
 fC	:= StrSplit(fontColor, " ")
 fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
+fC[4] := fC[4] ? fC[4] : 235	; Transparency defaults to about 235 when no value is given
 fS	:= Round(fontSize / 3)
 font := "Arial"
 
@@ -76,10 +77,12 @@ sHeight := size.H
 ; background
 bgC	:= StrSplit(bgColor, " ")
 bgClr:= rgbToRGBHex(bgC[1], bgC[2], bgC[3])
+bC[4] := bC[4] ? bC[4] : 235	; Transparency defaults to about 235 when no value is given
 
 ; border
 bC	:= StrSplit(borderColor, " ")
 bClr	:= rgbToRGBHex(bC[1], bC[2], bC[3])
+bC[4] := bC[4] ? bC[4] : 235	; Transparency defaults to about 235 when no value is given
 
 ; Loop 1 = background
 ; Loop 2 = border

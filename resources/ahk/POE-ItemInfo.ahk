@@ -12104,6 +12104,7 @@ ParseItemLootFilter(filter, item) {
 	json := JSON.Dump(rules)
 	FileDelete, %A_ScriptDir%\temp\itemFilterParsed.json
 	FileAppend, %json%, %A_ScriptDir%\temp\itemFilterParsed.json
+	
 	/*
 		Match item againt rules
 	*/
