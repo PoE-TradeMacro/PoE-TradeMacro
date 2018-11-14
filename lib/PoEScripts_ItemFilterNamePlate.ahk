@@ -77,7 +77,7 @@ sHeight := size.H
 ; background
 bgC	:= StrSplit(bgColor, " ")
 bgClr:= rgbToRGBHex(bgC[1], bgC[2], bgC[3])
-bC[4] := bC[4] ? bC[4] : 235	; Transparency defaults to about 235 when no value is given
+bgC[4] := bgC[4] ? bgC[4] : 235	; Transparency defaults to about 235 when no value is given
 
 ; border
 bC	:= StrSplit(borderColor, " ")

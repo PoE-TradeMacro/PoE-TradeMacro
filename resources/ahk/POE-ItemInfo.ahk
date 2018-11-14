@@ -7288,6 +7288,10 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 		isVaalGem := true
 	}
 
+	If (RegExMatch(ItemData.NamePlate, "i)Rarity\s?+:\s?+Currency")) {		
+		ItemBaseName := Trim(ItemName)
+	}
+
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
 		If (A_Index == 1)
@@ -7992,6 +7996,8 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		If (Item.IsCurrency)
 		{
+			Item.BaseType := "Currency"
+	
 			dataSource	:= ""
 			ValueInChaos	:= ConvertCurrency(Item.Name, ItemData.Stats, dataSource)
 			If (ValueInChaos.Length() and not Item.Name == "Chaos Orb")
@@ -11818,56 +11824,54 @@ ShowItemFilterFormatting(Item) {
 	}
 	
 	; classes
-	class := Item.SubType
-	search.Classes := []
+	class := (StrLen(Item.SubType)) ? Item.SubType : Item.BaseType
+	search.Class := []
 	If (RegExMatch(class, "i)BodyArmour")) {
-		search.Classes.push("Body Armour")
-		search.Classes.push("Body Armours")
+		search.Class.push("Body Armour")
+		search.Class.push("Body Armours")
 	}
 	If (RegExMatch(class, "i)Sword|Mace|Axe")) {
 		If (Item.GripType = "2H") {
-			search.Classes.push(class)
-			search.Classes.push("Two Hand " class)
-			search.Classes.push("Two Hand " class "s")
-			search.Classes.push("Two Hand")
+			search.Class.push(class)
+			search.Class.push("Two Hand " class)
+			search.Class.push("Two Hand " class "s")
+			search.Class.push("Two Hand")
 		} Else {
-			search.Classes.push(class)
-			search.Classes.push("One Hand " class)
-			search.Classes.push("One Hand " class "s")
-			search.Classes.push("One Hand")
+			search.Class.push(class)
+			search.Class.push("One Hand " class)
+			search.Class.push("One Hand " class "s")
+			search.Class.push("One Hand")
 		}
 	}
 	If (RegExMatch(class, "i)Flask")) {
 		If (RegExMatch(Item.BaseName, "i) (Life|Mana) ", match)) {
-			search.Classes.push(match1 " Flasks") 
-			search.Classes.push(match1 " Flask") 
-			search.Classes.push("Flask") 
+			search.Class.push(match1 " Flasks") 
+			search.Class.push(match1 " Flask") 
+			search.Class.push("Flask") 
 		} Else {			
-			search.Classes.push("Utility Flasks") 
-			search.Classes.push("Utility Flask") 
-			search.Classes.push("Flask") 
+			search.Class.push("Utility Flasks") 
+			search.Class.push("Utility Flask") 
+			search.Class.push("Flask") 
 		}
 	}
 	If (RegExMatch(class, "i)Jewel")) {
 		class := "Jewel"
-		search.Classes.push(class)
-		search.Classes.push(class "s")
+		search.Class.push(class)
+		search.Class.push(class "s")
 		
 		If (RegExMatch(Item.SubType, "i)Murderous Eye|Hypnotic Eye|Searching Eye")) {
 			class := "Abyss Jewel"
-			search.Classes.push(class)
-			search.Classes.push(class "s")
+			search.Class.push(class)
+			search.Class.push(class "s")
 		}
 	}
 
-	If (not search.Classes.MaxIndex()) {		
-		search.Classes.push(class)
-		search.Classes.push(class "s")
-	}	
+	If (not search.Class.MaxIndex()) {		
+		search.Class.push(class)
+		search.Class.push(class "s")
+	}
 	
-	;debugprintarray(Item)
-	
-	For key,  val in ItemBaseList {
+	For key, val in ItemBaseList {
 		For k, v in val {
 			If (k = Item.BaseName) {
 				search.DropLevel := v["Drop Level"]
@@ -11877,7 +11881,10 @@ ShowItemFilterFormatting(Item) {
 			}
 		}
 	}
-	
+	If (Item.IsMap) {
+		search.DropLevel := Item.MapTier + 67
+	}
+
 	search.SocketGroup := [] 	; 	SocketGroups, RGB for example
 	For key, val in Item.SocketGroups {
 		sGroup := {}
@@ -11904,7 +11911,8 @@ ShowItemFilterFormatting(Item) {
 		_line := Item.BaseName
 		search.LabelLines.push(_line)
 	}	
-
+	
+	;debugprintarray(Item)
 	ParseItemLootFilter(filterFile, search) 
 }
 
@@ -12020,8 +12028,19 @@ ParseItemLootFilter(filter, item) {
 			rule := {}
 			rule.Display := match1
 			rule.Conditions := []
+			rule.Comments := []
+			If (RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment)) { ; only comments after filter code
+				If (StrLen(comment1)) {
+					rule.Comments.push(comment1)	
+				}				
+			}
 			rules.push(rule)
 		} Else  {
+			RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment) ; only comments after filter code
+			If (StrLen(comment1)) {
+				rules[rules.MaxIndex()].Comments.push(comment1)
+			}			
+			
 			line := RegExReplace(Trim(A_LoopReadLine), "i)#.*")
 			
 			/*
@@ -12082,7 +12101,7 @@ ParseItemLootFilter(filter, item) {
 				rules[rules.MaxIndex()].conditions.push(condition)
 			}
 			
-			Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap)\s")) {
+			Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap|ElderMap)\s")) {
 				RegExMatch(line, "i)(.*?)\s(.*)", match)		
 				
 				condition := {}
@@ -12140,6 +12159,7 @@ ParseItemLootFilter(filter, item) {
 			Else If (RegExMatch(condition.name, "i)(Class|BaseType|HasExplicitMod)", match1)) {
 				For j, value in condition.values {
 					foundMatch := 0
+					
 					For l, v in item[match1] {
 						If (RegExMatch(v, "i)" value "")) {
 							matchingConditions++
