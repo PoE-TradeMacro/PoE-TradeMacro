@@ -7288,8 +7288,12 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 		isVaalGem := true
 	}
 
-	If (RegExMatch(ItemData.NamePlate, "i)Rarity\s?+:\s?+(Currency|Divination Card)")) {		
-		ItemBaseName := Trim(ItemName)
+	If (RegExMatch(ItemData.NamePlate, "i)Rarity\s?+:\s?+(Currency|Divination Card|Gem)", match)) {
+		If (RegExMatch(match1, "i)Gem")) {
+			ItemBaseName := Trim(RegExReplace(ItemName, "i) Support"))
+		} Else {
+			ItemBaseName := Trim(ItemName)
+		}		
 	}
 	
 	Loop, Parse, ItemDataChunk, `n, `r
@@ -7427,17 +7431,17 @@ ParseLinks(ItemDataText)
 ParseSockets(ItemDataText)
 {
 	SocketsCount := 0
+	
 	Loop, Parse, ItemDataText, `n, `r
 	{
-		IfInString, A_LoopField, Sockets
+		If (RegExMatch(A_LoopField, "i)^Sockets\s?+:"))
 		{
 			LinksString	:= GetColonValue(A_LoopField)
-			before		:= StrLen(LinksString)
-			LinksString	:= RegExReplace(LinksString, "[RGBW]", "")
-			after		:= StrLen(LinksString)
-			SocketsCount	:= before - after
+			RegExReplace(LinksString, "i)[RGBWDA]", "", SocketsCount) ; "D" is being used for Resonator sockets, "A" for Abyssal Sockets
+			Break
 		}
 	}
+
 	return SocketsCount
 }
 
@@ -7455,7 +7459,10 @@ ParseSocketGroups(ItemDataText)
 				Pos		:= 0
 				While Pos	:= RegExMatch(sockets, "i)(.*?)\s+", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
 					s := Trim(value1)
-					groups.push(RegExReplace(s, "i)-"))
+					s := RegExReplace(s, "i)-")
+					If (StrLen(Trim(s))) {
+						groups.push(s)
+					}
 				}
 			}
 		}
@@ -7969,11 +7976,11 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
 	Item.IsCurrency:= (InStr(ItemData.Rarity, "Currency"))
 	
-	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key"]
+	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key", "Breachstone", "Divine Vessel"]
 	For key, val in regex {
 		If (RegExMatch(Item.Name, "i)" val "")) {
 			Item.IsMapFragment := True
-			Item.SubType := "MapFragment"
+			Item.SubType := "Map Fragment"
 			Break
 		}
 	}	
@@ -11801,7 +11808,7 @@ ShowItemFilterFormatting(Item) {
 	search.ElderItem := Item.IsElderBase
 	search.ItemLevel := Item.Level
 	search.BaseType := [Item.BaseName]
-	search.HasExplicitMod :=			; 	HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
+	search.HasExplicitMod :=					; HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
 	search.Identified := Item.IsUnidentified
 	search.Corrupted := Item.IsCorrupted
 	search.Quality := Item.Quality
@@ -11867,8 +11874,12 @@ ShowItemFilterFormatting(Item) {
 			search.Class.push(class "s")
 		}
 	}
+	If (RegExMatch(class, "i)Currency") and RegExMatch(Item.BaseName, "i)Resonator")) {
+		search.Class.push("Delve Socketable Currency")		
+		search.Class.push("Currency")		
+	}
 
-	If (not search.Class.MaxIndex()) {		
+	If (not search.Class.MaxIndex() and StrLen(class)) {		
 		search.Class.push(class)
 		search.Class.push(class "s")
 	}
@@ -11887,18 +11898,23 @@ ShowItemFilterFormatting(Item) {
 		search.DropLevel := Item.MapTier + 67
 	}
 
-	search.SocketGroup := [] 	; 	SocketGroups, RGB for example
+	; SocketGroups, RGB for example
+	search.SocketGroup := []
 	For key, val in Item.SocketGroups {
 		sGroup := {}
 		_r := RegExReplace(val, "i)r" , "", rCount)
 		_g := RegExReplace(val, "i)g" , "", gCount)
 		_b := RegExReplace(val, "i)b" , "", bCount)
 		_w := RegExReplace(val, "i)w" , "", wCount)
+		_w := RegExReplace(val, "i)d" , "", dCount)
 		sGroup.r := rCount
 		sGroup.g := gCount
 		sGroup.b := bCount
 		sGroup.w := wCount
-		search.SocketGroup.push(sGroup)
+		sGroup.d := dCount
+		If (sGroup.r or sGroup.b or sGroup.g or sGroup.w or sGroup.d) {
+			search.SocketGroup.push(sGroup)	
+		}		
 	}	
 	
 	search.SetBackGroundColor	:= GetItemDefaultColor(Item, "BackGround")
@@ -12186,8 +12202,9 @@ ParseItemLootFilter(filter, item) {
 						_g := RegExReplace(value, "i)g" , "", gCount)
 						_b := RegExReplace(value, "i)b" , "", bCount)
 						_w := RegExReplace(value, "i)w" , "", wCount)
+						_w := RegExReplace(value, "i)d" , "", dCount)
 						
-						If (v.r = rCount and v.g = gCount and v.b = bCount and v.w = wCount) {
+						If (v.r = rCount and v.g = gCount and v.b = bCount and v.w = wCount and v.d = dCount) {
 							matchingConditions++
 							matching_rules.push(condition.name)
 							foundMatch := 1
