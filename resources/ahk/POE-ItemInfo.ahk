@@ -11774,7 +11774,7 @@ GetCurrentItemFilterPath(ByRef parsingNeeded = true) {
 	configs 		:= []
 	productionIni	:= iniPath . "production_Config.ini"
 	betaIni		:= iniPath . "beta_Config.ini"	
-	
+
 	configs.push(productionIni)
 	configs.push(betaIni)
 	If (not FileExist(productionIni) and not FileExist(betaIni)) {

@@ -41,7 +41,10 @@ fC	:= StrSplit(fontColor, " ")
 fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
 fC[4] := fC[4] ? fC[4] : 235	; Transparency defaults to about 235 when no value is given
 fS	:= Round(fontSize / 3)
-font := "Arial"
+
+; Load font from file, without installation
+Font1 := New CustomFont(A_ScriptDir "\..\resources\fonts\Fontin-SmallCaps.ttf")
+font := "Fontin SmallCaps"
 
 width := 0
 height := 0
@@ -565,3 +568,121 @@ Font_DrawText(Text, DC="", Font="", Flags="", Rect="") {
 	
 	return InStr(Flags, "AHKSIZE") ? "w" w " h" h : { "W" : w, "H": h }
 }
+
+;==================================================================
+/*
+	CustomFont v2.00 (2016-2-24)
+	---------------------------------------------------------
+	Description: Load font from file or resource, without needed install to system.
+	---------------------------------------------------------
+	Useage Examples:
+
+		* Load From File
+			font1 := New CustomFont("ewatch.ttf")
+			Gui, Font, s100, ewatch
+
+		* Load From Resource
+			Gui, Add, Text, HWNDhCtrl w400 h200, 12345
+			font2 := New CustomFont("res:ewatch.ttf", "ewatch", 80) ; <- Add a res: prefix to the resource name.
+			font2.ApplyTo(hCtrl)
+
+		* The fonts will removed automatically when script exits.
+		  To remove a font manually, just clear the variable (e.g. font1 := "").
+*/
+Class CustomFont
+{
+	static FR_PRIVATE  := 0x10
+
+	__New(FontFile, FontName="", FontSize=30) {
+		if RegExMatch(FontFile, "i)res:\K.*", _FontFile) {
+			this.AddFromResource(_FontFile, FontName, FontSize)
+		} else {
+			this.AddFromFile(FontFile)
+		}
+	}
+
+	AddFromFile(FontFile) {
+		DllCall( "AddFontResourceEx", "Str", FontFile, "UInt", this.FR_PRIVATE, "UInt", 0 )
+		this.data := FontFile
+	}
+
+	AddFromResource(ResourceName, FontName, FontSize = 30) {
+		static FW_NORMAL := 400, DEFAULT_CHARSET := 0x1
+
+		nSize    := this.ResRead(fData, ResourceName)
+		fh       := DllCall( "AddFontMemResourceEx", "Ptr", &fData, "UInt", nSize, "UInt", 0, "UIntP", nFonts )
+		hFont    := DllCall( "CreateFont", Int,FontSize, Int,0, Int,0, Int,0, UInt,FW_NORMAL, UInt,0
+		            , Int,0, Int,0, UInt,DEFAULT_CHARSET, Int,0, Int,0, Int,0, Int,0, Str,FontName )
+
+		this.data := {fh: fh, hFont: hFont}
+	}
+
+	ApplyTo(hCtrl) {
+		SendMessage, 0x30, this.data.hFont, 1,, ahk_id %hCtrl%
+	}
+
+	__Delete() {
+		if IsObject(this.data) {
+			DllCall( "RemoveFontMemResourceEx", "UInt", this.data.fh    )
+			DllCall( "DeleteObject"           , "UInt", this.data.hFont )
+		} else {
+			DllCall( "RemoveFontResourceEx"   , "Str", this.data, "UInt", this.FR_PRIVATE, "UInt", 0 )
+		}
+	}
+
+	; ResRead() By SKAN, from http://www.autohotkey.com/board/topic/57631-crazy-scripting-resource-only-dll-for-dummies-36l-v07/?p=609282
+	ResRead( ByRef Var, Key ) {
+		VarSetCapacity( Var, 128 ), VarSetCapacity( Var, 0 )
+		If ! ( A_IsCompiled ) {
+			FileGetSize, nSize, %Key%
+			FileRead, Var, *c %Key%
+			Return nSize
+		}
+
+		If hMod := DllCall( "GetModuleHandle", UInt,0 )
+			If hRes := DllCall( "FindResource", UInt,hMod, Str,Key, UInt,10 )
+				If hData := DllCall( "LoadResource", UInt,hMod, UInt,hRes )
+					If pData := DllCall( "LockResource", UInt,hData )
+						Return VarSetCapacity( Var, nSize := DllCall( "SizeofResource", UInt,hMod, UInt,hRes ) )
+							,  DllCall( "RtlMoveMemory", Str,Var, UInt,pData, UInt,nSize )
+		Return 0
+	}
+}
+;=========================================================================
+
+
+
+;--------- http://ahkscript.org/boards/viewtopic.php?f=6&t=791 ---
+;--        from user cyruz
+;-- Last edited by cyruz on Sun Mar 09, 2014 12:51 pm, edited 6 times in total
+StdoutToVar_CreateProcess(sCmd, sDir:="", ByRef nExitCode:=0) {
+    DllCall( "CreatePipe",           PtrP,hStdOutRd, PtrP,hStdOutWr, Ptr,0, UInt,0 )
+    DllCall( "SetHandleInformation", Ptr,hStdOutWr,  UInt,1,         UInt,1        )
+
+            VarSetCapacity( pi, (A_PtrSize == 4) ? 16 : 24,  0 )
+    siSz := VarSetCapacity( si, (A_PtrSize == 4) ? 68 : 104, 0 )
+    NumPut( siSz,      si,  0,                          "UInt" )
+    NumPut( 0x100,     si,  (A_PtrSize == 4) ? 44 : 60, "UInt" )
+    NumPut( hStdInRd,  si,  (A_PtrSize == 4) ? 56 : 80, "Ptr"  )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 60 : 88, "Ptr"  )
+    NumPut( hStdOutWr, si,  (A_PtrSize == 4) ? 64 : 96, "Ptr"  )
+
+    If ( !DllCall( "CreateProcess", Ptr,0, Ptr,&sCmd, Ptr,0, Ptr,0, Int,True, UInt,0x08000000
+                                  , Ptr,0, Ptr,sDir?&sDir:0, Ptr,&si, Ptr,&pi ) )
+        Return ""
+      , DllCall( "CloseHandle", Ptr,hStdOutWr )
+      , DllCall( "CloseHandle", Ptr,hStdOutRd )
+
+    DllCall( "CloseHandle", Ptr,hStdOutWr ) ; The write pipe must be closed before reading the stdout.
+    VarSetCapacity(sTemp, 4095)
+    While ( DllCall( "ReadFile", Ptr,hStdOutRd, Ptr,&sTemp, UInt,4095, PtrP,nSize, Ptr,0 ) )
+        sOutput .= StrGet(&sTemp, nSize, A_FileEncoding)
+
+    DllCall( "GetExitCodeProcess", Ptr,NumGet(pi,0), Ptr,&nExitCode ), nExitCode := NumGet(nExitCode)
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,0)                 )
+    DllCall( "CloseHandle",        Ptr,NumGet(pi,A_PtrSize)         )
+    DllCall( "CloseHandle",        Ptr,hStdOutRd                    )
+    Return sOutput
+}
+;------------------------------------------------------------------------------------------------------
+;======================================================================================================
