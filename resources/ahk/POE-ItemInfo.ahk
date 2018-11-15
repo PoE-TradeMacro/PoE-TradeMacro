@@ -86,6 +86,8 @@ parsedJSON := JSON.Load(JSONFile)
 ItemBaseList.armours := parsedJSON.item_bases_armour
 
 Globals.Set("ItemBaseList", ItemBaseList)
+Globals.Set("ItemFilterObj", [])
+Globals.Set("CurrentItemFilter", "")
 /*
 */
 
@@ -11766,7 +11768,8 @@ GetScanCodes() {
 	}	
 }
 
-GetCurrentItemFilterPath() {
+GetCurrentItemFilterPath(ByRef parsingNeeded = true) {
+	currentFilter	:= Globals.Get("CurrentItemFilter")
 	iniPath		:= A_MyDocuments . "\My Games\Path of Exile\"
 	configs 		:= []
 	productionIni	:= iniPath . "production_Config.ini"
@@ -11791,7 +11794,14 @@ GetCurrentItemFilterPath() {
 	
 	filter := iniPath "\" filter
 	
-	Return filter
+	If (currentFilter != filter) {
+		parsingNeeded := true
+		Globals.Set("CurrentItemFilter", filter)
+		Return filter
+	} Else {
+		parsingNeeded := false
+		Return currentFilter
+	}
 }
 
 ShowItemFilterFormatting(Item) {
@@ -11799,7 +11809,9 @@ ShowItemFilterFormatting(Item) {
 		Return
 	}
 	
-	filterFile := GetCurrentItemFilterPath()
+	parsingNeeded := true
+	filterFile := GetCurrentItemFilterPath(parsingNeeded)	
+	
 	ItemBaseList := Globals.Get("ItemBaseList")
 	
 	search := {}
@@ -11940,7 +11952,7 @@ ShowItemFilterFormatting(Item) {
 	}	
 	
 	;debugprintarray(Item)
-	ParseItemLootFilter(filterFile, search) 
+	ParseItemLootFilter(filterFile, search, parsingNeeded) 
 }
 
 GetItemDefaultColor(item, cType) {
@@ -12037,114 +12049,122 @@ GetItemDefaultColor(item, cType) {
 	Return
 }
 
-ParseItemLootFilter(filter, item) {
+ParseItemLootFilter(filter, item, parsingNeeded) {
 	; https://pathofexile.gamepedia.com/Item_filter
 	rules := []
 	matchedRule := {}
-
-	/*
-		Parse filter rules to object
-	*/
-	Loop, Read, %filter%
-	{
-		If (RegExMatch(A_LoopReadLine, "i)^#") or not StrLen(A_LoopReadLine)) {
-			continue
-		}
-		
-		If (RegExMatch(Trim(A_LoopReadLine), "i)^(Show|Hide)(\s|#)?", match)) {
-			rule := {}
-			rule.Display := match1
-			rule.Conditions := []
-			rule.Comments := []
-			If (RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment)) { ; only comments after filter code
+	
+	; Use already parsed filter data if the item filter is still the same
+	If (not parsingNeeded) {
+		rules := Globals.Get("ItemFilterObj")
+	}
+	; Parse the item filter if it wasn't used the last time or fall back to parsing it if using the already parsed data fails
+	If (parsingNeeded or rules.MaxIndex() > 1) {
+		/*
+			Parse filter rules to object
+		*/
+		Loop, Read, %filter%
+		{
+			If (RegExMatch(A_LoopReadLine, "i)^#") or not StrLen(A_LoopReadLine)) {
+				continue
+			}
+			
+			If (RegExMatch(Trim(A_LoopReadLine), "i)^(Show|Hide)(\s|#)?", match)) {
+				rule := {}
+				rule.Display := match1
+				rule.Conditions := []
+				rule.Comments := []
+				If (RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment)) { ; only comments after filter code
+					If (StrLen(comment1)) {
+						rule.Comments.push(comment1)	
+					}				
+				}
+				rules.push(rule)
+			} Else  {
+				RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment) ; only comments after filter code
 				If (StrLen(comment1)) {
-					rule.Comments.push(comment1)	
-				}				
-			}
-			rules.push(rule)
-		} Else  {
-			RegExMatch(Trim(A_LoopReadLine), "i)#(.*)?", comment) ; only comments after filter code
-			If (StrLen(comment1)) {
-				rules[rules.MaxIndex()].Comments.push(comment1)
-			}			
-			
-			line := RegExReplace(Trim(A_LoopReadLine), "i)#.*")
-			
-			/*
-				Styles (last line is valid)
-			*/
-			If (RegExMatch(line, "i)^.*?Color\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)
-				rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
-			}
-			
-			Else If (RegExMatch(line, "i)^.*?(PlayAlertSound|MinimapIcon|PlayEffect)\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)
-				params := StrSplit(Trim(match2), " ")
-				rules[rules.MaxIndex()][Trim(match1)] := params
-			}
-			
-			/*
-				Conditions (every condition must match, lines don't overwrite each other)
-			*/
-			Else If (RegExMatch(line, "i)^.*?(Class|BaseType|HasExplicitMod|SocketGroup)\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)
+					rules[rules.MaxIndex()].Comments.push(comment1)
+				}			
 				
-				;temp := RegExReplace(match2, "i)(""\s+"")", """,""")
-				temp := RegExReplace(match2, "i)(\s)\s+", "\s")
-				temp := RegExReplace(temp, "i)(\s+)|""(.*?)""", "$1,$2")
-				temp := RegExReplace(temp, "i)(,,+)", ",")
-				temp := RegExReplace(temp, "i)(\s,)", ",")
-				temp := RegExReplace(temp, "i)(^,)|(, $)")
+				line := RegExReplace(Trim(A_LoopReadLine), "i)#.*")
 				
-				arr := StrSplit(temp, ",")
-				
-				condition := {}
-				condition.name := match1
-				condition.values := arr
-				rules[rules.MaxIndex()].conditions.push(condition)
-			}
-			
-			Else If (RegExMatch(line, "i)^.*?(DropLevel|ItemLevel|Rarity|LinkedSockets|Sockets|Quality|Height|Width|StackSize|GemLevel|MapTier)\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)
-				paramsTemp := StrSplit(Trim(match2), " ")
-				
-				condition := {}
-				condition.name := match1
-				condition.operator := ParamsTemp.MaxIndex() = 2 ? paramsTemp[1] : "=" 
-				condition.value := ParamsTemp.MaxIndex() = 2 ? paramsTemp[2] : paramsTemp[1]
-				
-				; rarity
-				If (condition.value = "Normal") {
-					condition.value := 1
-				} Else If (condition.value = "Magic") {
-					condition.value := 2
-				} Else If (condition.value = "Rare") {
-					condition.value := 3
-				} Else If (condition.value = "Unique") {
-					condition.value := 4
+				/*
+					Styles (last line is valid)
+				*/
+				If (RegExMatch(line, "i)^.*?Color\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)
+					rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
 				}
 				
-				rules[rules.MaxIndex()].conditions.push(condition)
-			}
-			
-			Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap|ElderMap)\s")) {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)		
+				Else If (RegExMatch(line, "i)^.*?(PlayAlertSound|MinimapIcon|PlayEffect)\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)
+					params := StrSplit(Trim(match2), " ")
+					rules[rules.MaxIndex()][Trim(match1)] := params
+				}
 				
-				condition := {}
-				condition.name := Trim(match1)
-				condition.value := Trim(match2) = "True" ? true : false			
-				rules[rules.MaxIndex()].conditions.push(condition)
-			}		
-			
-			/*
-				the rest
-			*/			
-			Else {
-				RegExMatch(line, "i)(.*?)\s(.*)", match)			
-				rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
+				/*
+					Conditions (every condition must match, lines don't overwrite each other)
+				*/
+				Else If (RegExMatch(line, "i)^.*?(Class|BaseType|HasExplicitMod|SocketGroup)\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)
+					
+					;temp := RegExReplace(match2, "i)(""\s+"")", """,""")
+					temp := RegExReplace(match2, "i)(\s)\s+", "\s")
+					temp := RegExReplace(temp, "i)(\s+)|""(.*?)""", "$1,$2")
+					temp := RegExReplace(temp, "i)(,,+)", ",")
+					temp := RegExReplace(temp, "i)(\s,)", ",")
+					temp := RegExReplace(temp, "i)(^,)|(, $)")
+					
+					arr := StrSplit(temp, ",")
+					
+					condition := {}
+					condition.name := match1
+					condition.values := arr
+					rules[rules.MaxIndex()].conditions.push(condition)
+				}
+				
+				Else If (RegExMatch(line, "i)^.*?(DropLevel|ItemLevel|Rarity|LinkedSockets|Sockets|Quality|Height|Width|StackSize|GemLevel|MapTier)\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)
+					paramsTemp := StrSplit(Trim(match2), " ")
+					
+					condition := {}
+					condition.name := match1
+					condition.operator := ParamsTemp.MaxIndex() = 2 ? paramsTemp[1] : "=" 
+					condition.value := ParamsTemp.MaxIndex() = 2 ? paramsTemp[2] : paramsTemp[1]
+					
+					; rarity
+					If (condition.value = "Normal") {
+						condition.value := 1
+					} Else If (condition.value = "Magic") {
+						condition.value := 2
+					} Else If (condition.value = "Rare") {
+						condition.value := 3
+					} Else If (condition.value = "Unique") {
+						condition.value := 4
+					}
+					
+					rules[rules.MaxIndex()].conditions.push(condition)
+				}
+				
+				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap|ElderMap)\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)		
+					
+					condition := {}
+					condition.name := Trim(match1)
+					condition.value := Trim(match2) = "True" ? true : false			
+					rules[rules.MaxIndex()].conditions.push(condition)
+				}		
+				
+				/*
+					the rest
+				*/			
+				Else {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)			
+					rules[rules.MaxIndex()][Trim(match1)] := Trim(match2)
+				}
 			}
 		}
+		Globals.Set("ItemFilterObj", rules)
 	}
 	
 	json := JSON.Dump(rules)
@@ -12256,7 +12276,6 @@ ParseItemLootFilter(filter, item) {
 	
 	MouseGetPos, CurrX, CurrY
 
-	;msgbox % "Item loot filter parsing`n`n" matchedRule.Display "`n" "SetBackgroundColor: " matchedRule.SetBackgroundColor "`n" "SetBorderColor: " matchedRule.SetBorderColor "`n" "SetTextColor: " matchedRule.SetTextColor "`n" "SetFontSize: "  matchedRule.SetFontSize "`n" 
 	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
 }
 

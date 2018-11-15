@@ -30,6 +30,10 @@ global mousePosY := mouseY
 GuiMargin := 2
 global borderWidth := 1
 
+If (not StrLen(itemText)) {
+	ExitApp
+}
+
 /*
 	font / text calculations
 */
