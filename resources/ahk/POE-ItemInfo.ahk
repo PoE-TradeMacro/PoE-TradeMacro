@@ -11942,6 +11942,7 @@ ShowItemFilterFormatting(Item) {
 	
 	search.LabelLines := []
 	_line := (Item.Quality > 0) ? "Superior " RegExReplace(Item.Name, "i)Superior (.*)", "$1") : Item.Name
+	_line := (not Item.IsGem) ? RegExReplace(Item.Name, "i)Superior (.*)", "$1") : _line
 	_line .= (Item.IsGem and Item.Level > 1) ? " (Level " Item.Level ")" : "" 
 	search.LabelLines.push(_line)
 	

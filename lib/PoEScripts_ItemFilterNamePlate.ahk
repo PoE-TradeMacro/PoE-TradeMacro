@@ -40,10 +40,10 @@ If (not StrLen(itemText)) {
 fC	:= StrSplit(fontColor, " ")
 fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
 fC[4] := fC[4] ? fC[4] : 235	; Transparency defaults to about 235 when no value is given
-fS	:= Round(fontSize / 3)
+fS	:= Round(fontSize / 2.5)
 
 ; Load font from file, without installation
-Font1 := New CustomFont(A_ScriptDir "\..\resources\fonts\Fontin-SmallCaps.ttf")
+global CFont := New CustomFont(A_ScriptDir "\..\resources\fonts\Fontin-SmallCaps.ttf")
 font := "Fontin SmallCaps"
 
 width := 0
@@ -71,6 +71,13 @@ Loop, Parse, itemText, `n, `r
 	If (StrLen(string)) {
 		size := Font_DrawText(string, "", "s" fS ", " font, "CALCRECT SINGLELINE NOCLIP")								
 		width := width > size.W ? width : size.W
+		If (width > 400) {
+			width := width * 1.03
+		} Else If (width > 200) {
+			width := width * 1.05
+		} Else {
+			width := width * 1.1
+		}		
 		height += size.H
 	}
 }
@@ -491,7 +498,6 @@ CreateFont(HCtrl="", Font="", BRedraw=1) {
 		weight      := InStr(Font1, "bold")      ? 700   : 400 
 
 	  ;height 
-
 		RegExMatch(Font1, "(?<=[S|s])(\d{1,2})(?=[ ,]*)", height) 
 		ifEqual, height,, SetEnv, height, 10
 		RegRead, LogPixels, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows NT\CurrentVersion\FontDPI, LogPixels 
