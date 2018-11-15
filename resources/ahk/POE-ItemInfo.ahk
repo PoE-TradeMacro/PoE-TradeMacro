@@ -769,7 +769,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 
 	; Check name plate section
 	Loop, Parse, ItemDataNamePlate, `n, `r
-	{
+	{		
 		; Get third line in case of rare or unique item and retrieve the base item name
 		LoopField := RegExReplace(A_LoopField, "<<.*>>", "")
 		If (RarityLevel > 2)
@@ -11877,6 +11877,11 @@ ShowItemFilterFormatting(Item) {
 	If (RegExMatch(class, "i)Currency") and RegExMatch(Item.BaseName, "i)Resonator")) {
 		search.Class.push("Delve Socketable Currency")		
 		search.Class.push("Currency")		
+	}	
+	; Quest Items
+	If (RegExMatch(Item.BaseName, "i)(Elder's Orb|Shaper's Orb)", match)) {
+		search.Class.push("Quest")
+		Item.IsQuestItem := true
 	}
 
 	If (not search.Class.MaxIndex() and StrLen(class)) {		
@@ -11907,12 +11912,14 @@ ShowItemFilterFormatting(Item) {
 		_b := RegExReplace(val, "i)b" , "", bCount)
 		_w := RegExReplace(val, "i)w" , "", wCount)
 		_w := RegExReplace(val, "i)d" , "", dCount)
+		_w := RegExReplace(val, "i)a" , "", aCount)
 		sGroup.r := rCount
 		sGroup.g := gCount
 		sGroup.b := bCount
 		sGroup.w := wCount
 		sGroup.d := dCount
-		If (sGroup.r or sGroup.b or sGroup.g or sGroup.w or sGroup.d) {
+		sGroup.a := aCount
+		If (sGroup.r or sGroup.b or sGroup.g or sGroup.w or sGroup.d or sGroup.a) {
 			search.SocketGroup.push(sGroup)	
 		}		
 	}	
@@ -11994,7 +12001,7 @@ GetItemDefaultColor(item, cType) {
 		}
 
 		; quest / lab item
-		Else If (item.IsQuestItem or item.IsLabyrinthItem) ; these variables don't exist yet
+		Else If (item.IsQuestItem or item.IsLabyrinthItem) ; IsLabyrinthItem doesn't exist yet
 		{
 			return "74 230 58 1"
 		}
@@ -12203,8 +12210,9 @@ ParseItemLootFilter(filter, item) {
 						_b := RegExReplace(value, "i)b" , "", bCount)
 						_w := RegExReplace(value, "i)w" , "", wCount)
 						_w := RegExReplace(value, "i)d" , "", dCount)
+						_w := RegExReplace(value, "i)a" , "", aCount)
 						
-						If (v.r = rCount and v.g = gCount and v.b = bCount and v.w = wCount and v.d = dCount) {
+						If (v.r = rCount and v.g = gCount and v.b = bCount and v.w = wCount and v.d = dCount and v.a = aCount) {
 							matchingConditions++
 							matching_rules.push(condition.name)
 							foundMatch := 1
