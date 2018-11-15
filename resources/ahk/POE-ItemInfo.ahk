@@ -11792,8 +11792,8 @@ GetCurrentItemFilterPath(ByRef parsingNeeded = true) {
 		}
 	}
 	
-	filter := iniPath "\" filter
-	
+	filter := iniPath . filter
+
 	If (currentFilter != filter) {
 		parsingNeeded := true
 		Globals.Set("CurrentItemFilter", filter)
@@ -11804,13 +11804,36 @@ GetCurrentItemFilterPath(ByRef parsingNeeded = true) {
 	}
 }
 
-ShowItemFilterFormatting(Item) {
+ShowAdvancedItemFilterFormatting() {
+	Global Item
+
+	SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+
+	scancode_c := Globals.Get("Scancodes").c
+	Send ^{%scancode_c%}
+	Sleep 150
+	CBContents := GetClipboardContents()
+	CBContents := PreProcessContents(CBContents)
+	Globals.Set("ItemText", CBContents)
+	ParsedData := ParseItemData(CBContents)
+	ShowItemFilterFormatting(Item, true)
+	
+	SuspendPOEItemScript = 0 ; Allow ItemInfo to handle clipboard change event	
+}
+
+ShowItemFilterFormatting(Item, advanced = false) {
 	If (not Item.Name) {
 		Return
 	}
 	
 	parsingNeeded := true
-	filterFile := GetCurrentItemFilterPath(parsingNeeded)	
+	filterFile := GetCurrentItemFilterPath(parsingNeeded)
+	If (RegExMatch(filterFile, "i).*\\(error)$")) {
+		If (advanced) {
+			ShowToolTip("No custom loot filter loaded successfully.`nMake sure you have one selected in your UI options.")
+		}
+		Return
+	}
 	
 	ItemBaseList := Globals.Get("ItemBaseList")
 	
@@ -11942,7 +11965,7 @@ ShowItemFilterFormatting(Item) {
 	
 	search.LabelLines := []
 	_line := (Item.Quality > 0) ? "Superior " RegExReplace(Item.Name, "i)Superior (.*)", "$1") : Item.Name
-	_line := (not Item.IsGem) ? RegExReplace(Item.Name, "i)Superior (.*)", "$1") : _line
+	_line := (not Item.IsGem and not Item.IsUnidentified and not Item.RarityLevel = 1) ? RegExReplace(Item.Name, "i)Superior (.*)", "$1") : _line
 	_line .= (Item.IsGem and Item.Level > 1) ? " (Level " Item.Level ")" : "" 
 	search.LabelLines.push(_line)
 	
@@ -11953,7 +11976,7 @@ ShowItemFilterFormatting(Item) {
 	}	
 	
 	;debugprintarray(Item)
-	ParseItemLootFilter(filterFile, search, parsingNeeded) 
+	ParseItemLootFilter(filterFile, search, parsingNeeded, advanced) 
 }
 
 GetItemDefaultColor(item, cType) {
@@ -12050,7 +12073,7 @@ GetItemDefaultColor(item, cType) {
 	Return
 }
 
-ParseItemLootFilter(filter, item, parsingNeeded) {
+ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 	; https://pathofexile.gamepedia.com/Item_filter
 	rules := []
 	matchedRule := {}
@@ -12275,9 +12298,65 @@ ParseItemLootFilter(filter, item, parsingNeeded) {
 	fontColor 	:= matchedRule.SetTextColor
 	fontSize		:= matchedRule.SetFontSize
 	
-	MouseGetPos, CurrX, CurrY
+	If (advanced) {	
+		filterName := RegExReplace(Globals.Get("CurrentItemFilter"), "i).*\\(.*)(\.filter)","$1")
+		commentsJSON := DebugPrintArray(matchedRule, false)
+		
+		comments := ""
+		For key, val in matchedRule.Comments {
+			comments .= val "`n"
+		}
+		
+		conditions := ""
+		rarities := ["Normal", "Magic", "Rare", "Unique"]
+		For key, val in matchedRule.Conditions {
+			If (val.operator) {
+				cLine := val.name
+				If (val.name = "Rarity") {				
+					cLine .= " " val.operator " " rarities[val.value]
+				} Else {
+					cLine .= " " val.operator " " val.value	
+				}				
+			}
+			Else {
+				cLine := val.name ": "
+				indent := StrLen(cLine)
+				count := 0
+				For k, v in val.values {
+					cLine .= """" v """"
+					
+					count++
+					If (count = 5) {
+						cLine .= "`n" StrPad("", indent)
+						count := 0
+					} Else {
+						cLine .= ", "
+					}
+				}
+			}
+			
+			conditions .= cLine "`n" 
+		}
+		conditions := RegExReplace(Trim(conditions), "i),(\n|\r|\s)+?$")
 
-	Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%"
+		line := "--------------------------------------------"
+		tt := "Loaded Item Filter: """ filterName """`n`n"
+		tt .= "Comments:" "`n" line "`n" 
+		tt .= comments "`n"
+		tt .= "Matching conditions:" "`n" line "`n" 
+		tt .= conditions
+		
+		ShowToolTip(tt)	
+	}
+	
+	MouseGetPos, CurrX, CurrY
+	
+	If (advanced) {
+		Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%" "1"	
+	} Else {
+		Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%" 
+	}
+	
 }
 
 CompareNumValues(num1, num2, operator = "=") {

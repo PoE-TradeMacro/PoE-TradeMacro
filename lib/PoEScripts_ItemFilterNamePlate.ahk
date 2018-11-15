@@ -9,6 +9,7 @@ fontColor 	= %5%
 fontSize		= %6%
 mouseX		= %7%
 mouseY		= %8%
+advanced		= %9%
 
 ;Define window criteria for the regular and steam version, for later use at the very end of the script. This needs to be done early, in the "auto-execute section".
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile.exe
@@ -27,6 +28,7 @@ global winWidth := 0
 global winHeight := 0
 global mousePosX := mouseX
 global mousePosY := mouseY
+global advancedPreview := advanced
 GuiMargin := 2
 global borderWidth := 1
 
@@ -195,8 +197,14 @@ Loop, 3 {
 	}
 }
 
-; automatically close the windows after 6 seconds
-SetTimer, CloseWindows, 4000
+If (advancedPreview) {
+	; automatically close the windows after 20 seconds
+	SetTimer, CloseWindows, 20000	
+} Else {
+	; automatically close the windows after 4 seconds
+	SetTimer, CloseWindows, 4000
+}
+
 
 Return 
 
