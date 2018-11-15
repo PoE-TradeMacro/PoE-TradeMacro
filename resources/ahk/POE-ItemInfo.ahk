@@ -10495,7 +10495,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 	{
 		Global Item, Opts, Globals, ItemData
 
-		ClipBoardTemp := Clipboard
+		ClipBoardTemp := ClipboardAll
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 		
 		scancode_c := Globals.Get("ScanCodes").c
@@ -10717,7 +10717,7 @@ AdvancedItemInfoExt() {
 	{
 		Global Item, Opts, Globals, ItemData
 
-		ClipBoardTemp := Clipboard
+		ClipBoardTemp := ClipboardAll
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
@@ -10744,7 +10744,7 @@ OpenItemOnPoEAntiquary() {
 	{
 		Global Item, Opts, Globals, ItemData
 
-		ClipBoardTemp := Clipboard
+		ClipBoardTemp := ClipboardAll
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
@@ -10934,7 +10934,7 @@ LookUpAffixes() {
 	{
 		Global Item, Opts, Globals, ItemData
 
-		ClipBoardTemp := Clipboard
+		ClipBoardTemp := ClipboardAll
 		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
 
 		Clipboard :=
@@ -12341,7 +12341,7 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 
 		line := "--------------------------------------------"
 		tt := "Loaded Item Filter: """ filterName """`n`n"
-		tt .= "Comments:" "`n" line "`n" 
+		tt .= "Inline comments:" "`n" line "`n" 
 		tt .= comments "`n"
 		tt .= "Matching conditions:" "`n" line "`n" 
 		tt .= conditions
