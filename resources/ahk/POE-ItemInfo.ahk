@@ -11844,7 +11844,7 @@ ShowItemFilterFormatting(Item, advanced = false) {
 	search.ItemLevel := Item.Level
 	search.BaseType := [Item.BaseName]
 	search.HasExplicitMod :=					; HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
-	search.Identified := Item.IsUnidentified
+	search.Identified := Item.IsUnidentified ? 0 : 1
 	search.Corrupted := Item.IsCorrupted
 	search.Quality := Item.Quality
 	search.Sockets := Item.Sockets	
@@ -11959,6 +11959,18 @@ ShowItemFilterFormatting(Item, advanced = false) {
 		}		
 	}	
 	
+	search.HasExplicitMod := []
+	; works only for magic items
+	If (Item.RarityLevel = 2) {
+		RegExMatch(Item.Name, "i)(.*)?" Item.BaseName "(.*)?", nameParts)
+		If (StrLen(nameParts1)) {
+			search.HasExplicitMod.push(Trim(nameParts1))
+		}
+		If (StrLen(nameParts2)) {
+			search.HasExplicitMod.push(Trim(nameParts2))
+		}
+	}
+	
 	search.SetBackGroundColor	:= GetItemDefaultColor(Item, "BackGround")
 	search.SetBorderColor		:= GetItemDefaultColor(Item, "Border")
 	search.SetTextColor			:= GetItemDefaultColor(Item, "Text")
@@ -11974,8 +11986,7 @@ ShowItemFilterFormatting(Item, advanced = false) {
 		_line := Item.BaseName
 		search.LabelLines.push(_line)
 	}	
-	
-	;debugprintarray(Item)
+
 	ParseItemLootFilter(filterFile, search, parsingNeeded, advanced) 
 }
 
@@ -12344,7 +12355,9 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 		tt .= "Inline comments:" "`n" line "`n" 
 		tt .= comments "`n"
 		tt .= "Matching conditions:" "`n" line "`n" 
-		tt .= conditions
+		tt .= conditions "`n`n"
+		tt .= "  Disclaimer: Matching explicit mods is only possible for magic items. In rare" "`n"
+		tt .= "              cases this can cause a wrong match, depending on the used filter."
 		
 		ShowToolTip(tt)	
 	}
