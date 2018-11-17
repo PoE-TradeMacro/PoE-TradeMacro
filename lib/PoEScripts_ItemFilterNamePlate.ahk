@@ -11,13 +11,13 @@ mouseX		= %7%
 mouseY		= %8%
 advanced		= %9%
 
-;Define window criteria for the regular and steam version, for later use at the very end of the script. This needs to be done early, in the "auto-execute section".
+/*
+	Define window criteria for the regular and steam version, for later use at the very end of the script. This needs to be done early, in the "auto-execute section".
+	*/
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile.exe
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExileSteam.exe
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64.exe
 GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExile_x64Steam.exe
-
-;msgbox % itemName "`n" itemBase "`n" bgColor  "`n" borderColor "`n" fontColor "`n" fontSize
 
 global itemText := itemName "`n" itemBase
 global appAHKGroup := "PoEWindowGroup"
@@ -37,11 +37,13 @@ If (not StrLen(itemText)) {
 }
 
 /*
-	font / text calculations
-*/
+	Create a custom font in the case that "Fontin SmallCaps" is not installed on the users system.
+	Calculate text dimensions based on font styles (size, font face) and text contents.
+	Parse font color (transparency defaults to about 235 when no value is given).
+	*/
 fC	:= StrSplit(fontColor, " ")
 fClr	:= rgbToRGBHex(fC[1], fC[2], fC[3])
-fC[4] := fC[4] ? fC[4] : 235	; Transparency defaults to about 235 when no value is given
+fC[4] := fC[4] ? fC[4] : 235				
 fS	:= Round(fontSize / 2.5)
 
 ; Load font from file, without installation
@@ -86,24 +88,29 @@ Loop, Parse, itemText, `n, `r
 width += 5
 sHeight := size.H
 
-/*
-	calcs end
+	/*
+	Text calculations are done.
 */
 
-; background
+/*
+	Parse border and background colors (transparency defaults to about 235 when no value is given).
+	*/
 bgC	:= StrSplit(bgColor, " ")
 bgClr:= rgbToRGBHex(bgC[1], bgC[2], bgC[3])
-bgC[4] := bgC[4] ? bgC[4] : 235	; Transparency defaults to about 235 when no value is given
+bgC[4] := bgC[4] ? bgC[4] : 235
 
-; border
 bC	:= StrSplit(borderColor, " ")
 bClr	:= rgbToRGBHex(bC[1], bC[2], bC[3])
-bC[4] := bC[4] ? bC[4] : 235	; Transparency defaults to about 235 when no value is given
+bC[4] := bC[4] ? bC[4] : 235
 
-; Loop 1 = background
-; Loop 2 = border
-; Loop 3 = text
-
+/*
+	Create three seperate windows for 
+	1. background 
+	2. border 
+	3. text
+	
+	Because of the different transparencies this is neccessary.
+	*/
 winHwnds := []
 Loop, 3 {
 	GuiName := "ItemNamePlate"
@@ -121,7 +128,7 @@ Loop, 3 {
 
 	/*
 		leave emtpy in some loops, just placeholders for autosizing
-	*/
+		*/
 	If (A_Index = 3) {
 		text1 := itemName
 		text2 := itemBase
@@ -173,6 +180,25 @@ bwWidth := winWidth + (borderWidth * 2)
 bwHeight := winHeight + (borderWidth * 2)
 CheckAndCorrectWindowPosition(winHwnds[2], borderWidth, xPos, yPos, bwWidth, bwHeight)
 
+/*
+	Move/resize all windows to their final position/dimensions (layer them on top of each other).
+	*/
+Loop, 3 {
+	TTHwnd := winHwnds[A_Index]
+	Gui, +Lastfound
+	If (A_Index = 1) {
+		WinMove, ahk_id %TTHwnd%, , xPos + borderWidth, yPos + borderWidth, 
+	} Else If (A_Index = 2) {		
+		; add a border to the window, has to be done after auto-resizing the window
+		GuiAddBorder(bClr, borderWidth, bwWidth, bwHeight, A_Index, TTHWnd)
+		WinMove, ahk_id %TTHwnd%, , xPos, yPos, bwWidth, bwHeight  
+	} Else If (A_Index = 3) {
+		WinMove, ahk_id %TTHwnd%, , xPos + borderWidth, yPos + borderWidth, 
+	}
+}
+/*
+	Make all windows visible again after moving/resizing them, otherwise they can appear at different times,  causing "flickering".
+	*/
 Loop, 3 {
 	TTHwnd := winHwnds[A_Index]
 	; make windows visible again
@@ -180,23 +206,20 @@ Loop, 3 {
 	If (A_Index = 1) {
 		bgTrans := bgC[4]
 		WinSet, Transparent, %bgTrans%, ahk_id %TTHWnd%
-		WinMove, ahk_id %TTHwnd%, , xPos + borderWidth, yPos + borderWidth, 
 	} Else If (A_Index = 2) {
 		bTrans := bc[4]
 		WinSet, Transparent, %bTrans%, ahk_id %TTHWnd%
 		WinSet, TransColor, %bgClr% 255, ahk_id %TTHWnd%
-		
-		; add a border to the window, has to be done after auto-resizing the window
-		GuiAddBorder(bClr, borderWidth, bwWidth, bwHeight, A_Index, TTHWnd)
-		WinMove, ahk_id %TTHwnd%, , xPos, yPos, bwWidth, bwHeight  
 	} Else If (A_Index = 3) {
 		fTrans := fC[4]
 		WinSet, Transparent, %fTrans%, ahk_id %TTHWnd%
 		WinSet, TransColor, %bgClr% 255, ahk_id %TTHWnd%
-		WinMove, ahk_id %TTHwnd%, , xPos + borderWidth, yPos + borderWidth, 
 	}
 }
 
+/*
+	Make sure that the overlay gets closed after some time, although the calling script is able to kill it, too. 
+	*/
 If (advancedPreview) {
 	; automatically close the windows after 20 seconds
 	SetTimer, CloseWindows, 20000	
@@ -204,7 +227,6 @@ If (advancedPreview) {
 	; automatically close the windows after 4 seconds
 	SetTimer, CloseWindows, 4000
 }
-
 
 Return 
 
