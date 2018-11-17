@@ -615,15 +615,15 @@ OpenUserDirFile(Filename)
 
 OpenUserSettingsFolder(ProjectName, Dir = "")
 {
-    If (!StrLen(Dir)) {
-        Dir := userDirectory
-    }
+	If (!StrLen(Dir)) {
+		Dir := userDirectory
+	}
 
-    If (!InStr(FileExist(Dir), "D")) {
-        FileCreateDir, %Dir%
-    }
-    Run, Explorer %Dir%
-    return
+	If (!InStr(FileExist(Dir), "D")) {
+		FileCreateDir, %Dir%
+	}
+	Run, Explorer %Dir%
+	return
 }
 
 ; Function that checks item type name against entries
@@ -6947,7 +6947,6 @@ ParseClipBoardChanges(debug = false)
 	}
 	
 	ShowToolTip(ParsedData, false, Opts.GDIConditionalColors)
-	ShowItemFilterFormatting(Item)
 }
 
 AddLogEntry(ParsedData, RawData) {
