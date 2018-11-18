@@ -88,10 +88,6 @@ Loop, Parse, itemText, `n, `r
 width += 5
 sHeight := size.H
 
-	/*
-	Text calculations are done.
-*/
-
 /*
 	Parse border and background colors (transparency defaults to about 235 when no value is given).
 	*/
