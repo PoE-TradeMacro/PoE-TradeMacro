@@ -1533,7 +1533,7 @@ TradeFunc_StartSplashScreen() {
 	"Preparing GPU to mine Azurite...",  "Loading spell block... 3%... aborting...", "Exploring reddit's first infinite salt mine...", "Awakening the balrogs...", 
 	"Sending the dark elves into some arc delves..."]
 	*/
-	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app...", ""]
+	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app...", "Hunting some old friends..."]
 	
 	Random, randomNum, 1, initArray.MaxIndex()
 	SplashTextOn, 300, 20, PoE-TradeMacro, % initArray[randomNum]
