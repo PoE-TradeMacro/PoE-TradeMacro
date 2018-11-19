@@ -3960,7 +3960,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 			Gui, PredictedPricing:Add, Text, x30 w350 y+4 BackgroundTrans, % _line	
 		}		
 	}
-	
+		
 	; browser url
 	_url := data.added.browserUrl
 	Gui, PredictedPricing:Add, Link, x245 y+12 cBlue BackgroundTrans, <a href="%_url%">Open on poeprices.info</a>
@@ -4008,6 +4008,29 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	ControlFocus, Send && Close, Predicted Item Pricing
 }
 
+HandleGuiControlSetFocus( p_w, p_l, p_m, p_hw ) {
+	global
+	local lastControl
+
+	; EN_KILLFOCUS = 0x0200
+	; EN_SETFOCUS = 0x0100
+	If ( p_w & 0x1000000 and TradeOpts.IncludeSearchParamByFocus)
+	{
+		Gui, SelectModsGui:Submit, NoHide
+		If (WinActive(ahk_group SelectModsGui)) {
+			GuiControlGet, lastControl, Name, % p_l
+
+			RegExMatch(lastControl, "i)(TradeAdvancedMod|TradeAdvancedStat).*(\d+)$", match)
+			If (RegExMatch(match1, "i)TradeAdvancedMod")) {			
+				GuiControl,, TradeAdvancedSelected%match2% , 1		
+			}
+			Else If (RegExMatch(match1, "i)TradeAdvancedStat")) {			
+				GuiControl,, TradeAdvancedStatSelected%match2% , 1		
+			}			
+		}		
+	}
+}
+
 ; Open Gui window to show the items variable mods, select the ones that should be used in the search and set their min/max values
 TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = "", ChangedImplicit = "") {
 	;https://autohotkey.com/board/topic/9715-positioning-of-controls-a-cheat-sheet/
@@ -4024,8 +4047,18 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 
 	ValueRangeMin := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMin : TradeOpts.AdvancedSearchModValueRangeMin / 2
 	ValueRangeMax := advItem.IsUnique ? TradeOpts.AdvancedSearchModValueRangeMax : TradeOpts.AdvancedSearchModValueRangeMax / 2
-
+	
+	Gui, +LastFound
+	hw_gui := WinExist()	
+	
 	Gui, SelectModsGui:Destroy
+
+	/*
+		"Dummy" edit field which gets focus on creation.
+		"Real" edit fields trigger on SetFocus, which checks the corresponding checkbox, this should only happen via user interaction.
+		*/
+	Gui, SelectModsGui:Add, Edit, x0 y0 w0 h0,	
+	
 	Gui, SelectModsGui:Color, ffffff, ffffff
 	Gui, SelectModsGui:Add, Text, x10 y12, Percentage to pre-calculate min/max values (halved for non-unique items):
 	Gui, SelectModsGui:Add, Text, x+5 yp+0 cGreen, % ValueRangeMin "`% / " ValueRangeMax "`%"
@@ -4039,48 +4072,46 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	/*
 		Add item "nameplate" including sockets and links
 		*/
-		
-	If (true) {
-		itemName := advItem.name
-		itemType := advItem.BaseName
-		If (advItem.Rarity = 1) {
-			iPic 	:= "bg-normal"
-			tColor	:= "cc8c8c8"
-		} Else If (advItem.Rarity = 2) {
-			iPic 	:= "bg-magic"
-			tColor	:= "c8787fe"
-		} Else If (advItem.Rarity = 3) {
-			iPic 	:= "bg-rare"
-			tColor	:= "cfefe76"
-		} Else If (advItem.isUnique) {
-			iPic 	:= "bg-unique"
-			tColor	:= "cAF5F1C"
-		}
-		
-		image := A_ScriptDir "\resources\images\" iPic ".png"
-		If (FileExist(image)) {
-			Gui, SelectModsGui:Add, Picture, w800 h30 x0 yp+20, %image%
-		}		
-		Gui, SelectModsGui:Add, Text, x14 yp+9 %tColor% BackgroundTrans, %itemName%
-		If (advItem.Rarity > 2 or advItem.isUnique) {
-			Gui, SelectModsGui:Add, Text, x14 yp+0 x+5 cc8c8c8 BackgroundTrans, %itemType%
-		}
-		If (advItem.isRelic) {
-			Gui, SelectModsGui:Add, Text, x+10 yp+0 cGreen BackgroundTrans, Relic
-		}
-		If (advItem.isCorrupted) {
-			Gui, SelectModsGui:Add, Text, x+10 yp+0 cD20000 BackgroundTrans, (Corrupted)
-		}
-		If (advItem.maxSockets > 0) {
-			tLinksSockets := "S (" Sockets "/" advItem.maxSockets ")"
-			If (advItem.maxSockets > 1) {
-				tLinksSockets .= " - " "L (" Links "/" advItem.maxSockets ")"
-			}
-			Gui, SelectModsGui:Add, Text, x+10 yp+0 cc8c8c8 BackgroundTrans, %tLinksSockets%
-		}
 
-		Gui, SelectModsGui:Add, Text, x0 w800 yp+13 cBlack BackgroundTrans, %line%
+	itemName := advItem.name
+	itemType := advItem.BaseName
+	If (advItem.Rarity = 1) {
+		iPic 	:= "bg-normal"
+		tColor	:= "cc8c8c8"
+	} Else If (advItem.Rarity = 2) {
+		iPic 	:= "bg-magic"
+		tColor	:= "c8787fe"
+	} Else If (advItem.Rarity = 3) {
+		iPic 	:= "bg-rare"
+		tColor	:= "cfefe76"
+	} Else If (advItem.isUnique) {
+		iPic 	:= "bg-unique"
+		tColor	:= "cAF5F1C"
 	}
+	
+	image := A_ScriptDir "\resources\images\" iPic ".png"
+	If (FileExist(image)) {
+		Gui, SelectModsGui:Add, Picture, w800 h30 x0 yp+20, %image%
+	}		
+	Gui, SelectModsGui:Add, Text, x14 yp+9 %tColor% BackgroundTrans, %itemName%
+	If (advItem.Rarity > 2 or advItem.isUnique) {
+		Gui, SelectModsGui:Add, Text, x14 yp+0 x+5 cc8c8c8 BackgroundTrans, %itemType%
+	}
+	If (advItem.isRelic) {
+		Gui, SelectModsGui:Add, Text, x+10 yp+0 cGreen BackgroundTrans, Relic
+	}
+	If (advItem.isCorrupted) {
+		Gui, SelectModsGui:Add, Text, x+10 yp+0 cD20000 BackgroundTrans, (Corrupted)
+	}
+	If (advItem.maxSockets > 0) {
+		tLinksSockets := "S (" Sockets "/" advItem.maxSockets ")"
+		If (advItem.maxSockets > 1) {
+			tLinksSockets .= " - " "L (" Links "/" advItem.maxSockets ")"
+		}
+		Gui, SelectModsGui:Add, Text, x+10 yp+0 cc8c8c8 BackgroundTrans, %tLinksSockets%
+	}
+
+	Gui, SelectModsGui:Add, Text, x0 w800 yp+13 cBlack BackgroundTrans, %line%
 
 	ValueRangeMin	:= ValueRangeMin / 100
 	ValueRangeMax	:= ValueRangeMax / 100
@@ -4142,7 +4173,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	/*
 		add defense stats
 		*/
-		
+
 	j := 1
 	For i, stat in Stats.Defense {
 		If (stat.value) {
@@ -4468,9 +4499,11 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color% vTradeAdvancedModName%index%			, % isPseudo ? "(pseudo) " . displayName : displayName
 		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 Disabled%state% 	, % modValueMin
+		DllCall( "FindWindowEx", "uint", hw_gui, "uint", 0, "str", "Edit", "uint", 0 )
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen                  		 				, % (advItem.mods[A_Index].ranges[1]) ? minLabelFirst : ""
 		Gui, SelectModsGui:Add, Text, x+10 yp+0       w45 r1     		                         		, % TradeUtils.ZeroTrim(modValue)
 		Gui, SelectModsGui:Add, Edit, x+10 yp-3       w40 vTradeAdvancedModMax%index% r1 Disabled%state% 	, % modValueMax
+		DllCall( "FindWindowEx", "uint", hw_gui, "uint", 0, "str", "Edit", "uint", 0 )
 		Gui, SelectModsGui:Add, Text, x+5  yp+3       w45 cGreen 			                       		, % (advItem.mods[A_Index].ranges[1]) ? maxLabelFirst : ""
 		checkEnabled := ErrorMsg ? 0 : 1
 		

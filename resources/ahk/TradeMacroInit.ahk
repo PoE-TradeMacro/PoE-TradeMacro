@@ -159,6 +159,12 @@ If (_updateConfigWrite) {
 	; some value needs to be written to config because it was invalid and was therefore changed
 	WriteTradeConfig()
 }
+
+/*
+	Triggers when an edit field on the advanced search gets focus.
+*/
+OnMessage( 0x111, "HandleGuiControlSetFocus" )
+
 TradeFunc_StopSplashScreen()
 
 ; ----------------------------------------------------------- Functions ----------------------------------------------------------------
@@ -683,8 +689,13 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("Use feedback Gui.", "x482 yp+0 w120 h20", TradeOpts.UsePredictedItemPricingGui, "UsePredictedItemPricingGui", "UsePredictedItemPricingGuiH")
 	AddToolTip(UsePredictedItemPricingGuiH, "Use a Gui instead of the default tooltip to display results.`nYou can send some feedback to improve this feature.")
 
+	; option group start
+	GuiAddCheckbox("Include search parameter via edit field focus.", "x337 yp+25 w280 h20", TradeOpts.IncludeSearchParamByFocus, "IncludeSearchParamByFocus", "IncludeSearchParamByFocusH")
+	AddToolTip(IncludeSearchParamByFocusH, "Checks a search parameters (mod/stat line) checkbox to include it in the`nadvanced search when any of its edit fields gets focus.")
+
+
 	; header
-	GuiAddText("Pre-Select Options (Advanced Search)", "x337 yp+43 w280 h20 0x0100 cDA4F49", "", "")
+	GuiAddText("Pre-Select Options (Advanced Search)", "x337 yp+35 w280 h20 0x0100 cDA4F49", "", "")
 	GuiAddText("-------------------------------------------------------------", "x337 yp+6 w280 h20 0x0100 cDA4F49", "", "")
 
 	; option group start

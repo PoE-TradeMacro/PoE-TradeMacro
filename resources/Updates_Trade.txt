@@ -1,5 +1,9 @@
 The following is a list of what has been updated, starting with 1.1.0
 
+2.11.2
+================================================================================================
+* Advanced search: Added an option to include any search parameter (mod/stat line) to the search simply by focusing any of its edit fields. Enabled by default.
+
 2.11.1
 ================================================================================================
 * Removed the hotkey to open an item on pathof.info since it's outdated and kind of obsolete with PoE's advanced mod descriptions.

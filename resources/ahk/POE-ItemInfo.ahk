@@ -7163,8 +7163,7 @@ AssembleDamageDetails(FullItemData)
 		Q20Dps := Q20Dps + EleDps + ChaosDps	
 	}
 	
-	If ( MainHEleDps > 0 or OffHEleDps > 0 or MainHChaosDps > 0 or OffHChaosDps > 0 )
-	{
+	If ( MainHEleDps > 0 or OffHEleDps > 0 or MainHChaosDps > 0 or OffHChaosDps > 0 ) {
 		MainH_OffH_Display	:= true
 		TotalMainHEleDps	:= MainHEleDps + EleDps
 		TotalOffHEleDps	:= OffHEleDps + EleDps
