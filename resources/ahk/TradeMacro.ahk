@@ -482,6 +482,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		preparedItem.BaseName	:= Item.BaseName
 		preparedItem.Rarity		:= Item.RarityLevel
 		preparedItem.BeastData	:= Item.BeastData
+		preparedItem.IsCorrupted	:= Item.IsCorrupted
+		preparedItem.IsJewel	:= Item.IsJewel
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
@@ -706,6 +708,12 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 		If (s.onlineOverride) {
 			RequestParams.online := ""
+		}
+		
+		If (s.corruptedOverride) {
+			RequestParams.corrupted := "1"
+		} Else {
+			RequestParams.corrupted := "0"
 		}
 		
 		; special bases (elder/shaper)
@@ -1018,7 +1026,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	/*
 		handle corruption
 		*/
-	If (Item.IsCorrupted and TradeOpts.CorruptedOverride and not Item.IsDivinationCard) {
+		
+	If (Item.IsCorrupted and isAdvancedPriceCheckRedirect and RequestParams.corrupted = "0" and Item.IsJewel) {
+		RequestParams.corrupted := "0"
+	}
+	Else If (Item.IsCorrupted and TradeOpts.CorruptedOverride and not Item.IsDivinationCard) {
 		If (TradeOpts.Corrupted = "Either") {
 			RequestParams.corrupted := ""
 			Item.UsedInSearch.Corruption := "Either"
@@ -4640,6 +4652,13 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.specialBase) {
 		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 	}
+	
+	/*
+		corrupted state for jewels
+		*/
+	If (advItem.IsJewel and Item.IsCorrupted) {
+		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedCorruptedState Checked, % "Corrupted"
+	}
 
 	Item.UsedInSearch.SearchType := "Advanced"
 	; closes this window and starts the search
@@ -4807,6 +4826,7 @@ TradeFunc_ResetGUI() {
 	TradeAdvancedOverrideOnlineState	:=
 	TradeAdvancedUseAbyssalSockets	:=
 	TradeAdvancedAbyssalSockets		:=
+	TradeAdvancedSelectedCorruptedState:=
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
@@ -4870,6 +4890,7 @@ TradeFunc_HandleGuiSubmit() {
 	newItem.useBase			:= TradeAdvancedSelectedItemBase
 	newItem.useSpecialBase		:= TradeAdvancedSelectedSpecialBase
 	newItem.onlineOverride		:= TradeAdvancedOverrideOnlineState
+	newItem.corruptedOverride	:= TradeAdvancedSelectedCorruptedState
 	newItem.useAbyssalSockets 	:= TradeAdvancedUseAbyssalSockets
 	newItem.abyssalSockets		:= TradeAdvancedAbyssalSockets
 
