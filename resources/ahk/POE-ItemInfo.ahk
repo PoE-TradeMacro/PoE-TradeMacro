@@ -8701,7 +8701,24 @@ ModStringToObject(string, isImplicit) {
 		temp.values	:= values
 		; mods with negative values inputted in the value fields are not supported on poe.trade, so searching for "-1 maximum charges/frenzy charges" is not possible
 		; unless there is a mod "-# maximum charges"
-		s			:= RegExReplace(Matches[A_Index], "i)(-?)[.0-9]+", "$1#")
+		
+		; some values shouldn't be replaced because they are fixed, for example "#% chance to gain Onslaught for 4 seconds on Kill"
+		; regex, | delimited
+		exceptionsList := "recovered every 3 seconds|inflicted with this Weapon to deal 100% more Damage|with 30% reduced Movement Speed|chance to Recover 10% of Maximum Mana|"
+		exceptionsList .= "for 3 seconds|for 4 seconds|for 8 seconds|for 10 seconds|over 4 seconds|"
+		exceptionsList .= "per (10|12|15|16|50) (Strength|Dexterity|Intelligence)|"
+		exceptionsList .= "per 200 Accuracy Rating|if you have at least 500 Strength|per 1% Chance to Block Attack Damage|are at least 5 nearby Enemies|a total of 200 Mana"		
+		
+		RegExMatch(Matches[A_Index], "i)(" exceptionsList ")", exception) 
+		
+		s := RegExReplace(Matches[A_Index], "i)(-?)[.0-9]+", "$1#")
+		
+		; restore certain mod line parts if there are exceptions
+		If (exception) {
+			replacer_reg := RegExReplace(exception, "i)(-?)[.0-9]+", "(#)")
+			s := RegExReplace(s, "i)" replacer_reg "", exception)
+		}
+		
 		temp.name		:= RegExReplace(s, "i)# ?to ? #", "#", isRange)
 		temp.isVariable:= false
 		temp.type		:= (isImplicit and Matches.Length() <= 1) ? "implicit" : "explicit"
