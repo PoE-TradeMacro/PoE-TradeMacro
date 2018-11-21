@@ -596,11 +596,17 @@ CreateTradeSettingsUI()
 	*/
 
 	GuiAddGroupBox("[TradeMacro] Search", "x327 y35 w310 h625")
-
+	
+	; league section
 	GuiAddText("League:", "x337 yp+28 w160 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
-	AddToolTip(LblSearchLeagueH, "Defaults to ""Standard"" or ""TmpStandard"" If there is a`nTemp-League active at the time of script execution.`n`n""TmpStandard"" and ""TmpHardcore"" are automatically replaced`nwith their permanent counterparts If no Temp-League is active.")
+	AddToolTip(LblSearchLeagueH, """TmpStandard"" = current softcore challenge league.`n""TmpHardcore"" = current hardcore challenge league.`n`nDefaults are ""Standard"" and ""TempStandard"" depending on league availability.")
+	
+	GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-15 yp+0 w15 h-1 0x0100", "LeagueInfo", "LeagueInfoH", "")
+	
 	LeagueList := TradeFunc_GetDelimitedLeagueList()
 	GuiAddDropDownList(LeagueList, "x+10 yp-4", TradeOpts.SearchLeague, "SearchLeague", "SearchLeagueH")
+	AddToolTip(SearchLeagueH, """TmpStandard"" = current softcore challenge league.`n""TmpHardcore"" = current hardcore challenge league.`n`nDefaults are ""Standard"" and ""TempStandard"" depending on league availability.")
+	; league section end
 
 	GuiAddText("Account Name:", "x337 yp+34 w160 h20 0x0100", "LblAccountName", "LblAccountNameH")
 	AddToolTip(LblAccountNameH, "Your Account Name used to check your item's age.")

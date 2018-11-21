@@ -9517,6 +9517,11 @@ GuiAdd(ControlType, Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabe
 	Gui, %GuiName%, %ControlType%, %PositionInfo% %av% %al% %ah% %Options%, %Contents%
 }
 
+GuiAddPicture(Contents, PositionInfo, AssocVar="", AssocHwnd="", AssocLabel="", Options="", GuiName="")
+{
+	GuiAdd("Picture", Contents, PositionInfo, AssocVar, AssocHwnd, AssocLabel, Options, GuiName)
+}
+
 GuiAddListView(ColumnHeaders, PositionInfo, AssocVar="", AssocHwnd="", AssocLabel="", Options="", GuiName="")
 {	
 	GuiAdd("ListView", ColumnHeaders, PositionInfo, AssocVar, AssocHwnd, AssocLabel, Options, GuiName)
