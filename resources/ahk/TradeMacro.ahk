@@ -168,7 +168,11 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 		UrlPage := ""
 		If (TradeOpts.WikiAlternative) {
 			; uses poedb.tw
-			UrlPage := "item.php?n="
+			If (Item.IsUnique) {
+				UrlPage := "unique.php?n="
+			} Else {
+				UrlPage := "item.php?n="
+			}
 			
 			If (Item.IsUnique or Item.IsGem or Item.IsDivinationCard or Item.IsCurrency) {
 				UrlAffix := Item.Name
