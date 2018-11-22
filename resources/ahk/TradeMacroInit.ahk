@@ -125,7 +125,7 @@ TradeFunc_CheckIfCloudFlareBypassNeeded()
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 Sleep, 200
 ReadTradeConfig("", "config_trade.ini", _updateConfigWrite)
-TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[SearchLeague])
+TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
 
 ; set this variable to skip the update check in "PoE-ItemInfo.ahk"
 SkipItemInfoUpdateCall := 1
@@ -235,8 +235,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	oldAltCurrencySearch := TradeOpts.AlternativeCurrencySearch
 
 	UpdateOldTradeOptsFromVars()
-
-	TradeOpts.SearchLeague := TradeFunc_CheckIfLeagueIsActive(TradeOpts.SearchLeague)
+	TradeOpts.SearchLeague := TradeFunc_CheckIfLeagueIsActive(TradeOpts.SearchLeague, "2")
 	oldLeagueName := TradeGlobals.Get("LeagueName")
 	newLeagueName := TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague]
 	TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
@@ -343,14 +342,21 @@ CreateDefaultTradeConfig() {
 	WriteTradeConfig(path)
 }
 
-TradeFunc_CheckIfLeagueIsActive(LeagueName) {
+TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 	; Check if league from Ini is set to an inactive league and change it to the corresponding active one, for example tmpstandard to standard
 	; Leagues not supported with any API (beta leagues) and events (some races and SSF events) are being removed while reading the config when they are not supported by poe.trade anymore
 	If (RegExMatch(LeagueName, "i)tmp(standard)|tmp(hardcore)", match) and not TradeGlobals.Get("TempLeagueIsRunning")) {
 		LeagueName := match1 ? "standard" : "hardcore"
-	} 
-	If (RegExMatch(LeagueName, "i)(hc|hardcore).*event|(event)", match) and not RegExMatch(LeagueName, "i)ssf") and not TradeGlobals.Get("EventLeagueIsRunning")) {
+	}
+	Else If (RegExMatch(LeagueName, "i)(hc|hardcore).*event|(event)", match) and not RegExMatch(LeagueName, "i)ssf") and not TradeGlobals.Get("EventLeagueIsRunning")) {
 		LeagueName := match1 ? "hardcore" : "standard"
+	} 
+	Else {
+		For key, val in TradeGlobals.Get("Leagues") {
+			If (val = LeagueName) {
+				LeagueName := key
+			}
+		}
 	}
 	
 	return LeagueName
