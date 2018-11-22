@@ -33,7 +33,7 @@ Never completely trust any price checking tool. Inform yourself about what this 
 
 |Shortcut|Description|
 |---	|---	|
-| `ctrl+c`      | See item info (via PoE-ItemInfo). 
+| `ctrl+c`      | Show your items loot filter highlighting
 | `ctrl+d`      | Search item on poe.trade.
 | `ctrl+alt+d`  | Advanced item search (select mods). 
 | `ctrl+i`      | Opens a text input where you can type an item name to search for.
