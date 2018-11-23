@@ -10334,11 +10334,18 @@ StdOutStream(sCmd, Callback = "") {
 	Return Isfunc( Callback ) ? %Callback%( "", 0 ) : sOutput
 }
 
-ReadConsoleOutputFromFile(command, fileName) {
+ReadConsoleOutputFromFile(command, fileName, ByRef error = "") {
 	file := "temp\" fileName
 	RunWait %comspec% /c "chcp 1251 /f >nul 2>&1 & %command% > %file%", , Hide
 	FileRead, io, %file%
-
+	
+	If (FileExist(file) and not StrLen(io)) {
+		error := "Output file is empty."
+	}
+	Else If (not FileExist(file)) {
+		error := "Output file does not exist."
+	}
+	
 	Return io
 }
 
@@ -10906,22 +10913,75 @@ AntiquaryGetType(Item) {
 }
 
 
-StringToBase64UriEncoded(stringIn, noUriEncode = false) {
-	stringBase64 := ""
+StringToBase64UriEncoded(stringIn, noUriEncode = false, ByRef errorMessage = "") {
 	FileDelete, %A_ScriptDir%\temp\itemText.txt
-	FileAppend, %stringIn%, %A_ScriptDir%\temp\itemText.txt, utf-8
-	command		:= "certutil -encode -f ""%cd%\temp\itemText.txt"" ""%cd%\temp\base64ItemText.txt"" & type ""%cd%\temp\base64ItemText.txt"""
-	stringBase64	:= ReadConsoleOutputFromFile(command, "encodeToBase64.txt")
-	stringBase64	:= Trim(RegExReplace(stringBase64, "i)-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|77u/", ""))
+	FileDelete, %A_ScriptDir%\temp\base64Itemtext.txt
+	FileDelete, %A_ScriptDir%\temp\encodeToBase64.txt
+	
+	encodeError1 := ""
+	encodeError2 := ""
+	stringBase64 := b64Encode(stringIn, encodeError1)
+	
+	If (not StrLen(stringBase64)) {
+		FileAppend, %stringIn%, %A_ScriptDir%\temp\itemText.txt, utf-8
+		command		:= "certutil -encode -f ""%cd%\temp\itemText.txt"" ""%cd%\temp\base64ItemText.txt"" & type ""%cd%\temp\base64ItemText.txt"""
+		stringBase64	:= ReadConsoleOutputFromFile(command, "encodeToBase64.txt", encodeError2)
+		stringBase64	:= Trim(RegExReplace(stringBase64, "i)-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|77u/", ""))
+	}
+
+	If (not StrLen(stringBase64)) {
+		errorMessage := ""
+		If (StrLen(encodeError1)) {
+			errorMessage .= encodeError1 " "
+		}
+		If (StrLen(encodeError2)) {
+			errorMessage .= "Encoding via certutil returned: " encodeError2
+		}
+	}
 	
 	If (not noUriEncode) {
 		stringBase64	:= UriEncode(stringBase64)
 		stringBase64	:= RegExReplace(stringBase64, "i)^(%0D)?(%0A)?|((%0D)?(%0A)?)+$", "")
 	} Else {
-		stringBase64 := RegExReplace(stringBase64, "i)\r|\n", "") 
-	}	
+		stringBase64 := RegExReplace(stringBase64, "i)\r|\n", "")
+	}
 	
 	Return stringBase64
+}
+
+/*
+	Base64 Encode / Decode a string (binary-to-text encoding)
+	https://github.com/jNizM/AHK_Scripts/blob/master/src/encoding_decoding/base64.ahk
+	
+	Alternative: https://github.com/cocobelgica/AutoHotkey-Util/blob/master/Base64.ahk
+*/
+b64Encode(string, ByRef error = "") {	
+	VarSetCapacity(bin, StrPut(string, "UTF-8")) && len := StrPut(string, &bin, "UTF-8") - 1 
+	If !(DllCall("crypt32\CryptBinaryToString", "ptr", &bin, "uint", len, "uint", 0x1, "ptr", 0, "uint*", size)) {
+		;throw Exception("CryptBinaryToString failed", -1)
+		error := "Exception (1) while encoding string to base64."
+	}	
+	VarSetCapacity(buf, size << 1, 0)
+	If !(DllCall("crypt32\CryptBinaryToString", "ptr", &bin, "uint", len, "uint", 0x1, "ptr", &buf, "uint*", size)) {
+		;throw Exception("CryptBinaryToString failed", -1)
+		error := "Exception (2) while encoding string to base64."
+	}
+	
+	If (not StrLen(Error)) {
+		Return StrGet(&buf)
+	} Else {
+		Return ""
+	}
+}
+
+b64Decode(string)
+{
+	If !(DllCall("crypt32\CryptStringToBinary", "ptr", &string, "uint", 0, "uint", 0x1, "ptr", 0, "uint*", size, "ptr", 0, "ptr", 0))
+		throw Exception("CryptStringToBinary failed", -1)
+	VarSetCapacity(buf, size, 0)
+	If !(DllCall("crypt32\CryptStringToBinary", "ptr", &string, "uint", 0, "uint", 0x1, "ptr", &buf, "uint*", size, "ptr", 0, "ptr", 0))
+		throw Exception("CryptStringToBinary failed", -1)
+	return StrGet(&buf, size, "UTF-8")
 }
 
 OpenWebPageWith(application, url) {

@@ -1931,7 +1931,8 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 
 TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	RawItemData := RegExReplace(RawItemData, "<<.*?>>|<.*?>")
-	EncodedItemData := StringToBase64UriEncoded(RawItemData, true)
+	encodingError := ""
+	EncodedItemData := StringToBase64UriEncoded(RawItemData, true, encodingError)
 	
 	postData 	:= "l=" UriEncode(TradeGlobals.Get("LeagueName")) "&i=" EncodedItemData
 	payLength	:= StrLen(postData)
@@ -1970,9 +1971,8 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	If (not StrLen(response)) {
 		responseObj.failed := "ERROR: Parsing response failed, empty response! "
 	}
-	
-	; temporary debug log
-	If (true) {
+
+	If (TradeOpts.Debug) {
 		arr := {}
 		arr.RawItemData := RawItemData
 		arr.EncodedItemata := EncodedItemData
@@ -1985,7 +1985,8 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	responseObj.added.league := TradeGlobals.Get("LeagueName")
 	responseObj.added.requestUrl := url "?" postData
 	responseObj.added.browserUrl := url "?" postData "&w=1"
-
+	responseObj.added.encodingError := encodingError
+	
 	Return responseObj
 }
 
