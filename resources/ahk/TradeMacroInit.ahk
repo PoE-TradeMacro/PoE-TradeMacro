@@ -1557,8 +1557,8 @@ TradeFunc_StartSplashScreen() {
 	"Sending the dark elves into some arc delves..."]
 	*/
 	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app..."
-		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to forcefully open some chests...", "Setting up lab carries for the other 99%...",
-		, "Helping Alva to discover the Jungle Hideout...", "Conning EngineerinEternity with the Atlas City Shuffle..."]
+		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%...",
+		, "Helping Alva to discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle..."]
 	
 	Random, randomNum, 1, initArray.MaxIndex()
 	SplashTextOn, 300, 20, PoE-TradeMacro, % initArray[randomNum]

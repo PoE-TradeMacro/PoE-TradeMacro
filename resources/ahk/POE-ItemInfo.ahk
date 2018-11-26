@@ -375,6 +375,7 @@ class Item_ {
 		This.IsShaperBase	:= False
 		This.IsAbyssJewel	:= False
 		This.IsBeast		:= False
+		This.IsHideoutObject:= False
 	}
 }
 Global Item := new Item_
@@ -7907,12 +7908,13 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	
 	; ItemData.Requirements := GetItemDataChunk(ItemDataText, "Requirements:")
 	; ParseRequirements(ItemData.Requirements, RequiredLevel, RequiredAttributes, RequiredAttributeValues)
-	
+
 	ParseItemName(ItemData.NamePlate, ItemName, ItemBaseName, "", ItemData)
 	If (Not ItemName)
 	{
 		return
 	}
+
 	Item.Name		:= ItemName
 	Item.BaseName	:= ItemBaseName
 	
@@ -7965,6 +7967,12 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		Item.BaseType := "Prophecy"
 		; ParseProphecy(ItemData, Difficulty)
 		; Item.DifficultyRestriction := Difficulty
+	}
+	
+	; Hideout doodad detection
+	If (InStr(ItemData.PartsLast, "Creates an object in your hideout"))
+	{
+		Item.IsHideoutObject := True
 	}
 	
 	; Beast detection
@@ -9854,7 +9862,7 @@ CreateSettingsUI()
 			; hotkey checkboxes (enable/disable)
 			HKCheckBoxID := "AM_" sectionName "_State"
 			GuiAddCheckbox(sectionName ":", "x17 yp+" chkBoxShiftY " w" chkBoxWidth " h20 0x0100", AM_Config[sectionName].State, HKCheckBoxID, HKCheckBoxID "H")
-			AddToolTip(%HKCheckBoxID%H, RegExReplace(AM_ConfigDefault[sectionName].Description, "i)(\(Default = .*\))", "`n$1"))	; read description from default config
+			AddToolTip(%HKCheckBoxID%H, RegExReplace(AM_ConfigDefault[sectionName].Description, "i)(\(Default = .*\))|\\n", "`n$1"))	; read description from default config
 			
 			For keyIndex, keyValue in StrSplit(AM_Config[sectionName].Hotkeys, ", ") {	
 				HotKeyID := "AM_" sectionName "_HotKeys_" keyIndex
@@ -9874,6 +9882,20 @@ CreateSettingsUI()
 						If (keyIndex = "Arg2") {
 							CheckBoxID := "AM_" sectionName "_Arg2"
 							GuiAddCheckbox("Leave search field.", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY, keyValue, CheckBoxID, CheckBoxID "H")
+						}
+						If (keyIndex = "Arg3") {
+							CheckBoxID := "AM_" sectionName "_Arg3"
+							GuiAddCheckbox("Enable hideout stash search.", "x+10 yp+0", keyValue, CheckBoxID, CheckBoxID "H")
+						}
+						If (keyIndex = "Arg4") {
+							EditID := "AM_" sectionName "_" keyIndex
+							GuiAddText("Decoration stash search field coordinates:  " "x=", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w270 h20 0x0100")
+							GuiAddEdit(keyValue, "x+0 yp-2 w40 h20", EditID)
+						}
+						If (keyIndex = "Arg5") {
+							EditID := "AM_" sectionName "_" keyIndex
+							GuiAddText("y=", "x+5 yp+2 w20 h20 0x0100")
+							GuiAddEdit(keyValue, "x+0 yp-2 w40 h20", EditID)
 						}
 					}
 					Else {
@@ -10518,8 +10540,8 @@ CloseScripts() {
 	ExitApp
 }
 
-HighlightItems(broadTerms = false, leaveSearchField = true) {
-	; Highlights items via stash search (also in vendor search)
+HighlightItems(broadTerms = false, leaveSearchField = true, focusHideoutFilter = false, hideoutFieldX = 0, hideoutFieldY = 0) {
+	; Highlights items via stash search (also in vendor and hideout search)
 	IfWinActive, ahk_group PoEWindowGrp
 	{
 		Global Item, Opts, Globals, ItemData
@@ -10532,7 +10554,7 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 		scancode_a := Globals.Get("ScanCodes").a
 		scancode_f := Globals.Get("ScanCodes").f
 		scancode_enter := Globals.Get("ScanCodes").enter
-		
+
 		; Parse the clipboard contents twice.
 		; If the clipboard contains valid item data before we send ctrl + c to try and parse an item via ctrl + f then don't restore that clipboard data later on.
 		; This prevents the highlighting function to fill search fields with data from previous item parsings/manual data copying since
@@ -10705,35 +10727,62 @@ HighlightItems(broadTerms = false, leaveSearchField = true) {
 		}
 
 		If (terms.length() > 0) {
-			SendInput ^{%scancode_f%} ; sc021 = f
-			searchText =
-			For key, val in terms {
-				searchText = %searchText% "%val%"
+			focusHideoutFilter := true
+			If (Item.IsHideoutObject and focusHideoutFilter) {
+				MouseGetPos, currentX, currentY				
+				MouseClick, Left, %hideoutFieldX%, %hideoutFieldY%, 1, 0
+				Sleep, 50
+				MouseMove, %currentX%, %currentY%, 0
+				Sleep, 10
+				SendInput ^{%scancode_a%}
+			} Else {
+				SendInput ^{%scancode_f%} ; sc021 = f	
 			}
 
-			; the search field has a 50 character limit, we have to close the last term with a quotation mark
-			If (StrLen(searchText) > 50) {
-				newString := SubStr(searchText, 1, 50)
+			searchText = 
+			For key, val in terms {
+				If (not Item.IsHideoutObject) {
+					searchText = %searchText% "%val%"
+				} Else {
+					; hideout objects shouldn't use quotation marks
+					searchText = %searchText% %val%
+				}				
+			}
+
+			; search fields have character limits
+			; stash search field := 50 chars , we have to close the last term with a quotation mark
+			; hideout mtx search field := 23 chars	
+			charLimit := Item.IsHideoutObject ? 23 : 50
+	
+			If (StrLen(searchText) > charLimit) {
+				newString := SubStr(searchText, 1, charLimit)
+
 				temp := RegExReplace(newString, "i)""", Replacement = "", QuotationMarks)
 				; make sure we have an equal amount of quotation marks (all terms properly enclosed)
 				If (QuotationMarks&1) {
 					searchText := RegExReplace(newString, "i).$", """")
+				} Else {
+					searchText := newString
 				}
 			}
 
 			Clipboard := searchText
-			Sleep 10		
+	
+			Sleep 10
 			SendEvent ^{%scancode_v%}		; ctrl + v
-			If (leaveSearchField) {
-				SendInput {%scancode_enter%}	; enter
-			} Else {
-				SendInput ^{%scancode_a%}	; ctrl + a
+			
+			If (not (Item.IsHideoutObject and focusHideoutFilter)) {
+				If (leaveSearchField) {
+					SendInput {%scancode_enter%}	; enter
+				} Else {
+					SendInput ^{%scancode_a%}	; ctrl + a
+				}
 			}
 		} Else {
 			SendInput ^{%scancode_f%}		; send ctrl + f in case we don't have information to input
 		}
 
-		Sleep, 10
+		Sleep,  500
 		If (!dontRestoreClipboard) {
 			Clipboard := ClipBoardTemp
 		}

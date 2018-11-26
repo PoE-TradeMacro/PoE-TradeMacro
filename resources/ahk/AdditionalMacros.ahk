@@ -53,6 +53,9 @@ AM_AssignHotkeys:
 	global AM_ChannelName		:= AM_Config["JoinChannel"].Channel
 	global AM_HighlightArg1		:= AM_Config["HighlightItems"].Arg1
 	global AM_HighlightArg2		:= AM_Config["HighlightItems"].Arg2
+	global AM_HighlightArg3		:= AM_Config["HighlightItems"].Arg3
+	global AM_HighlightArg4		:= AM_Config["HighlightItems"].Arg4
+	global AM_HighlightArg5		:= AM_Config["HighlightItems"].Arg5
 	global AM_HighlightAltArg1	:= AM_Config["HighlightItemsAlt"].Arg1
 	global AM_HighlightAltArg2	:= AM_Config["HighlightItemsAlt"].Arg2
 	global AM_KeyToSCState		:= (TradeOpts.KeyToSCState != "") ? TradeOpts.KeyToSCState : AM_Config["General"].General_KeyToSCState
@@ -72,10 +75,11 @@ AM_Minimize_HKey:
 Return
 
 AM_HighlightItems_HKey:
-	HighlightItems(AM_HighlightArg1, AM_HighlightArg2)		; Ctrl+F fills search bars in the stash or vendor screens with the item's name or info you're hovering over.
-													; Function parameters, change if needed or wanted:
-													;	1. Use broader terms, default = false.
-													;	2. Leave the search field after pasting the search terms, default = true.
+	HighlightItems(AM_HighlightArg1, AM_HighlightArg2, AM_HighlightArg3, AM_HighlightArg4, AM_HighlightArg5)		
+							; Ctrl+F fills search bars in the stash or vendor screens with the item's name or info you're hovering over.
+							; Function parameters, change if needed or wanted:
+							;	1. Use broader terms, default = false.
+							;	2. Leave the search field after pasting the search terms, default = true.
 Return
 
 AM_HighlightItemsAlt_HKey:
