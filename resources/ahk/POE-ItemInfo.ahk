@@ -332,6 +332,7 @@ class Item_ {
 		This.Sockets		:= ""
 		This.AbyssalSockets	:= ""
 		This.SocketGroups	:= []
+		This.SocketString	:= ""
 		This.Links		:= ""
 		This.SubType		:= ""		
 		This.DifficultyRestriction := ""
@@ -339,6 +340,7 @@ class Item_ {
 		This.Charges		:= []
 		This.AreaMonsterLevelReq := []
 		This.BeastData 	:= {}
+		Item.GemColor		:= ""
 		
 		This.HasImplicit	:= False
 		This.HasEffect		:= False
@@ -1600,6 +1602,27 @@ ParseGemLevel(ItemDataText, PartialString="Level:")
 			Result := StrTrimWhitespace(ItemLevelParts2)
 			return Result
 		}
+	}
+}
+
+ParseGemColor(ItemDataText)
+{
+	RegExMatch(ItemDataText, "ims)Requirements.*?(Str\s?:\s?(\d+))", str)
+	RegExMatch(ItemDataText, "ims)Requirements.*?(Dex\s?:\s?(\d+))", dex)
+	RegExMatch(ItemDataText, "ims)Requirements.*?(Int\s?:\s?(\d+))", int)
+	
+	highestRequirement := ""
+	If (not str2 and not dex2 and not int2) {
+		Return "WHITE"
+	}
+	Else If (str2 > dex2 and str2 > int2) {
+		Return "RED"
+	}
+	Else If (dex2 > str2 and dex2 > int2) {
+		Return "GREEN"
+	}
+	Else If (int2 > dex2 and int2 > str2) {
+		Return "BLUE"
 	}
 }
 
@@ -7447,7 +7470,7 @@ ParseSockets(ItemDataText, ByRef AbyssalSockets)
 	return SocketsCount
 }
 
-ParseSocketGroups(ItemDataText)
+ParseSocketGroups(ItemDataText, ByRef RawSocketString = "")
 {
 	groups := []
 	Loop, Parse, ItemDataText, `n, `r
@@ -7457,6 +7480,7 @@ ParseSocketGroups(ItemDataText)
 			RegExMatch(A_LoopField, "i)Sockets:\s?(.*)", socketString)
 			
 			sockets := socketString1 " "	; add a space at the end for easier regex
+			RawSocketString := socketString1
 			If (StrLen(sockets)) {
 				Pos		:= 0
 				While Pos	:= RegExMatch(sockets, "i)(.*?)\s+", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
@@ -7469,6 +7493,7 @@ ParseSocketGroups(ItemDataText)
 			}
 		}
 	}
+
 	return groups
 }
 
@@ -7937,7 +7962,8 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	ItemData.Sockets	:= ParseSockets(ItemDataText, ItemAbyssalSockets)
 	Item.Sockets		:= ItemData.Sockets
 	Item.AbyssalSockets := ItemAbyssalSockets
-	Item.SocketGroups	:= ParseSocketGroups(ItemDataText) 
+	Item.SocketGroups	:= ParseSocketGroups(ItemDataText, ItemSocketString)
+	Item.SocketString	:= ItemSocketString
 
 	Item.Charges		:= ParseCharges(ItemData.Stats)
 
@@ -8004,6 +8030,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		RarityLevel	:= 0
 		Item.Level	:= ParseGemLevel(ItemDataText, "Level:")
+		Item.GemColor	:= ParseGemColor(ItemDataText)
 		ItemExperienceFlat := ""
 		Item.Experience:= ParseGemXP(ItemDataText, "Experience:", ItemExperienceFlat)
 		Item.ExperienceFlat := ItemExperienceFlat
@@ -8191,6 +8218,12 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		TT := TT . "`n" . Item.BaseName
 	}
 	
+	If (Item.IsGem) {			
+		If (Item.GemColor) {
+			TT := TT . "`nColor: " . Item.GemColor
+		}
+	}
+	
 	If (Item.IsCurrency)
 	{
 		TT := TT . "`n" . CurrencyDetails
@@ -8282,6 +8315,11 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 				TT := TT . Item.MaxSockets
 			}
 		}
+		
+		If (Item.SocketString) {			
+			TT := TT . "`n"
+			TT := TT . "Sockets:        " . Item.SocketString
+		}
 	}
 	
 	If (Item.IsWeapon)
@@ -8357,7 +8395,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	}
 	
 	If (Item.IsGem)
-	{
+	{		
 		If (gemQualityList[Item.Name] != "")
 		{
 			GemQualityDescription := gemQualityList[Item.Name]
@@ -9889,7 +9927,10 @@ CreateSettingsUI()
 						}
 						If (keyIndex = "Arg4") {
 							EditID := "AM_" sectionName "_" keyIndex
-							GuiAddText("Decoration stash search field coordinates:  " "x=", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w270 h20 0x0100")
+							GuiAddText("Decoration stash search field coordinates:  ", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w260 h20 0x0100", "LblHighlighting", "LblHighlightingH")
+							AddToolTip(LblHighlightingH, "Refers to the decoration stash on the right side`nof the screen, not the master vendor window.`n`nCoordinates are relative to the PoE game window and`nare neccessary to click into/focus the search field.")
+							GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-15 yp+0 w15 h-1 0x0100", "HighlightInfo", "HighlightH", "")
+							GuiAddText("x= ", "x+5 yp+0 w20 h20 0x0100")
 							GuiAddEdit(keyValue, "x+0 yp-2 w40 h20", EditID)
 						}
 						If (keyIndex = "Arg5") {
@@ -10728,7 +10769,8 @@ HighlightItems(broadTerms = false, leaveSearchField = true, focusHideoutFilter =
 
 		If (terms.length() > 0) {
 			focusHideoutFilter := true
-			If (Item.IsHideoutObject and focusHideoutFilter) {
+			If (Item.IsHideoutObject and focusHideoutFilter) {				
+				CoordMode, Mouse, Relative
 				MouseGetPos, currentX, currentY				
 				MouseClick, Left, %hideoutFieldX%, %hideoutFieldY%, 1, 0
 				Sleep, 50
