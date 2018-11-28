@@ -1634,7 +1634,7 @@ TradeFunc_CalculateQ20(base, affixFlat, affixPercent){
 }
 
 ; parse items dmg stats
-TradeFunc_ParseItemOffenseStats(Stats, mods) {
+TradeFunc_ParseItemOffenseStats(Stats, mods) {	
 	Global ItemData
 	iStats := {}
 	debugOutput :=
@@ -3309,11 +3309,11 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 				v.ranges[1][2] := Abs(v.ranges[1][1])
 				v.ranges[1][1] := (v.ranges[1][2] > 2) ? 1 : 0.1
 			}
+			v.IsUnknown := false
 			tempMods.push(v)
 			tempMods2.push(v)
 		}
 	}
-
 
 	For key, val in Affixes {
 		t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))		
@@ -3322,6 +3322,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		For k, v in tempMods {
 			n := TradeUtils.CleanUp(RegExReplace(v.name_orig, "i)-?[\d\.]+|-?\(.+?\)", "#"))
 			n := TradeUtils.CleanUp(n)
+
 			If (RegExMatch(n, "i)^(\+?" . t . ")$", match)) {
 				modFound := true
 			}
@@ -4188,7 +4189,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	modLengthMax	:= 0
 	modGroupBox	:= 0
 	Loop % advItem.mods.Length() {
-		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique)
+		invalidUnique := ((not advItem.mods[A_Index].isVariable and not advItem.hasVariant) and advItem.IsUnique and not advItem.mods[A_Index].isUnknown)
 		If (invalidUnique) {
 			continue
 		}
@@ -4235,7 +4236,15 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		line := line . "-"
 	}
 	Gui, SelectModsGui:Add, Text, x0 w700 yp+13, %line%
-
+	
+	hasUnknownMods := false
+	For k, v in advItem.mods {
+		If (v.isUnknown) {
+			hasUnknownMods := true
+			Break
+		}	
+	}	
+	
 	/*
 		add defense stats
 		*/
@@ -4246,7 +4255,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			xPosMin := modGroupBox + 25
 			yPosFirst := ( j = 1 ) ? 20 : 25
 
-			If (!stat.min or !stat.max or (stat.min = stat.max) and advItem.IsUnique) {
+			If (!stat.min or !stat.max or (stat.min = stat.max and (Stats.Defense.Quality <= 20 or hasUnknownMods)) and advItem.IsUnique) {
 				continue
 			}
 
@@ -4279,9 +4288,9 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 				statValueMax :=
 			}
 
-			minLabelFirst  := advItem.isUnique ? "(" Floor(statValueMin) : ""
+			minLabelFirst  := advItem.isUnique ? "(" Floor(stat.min) : ""
 			minLabelSecond := advItem.isUnique ? ")" : ""
-			maxLabelFirst  := advItem.isUnique ? "(" Floor(statValueMax) : ""
+			maxLabelFirst  := advItem.isUnique ? "(" Ceil(stat.max) : ""
 			maxLabelSecond := advItem.isUnique ? ")" : ""
 
 			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%							, % "(Total Q20) " stat.name
@@ -4306,13 +4315,13 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		add dmg stats
 		*/
 		
-	k := 1	
+	k := 1
 	For i, stat in Stats.Offense {
 		If (stat.value) {
 			xPosMin := modGroupBox + 25
 			yPosFirst := ( j = 1 ) ? 20 : 25
 
-			If (!stat.min or !stat.max or (stat.min == stat.max) and advItem.IsUnique) {
+			If (!stat.min or !stat.max or (stat.min == stat.max and (Stats.Offense.Quality <= 20 or hasUnknownMods)) and advItem.IsUnique) {
 				continue
 			}
 
@@ -4342,7 +4351,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 
 			minLabelFirst  := advItem.isUnique ? "(" Floor(stat.min) : ""
 			minLabelSecond := advItem.isUnique ? ")" : ""
-			maxLabelFirst  := advItem.isUnique ? "(" Floor(stat.max) : ""
+			maxLabelFirst  := advItem.isUnique ? "(" Ceil(stat.max) : ""
 			maxLabelSecond := advItem.isUnique ? ")" : ""
 
 			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%						  , % stat.name
@@ -4413,7 +4422,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Loop % advItem.mods.Length() {		
 		hidePseudo := advItem.mods[A_Index].hideForTradeMacro ? true : false
 		; allow non-variable mods if the item has variants to better identify the specific version/variant
-		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique not advItem.mods[A_Index].isUnknown)
+		invalidUnique := ((not advItem.mods[A_Index].isVariable and not advItem.hasVariant) and advItem.IsUnique and not advItem.mods[A_Index].isUnknown)
 		If (invalidUnique or hidePseudo or not StrLen(advItem.mods[A_Index].name)) {
 			continue
 		}
