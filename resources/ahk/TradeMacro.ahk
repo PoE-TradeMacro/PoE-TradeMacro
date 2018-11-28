@@ -4087,12 +4087,12 @@ HandleGuiControlSetFocus( p_w, p_l, p_m, p_hw ) {
 		If (WinActive(ahk_group SelectModsGui)) {
 			GuiControlGet, lastControl, Name, % p_l
 
-			RegExMatch(lastControl, "i)(TradeAdvancedMod|TradeAdvancedStat).*(\d+)$", match)
-			If (RegExMatch(match1, "i)TradeAdvancedMod")) {			
-				GuiControl,, TradeAdvancedSelected%match2% , 1		
+			RegExMatch(lastControl, "i)(TradeAdvancedMod|TradeAdvancedStat).*?(\d+)$", match)
+			If (RegExMatch(match1, "i)TradeAdvancedMod")) {
+				GuiControl,, TradeAdvancedSelected%match2% , 1
 			}
-			Else If (RegExMatch(match1, "i)TradeAdvancedStat")) {			
-				GuiControl,, TradeAdvancedStatSelected%match2% , 1		
+			Else If (RegExMatch(match1, "i)TradeAdvancedStat")) {
+				GuiControl,, TradeAdvancedStatSelected%match2% , 1
 			}			
 		}		
 	}
