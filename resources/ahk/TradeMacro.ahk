@@ -3265,30 +3265,56 @@ TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
 TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
-	tempMods	:= []
+	tempMods	:= []	
 
 	For k, v in Item.mods {
-		modFound := false
+		negativeToPositiveRange := false
+		; Mod can be 0 or negative since the range goes from negative to positive, example: ventors gamble.
+		; This means the mod can be missing from the item or change it's description from "increased" to reduced.
+		If (v.ranges[1][1] < 0 and v.ranges[1][2] > 0) {
+			negativeToPositiveRange := true
+		}		
+		
+		modFound := false 
+		negativeValue := false
 		For key, val in Affixes {
 			; remove negative sign also
 			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
 			n := TradeUtils.CleanUp(RegExReplace(v.name_orig, "i)-?[\d\.]+|-?\(.+?\)", "#"))
 			n := TradeUtils.CleanUp(n)
+			
 			; match with optional positive sign to match for example "-7% to cold resist" with "+#% to cold resist"
-			RegExMatch(n, "i)^(\+?" . t . ")$", match)
+			If (not negativeToPositiveRange) {
+				RegExMatch(n, "i)^(\+?" . t . ")$", match)	
+			} Else {
+				t2 := RegExReplace(t, "i)(reduced)", "(increased)")
+				RegExMatch(n, "i)^(\+?" . t2 . ")$", match)
+			}			
 
 			If (match) {
+				negativeValue := RegExMatch(t, "i)#%? reduced")
 				modFound := true
 			}
 		}
 
 		If (modFound) {
+			; Rewrite some values because poe.trade doesn't support "increased" mods with negative parameters.
+			; The solution is to use "reduced" instead, which requires changing the range values.
+			If (negativeToPositiveRange and negativeValue) {
+				v.name := RegExReplace(v.name, "i)(.*#%?) increased", "$1 reduced")
+				v.param := RegExReplace(v.param, "i)(.*#%?) increased", "$1 reduced")
+				
+				v.ranges[1][2] := Abs(v.ranges[1][1])
+				v.ranges[1][1] := (v.ranges[1][2] > 2) ? 1 : 0.1
+			}
 			tempMods.push(v)
+		} Else {
+			;msgbox % v
 		}
 	}
-	
-	Item.mods := tempMods
 
+
+	Item.mods := tempMods
 	return Item
 }
 
@@ -3461,7 +3487,7 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 }
 
 ; Add poe.trades mod names to the items mods to use as POST parameter
-TradeFunc_GetItemsPoeTradeUniqueMods(_item) {	
+TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 	mods := TradeGlobals.Get("ModsData")
 	For k, imod in _item.mods {
 		_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["unique explicit"], _item.mods[k])
