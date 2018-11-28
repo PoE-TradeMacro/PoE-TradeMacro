@@ -3265,7 +3265,8 @@ TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
 TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
-	tempMods	:= []	
+	tempMods	:= []
+	tempMods2 := []
 
 	For k, v in Item.mods {
 		negativeToPositiveRange := false
@@ -3302,19 +3303,41 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 			; The solution is to use "reduced" instead, which requires changing the range values.
 			If (negativeToPositiveRange and negativeValue) {
 				v.name := RegExReplace(v.name, "i)(.*#%?) increased", "$1 reduced")
+				v.name_orig := RegExReplace(v.name_orig, "i)(.*-?[\d\.]+|-?\(.+?\))(%?) increased", "$1$2$3 reduced")
 				v.param := RegExReplace(v.param, "i)(.*#%?) increased", "$1 reduced")
 				
 				v.ranges[1][2] := Abs(v.ranges[1][1])
 				v.ranges[1][1] := (v.ranges[1][2] > 2) ? 1 : 0.1
 			}
 			tempMods.push(v)
-		} Else {
-			;msgbox % v
+			tempMods2.push(v)
 		}
 	}
 
 
-	Item.mods := tempMods
+	For key, val in Affixes {
+		t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))		
+		modFound := false
+		
+		For k, v in tempMods {
+			n := TradeUtils.CleanUp(RegExReplace(v.name_orig, "i)-?[\d\.]+|-?\(.+?\)", "#"))
+			n := TradeUtils.CleanUp(n)
+			If (RegExMatch(n, "i)^(\+?" . t . ")$", match)) {
+				modFound := true
+			}
+		}
+		If (not modFound) {
+			m := {}
+			m.name := t
+			m.name_orig := t 
+			m.param := t
+			m.ranges := []
+			m.IsUnknown := true
+			tempMods2.push(m)
+		}
+	}		
+
+	Item.mods := tempMods2
 	return Item
 }
 
@@ -4390,7 +4413,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Loop % advItem.mods.Length() {		
 		hidePseudo := advItem.mods[A_Index].hideForTradeMacro ? true : false
 		; allow non-variable mods if the item has variants to better identify the specific version/variant
-		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique)
+		invalidUnique := (not advItem.mods[A_Index].isVariable and not advItem.hasVariant and advItem.IsUnique not advItem.mods[A_Index].isUnknown)
 		If (invalidUnique or hidePseudo or not StrLen(advItem.mods[A_Index].name)) {
 			continue
 		}
@@ -4458,7 +4481,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			}
 		}
 		
-		If (advItem.mods[A_Index].isVariable or not advItem.IsUnique) {	
+		If (advItem.mods[A_Index].isVariable or not advItem.IsUnique or advItem.mods[A_Index].isUnknown) {	
 			; calculate values to prefill min/max fields
 			; assume the difference between the theoretical max and min value as 100%
 			If (advItem.mods[A_Index].ranges[1]) {
@@ -4538,7 +4561,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			TradeAdvancedNormalModCount++
 		}
 
-		state := modValue and (advItem.mods[A_Index].isVariable or not advItem.IsUnique) ? 0 : 1
+		state := modValue and (advItem.mods[A_Index].isVariable or not advItem.IsUnique or advItem.mods[A_Index].isUnknown) ? 0 : 1
 
 		Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%  %color% vTradeAdvancedModName%index%			, % isPseudo ? "(pseudo) " . displayName : displayName
 		Gui, SelectModsGui:Add, Edit, x%xPosMin% yp-3 w40 vTradeAdvancedModMin%index% r1 Disabled%state% 	, % modValueMin
@@ -4552,7 +4575,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		
 		; pre-select mods according to the options in the settings menu
 		If (checkEnabled) {
-			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods or (not advItem.mods[A_Index].isVariable and advItem.IsUnique)) ? "Checked" : ""
+			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods or (not advItem.mods[A_Index].isVariable and not advItem.mods[A_Index].isUnknown and advItem.IsUnique)) ? "Checked" : ""
 			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index%
 		}
 		Else {
