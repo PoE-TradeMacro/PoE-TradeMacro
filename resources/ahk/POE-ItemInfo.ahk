@@ -10645,44 +10645,53 @@ ColorBlindSupport() {
 		}
 		
 		If (Item.Name) {
-			Sleep,  500
+			Sleep,  100
 			If (!dontRestoreClipboard) {
 				Clipboard := ClipBoardTemp
 			}
 			
 			If (Item.IsGem) {
-				ShowToolTip(Item.GemColor)
+				ShowToolTip("Gem color: " Item.GemColor)
 			}
-			Else If (Item.MaxSockets > 0) {
+			Else If (Item.Sockets > 0) {
 				sockets := Item.Sockets
 
 				groups := StrSplit(Trim(Item.SocketString), "")
+				groups[2] := groups[2] = "-" ? "--" : "  "
+				groups[6] := groups[6] = "-" ? "--" : "  "
+				groups[10] := groups[10] = "-" ? "--" : "  "
 				
+				str := " `n"
 				If (sockets <= 2) {
-					str := groups[1] " " groups[2] " " groups[3]
-					ShowToolTip(str)
+					If (sockets = 1) {
+						str .= "  " groups[1] "  "
+					} Else {
+						str .= " " groups[1] " " groups[2] " " groups[3] " "
+					}					
+					ShowToolTip(str "`n ")
 				}
 				Else If (sockets <= 4) {
 					groups[7] := StrLen(groups[7]) ? groups[7] : " "
 					groups[6] := StrLen(groups[6]) ? groups[6] : " "
 					
-					str := groups[1] " " groups[2] " " groups[3] "`n"
-					str .= (groups[4] = "-") ? "    |" : "    " 
-					str .= "`n" groups[7] " " groups[6] " " groups[5]
+					str .= " " groups[1] " " groups[2] " " groups[3] " `n"
+					str .= (groups[4] = "-") ? "      |" : "      " 
+					str .= "`n " groups[7] " " groups[6] " " groups[5] " "
 					
-					ShowToolTip(str)
+					ShowToolTip(str "`n ")
 				}
 				Else {
 					groups[11] := StrLen(groups[11]) ? groups[11] : " "
 					groups[9] := StrLen(groups[9]) ? groups[9] : " "
 					
-					str := groups[1] " " groups[2] " " groups[3] "`n"
-					str .= (groups[4] = "-") ? "    |" : "    " 
-					str .= "`n" groups[7] " " groups[6] " " groups[5] "`n"
-					str .= (groups[8] = "-") ? "|    " : "    " 
-					str .= "`n" groups[9] " " groups[10] " " groups[11]
+					str .= " " groups[1] " " groups[2] " " groups[3] " `n"
+					str .= (groups[4] = "-") ? "      |" : "      " 
+					str .= "`n " groups[7] " " groups[6] " " groups[5] " `n"
+					str .= (groups[8] = "-") ? " |    " : "     " 
+					str .= "`n " groups[9] " " groups[10] " " groups[11] " "
 					
-					ShowToolTip(str)
+					ShowToolTip(str "`n ")
+					
 				}
 			}
 		}
