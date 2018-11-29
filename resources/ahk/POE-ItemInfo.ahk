@@ -532,6 +532,11 @@ Menu, Tray, Default, % Globals.Get("SettingsUITitle", "PoE ItemInfo Settings")
 
 Fonts := new Fonts(Opts.FontSize, 9)
 
+If (Opts.Lutbot_CheckScript) {	
+	SetTimer, StartLutbot, 2000
+}
+
+
 GetAhkExeFilename(Default_="AutoHotkey.exe")
 {
 	AhkExeFilename := Default_
@@ -10005,16 +10010,35 @@ CreateSettingsUI()
 	
 	GuiAddGroupBox("[Lutbot Logout]", "x7 " topGroupBoxYPos " w630 h625")
 
-	lb_desc := "Lutbot's macro is a collection of features like logout, whisper replies, ingame ladder tracker and more.`n"
+	lb_desc := "Lutbot's macro is a collection of features like TCP disconnect logout, whisper replies, ladder tracker and more.`n"
 	lb_desc .= "The included logout macro is the most advanced logout feature currently out there."
-	GuiAddText(lb_desc, "x17 yp+28 w600 h45 0x0100", "", "")
-	Gui, Add, Link, x17 y+10 cBlue, <a href="http://lutbot.com/#/ahk">Website</a>
+	GuiAddText(lb_desc, "x17 yp+28 w600 h40 0x0100", "", "")
 	
-	lb_desc := "The included logout macro is the most advanced logout feature currently out there."
-	GuiAddText(lb_desc, "x17 yp+28 w600 h70 0x0100", "", "")
+	lb_desc := "Since running the main version of this script alongside " Globals.Get("Projectname") " can cause some issues`n"
+	lb_desc .= "and hotkey conflicts, Lutbot also released a lite version that only contains the logout features."
+	GuiAddText(lb_desc, "x17 y+10 w600 h35 0x0100", "", "")
 	
-	;TCP Disconnect for logging out. (Faster+Safer than Alt+F4 / Hitting the logout button)
-	;http://lutbot.com/#/ahk
+	Gui, Add, Link, x17 y+5 cBlue, <a href="http://lutbot.com/#/ahk">Website and download</a>
+	
+	lb_desc := Globals.Get("Projectname") " can manage running this lite version for you, keeping it an independant script."
+	GuiAddText(lb_desc, "x17 y+20 w600 h20 0x0100", "", "")
+	
+	GuiAddCheckbox("Run lutbot on script start if the lutbot macro exists (requires you to have run it once before).", "x17 yp+20 w600 h30", Opts.Lutbot_CheckScript, "Lutbot_CheckScript", "Lutbot_CheckScriptH")
+	
+	GuiAddCheckbox("Warn in case of hotkey conflicts", "x17 yp+30 w290 h30", Opts.Lutbot_WarnConflicts, "Lutbot_WarnConflicts", "Lutbot_WarnConflictsH")
+	AddToolTip(Lutbot_CheckScriptH, "Check if the lutbot macro exists and run it.")
+	
+	lb_desc := "If you have any issues related to"
+	GuiAddText(lb_desc, "x17 y+40 w600 h20 0x0100", "", "")
+	lb_desc := "- " Globals.Get("Projectname") " starting the lutbot script or checking for conflicts report here:"
+	GuiAddText(lb_desc, "x17 y+0 w600 h20 0x0100", "", "")
+	Gui, Add, Link, x35 y+5 cBlue h20, - <a href="https://github.com/PoE-TradeMacro/POE-TradeMacro/issues">Github</a>
+	Gui, Add, Link, x35 y+0 cBlue h20, - <a href="https://discord.gg/taKZqWw">Discord</a>
+	Gui, Add, Link, x35 y+0 cBlue h20, - <a href="https://www.pathofexile.com/forum/view-thread/1757730">Forum</a>
+
+	lb_desc := "- Lutbots script not working correctly in any way report here:"
+	GuiAddText(lb_desc, "x17 y+5 w600 h20 0x0100", "", "")
+	Gui, Add, Link, x35 y+5 cBlue h20, - <a href="https://discord.gg/nttekWT">Discord</a>
 	
 	; Lutbot Buttons
 	
@@ -10295,6 +10319,10 @@ ReadConfig(ConfigDir = "", ConfigFile = "config.ini")
 		Opts.GDITextOpacity			:= IniRead("GDI", "TextOpacity", Opts.GDITextOpacity, ItemInfoConfigObj)
 		Opts.GDITextOpacityDefault	:= IniRead("GDI", "TextOpacityDefault", Opts.GDITextOpacityDefault, ItemInfoConfigObj)
 		gdipTooltip.UpdateColors(Opts.GDIWindowColor, Opts.GDIWindowOpacity, Opts.GDIBorderColor, Opts.GDIBorderOpacity, Opts.GDITextColor, Opts.GDITextOpacity, "10", "16")
+		
+		; Lutbot
+		Opts.Lutbot_CheckScript		:= IniRead("Lutbot", "Lutbot_CheckScript", Opts.Lutbot_CheckScript, ItemInfoConfigObj)
+		Opts.Lutbot_WarnConflicts	:= IniRead("Lutbot", "Lutbot_WarnConflicts", Opts.Lutbot_WarnConflicts, ItemInfoConfigObj)
 	}
 }
 
@@ -10350,6 +10378,10 @@ WriteConfig(ConfigDir = "", ConfigFile = "config.ini")
 	IniWrite(Opts.GDIBorderOpacity, "GDI", "BorderOpacity", ItemInfoConfigObj)
 	IniWrite(Opts.GDITextColor, "GDI", "TextColor", ItemInfoConfigObj)
 	IniWrite(Opts.GDITextOpacity, "GDI", "TextOpacity", ItemInfoConfigObj)
+	
+	; Lutbot
+	IniWrite(Opts.Lutbot_CheckScript, "Lutbot", "Lutbot_CheckScript", ItemInfoConfigObj)
+	IniWrite(Opts.Lutbot_WarnConflicts, "Lutbot", "Lutbot_WarnConflicts", ItemInfoConfigObj)
 	
 	ItemInfoConfigObj.Save(ConfigPath)
 }
@@ -10525,7 +10557,7 @@ GetContributors(AuthorsPerLine=0)
 	return Authors
 }
 
-ShowAssignedHotkeys() {
+ShowAssignedHotkeys(returnList = false) {
 	scriptInfo	:= ScriptInfo("ListHotkeys")
 	hotkeys		:= []
 
@@ -10555,7 +10587,11 @@ ShowAssignedHotkeys() {
 			val.Push(KeyCodeToKeyName(val[5]))
 		}
 	}
-
+	
+	If (returnList) {
+		Return hotkeys
+	}
+	
 	Gui, ShowHotkeys:Color, ffffff, ffffff
 	Gui, ShowHotkeys:Add, Text, , List of this scripts assigned hotkeys.
 	Gui, ShowHotkeys:Default
@@ -12681,6 +12717,18 @@ CompareNumValues(num1, num2, operator = "=") {
 	}
 	Return res
 }
+
+StartLutbot:
+	If (Opts.Lutbot_WarnConflicts) {
+		CheckForHotkeyConflicts(ShowAssignedHotkeys(true))
+	}
+	SetTimer, StartLutbot, Off
+Return
+
+CheckForHotkeyConflicts(hotkeys) {
+	;debugprintarray(hotkeys)
+}
+
 
 ; ############ (user) macros #############
 ; macros are being appended here by merge script

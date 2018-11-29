@@ -1563,7 +1563,7 @@ TradeFunc_StartSplashScreen() {
 		, "Helping Alva to discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle..."]
 	
 	Random, randomNum, 1, initArray.MaxIndex()
-	SplashTextOn, 350, 20, PoE-TradeMacro, % initArray[randomNum]
+	SplashTextOn, 370, 20, PoE-TradeMacro, % initArray[randomNum]
 }
 
 TradeFunc_StopSplashScreen() {
