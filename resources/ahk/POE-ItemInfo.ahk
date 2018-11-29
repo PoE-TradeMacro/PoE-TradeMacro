@@ -7480,7 +7480,9 @@ ParseSocketGroups(ItemDataText, ByRef RawSocketString = "")
 			RegExMatch(A_LoopField, "i)Sockets:\s?(.*)", socketString)
 			
 			sockets := socketString1 " "	; add a space at the end for easier regex
-			RawSocketString := socketString1
+			If (StrLen(socketString1)) {
+				RawSocketString := socketString1
+			}			
 			If (StrLen(sockets)) {
 				Pos		:= 0
 				While Pos	:= RegExMatch(sockets, "i)(.*?)\s+", value, Pos + (StrLen(value) ? StrLen(value) : 1)) {
@@ -10643,6 +10645,11 @@ ColorBlindSupport() {
 		}
 		
 		If (Item.Name) {
+			Sleep,  500
+			If (!dontRestoreClipboard) {
+				Clipboard := ClipBoardTemp
+			}
+			
 			If (Item.IsGem) {
 				ShowToolTip(Item.GemColor)
 			}
@@ -10673,17 +10680,13 @@ ColorBlindSupport() {
 					str .= (groups[4] = "-") ? "    |" : "    " 
 					str .= "`n" groups[7] " " groups[6] " " groups[5] "`n"
 					str .= (groups[8] = "-") ? "|    " : "    " 
-					str .= "`n" groups[11] " " groups[10] " " groups[9]
+					str .= "`n" groups[9] " " groups[10] " " groups[11]
 					
 					ShowToolTip(str)
 				}
 			}
 		}
-		
-		Sleep,  500
-		If (!dontRestoreClipboard) {
-			Clipboard := ClipBoardTemp
-		}
+
 		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
 	}
 }
