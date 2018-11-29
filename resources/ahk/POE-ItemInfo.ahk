@@ -55,7 +55,7 @@ Globals.Set("GithubRepo", "POE-ItemInfo")
 Globals.Set("GithubUser", "aRTy42")
 Globals.Set("ScriptList", [A_ScriptDir "\POE-ItemInfo"])
 Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\resources\updates.txt","ItemInfo"]])
-Globals.Set("SettingsScriptList", ["ItemInfo", "Additional Macros"])
+Globals.Set("SettingsScriptList", ["ItemInfo", "Additional Macros", "Lutbot"])
 Globals.Set("ScanCodes", GetScanCodes())
 argumentProjectName		= %1%
 argumentUserDirectory	= %2%
@@ -9735,10 +9735,10 @@ CreateSettingsUI()
 	Global
 	
 	Gui, Color, ffffff, ffffff
-	
+
 	; ItemInfo is not included in other scripts
-	If (not SkipItemInfoUpdateCall) {	
-		Fonts.SetUIFont()
+	If (not SkipItemInfoUpdateCall) {
+		Fonts.SetUIFont(8)
 		Scripts := Globals.Get("SettingsScriptList")
 		TabNames := ""
 		Loop, % Scripts.Length() {
@@ -9747,15 +9747,16 @@ CreateSettingsUI()
 		}
 
 		StringTrimRight, TabNames, TabNames, 1
-		Gui, Add, Tab3, Choose1 h660 x0, %TabNames%	
+		Gui, Add, Tab3, Choose1 h660 x0, %TabNames%
 	}
 	
 	; Note: window handles (hwnd) are only needed if a UI tooltip should be attached.
 	
 	generalHeight := SkipItemInfoUpdateCall ? "150" : "240"		; "180" : "270" with ParseItemHotKey
+	topGroupBoxYPos := SkipItemInfoUpdateCall ? "y53" : "y30"
 	
 	; General
-	GuiAddGroupBox("General", "x7 ym" 30 " w310 h" generalHeight " Section")
+	GuiAddGroupBox("General", "x7 " topGroupBoxYPos " w310 h" generalHeight " Section")
 	GuiAddCheckbox("Only show tooltip if PoE is frontmost", "xs10 yp+20 w250 h30", Opts.OnlyActiveIfPOEIsFront, "OnlyActiveIfPOEIsFront", "OnlyActiveIfPOEIsFrontH")
 	AddToolTip(OnlyActiveIfPOEIsFrontH, "When checked the script only activates while you are ingame`n(technically while the game window is the frontmost)")
 	
@@ -9811,7 +9812,7 @@ CreateSettingsUI()
 	GuiAddButton("Preview", "xs210 ys290 w80 h23", "SettingsUI_BtnGDIPreviewTooltip", "BtnGDIPreviewTooltip", "BtnGDIPreviewTooltipH")
 
 	; Tooltip
-	GuiAddGroupBox("Tooltip", "x327 ym" 30 " w310 h140 Section")
+	GuiAddGroupBox("Tooltip", "x327 " topGroupBoxYPos " w310 h140 Section")
 
 	GuiAddEdit(Opts.MouseMoveThreshold, "xs250 yp+22 w50 h20 Number", "MouseMoveThreshold", "MouseMoveThresholdH")
 	GuiAddText("Mouse move threshold (px):", "xs27 yp+3 w200 h20 0x0100", "LblMouseMoveThreshold", "LblMouseMoveThresholdH")
@@ -9865,7 +9866,7 @@ CreateSettingsUI()
 
 	; Buttons
 	ButtonsShiftX := "x659 "
-	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX "y40 w290 h30 0x0100")
+	GuiAddText("Mouse over settings or see the GitHub Wiki page for comments on what these settings do exactly.", ButtonsShiftX " y63 w290 h30 0x0100")
 	
 	GuiAddButton("Defaults", ButtonsShiftX "y+8 w90 h23", "SettingsUI_BtnDefaults")
 	GuiAddButton("OK", "Default x+5 yp+0 w90 h23", "SettingsUI_BtnOK")
@@ -9884,7 +9885,7 @@ CreateSettingsUI()
 	}
 	
 	; AM Hotkeys
-	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 y35 w630 h625")	
+	GuiAddGroupBox("[AdditionalMacros] Hotkeys", "x7 " topGroupBoxYPos " w630 h625")	
 	
 	If (not AM_Config) {
 		GoSub, AM_Init
@@ -9939,6 +9940,11 @@ CreateSettingsUI()
 							GuiAddEdit(keyValue, "x+0 yp-2 w40 h20", EditID)
 						}
 					}
+					Else If (RegExMatch(sectionName, "i)JoinChannel|KickYourself")) {
+						EditID := "AM_" sectionName "_" keyIndex
+						GuiAddText(keyIndex ":", "x+10 yp+4 w85 h20 0x0100")
+						GuiAddEdit(keyValue, "x+0 yp-2 w99 h20", EditID)
+					} 
 					Else {
 						EditID := "AM_" sectionName "_" keyIndex
 						GuiAddText(keyIndex ":", "x" 17 + chkBoxWidth + 10 " yp+" chkBoxShiftY " w85 h20 0x0100")
@@ -9951,7 +9957,7 @@ CreateSettingsUI()
 	
 	; AM General
 
-	GuiAddGroupBox("[AdditionalMacros] General", "x647 y35 w310 h60")
+	GuiAddGroupBox("[AdditionalMacros] General", "x647 " topGroupBoxYPos " w310 h60")
 	
 	_i := 0
 	For keyIndex, keyValue in AM_Config.General {
@@ -9987,6 +9993,32 @@ CreateSettingsUI()
 	experimentalNotice .= " You can still assign your settings directly using the AdditionalMacros.ini like before."
 	experimentalNotice .= " (Right-click system tray icon -> Edit Files)."
 	GuiAddText(experimentalNotice, ButtonsShiftX "yp+25 w290")
+	
+	; Begin Lutbot Tab
+	If (SkipItemInfoUpdateCall) {
+		Gui, Tab, 4 
+	} Else {
+		Gui, Tab, 3
+	}
+	
+	GuiAddGroupBox("[Lutbot Logout]", "x7 " topGroupBoxYPos " w630 h625")
+
+	lb_desc := "Lutbot's macro is a collection of features like logout, whisper replies, ingame ladder tracker and more.`n"
+	lb_desc .= "The included logout macro is the most advanced logout feature currently out there."
+	GuiAddText(lb_desc, "x17 yp+28 w600 h45 0x0100", "", "")
+	Gui, Add, Link, x17 y+10 cBlue, <a href="http://lutbot.com/#/ahk">Website</a>
+	
+	lb_desc := "The included logout macro is the most advanced logout feature currently out there."
+	GuiAddText(lb_desc, "x17 yp+28 w600 h70 0x0100", "", "")
+	
+	;TCP Disconnect for logging out. (Faster+Safer than Alt+F4 / Hitting the logout button)
+	;http://lutbot.com/#/ahk
+	
+	; Lutbot Buttons
+	
+	GuiAddText("Mouse over settings to see what these settings do exactly.", ButtonsShiftX "y60 w290 h30 0x0100")
+	GuiAddButton("OK", "Default xp-5 y+8 w90 h23", "SettingsUI_BtnOK")
+	GuiAddButton("Cancel", "x+5 yp+0 w90 h23", "SettingsUI_BtnCancel")
 	
 	; close tabs
 	Gui, Tab
@@ -10579,6 +10611,81 @@ CloseScripts() {
 		}
 	}
 	ExitApp
+}
+
+ColorBlindSupport() {
+	IfWinActive, ahk_group PoEWindowGrp
+	{
+		Global Item, Opts, Globals, ItemData
+
+		ClipBoardTemp := ClipboardAll
+		SuspendPOEItemScript = 1 ; This allows us to handle the clipboard change event
+		
+		scancode_c := Globals.Get("ScanCodes").c
+
+		; Parse the clipboard contents twice.
+		; If the clipboard contains valid item data before we send ctrl + c to try and parse an item via ctrl + f then don't restore that clipboard data later on.
+		; This prevents the highlighting function to fill search fields with data from previous item parsings/manual data copying since
+		; that clipboard data would always be restored again.
+		Loop, 2 {
+			If (A_Index = 2) {
+				Clipboard :=
+				Send ^{%scancode_c%}	; ^{c}
+				Sleep 100
+			}
+			CBContents := GetClipboardContents()
+			CBContents := PreProcessContents(CBContents)
+			Globals.Set("ItemText", CBContents)
+			ParsedData := ParseItemData(CBContents)
+			If (A_Index = 1 and Item.Name) {
+				dontRestoreClipboard := true
+			}
+		}
+		
+		If (Item.Name) {
+			If (Item.IsGem) {
+				ShowToolTip(Item.GemColor)
+			}
+			Else If (Item.MaxSockets > 0) {
+				sockets := Item.Sockets
+
+				groups := StrSplit(Trim(Item.SocketString), "")
+				
+				If (sockets <= 2) {
+					str := groups[1] " " groups[2] " " groups[3]
+					ShowToolTip(str)
+				}
+				Else If (sockets <= 4) {
+					groups[7] := StrLen(groups[7]) ? groups[7] : " "
+					groups[6] := StrLen(groups[6]) ? groups[6] : " "
+					
+					str := groups[1] " " groups[2] " " groups[3] "`n"
+					str .= (groups[4] = "-") ? "    |" : "    " 
+					str .= "`n" groups[7] " " groups[6] " " groups[5]
+					
+					ShowToolTip(str)
+				}
+				Else {
+					groups[11] := StrLen(groups[11]) ? groups[11] : " "
+					groups[9] := StrLen(groups[9]) ? groups[9] : " "
+					
+					str := groups[1] " " groups[2] " " groups[3] "`n"
+					str .= (groups[4] = "-") ? "    |" : "    " 
+					str .= "`n" groups[7] " " groups[6] " " groups[5] "`n"
+					str .= (groups[8] = "-") ? "|    " : "    " 
+					str .= "`n" groups[11] " " groups[10] " " groups[9]
+					
+					ShowToolTip(str)
+				}
+			}
+		}
+		
+		Sleep,  500
+		If (!dontRestoreClipboard) {
+			Clipboard := ClipBoardTemp
+		}
+		SuspendPOEItemScript = 0 ; Allow Item info to handle clipboard change event
+	}
 }
 
 HighlightItems(broadTerms = false, leaveSearchField = true, focusHideoutFilter = false, hideoutFieldX = 0, hideoutFieldY = 0) {

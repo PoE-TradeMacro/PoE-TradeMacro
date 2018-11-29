@@ -77,7 +77,7 @@ globalUpdateInfo.skipSelection 	:= 0
 globalUpdateInfo.skipBackup 		:= 0
 globalUpdateInfo.skipUpdateCheck 	:= 0
 
-TradeGlobals.Set("SettingsScriptList", ["TradeMacro", "ItemInfo", "Additional Macros"])
+TradeGlobals.Set("SettingsScriptList", ["TradeMacro", "ItemInfo", "Additional Macros", "Lutbot"])
 TradeGlobals.Set("SettingsUITitle", "PoE (Trade) Item Info Settings")
 argumentProjectName		= %1%
 argumentUserDirectory	= %2%
@@ -549,7 +549,9 @@ CreateTradeSettingsUI()
 
 	StringTrimRight, TabNames, TabNames, 1
 	Gui, Add, Tab3, Choose1 h660 x0, %TabNames%
-
+	
+	topGroupBoxYPos := "y53"
+	
 	/* 
 		General
 	*/
@@ -601,7 +603,7 @@ CreateTradeSettingsUI()
 		Search
 	*/
 
-	GuiAddGroupBox("[TradeMacro] Search", "x327 y35 w310 h625")
+	GuiAddGroupBox("[TradeMacro] Search", "x327 " topGroupBoxYPos " w310 h625")
 	
 	; league section
 	GuiAddText("League:", "x337 yp+28 w160 h20 0x0100", "LblSearchLeague", "LblSearchLeagueH")
@@ -754,7 +756,7 @@ CreateTradeSettingsUI()
 		Hotkeys 
 	*/
 
-	GuiAddGroupBox("[TradeMacro] Hotkeys", "x647 y35 w310 h295")
+	GuiAddGroupBox("[TradeMacro] Hotkeys", "x647 " topGroupBoxYPos " w310 h295")
 
 	GuiAddCheckbox("Price Check:", "x657 yp+26 w165 h20 0x0100", TradeOpts.PriceCheckEnabled, "PriceCheckEnabled", "PriceCheckEnabledH")
 	AddToolTip(PriceCheckEnabledH, "Check item prices.")
@@ -1561,7 +1563,7 @@ TradeFunc_StartSplashScreen() {
 		, "Helping Alva to discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle..."]
 	
 	Random, randomNum, 1, initArray.MaxIndex()
-	SplashTextOn, 300, 20, PoE-TradeMacro, % initArray[randomNum]
+	SplashTextOn, 350, 20, PoE-TradeMacro, % initArray[randomNum]
 }
 
 TradeFunc_StopSplashScreen() {

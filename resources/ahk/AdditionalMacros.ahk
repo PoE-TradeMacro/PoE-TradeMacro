@@ -149,6 +149,10 @@ AM_AdvItemFilterPreview_HKey:
 	ShowAdvancedItemFilterFormatting()			; Parses your current loot filter (if a custom filter is being used) and shows a highlighting preview for our item, including information about the mathcing filter rule 
 Return
 
+AM_ColorBlindSupport_HKey:
+	ColorBlindSupport()						; Shows text-based information about an items socket colors or a gems color
+Return
+
 AM_WhoisLastWhisper_HKey:
 	KeyWait, Ctrl							; Sends "/whois lastWhisperCharacterName" when keys are released (not when pressed).
 	KeyWait, Alt
