@@ -10028,6 +10028,8 @@ CreateSettingsUI()
 	GuiAddCheckbox("Warn in case of hotkey conflicts", "x17 yp+30 w290 h30", Opts.Lutbot_WarnConflicts, "Lutbot_WarnConflicts", "Lutbot_WarnConflictsH")
 	AddToolTip(Lutbot_CheckScriptH, "Check if the lutbot macro exists and run it.")
 	
+	GuiAddButton("Open Lutbot folder", "Default x17 y+10 w130 h23", "OpenLutbotDocumentsFolder")
+	
 	lb_desc := "If you have any issues related to"
 	GuiAddText(lb_desc, "x17 y+40 w600 h20 0x0100", "", "")
 	lb_desc := "- " Globals.Get("Projectname") " starting the lutbot script or checking for conflicts report here:"
@@ -12719,14 +12721,57 @@ CompareNumValues(num1, num2, operator = "=") {
 }
 
 StartLutbot:
-	If (Opts.Lutbot_WarnConflicts) {
-		CheckForHotkeyConflicts(ShowAssignedHotkeys(true))
+	global LutBotSettings	:= class_EasyIni(A_MyDocuments "\AutoHotKey\LutTools\settings.ini")
+
+	If (not FileExist(A_MyDocuments "\AutoHotKey\LutTools\lite.ahk")) {
+		_project := Globals.Get("ProjectName")
+		MsgBox, 0x14, %_project% - Lutbot lite.ahk missing, The Lutbot lite macro cannot be executed since its script file is missing,`nopen download website? ("http://lutbot.com/#/ahk")
+		IfMsgBox Yes
+		{
+			OpenWebPageWith(AssociatedProgram("html"), "http://lutbot.com/#/ahk")
+		}
+	} Else {		
+		Run "%A_AhkPath%" "%A_MyDocuments%\AutoHotKey\LutTools\lite.ahk"	
 	}
+
+	If (Opts.Lutbot_WarnConflicts) {
+		CheckForLutBotHotkeyConflicts(ShowAssignedHotkeys(true), LutBotSettings)
+	}
+
 	SetTimer, StartLutbot, Off
 Return
 
-CheckForHotkeyConflicts(hotkeys) {
-	;debugprintarray(hotkeys)
+OpenLutbotDocumentsFolder:
+	OpenUserSettingsFolder("Lutbot", A_MyDocuments "\AutoHotKey\LutTools")
+Return
+
+CheckForLutBotHotkeyConflicts(hotkeys, config) {
+	conflicts := []
+	
+	For key, val in config.hotkeys {
+		s1 := RegExReplace(val, "([-+^*$?\|&()])", "\$1")		
+		For k, v in hotkeys {
+			s2 := RegExReplace(v[6], "([-+^*$?\|&()])", "\$1")
+			If (RegExmatch(Trim(val), "i)^" Trim(s2) "$")) {
+				conflict := {}
+				conflict.name := key 
+				conflict.hkey := val
+				conflicts.push(conflict)
+			}
+		}	
+	}
+	
+	If (conflicts.MaxIndex()) {
+		project := Globals.Get("ProjectName")		
+		msg := project " detected a hotkey conflict with the Lutbot lite macro, "
+		msg .= "`n" "which should be resolved before playing the game."
+		msg .= "`n`n" "Conflicting hotkey(s) from Lutbot:"
+		For key, val in conflicts {
+			msg .= "`n"   "-  " val.hkey "    (" val.name ")" 	
+		}
+		
+		MsgBox, 16, Lutbot lite - %project% conflict, %msg%
+	}
 }
 
 
