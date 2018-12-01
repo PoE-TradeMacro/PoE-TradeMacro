@@ -12701,7 +12701,6 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 	}
 	
 	MouseGetPos, CurrX, CurrY
-	msgbox % A_AhkPath "`n" A_ScriptDir "\lib\PoEScripts_ItemFilterNamePlate.ahk`n" itemName "`n" itemBase "`n" bgColor "`n" borderColor "`n" fontColor "`n" fontSize "`n" CurrX "`n" CurrY 
 	If (advanced) {
 		Run "%A_AhkPath%" "%A_ScriptDir%\lib\PoEScripts_ItemFilterNamePlate.ahk" "%itemName%" "%itemBase%" "%bgColor%"  "%borderColor%"  "%fontColor%"  "%fontSize%" "%CurrX%" "%CurrY%" "1"	
 	} Else {

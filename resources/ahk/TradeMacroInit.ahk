@@ -5,10 +5,9 @@
 #Persistent ; Stay open in background
 
 SetWorkingDir, %A_ScriptDir%
-;https://autohotkey.com/boards/viewtopic.php?f=6&t=53
-#Include, %A_ScriptDir%\lib\JSON.ahk
-; Console https://autohotkey.com/boards/viewtopic.php?f=6&t=2116
-#Include, %A_ScriptDir%\lib\Class_Console.ahk
+
+#Include, %A_ScriptDir%\lib\JSON.ahk				; https://autohotkey.com/boards/viewtopic.php?f=6&t=53
+#Include, %A_ScriptDir%\lib\Class_Console.ahk		; Console https://autohotkey.com/boards/viewtopic.php?f=6&t=2116
 #Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
 #Include, %A_ScriptDir%\lib\AssociatedProgram.ahk
 #Include, %A_ScriptDir%\lib\EasyIni.ahk
@@ -20,6 +19,14 @@ TradeMsgWrongAHKVersion := "AutoHotkey v" . TradeAHKVersionRequired . " or later
 If (A_AhkVersion < TradeAHKVersionRequired)
 {
 	MsgBox, 16, Wrong AutoHotkey Version, % TradeMsgWrongAHKVersion
+	ExitApp
+}
+If (not StrLen(A_AhkPath)) {
+	MsgBox, 16, AHK path empty, "The script can't find your AHK installation."
+	ExitApp
+}
+If (not FileExist(A_AhkPath)) {
+	MsgBox, 16, AHK executable missing, "The script can't the AutoHotkey executable in your AHk installation directory.`n`n" A_AhkPath
 	ExitApp
 }
 
