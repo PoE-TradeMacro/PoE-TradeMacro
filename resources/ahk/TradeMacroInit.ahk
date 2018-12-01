@@ -365,8 +365,14 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
 TradeFunc_AssignHotkey(Key, Label) {
 	Key := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
+	
+	assignedKeys_before := ShowAssignedHotkeys(true)
+	
 	Hotkey, %Key%, %Label%, UseErrorLevel
-	If (ErrorLevel)	{
+	
+	assignedKeys_after := ShowAssignedHotkeys(true)
+
+	If (ErrorLevel) {
 		If (errorlevel = 1)
 			str := str . "`nASCII " . Key . " - 1) The Label parameter specifies a nonexistent label name."
 		Else If (errorlevel = 2)
@@ -389,6 +395,10 @@ TradeFunc_AssignHotkey(Key, Label) {
 			str := str . "`nASCII " . Key . " - 99) Out of memory. This is very rare and usually happens only when the operating system has become unstable."
 
 		MsgBox, %str%
+	}
+	Else If (assignedKeys_before.MaxIndex() = assignedKeys_after.MaxIndex()) {
+		;ShowHotKeyConflictUI(assignedKeys_after[assignedKeys_after.MaxIndex()], Key, Label)
+		;	debugprintarray([assignedKeys_before, assignedKeys_after])
 	}
 }
 

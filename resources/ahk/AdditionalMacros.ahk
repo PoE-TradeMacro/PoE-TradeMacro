@@ -196,17 +196,27 @@ AM_SetHotkeys() {
 				For labelKeyIndex, labelKeyName in StrSplit(AM_Config[labelName].Hotkeys, ", ") {
 					If (labelKeyName and labelKeyName != A_Space) {
 						AM_Config[labelName].State := AM_ConvertState(AM_Config[labelName].State)						
-						stateValue := AM_Config[labelName].State ? "on" : "off"
+						stateValue := AM_Config[labelName].State ? "on" : "off"	
 						
+						assignedKeys_before := ShowAssignedHotkeys(true)
+						assignedKeys_after := 
 						; TODO: Fix hotkeys not being set without restart
+						ErrorLevel := 0
 						If (stateValue = "on" and not AM_Config.General.finishedInit) {
 							; set hotkeys on init, only set enabled hotkeys to prevent key conflicts with other macros/applications
-							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue
+							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, UseErrorLevel %stateValue%
+							assignedKeys_after := ShowAssignedHotkeys(true)
 						} Else If (AM_Config.General.finishedInit) {
 							; change hotkey states/keys without a restart (currently not working without the restart)
-							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, % stateValue							
+							Hotkey, % KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), AM_%labelName%_HKey, UseErrorLevel %stateValue%
+							assignedKeys_after := ShowAssignedHotkeys(true)
 							;console.log(labelKeyName ", " KeyNameToKeyCode(labelKeyName, AM_KeyToSCState) ", " "AM_" labelName "_HKey, " stateValue ", " ErrorLevel)
-						}		
+						}
+						
+						If (not ErrorLevel and assignedKeys_before.MaxIndex() = assignedKeys_after.MaxIndex()) {
+							;debugprintarray([assignedKeys_before, assignedKeys_after])
+							;ShowHotKeyConflictUI(assignedKeys_after[assignedKeys_after.MaxIndex()], KeyNameToKeyCode(labelKeyName, AM_KeyToSCState), "AM_" labelName "_HKey")
+						}
 					}
 				}
 			}

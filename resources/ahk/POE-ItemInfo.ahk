@@ -11868,6 +11868,14 @@ UpdateNotesGuiEscape:
 	Gui, UpdateNotes:Cancel
 Return
 
+HotkeyConflictGuiEscape:
+	Gui, HotkeyConflict:Cancel
+Return
+
+CloseHotkeyConflictGui:
+	Gui, HotkeyConflict:Destroy
+Return
+
 CheckForUpdates:
 	If (not globalUpdateInfo.repo) {
 		global globalUpdateInfo := {}
@@ -12772,6 +12780,42 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 		
 		MsgBox, 16, Lutbot lite - %project% conflict, %msg%
 	}
+}
+
+ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel) {
+	SplashTextOff
+	
+	Gui, HotkeyConflict:Destroy
+	Gui, HotkeyConflict:Font,, Consolas
+
+	Gui, HotkeyConflict:Add, Edit, w0 h0
+	
+	Gui, HotkeyConflict:Add, Text, x17 w150 h20, Label
+	Gui, HotkeyConflict:Add, Text, x+10 yp+0 w150 h20, Pretty hotkey
+	Gui, HotkeyConflict:Add, Text, x+10 yp+0 w150 h20, Hotkey
+	Gui, HotkeyConflict:Add, Text, x+10 yp+0 w150 h20, Virtual Key
+	line := ""
+	Loop, 130 {
+		line .= "-"
+	}
+	Gui, HotkeyConflict:Add, Text, x17 y+-5 w630 h20, % line
+	
+	Gui, HotkeyConflict:Add, Text, x17 y+0 w150 h20, % hkeyLabel
+	Gui, HotkeyConflict:Add, Hotkey, x+10 yp-3 w150 h20, % hkeyObj[5]
+	Gui, HotkeyConflict:Add, Text, x+10 yp+3 w150 h20, % hkeyObj[6]
+	Gui, HotkeyConflict:Add, Text, x+10 yp+0 w150 h20, % hkey
+	
+	Gui, HotkeyConflict:Font,, Verdana
+	msg := "The hotkey for the label/function/feature """ hkeyLabel """ is already being used for a different one.`nThe previously created one got overwritten and is now unassigned, please resolve this conflict`nin the settings menu."
+	msg .= "`n`nYou may have to restart the script afterwards."
+	Gui, HotkeyConflict:Add, Text, x17 y+20 w630 h40, % msg
+	
+	Gui, HotkeyConflict:Add, Button, w60 x590 gCloseHotkeyConflictGui, Close
+	Gui, HotkeyConflict:Show, xCenter yCenter w660, Hotkey conflict
+	
+	WinWaitClose, Hotkey conflict
+	sleep 5000
+	
 }
 
 
