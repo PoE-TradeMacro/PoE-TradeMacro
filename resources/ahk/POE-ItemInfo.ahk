@@ -57,6 +57,7 @@ Globals.Set("ScriptList", [A_ScriptDir "\POE-ItemInfo"])
 Globals.Set("UpdateNoteFileList", [[A_ScriptDir "\resources\updates.txt","ItemInfo"]])
 Globals.Set("SettingsScriptList", ["ItemInfo", "Additional Macros", "Lutbot"])
 Globals.Set("ScanCodes", GetScanCodes())
+Globals.Set("AssignedHotkeys", GetObjPropertyCount(Globals.Get("AssignedHotkeys")) ? Globals.Get("AssignedHotkeys") : {})	; initializes the object only if it hasn't any properties already
 argumentProjectName		= %1%
 argumentUserDirectory	= %2%
 argumentIsDevVersion	= %3%
@@ -12063,6 +12064,10 @@ IsInArray(el, array) {
 	Return false
 }
 
+GetObjPropertyCount(obj) {
+	Return NumGet(&obj + 4*A_PtrSize)	
+}
+
 TogglePOEItemScript()
 {
 	IF SuspendPOEItemScript = 0
@@ -12781,7 +12786,96 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 	}
 }
 
-ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel) {
+SaveAssignedHotkey(label, key, vkey) {
+	hk := {}
+	hk.key := key
+	hk.vkey := vkey
+	
+	obj := Globals.Get("AssignedHotkeys")
+	obj[label] := hk 
+	Globals.Set("AssignedHotkeys", obj)
+}
+
+RemoveAssignedHotkey(label) {	
+	haystack := Globals.Get("AssignedHotkeys")
+	
+	For k, v in haystack {
+		If (k = label) {
+			v.vkey := ""
+			v.key := ""
+			Globals.Set("AssignedHotkeys", haystack)
+			Return
+		}
+	}
+}
+
+GetAssignedHotkeysLabel(label, key, vkey) {
+	haystack := Globals.Get("AssignedHotkeys")
+	
+	For k, v in haystack {
+		If (v.vkey = vkey) {
+			Return k
+		}
+	}
+}
+
+GetAssignedHotkeysEnglishKey(vkey) {
+	haystack := ShowAssignedHotkeys(true)
+
+	For k, v in haystack {
+		If (v[5] = vkey) {
+			Return haystack[k]
+		}
+	}
+}
+
+AssignHotKey(Label, key, vkey, enabledState = "on") {
+	assignedLabel := GetAssignedHotkeysLabel(Label, key, vkey)
+	If (assignedLabel = Label) {
+		; new hotkey is already assigned to the target label
+		Return
+	} Else If (StrLen(assignedLabel)) {
+		; new hotkey is already assigned to a different label
+		; the old label will be unassigned unless prevented
+		Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
+		If (not ErrorLevel) {
+			SaveAssignedHotkey(Label, key, vkey)
+			RemoveAssignedHotkey(assignedLabel)
+			ShowHotKeyConflictUI(GetAssignedHotkeysEnglishKey(VKey), VKey, Label, assignedLabel, false)
+		}
+	} Else {
+		; new hotkey is not assigned to any label yet
+		Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
+		SaveAssignedHotkey(Label, key, vkey)
+	}
+	
+	If (ErrorLevel) {
+		If (errorlevel = 1)
+			str := str . "`nASCII " . VKey . " - 1) The Label parameter specifies a nonexistent label name."
+		Else If (errorlevel = 2)
+			str := str . "`nASCII " . VKey . " - 2) The KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language. Switching to the english layout should solve this for now."
+		Else If (errorlevel = 3)
+			str := str . "`nASCII " . VKey . " - 3) Unsupported prefix key. For example, using the mouse wheel as a prefix in a hotkey such as WheelDown & Enter is not supported."
+		Else If (errorlevel = 4)
+			str := str . "`nASCII " . VKey . " - 4) The KeyName parameter is not suitable for use with the AltTab or ShiftAltTab actions. A combination of two keys is required. For example: RControl & RShift::AltTab."
+		Else If (errorlevel = 5)
+			str := str . "`nASCII " . VKey . " - 5) The command attempted to modify a nonexistent hotkey."
+		Else If (errorlevel = 6)
+			str := str . "`nASCII " . VKey . " - 6) The command attempted to modify a nonexistent variant of an existing hotkey. To solve this, use Hotkey IfWin to set the criteria to match those of the hotkey to be modified."
+		Else If (errorlevel = 50)
+			str := str . "`nASCII " . VKey . " - 50) Windows 95/98/Me: The command completed successfully but the operating system refused to activate the hotkey. This is usually caused by the hotkey being "" ASCII " . int . " - in use"" by some other script or application (or the OS itself). This occurs only on Windows 95/98/Me because on other operating systems, the program will resort to the keyboard hook to override the refusal."
+		Else If (errorlevel = 51)
+			str := str . "`nASCII " . VKey . " - 51) Windows 95/98/Me: The command completed successfully but the hotkey is not supported on Windows 95/98/Me. For example, mouse hotkeys and prefix hotkeys such as a & b are not supported."
+		Else If (errorlevel = 98)
+			str := str . "`nASCII " . VKey . " - 98) Creating this hotkey would exceed the 1000-hotkey-per-script limit (however, each hotkey can have an unlimited number of variants, and there is no limit to the number of hotstrings)."
+		Else If (errorlevel = 99)
+			str := str . "`nASCII " . VKey . " - 99) Out of memory. This is very rare and usually happens only when the operating system has become unstable."
+
+		MsgBox, %str%
+	}
+}
+
+ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel, oldLabel = "", preventedAssignment = false) {
 	SplashTextOff
 	
 	Gui, HotkeyConflict:Destroy
@@ -12804,10 +12898,23 @@ ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel) {
 	Gui, HotkeyConflict:Add, Text, x+10 yp+3 w150 h20, % hkeyObj[6]
 	Gui, HotkeyConflict:Add, Text, x+10 yp+0 w150 h20, % hkey
 	
+	If (StrLen(oldLabel)) {
+		Gui, HotkeyConflict:Font, bold
+		Gui, HotkeyConflict:Add, Text, x17 y+15 w400 h20, % "Old Label: " oldLabel	
+		Gui, HotkeyConflict:Font, norm
+	}	
+	
 	Gui, HotkeyConflict:Font,, Verdana
-	msg := "The hotkey for the label/function/feature """ hkeyLabel """ is already being used for a different one.`nThe previously created one got overwritten and is now unassigned, please resolve this conflict`nin the settings menu."
+	msg := "The hotkey for the label/function/feature """ hkeyLabel """ was previously used for "
+	msg .= (StrLen(oldLabel)) ? "the label """ oldLabel """." : "a different one."
+	If (not preventedAssignment) {
+		msg .= "`nThe previously created one got overwritten and is now unassigned, please resolve this conflict`nin the settings menu."			
+	} Else {
+		msg .= "`nThis current hotkey was not assigned, keeping it's previous value. Please resolve this conflict`nin the settings menu if you want to set the hotkey to this function."
+	}	
 	msg .= "`n`nYou may have to restart the script afterwards."
-	Gui, HotkeyConflict:Add, Text, x17 y+20 w630 h40, % msg
+	
+	Gui, HotkeyConflict:Add, Text, x17 y+15 w630 h80, % msg
 	
 	Gui, HotkeyConflict:Add, Button, w60 x590 gCloseHotkeyConflictGui, Close
 	Gui, HotkeyConflict:Show, xCenter yCenter w660, Hotkey conflict

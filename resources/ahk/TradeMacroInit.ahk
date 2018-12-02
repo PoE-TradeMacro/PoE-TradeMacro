@@ -76,6 +76,7 @@ TradeGlobals.Set("DefaultLeague", (TradeFunc_CheckIfTempLeagueIsRunning() > 0) ?
 TradeGlobals.Set("GithubUser", "POE-TradeMacro")
 TradeGlobals.Set("GithubRepo", "POE-TradeMacro")
 TradeGlobals.Set("ReleaseVersion", TradeReleaseVersion)
+Globals.Set("AssignedHotkeys", {})
 global globalUpdateInfo := {}
 globalUpdateInfo.repo := TradeGlobals.Get("GithubRepo")
 globalUpdateInfo.user := TradeGlobals.Get("GithubUser")
@@ -371,42 +372,9 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
 TradeFunc_AssignHotkey(Key, Label) {
-	Key := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
+	VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
 	
-	assignedKeys_before := ShowAssignedHotkeys(true)
-	
-	Hotkey, %Key%, %Label%, UseErrorLevel
-	
-	assignedKeys_after := ShowAssignedHotkeys(true)
-
-	If (ErrorLevel) {
-		If (errorlevel = 1)
-			str := str . "`nASCII " . Key . " - 1) The Label parameter specifies a nonexistent label name."
-		Else If (errorlevel = 2)
-			str := str . "`nASCII " . Key . " - 2) The KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language. Switching to the english layout should solve this for now."
-		Else If (errorlevel = 3)
-			str := str . "`nASCII " . Key . " - 3) Unsupported prefix key. For example, using the mouse wheel as a prefix in a hotkey such as WheelDown & Enter is not supported."
-		Else If (errorlevel = 4)
-			str := str . "`nASCII " . Key . " - 4) The KeyName parameter is not suitable for use with the AltTab or ShiftAltTab actions. A combination of two keys is required. For example: RControl & RShift::AltTab."
-		Else If (errorlevel = 5)
-			str := str . "`nASCII " . Key . " - 5) The command attempted to modify a nonexistent hotkey."
-		Else If (errorlevel = 6)
-			str := str . "`nASCII " . Key . " - 6) The command attempted to modify a nonexistent variant of an existing hotkey. To solve this, use Hotkey IfWin to set the criteria to match those of the hotkey to be modified."
-		Else If (errorlevel = 50)
-			str := str . "`nASCII " . Key . " - 50) Windows 95/98/Me: The command completed successfully but the operating system refused to activate the hotkey. This is usually caused by the hotkey being "" ASCII " . int . " - in use"" by some other script or application (or the OS itself). This occurs only on Windows 95/98/Me because on other operating systems, the program will resort to the keyboard hook to override the refusal."
-		Else If (errorlevel = 51)
-			str := str . "`nASCII " . Key . " - 51) Windows 95/98/Me: The command completed successfully but the hotkey is not supported on Windows 95/98/Me. For example, mouse hotkeys and prefix hotkeys such as a & b are not supported."
-		Else If (errorlevel = 98)
-			str := str . "`nASCII " . Key . " - 98) Creating this hotkey would exceed the 1000-hotkey-per-script limit (however, each hotkey can have an unlimited number of variants, and there is no limit to the number of hotstrings)."
-		Else If (errorlevel = 99)
-			str := str . "`nASCII " . Key . " - 99) Out of memory. This is very rare and usually happens only when the operating system has become unstable."
-
-		MsgBox, %str%
-	}
-	Else If (assignedKeys_before.MaxIndex() = assignedKeys_after.MaxIndex()) {
-		;ShowHotKeyConflictUI(assignedKeys_after[assignedKeys_after.MaxIndex()], Key, Label)
-		;	debugprintarray([assignedKeys_before, assignedKeys_after])
-	}
+	AssignHotKey(Label, key, vkey, "on")
 }
 
 ; ------------------ GET LEAGUES ------------------
