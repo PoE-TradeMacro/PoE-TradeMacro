@@ -12065,7 +12065,7 @@ IsInArray(el, array) {
 }
 
 GetObjPropertyCount(obj) {
-	Return NumGet(&obj + 4*A_PtrSize)	
+	Return NumGet(&obj + 4*A_PtrSize)
 }
 
 TogglePOEItemScript()
@@ -12743,7 +12743,7 @@ StartLutbot:
 			OpenWebPageWith(AssociatedProgram("html"), "http://lutbot.com/#/ahk")
 		}
 	} Else {		
-		Run "%A_AhkPath%" "%A_MyDocuments%\AutoHotKey\LutTools\lite.ahk"	
+		Run "%A_AhkPath%" "%A_MyDocuments%\AutoHotKey\LutTools\lite.ahk"
 	}
 
 	If (Opts.Lutbot_WarnConflicts) {
@@ -12761,16 +12761,29 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 	conflicts := []
 	
 	For key, val in config.hotkeys {
-		s1 := RegExReplace(val, "([-+^*$?\|&()])", "\$1")		
-		For k, v in hotkeys {
-			s2 := RegExReplace(v[6], "([-+^*$?\|&()])", "\$1")
-			If (RegExmatch(Trim(val), "i)^" Trim(s2) "$")) {
-				conflict := {}
+		If (RegExMatch(key, "i)superLogout|logout|options")) {
+			conflict := {}
+			VKey := KeyNameToKeyCode(val, 0)
+			assignedLabel := GetAssignedHotkeysLabel(key, val, vkey)
+			
+			s1 := RegExReplace(val, "([-+^*$?\|&()])", "\$1")
+			foundConflict := false
+			For k, v in hotkeys {				
+				s2 := RegExReplace(v[6], "([-+^*$?\|&()])", "\$1")
+				If (RegExmatch(Trim(val), "i)^" Trim(s2) "$")) {
+					foundConflict := true
+					Break					
+				}
+			}
+			
+			If (StrLen(assignedLabel) or foundConflict) {
 				conflict.name := key 
 				conflict.hkey := val
+				conflict.vkey := vkey
+				conflict.assignedLabel := assignedLabel				
 				conflicts.push(conflict)
 			}
-		}	
+		}
 	}
 	
 	If (conflicts.MaxIndex()) {
@@ -12779,7 +12792,7 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 		msg .= "`n" "which should be resolved before playing the game."
 		msg .= "`n`n" "Conflicting hotkey(s) from Lutbot:"
 		For key, val in conflicts {
-			msg .= "`n"   "-  " val.hkey "    (" val.name ")" 	
+			msg .= "`n"   "- Lutbots """ val.name """ (" val.hkey ") conflicts with """ val.assignedLabel """"
 		}
 		
 		MsgBox, 16, Lutbot lite - %project% conflict, %msg%
