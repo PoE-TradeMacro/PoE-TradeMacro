@@ -219,14 +219,6 @@ TradeFunc_AssignAllHotkeys()
 	For keyName, keyVal in TradeOpts_New.Hotkeys {
 		state := TradeOpts_New.HotkeyStates[keyName] ? "on" : "off"
 		TradeFunc_AssignHotkey(keyVal, keyName, state)
-		/*
-		If (TradeOpts_New.HotkeyStates[keyName]) {
-			TradeFunc_AssignHotkey(keyVal, keyName)
-		}
-		Else {
-			Hotkey, %keyVal%, off, UseErrorLevel
-		}
-		*/
 	}
 	Return
 }

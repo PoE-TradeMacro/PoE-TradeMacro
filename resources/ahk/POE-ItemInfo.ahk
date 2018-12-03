@@ -341,7 +341,9 @@ class Item_ {
 		This.Charges		:= []
 		This.AreaMonsterLevelReq := []
 		This.BeastData 	:= {}
-		Item.GemColor		:= ""
+		This.GemColor		:= ""
+		This.veiledPrefixCount	:= ""
+		This.veiledSuffixCount	:= ""
 		
 		This.HasImplicit	:= False
 		This.HasEffect		:= False
@@ -365,6 +367,7 @@ class Item_ {
 		This.IsTalisman 	:= False
 		This.IsJewel 		:= False
 		This.IsLeaguestone	:= False
+		This.IsScarab		:= False
 		This.IsDivinationCard := False
 		This.IsProphecy	:= False
 		This.IsUnique 		:= False
@@ -875,13 +878,13 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			return
 		}
 		
-		; Leaguestones
-		IfInString, LoopField, Leaguestone
+		; Leaguestones and Scarabs
+		If (RegExMatch(Loopfield, "i)Leaguestone|Scarab"))
 		{
-			RegexMatch(LoopField, "i)(.*)Leaguestone", match)
-			RegexMatch(Trim(match1), "i)\b(\w+)\W*$", match) ; match last word
-			BaseType = Leaguestone
-			SubType := Trim(match1) " Leaguestone"
+			RegexMatch(LoopField, "i)(.*)(Leaguestone|Scarab)", typeMatch)
+			RegexMatch(Trim(typeMatch1), "i)\b(\w+)\W*$", match) ; match last word
+			BaseType := Trim(typeMatch2)
+			SubType := Trim(match1) " " Trim(typeMatch2)
 			return
 		}
 
@@ -3926,6 +3929,26 @@ SolveAffixes_PreSuf(Keyname, LineNum, Value, Filename1, Filename2, ItemLevel)
 		LineTxt := MakeAffixDetailLine(Itemdata.AffixTextLines[LineNum].Text, ["Prefix", "Suffix"], ValueRange, [[Mod1Mod2Tiers.Mod1Top, Mod1Mod2Tiers.Mod1Btm] , [Mod1Mod2Tiers.Mod2Top, Mod1Mod2Tiers.Mod2Btm]], False)
 		Itemdata.UncertainAffixes[Keyname]["3_PreSuf"] := [1, 1, LineNum, LineTxt]
 	}
+}
+
+GetVeiledModCount(ItemDataAffixes, AffixType) {
+	vCount := 0
+	
+	IfInString, ItemDataAffixes, Unidentified
+	{
+		Return ; Not interested in unidentified items
+	}
+	
+	Loop, Parse, ItemDataAffixes, `n, `r 
+	{
+		If (RegExMatch(A_LoopField, "i)Veiled (Prefix|Suffix)", match)) {
+			If (match1 = AffixType) {
+				vCount := vCount + 1	
+			}			
+		}
+	}
+	
+	Return vCount  
 }
 
 ParseAffixes(ItemDataAffixes, Item)
@@ -8019,6 +8042,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
 	Item.IsCurrency:= (InStr(ItemData.Rarity, "Currency"))
+	Item.IsScarab	:= (RegExMatch(ItemData.NamePlate, "i)Scarab$")) ? true : false
 	
 	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key", "Breachstone", "Divine Vessel"]
 	For key, val in regex {
@@ -8028,12 +8052,12 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			Break
 		}
 	}	
-	
-	If (Not (InStr(ItemDataText, "Itemlevel:") or InStr(ItemDataText, "Item Level:")) and not Item.IsGem and not Item.IsCurrency and not Item.IsDivinationCard and not Item.IsProphecy)
+
+	If (Not (InStr(ItemDataText, "Itemlevel:") or InStr(ItemDataText, "Item Level:")) and not Item.IsGem and not Item.IsCurrency and not Item.IsDivinationCard and not Item.IsProphecy and not Item.IsScarab)
 	{
 		return Item.Name
 	}
-	
+
 	If (Item.IsGem)
 	{
 		RarityLevel	:= 0
@@ -8077,8 +8101,10 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		Else If (Not Item.IsCurrency and Not Item.IsDivinationCard and Not Item.IsProphecy)
 		{
 			RarityLevel	:= CheckRarityLevel(ItemData.Rarity)
-			Item.Level	:= ParseItemLevel(ItemDataText)
-			ItemLevelWord	:= "Item Level:"
+			If (not Item.IsScarab) {
+				Item.Level	:= ParseItemLevel(ItemDataText)
+				ItemLevelWord	:= "Item Level:"	
+			}			
 			If (Not Item.IsBeast) {
 				ParseItemType(ItemData.Stats, ItemData.NamePlate, ItemBaseType, ItemSubType, ItemGripType, RarityLevel)
 				Item.BaseType	:= ItemBaseType
@@ -8087,7 +8113,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			}			
 		}
 	}
-	
+
 	Item.RarityLevel	:= RarityLevel
 	
 	Item.IsBow		:= (Item.SubType == "Bow")
@@ -8148,7 +8174,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		return
 	}
 
-	If (Item.IsLeagueStone) {
+	If (Item.IsLeagueStone or Item.IsScarab) {
 		ItemDataIndexAffixes := ItemDataIndexAffixes - 1
 	}
 	If (Item.IsBeast) {
@@ -8189,7 +8215,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		; already parsed
 	}
-	Else If (RarityLevel > 1 and RarityLevel < 4 and Item.IsMap = False and not Item.IsLeaguestone)  ; Code added by Bahnzo to avoid maps showing affixes
+	Else If (RarityLevel > 1 and RarityLevel < 4 and Item.IsMap = False and not (Item.IsLeaguestone or Item.IsScarab))  ; Code added by Bahnzo to avoid maps showing affixes
 	{
 		ParseAffixes(ItemData.Affixes, Item)
 	}
@@ -8197,11 +8223,16 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	{
 		MapModWarnings := ParseMapAffixes(ItemData.Affixes)
 	}
-	Else If (RarityLevel > 1 and RarityLevel < 4 and Item.IsLeaguestone)
+	Else If (RarityLevel > 1 and RarityLevel < 4 and (Item.IsLeaguestone or Item.IsScarab))
 	{
 		ParseLeagueStoneAffixes(ItemData.Affixes, Item)
 	}
 	
+	If (RarityLevel > 1 and Item.IsMap = False) {
+		Item.veiledPrefixCount := GetVeiledModCount(ItemData.Affixes, "Prefix")
+		Item.veiledSuffixCount := GetVeiledModCount(ItemData.Affixes, "Suffix")
+	}
+
 	AffixTotals.FormatAll()
 	
 	NumPrefixes	:= AffixTotals.NumPrefixes
@@ -10845,8 +10876,8 @@ HighlightItems(broadTerms = false, leaveSearchField = true, focusHideoutFilter =
 					terms.push(Item.BaseName)
 				}
 			}
-			; leaguestones
-			Else If (Item.IsLeaguestone) {
+			; leaguestones and Scarabs
+			Else If (Item.IsLeaguestone or Item.IsScarab) {
 				If (broadTerms) {
 					terms.push(Item.BaseType)
 				} Else {

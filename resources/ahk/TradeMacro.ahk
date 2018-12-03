@@ -4158,7 +4158,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	
 	image := A_ScriptDir "\resources\images\" iPic ".png"
 	If (FileExist(image)) {
-		Gui, SelectModsGui:Add, Picture, w800 h30 x0 yp+20, %image%
+		Gui, SelectModsGui:Add, Picture, w900 h30 x0 yp+20, %image%
 	}		
 	Gui, SelectModsGui:Add, Text, x14 yp+9 %tColor% BackgroundTrans, %itemName%
 	If (advItem.Rarity > 2 or advItem.isUnique) {
