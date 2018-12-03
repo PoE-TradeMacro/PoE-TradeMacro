@@ -173,7 +173,7 @@ If (_updateConfigWrite) {
 */
 OnMessage( 0x111, "HandleGuiControlSetFocus" )
 
-TradeFunc_StopSplashScreen()
+TradeFunc_FinishTMInit()
 
 ; ----------------------------------------------------------- Functions ----------------------------------------------------------------
 
@@ -1533,22 +1533,16 @@ TradeFunc_GetOSInfo() {
 
 ;----------------------- SplashScreens ---------------------------------------
 TradeFunc_StartSplashScreen() {
-	;SplashTextOn, , 20, PoE-TradeMacro, Initializing script...
-	/*
-	initArray := ["Sending Einhar to catch some canaries...", "Burying Sunder and KB in the Depths...", "Hiring Keanu Reeves as a cart driver...", "Hiring a wheely good escort...", 
-	"Preparing GPU to mine Azurite...",  "Loading spell block... 3%... aborting...", "Exploring reddit's first infinite salt mine...", "Awakening the balrogs...", 
-	"Sending the dark elves into some arc delves..."]
-	*/
 	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app..."
-		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%...",
-		, "Helping Alva to discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle..."]
-	
+		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%..."
+		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle..."]
+
 	Random, randomNum, 1, initArray.MaxIndex()
 	SplashTextOn, 370, 20, PoE-TradeMacro, % initArray[randomNum]
 }
 
-TradeFunc_StopSplashScreen() {
-	SplashTextOff
+TradeFunc_FinishTMInit() {
+	; SplashText gets disabled by ItemInfo
 
 	If (TradeOpts.Debug) {
 		Menu, Tray, Add ; Separator
@@ -1560,7 +1554,7 @@ TradeFunc_StopSplashScreen() {
 		SetTimer, BringPoEWindowToFrontAfterInit, 1000
 
 		gemList := TradeGlobals.Get("GemNameList")
-		If(gemList.Length()) {
+		If (gemList.Length()) {
 			console.log("Fetching gem names successful.")
 		}
 		Else {

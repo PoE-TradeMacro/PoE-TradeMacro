@@ -381,7 +381,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Global Item, ItemData, TradeOpts, mapList, uniqueMapList, Opts
 
 	; When redirected from AdvancedPriceCheck form the clipboard has already been parsed
-	if(!isAdvancedPriceCheckRedirect) {
+	If (!isAdvancedPriceCheckRedirect) {
 		TradeFunc_DoParseClipboard()
 	}
 	iLvl     := Item.Level
@@ -473,7 +473,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	If (!Item.IsUnique or Item.IsBeast) {
 		; TODO: improve this
 		If (Item.IsBeast) {
-			Item.BeastData.GenusMod 		:= {}
+			Item.BeastData.GenusMod 			:= {}
 			Item.BeastData.GenusMod.name_orig	:= "(beast) Genus: " Item.BeastData.Genus
 			Item.BeastData.GenusMod.name		:= RegExReplace(Item.BeastData.GenusMod.name_orig, "i)\d+", "#")
 			Item.BeastData.GenusMod.param		:= TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], Item.BeastData.GenusMod)
@@ -488,6 +488,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		preparedItem.BeastData	:= Item.BeastData
 		preparedItem.IsCorrupted	:= Item.IsCorrupted
 		preparedItem.IsJewel	:= Item.IsJewel
+		preparedItem.veiledPrefixCount := Item.veiledPrefixCount
+		preparedItem.veiledSuffixCount := Item.veiledSuffixCount
+		
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
@@ -543,6 +546,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem.isRelic	:= Item.isRelic
 			preparedItem.iLvl 		:= Item.level
 			preparedItem.BaseName	:= Item.BaseName
+			preparedItem.veiledPrefixCount := Item.veiledPrefixCount
+			preparedItem.veiledSuffixCount := Item.veiledSuffixCount
+		
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
 
@@ -729,14 +735,24 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				RequestParams.Elder := 1
 			}
 		}
-		
+
 		; abyssal sockets 
 		If (s.useAbyssalSockets) {
 			RequestParams.sockets_a_min := s.abyssalSockets
 			RequestParams.sockets_a_max := s.abyssalSockets
 		}
+		
+		; veiled mods
+		; TODO, params are speculated
+		If (s.useVeiledPrefix) {
+			RequestParams.veiledPrefix_min := s.veiledPrefixCount
+			RequestParams.veiledPrefix_max := s.veiledPrefixCount
+		}
+		If (s.useVeiledSuffix) {
+			RequestParams.veiledSuffix_min := s.useVeiledSuffix
+			RequestParams.veiledSuffix_max := s.useVeiledSuffix
+		}
 	}
-
 	
 	/*
 		prepend the item.subtype to match the options used on poe.trade
@@ -781,7 +797,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		; xtype = Item.SubType (Helmet)
 		; xbase = Item.BaseName (Eternal Burgonet)
 
-		; If desired crafting base and not isAdvancedPriceCheckRedirect
+		; if desired crafting base and not isAdvancedPriceCheckRedirect
 		If (isCraftingBase and not Enchantment.Length() and not Corruption.Length() and not isAdvancedPriceCheckRedirect) {
 			RequestParams.xbase := Item.BaseName
 			Item.UsedInSearch.ItemBase := Item.BaseName
@@ -820,7 +836,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 					RequestParams.modGroups[key].AddMod(modParam)
 					Item.UsedInSearch.CorruptedMod := true		
 				}			
-			}			
+			}	
 		}
 		Else {
 			RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
@@ -850,6 +866,22 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (not Item.IsBeast) {
 			Item.UsedInSearch.Type := (Item.xtype) ? Item.GripType . " " . Item.SubType : Item.SubType	
 		}		
+	}
+	
+	If (not AdvancedPriceCheckItem.mods.length() <= 0) {				
+		; TODO: speculated params
+		/*
+		If (Item.veiledPrefixCount) {
+			RequestParams.veiledPrefix_min := Item.veiledPrefixCount
+			RequestParams.veiledPrefix_min := Item.veiledPrefixCount
+			Item.UsedInSearch.veiledPrefix := Item.veiledPrefixCount
+		}
+		If (Item.veiledSuffixCount) {
+			RequestParams.veiledSuffix_min := Item.veiledSuffixCount
+			RequestParams.veiledSuffix_min := Item.veiledSuffixCount
+			Item.UsedInSearch.veiledSuffix := Item.veiledSuffixCount
+		}
+		*/
 	}
 	
 	/*
@@ -2689,6 +2721,12 @@ TradeFunc_ParseHtml(html, payload, iLvl = "", ench = "", isItemAgeRequest = fals
 			Title .= (Item.UsedInSearch.specialBase) ? "| " . Item.UsedInSearch.specialBase . " Base " : ""
 			Title .= (Item.UsedInSearch.Charges) ? "`n" . Item.UsedInSearch.Charges . " " : ""
 			Title .= (Item.UsedInSearch.AreaMonsterLvl) ? "| " . Item.UsedInSearch.AreaMonsterLvl . " " : ""
+			
+			If (Item.UsedInSearch.veiledPrefix or Item.UsedInSearch.veiledSuffix) {
+				Title .= "`n"
+				Title .= (Item.UsedInSearch.veiledPrefix) ? "Veiled Prefixes: " Item.UsedInSearch.Charges . " | " : ""	
+				Title .= (Item.UsedInSearch.veiledSuffix) ? "Veiled Suffixes: " Item.UsedInSearch.Charges . " | " : ""	
+			}
 			
 			If (Item.IsBeast and not Item.IsUnique) {
 				Title .= (Item.UsedInSearch.SearchType = "Default") ? "`n" . "!! Added special bestiary mods to the search !!" : ""	
@@ -4715,7 +4753,23 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.specialBase) {
 		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 	}
-	
+
+	/*
+		veiled mods
+		*/
+	/*
+	If (advItem.veiledPrefixCount) {
+		Gui, SelectModsGui:Add, CheckBox, x15 yp+25 vTradeAdvancedSelectedVeiledPrefix Checked, % "Veiled Prefix"
+		Gui, SelectModsGui:Add, Edit    , x+1 yp-3 w30 vTradeAdvancedVeiledPrefixCount        , % advItem.veiledPrefixCount
+	}
+	If (advItem.veiledSuffixCount) {
+		voffsetX := advItem.veiledPrefixCount ? "+10" : "15"
+		voffsetY := advItem.veiledPrefixCount ? "+3"  : "+25"
+		Gui, SelectModsGui:Add, CheckBox, x%voffsetX% yp%voffsetY% vTradeAdvancedSelectedVeiledSuffix Checked, % "Veiled Suffix"
+		Gui, SelectModsGui:Add, Edit    , x+1 yp-3 w30 vTradeAdvancedVeiledSuffixCount        , % advItem.veiledPrefixCount
+	}
+	*/
+
 	/*
 		corrupted state for jewels
 		*/
@@ -4889,7 +4943,11 @@ TradeFunc_ResetGUI() {
 	TradeAdvancedOverrideOnlineState	:=
 	TradeAdvancedUseAbyssalSockets	:=
 	TradeAdvancedAbyssalSockets		:=
-	TradeAdvancedSelectedCorruptedState:=
+	TradeAdvancedSelectedCorruptedState:=	
+	TradeAdvancedSelectedVeiledPrefix	:=
+	TradeAdvancedVeiledPrefixCount	:=
+	TradeAdvancedSelectedVeiledSuffix	:=
+	TradeAdvancedVeiledSuffixCount	:=
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
@@ -4955,7 +5013,11 @@ TradeFunc_HandleGuiSubmit() {
 	newItem.onlineOverride		:= TradeAdvancedOverrideOnlineState
 	newItem.corruptedOverride	:= TradeAdvancedSelectedCorruptedState
 	newItem.useAbyssalSockets 	:= TradeAdvancedUseAbyssalSockets
-	newItem.abyssalSockets		:= TradeAdvancedAbyssalSockets
+	newItem.abyssalSockets		:= TradeAdvancedAbyssalSockets	
+	newItem.useVeiledPrefix		:= TradeAdvancedSelectedVeiledPrefix
+	newItem.veiledPrefixCount	:= TradeAdvancedVeiledPrefixCount
+	newItem.useVeiledSuffix		:= TradeAdvancedSelectedVeiledSuffix
+	newItem.veiledSuffixCount	:= TradeAdvancedVeiledSuffixCount
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)
 	Gui, SelectModsGui:Destroy

@@ -540,6 +540,9 @@ If (Opts.Lutbot_CheckScript) {
 	SetTimer, StartLutbot, 2000
 }
 
+SplashTextOff	; init finished
+
+; ----------------------------------------------------------- Functions and Labels ----------------------------------------------------------------
 
 GetAhkExeFilename(Default_="AutoHotkey.exe")
 {
@@ -11126,7 +11129,7 @@ OpenItemOnPoEAntiquary() {
 AntiquaryOpenInBrowser(type, name, id, lastLeague, multiItems = false) {
 	league := TradeGlobals.Get("LeagueName")
 	If (RegExMatch(league, "Hardcore.*")) {
-		league := lastLeague "HC"
+		league := lastLeague " HC"
 	} Else {
 		league := lastLeague
 	}
@@ -12976,8 +12979,7 @@ ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel, oldLabel = "", preventedAssignmen
 	Gui, HotkeyConflict:Show, xCenter yCenter w660, Hotkey conflict
 	
 	WinWaitClose, Hotkey conflict
-	sleep 5000
-	
+	sleep 5000	
 }
 
 
