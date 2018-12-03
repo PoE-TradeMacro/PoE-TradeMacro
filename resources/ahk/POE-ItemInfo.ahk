@@ -12764,7 +12764,7 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 		If (RegExMatch(key, "i)superLogout|logout|options")) {
 			conflict := {}
 			VKey := KeyNameToKeyCode(val, 0)
-			assignedLabel := GetAssignedHotkeysLabel(key, val, vkey)
+			assignedLabel := GetAssignedHotkeysLabel(key, val, vkey, "on")
 			
 			s1 := RegExReplace(val, "([-+^*$?\|&()])", "\$1")
 			foundConflict := false
@@ -12799,10 +12799,11 @@ CheckForLutBotHotkeyConflicts(hotkeys, config) {
 	}
 }
 
-SaveAssignedHotkey(label, key, vkey) {
+SaveAssignedHotkey(label, key, vkey, state) {
 	hk := {}
 	hk.key := key
 	hk.vkey := vkey
+	hk.state := state
 	
 	obj := Globals.Get("AssignedHotkeys")
 	obj[label] := hk 
@@ -12822,11 +12823,12 @@ RemoveAssignedHotkey(label) {
 	}
 }
 
-GetAssignedHotkeysLabel(label, key, vkey) {
+GetAssignedHotkeysLabel(label, key, vkey, ByRef state) {
 	haystack := Globals.Get("AssignedHotkeys")
 	
 	For k, v in haystack {
 		If (v.vkey = vkey) {
+			state := v.state
 			Return k
 		}
 	}
@@ -12843,25 +12845,35 @@ GetAssignedHotkeysEnglishKey(vkey) {
 }
 
 AssignHotKey(Label, key, vkey, enabledState = "on") {
-	assignedLabel := GetAssignedHotkeysLabel(Label, key, vkey)
-	If (assignedLabel = Label) {
+	assignedState := ""
+	assignedLabel := GetAssignedHotkeysLabel(Label, key, vkey, assignedState)
+	
+	If (assignedLabel = Label and enabledState = assignedState) {
 		; new hotkey is already assigned to the target label
+
 		Return
+	} Else If (assignedLabel = Label and enabledState != assignedState) {
+		; new hotkey is already assigned but has a different state (enabled/disabled)
+		Hotkey, %VKey%, %Label%, UseErrorLevel %enabledState%
+		SaveAssignedHotkey(Label, key, vkey, enabledState)
 	} Else If (StrLen(assignedLabel)) {
 		; new hotkey is already assigned to a different label
 		; the old label will be unassigned unless prevented
 		Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
 		If (not ErrorLevel) {
-			SaveAssignedHotkey(Label, key, vkey)
+			SaveAssignedHotkey(Label, key, vkey, enabledState)
 			RemoveAssignedHotkey(assignedLabel)
 			ShowHotKeyConflictUI(GetAssignedHotkeysEnglishKey(VKey), VKey, Label, assignedLabel, false)
 		}
 	} Else {
 		; new hotkey is not assigned to any label yet
-		Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
-		SaveAssignedHotkey(Label, key, vkey)
+		If (enabledState != "off") {
+			; only assign it when it's enabled
+			Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
+			SaveAssignedHotkey(Label, key, vkey, enabledState)
+		}		
 	}
-	
+
 	If (ErrorLevel) {
 		If (errorlevel = 1)
 			str := str . "`nASCII " . VKey . " - 1) The Label parameter specifies a nonexistent label name."

@@ -217,12 +217,16 @@ TradeFunc_AssignAllHotkeys()
 {
 	Global
 	For keyName, keyVal in TradeOpts_New.Hotkeys {
+		state := TradeOpts_New.HotkeyStates[keyName] ? "on" : "off"
+		TradeFunc_AssignHotkey(keyVal, keyName, state)
+		/*
 		If (TradeOpts_New.HotkeyStates[keyName]) {
 			TradeFunc_AssignHotkey(keyVal, keyName)
 		}
 		Else {
 			Hotkey, %keyVal%, off, UseErrorLevel
 		}
+		*/
 	}
 	Return
 }
@@ -371,10 +375,10 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 }
 
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
-TradeFunc_AssignHotkey(Key, Label) {
+TradeFunc_AssignHotkey(Key, Label, state) {
 	VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
 	
-	AssignHotKey(Label, key, vkey, "on")
+	AssignHotKey(Label, key, vkey, state)
 }
 
 ; ------------------ GET LEAGUES ------------------
