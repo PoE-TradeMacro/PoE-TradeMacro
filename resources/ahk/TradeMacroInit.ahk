@@ -1533,9 +1533,15 @@ TradeFunc_GetOSInfo() {
 
 ;----------------------- SplashScreens ---------------------------------------
 TradeFunc_StartSplashScreen() {
+	/*
 	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app..."
 		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%..."
 		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle...", "Vendoring stat-sticks..."]
+	*/	
+		
+	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...",
+		, "Hunting some old friends...", "Setting up lab carries for the other 99%..."
+		, "Message @ScourgeOfTheImmortals if you find the new map hideouts.", "Vendoring stat-sticks..."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
 	SplashTextOn, 370, 20, PoE-TradeMacro, % initArray[randomNum]
