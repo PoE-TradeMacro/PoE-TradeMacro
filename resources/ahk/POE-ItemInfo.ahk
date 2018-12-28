@@ -382,6 +382,7 @@ class Item_ {
 		This.IsAbyssJewel	:= False
 		This.IsBeast		:= False
 		This.IsHideoutObject:= False
+		This.IsFossil		:= False
 	}
 }
 Global Item := new Item_
@@ -8045,6 +8046,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	
 	Item.IsGem	:= (InStr(ItemData.Rarity, "Gem"))
 	Item.IsCurrency:= (InStr(ItemData.Rarity, "Currency"))
+	Item.IsFossil	:= (RegExMatch(ItemData.NamePlate, "i)Fossil$")) ? true : false
 	Item.IsScarab	:= (RegExMatch(ItemData.NamePlate, "i)Scarab$")) ? true : false
 	
 	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key", "Breachstone", "Divine Vessel"]

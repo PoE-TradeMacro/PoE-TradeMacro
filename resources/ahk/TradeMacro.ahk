@@ -1306,7 +1306,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	ParsingError	:= ""
 	currencyUrl	:= ""	
 	If (Item.IsCurrency and not Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
-		If (!TradeOpts.AlternativeCurrencySearch) {
+		If (!TradeOpts.AlternativeCurrencySearch or Item.IsFossil) {
 			Html := TradeFunc_DoCurrencyRequest(Item.Name, openSearchInBrowser, 0, currencyUrl, error)
 			If (error) {
 				ParsingError := Html
