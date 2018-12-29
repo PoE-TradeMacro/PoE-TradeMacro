@@ -747,7 +747,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			SubType := match1
 			return
 		}
-		If (RegExMatch(LoopField, "i)\bMap\b"))
+		If (RegExMatch(LoopField, "i)\b(Map)\b"))
 		{
 			Global mapMatchList
 			BaseType = Map

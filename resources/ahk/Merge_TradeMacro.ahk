@@ -93,7 +93,12 @@ FileAppend, %trade%		, %scriptDir%\_TradeMacroMain.ahk
 FileSetAttrib, +H, %scriptDir%\_TradeMacroMain.ahk
 ; pass some parameters to TradeMacroInit
 If (not onlyMergeFiles) {
-	Run "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%"
+	SplashTextOff
+	RunWait, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel
+	If (ErrorLevel) {
+		
+		MsgBox, 16, PoE-TradeMacro run error, "The script failed to run. Do stuff."
+	}	
 }
 
 ExitApp

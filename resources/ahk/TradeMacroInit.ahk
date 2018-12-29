@@ -91,6 +91,7 @@ argumentProjectName		= %1%
 argumentUserDirectory	= %2%
 argumentIsDevVersion	= %3%
 argumentOverwrittenFiles = %4%
+argumentMergeScriptPath  = %7%
 
 ; when using the fallback exe we're missing the parameters passed by the merge script
 If (!StrLen(argumentProjectName) > 0) {
@@ -173,7 +174,7 @@ If (_updateConfigWrite) {
 */
 OnMessage( 0x111, "HandleGuiControlSetFocus" )
 
-TradeFunc_FinishTMInit()
+TradeFunc_FinishTMInit(argumentMergeScriptPath)
 
 ; ----------------------------------------------------------- Functions ----------------------------------------------------------------
 
@@ -1544,12 +1545,17 @@ TradeFunc_StartSplashScreen() {
 		, "Message @ScourgeOfTheImmortals if you find the new map hideouts.", "Vendoring stat-sticks..."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
-	SplashTextOn, 370, 20, PoE-TradeMacro, % initArray[randomNum]
+	SplashTextOn, 400, 20, PoE-TradeMacro, % initArray[randomNum]
 }
 
-TradeFunc_FinishTMInit() {
+TradeFunc_FinishTMInit(argumentMergeScriptPath) {	
+	/*
+		Make sure that the merge script is closed.
+		*/
+	WinClose, %argumentMergeScriptPath% ahk_class AutoHotkey
+	WinKill, %argumentMergeScriptPath% ahk_class AutoHotkey
+	
 	; SplashText gets disabled by ItemInfo
-
 	If (TradeOpts.Debug) {
 		Menu, Tray, Add ; Separator
 		Menu, Tray, Add, Test Item Pricing, DebugTestItemPricing
