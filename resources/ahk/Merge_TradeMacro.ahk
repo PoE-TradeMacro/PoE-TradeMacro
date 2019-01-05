@@ -96,7 +96,6 @@ If (not onlyMergeFiles) {
 	SplashTextOff
 	RunWait, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel
 	If (ErrorLevel) {
-		
 		MsgBox, 16, PoE-TradeMacro run error, "The script failed to run. Do stuff."
 	}	
 }
@@ -146,7 +145,7 @@ StartSplashScreen() {
 
 AppendCustomMacros(userDirectory)
 {
-	If(!InStr(FileExist(userDirectory "\CustomMacros"), "D")) {
+	If (!InStr(FileExist(userDirectory "\CustomMacros"), "D")) {
 		FileCreateDir, %userDirectory%\CustomMacros\
 	}
 
