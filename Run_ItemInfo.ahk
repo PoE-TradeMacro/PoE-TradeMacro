@@ -8,7 +8,7 @@ error := ErrorLevel
 
 If (not StrLen(versionFile) or error) {
 	If (RegExMatch(A_ScriptDir, "i)\.zip$")) {
-		MsgBox, 16, PoE-TradeMacro - Critical error, % "You are trying to run PoE-ItemInfo from inside a zip-archive, please unzip the whole folder. `n`nClosing script..."
+		MsgBox, 16, PoE-ItemInfo - Critical error, % "You are trying to run PoE-ItemInfo from inside a zip-archive, please unzip the whole folder. `n`nClosing script..."
 		ExitApp
 	} Else {
 		If (FileExist(versionFilePath)) {
