@@ -11857,11 +11857,8 @@ CurrencyDataDowloadURLtoJSON(url, sampleValue, critical = false, isFallbackReque
 		reqHeaders.push("User-Agent: Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36")
 		currencyData := PoEScripts_Download(url, postData, reqHeaders, options, true, true, false, "", reqHeadersCurl)
 		
-		If (FileExist(A_ScriptDir "\temp\currencyHistory_" league ".txt")) {
-			FileDelete, % A_ScriptDir "\temp\currencyHistory_" league ".txt"	
-		}
-		FileAppend, %currencyData%, % A_ScriptDir "\temp\currencyHistory_" league ".txt"
-		
+		deleteError := PoEScripts_SaveWriteTextFile(A_ScriptDir "\temp\currencyHistory_" league ".txt", currencyData, "utf-8", true, true)
+
 		Try {
 			parsedJSON := JSON.Load(currencyData)
 		} Catch e {
@@ -11876,6 +11873,10 @@ CurrencyDataDowloadURLtoJSON(url, sampleValue, critical = false, isFallbackReque
 			loggedCurrencyRequestAtStartup := true
 			If (not loggedTempLeagueCurrencyRequest and not isTempLeague) {
 				loggedTempLeagueCurrencyRequest := true
+			}
+			
+			If (deleteError) {
+				WriteToLogFile("Failed to delete " A_ScriptDir "\temp\currencyHistory_" league ".txt before writing data to it. `n", "StartupLog.txt", project)	
 			}
 		}
 		; first currency data parsing (script start)

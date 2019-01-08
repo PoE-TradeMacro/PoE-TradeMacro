@@ -43,7 +43,6 @@ projectName := "PoE-TradeMacro"
 /*
 	Check some folder permissions
 */
-
 PoEScripts_CheckFolderWriteAccess(A_MyDocuments . "\" . projectName)
 PoEScripts_CheckFolderWriteAccess(scriptDir)
 
@@ -220,7 +219,7 @@ ShowErrorUI:
 	Gui, Add, Text, x25 y+5 BackgroundTrans, % "- The script folder isn't located in any place that may cause permission issues:"
 	Gui, Add, Text, x35 y+5 BackgroundTrans, % "- Desktop or other system directories."
 	Gui, Add, Text, x35 y+5 BackgroundTrans, % "- Folders that are being synched by some software."
-	Gui, Add, Text, x25 y+5 BackgroundTrans, % "- When having ""duplicate label"" or ""This line does not contain any recognized action"" try deleting:"
+	Gui, Add, Text, x25 y+5 BackgroundTrans, % "- When having ""duplicate label"" or ""This line does not contain any recognized action"" errors try deleting:"
 	Gui, Add, Text, x35 y+5 BackgroundTrans, % "- All files in the folder " A_MyDocuments "\" projectName "\CustomMacros""."
 	
 	Gui, Add, Text, x15 y+15 BackgroundTrans, % "If the script displayed any error message please copy it or make a screenshot and report the issue."
