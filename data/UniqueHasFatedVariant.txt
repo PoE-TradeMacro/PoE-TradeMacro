@@ -7,9 +7,9 @@ Asenath's Mark
 Atziri's Mirror
 Blackgleam
 Blackheart
-Bloodboil
 Bramblejack
 Briskwrap
+Bloodboil
 Cameria's Maul
 Chalice of Horrors
 Chober Chaber
@@ -39,7 +39,6 @@ Kaom's Sign
 Karui Ward
 Limbsplit
 Malachai's Simula
-Matua Tupuna
 Quecholli
 Queen's Decree
 Realmshaper

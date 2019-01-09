@@ -4154,7 +4154,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
 	
 	If (StrLen(data.warning_msg)) {
-		Gui, PredictedPricing:Add, Text, x20 yp+15 w380 cBlack BackgroundTrans, % data.warning_msg
+		Gui, PredictedPricing:Add, Text, x20 yp+15 w380 cc14326 BackgroundTrans, % data.warning_msg
 	}
 	
 	; invisible fields
