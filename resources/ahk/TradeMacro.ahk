@@ -4167,8 +4167,6 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Color, FFFFFF	
 	Gui, PredictedPricing:Show, AutoSize, Predicted Item Pricing
 	ControlFocus, Send && Close, Predicted Item Pricing
-	
-	debugprintarray(data)
 }
 
 HandleGuiControlSetFocus( p_w, p_l, p_m, p_hw ) {
