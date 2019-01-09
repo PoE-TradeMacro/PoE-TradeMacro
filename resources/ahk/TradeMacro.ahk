@@ -1982,11 +1982,12 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	postData 	:= "l=" UriEncode(TradeGlobals.Get("LeagueName")) "&i=" EncodedItemData
 	payLength	:= StrLen(postData)
 	url 		:= "https://www.poeprices.info/api"
-
+	
+	reqTimeout := 25
 	options	:= "RequestType: GET"
 	;options	.= "`n" "ReturnHeaders: skip"
 	options	.= "`n" "ReturnHeaders: append"
-	options	.= "`n" "TimeOut: 10"
+	options	.= "`n" "TimeOut: " reqTimeout
 	reqHeaders := []
 
 	reqHeaders.push("Connection: keep-alive")
@@ -2019,15 +2020,6 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	If (not isObject(responseObj)) {		
 		responseObj := {}
 	}
-	
-	/*
-	If (not StrLen(response) and not responseHeader = "403") {
-		responseObj.failed := "ERROR: Parsing response failed, empty response! "
-	}
-	Else If (responseHeader = "403") {
-		responseObj.failed := "ERROR: Parsing response failed, server returned HTTP ERROR 403! "
-	}
-	*/
 
 	If (TradeOpts.Debug) {
 		arr := {}
@@ -2036,7 +2028,7 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 		arr.League := TradeGlobals.Get("LeagueName")
 		TradeFunc_LogPoePricesRequest(arr, request, "poe_prices_debug_log.txt")
 	}
-	
+
 	responseObj.added := {}
 	responseObj.added.encodedData := EncodedItemData
 	responseObj.added.league := TradeGlobals.Get("LeagueName")
@@ -2044,15 +2036,26 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	responseObj.added.browserUrl := url "?" postData "&w=1"
 	responseObj.added.encodingError := encodingError
 	responseObj.added.retHeader := responseHeader
+	responseObj.added.timeoutParam := reqTimeout
 	
 	Return responseObj
 }
 
 TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
+
+	httpErrors := {"403":"Forbidden", "404":"Not Found", "504":"Gateway Timeout", "000":"Client disconnected"}
+	debugprintarray([response, request, httpErrors])
 	; https://docs.google.com/spreadsheets/d/1XwHk6FZwzRDxTbDraGkMy5sF0mfGJhCIzCmLSD66JO0/edit#gid=0
-	If (RegExMatch(response.added.retHeader, "i)(403|404)", errMatch)) {
+	If (RegExMatch(response.added.retHeader, "i)(403|404|504)", errMatch)) {
 		ShowToolTip("")
-		ShowTooltip("ERROR: Request to poeprices.info returned HTTP ERROR " errMatch1 "! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
+		errorDesc := " (" httpErrors[errMatch1] ")"
+		ShowTooltip("ERROR: Request to poeprices.info returned HTTP ERROR " errMatch1 errorDesc "! `n`nPlease take a look at the file ""temp\poeprices_log.txt"".")
+		TradeFunc_LogPoePricesRequest(response, request)
+		Return 0
+	}
+	Else If (RegExMatch(response.added.retHeader, "i)(000)", errMatch)) {
+		ShowToolTip("")
+		ShowTooltip("ERROR: Client disconnected before completing the request to poeprices.info.`nA possible cause is that the timeout was set too low (" response.added.timeoutParam "s) and may have to be increased! `n`nThis might be a temporary issue because of slow server responses.`nPlease report it anyway.")
 		TradeFunc_LogPoePricesRequest(response, request)
 		Return 0
 	}
@@ -4154,7 +4157,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
 	
 	If (StrLen(data.warning_msg)) {
-		Gui, PredictedPricing:Add, Text, x20 yp+15 w380 cc14326 BackgroundTrans, % data.warning_msg
+		Gui, PredictedPricing:Add, Text, x20 y+15 w380 cc14326 BackgroundTrans, % "poeprices warning message:`n`n" data.warning_msg
 	}
 	
 	; invisible fields
