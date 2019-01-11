@@ -15,8 +15,6 @@
 		msg := "any drive root"
 	}
 	
-	return
-	
 	If (not valid) {
 		msg := "Invalid Installation Path, Executing PoE-TradeMacro from " msg " may cause script errors, please choose a different directory."
 		Msgbox, 0x1010, % msg
