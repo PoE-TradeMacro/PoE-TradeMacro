@@ -1,4 +1,4 @@
-﻿PoEScripts_CheckInvalidScriptFolder(currentDir,  critical = true) {
+﻿PoEScripts_CheckInvalidScriptFolder(currentDir, project, critical = true) {
 	valid := true
 	
 	SplitPath, currentDir, FileName, Dir, Extension, NameNoExt, Drive
@@ -16,8 +16,16 @@
 	}
 	
 	If (not valid) {
-		msg := "Invalid Installation Path, Executing PoE-TradeMacro from " msg " may cause script errors, please choose a different directory."
-		Msgbox, 0x1010, % msg
+		msg := "Executing PoE-TradeMacro from " msg " may cause script or permission errors, please choose a different directory."
+		msg .= "`n`n" "Current script directory: """ currentDir """"
+		
+		If (not critical) {			
+			msg .= "`n`n" "The script will continue to execute but it is highly recommended to use a different path."
+			Msgbox, 0x1010, %project% Problematic Installation Path, % msg
+		} Else {
+			SplashTextOff
+			Msgbox, 0x1010, %project% Invalid Installation Path, % msg
+		}	
 		
 		If (critical) {
 			ExitApp

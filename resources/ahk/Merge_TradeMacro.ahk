@@ -53,8 +53,7 @@ If (not PoEScripts_CheckCorrectClientLanguage()) {
 If (!PoEScripts_CreateTempFolder(scriptDir, projectName)) {
 	ExitApp
 }
-
-PoEScripts_CheckInvalidScriptFolder(scriptDir)
+PoEScripts_CheckInvalidScriptFolder(scriptDir, "PoE-TradeMacro")
 
 /*
 	Set some important variables
