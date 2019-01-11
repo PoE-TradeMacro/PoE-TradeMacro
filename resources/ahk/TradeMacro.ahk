@@ -1074,10 +1074,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 
 	/*
 		handle corruption
-		*/
-		
+		*/		
 	If (Item.IsCorrupted and isAdvancedPriceCheckRedirect and RequestParams.corrupted = "0" and Item.IsJewel) {
-		RequestParams.corrupted := "0"
+		RequestParams.corrupted := "1"
 	}
 	Else If (Item.IsCorrupted and TradeOpts.CorruptedOverride and not Item.IsDivinationCard) {
 		If (TradeOpts.Corrupted = "Either") {
@@ -4133,7 +4132,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	} Else {
 		Gui, PredictedPricing:Add, Text, x15 y+25 w380 BackgroundTrans, % ""
 	}
-	
+
 	Gui, PredictedPricing:Font, bold s8 c000000, Verdana
 	Gui, PredictedPricing:Add, GroupBox, w400 h230 y+10 x10, Feedback
 	Gui, PredictedPricing:Font, norm c000000, Verdana
