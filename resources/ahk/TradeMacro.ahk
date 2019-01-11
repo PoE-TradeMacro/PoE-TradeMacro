@@ -2042,9 +2042,7 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 }
 
 TradeFunc_ParsePoePricesInfoErrorCode(response, request) {
-
 	httpErrors := {"403":"Forbidden", "404":"Not Found", "504":"Gateway Timeout", "000":"Client disconnected"}
-	debugprintarray([response, request, httpErrors])
 	; https://docs.google.com/spreadsheets/d/1XwHk6FZwzRDxTbDraGkMy5sF0mfGJhCIzCmLSD66JO0/edit#gid=0
 	If (RegExMatch(response.added.retHeader, "i)(403|404|504)", errMatch)) {
 		ShowToolTip("")
@@ -4128,10 +4126,16 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Add, Link, x245 y+12 cBlue BackgroundTrans, <a href="%_url%">Open on poeprices.info</a>
 	
 	Gui, PredictedPricing:Font, norm s8 italic c000000, Verdana	
-	Gui, PredictedPricing:Add, Text, BackgroundTrans x15 y+25 w390, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group. Or even disable this predicted search entirely."
+
+	If (StrLen(data.warning_msg)) {
+		Gui, PredictedPricing:Add, Text, x15 y+25 w380 cc14326 BackgroundTrans, % "poeprices warning message:"
+		Gui, PredictedPricing:Add, Text, x15 y+8 w380 cc14326 BackgroundTrans, % data.warning_msg
+	} Else {
+		Gui, PredictedPricing:Add, Text, x15 y+25 w380 BackgroundTrans, % ""
+	}
 	
 	Gui, PredictedPricing:Font, bold s8 c000000, Verdana
-	Gui, PredictedPricing:Add, GroupBox, w400 h230 y+20 x10, Feedback
+	Gui, PredictedPricing:Add, GroupBox, w400 h230 y+10 x10, Feedback
 	Gui, PredictedPricing:Font, norm c000000, Verdana
 	
 	Gui, PredictedPricing:Add, Text, x20 yp+25 BackgroundTrans, You think the predicted price range is?
@@ -4156,9 +4160,7 @@ TradeFunc_ShowPredictedPricingFeedbackUI(data) {
 	Gui, PredictedPricing:Add, Text, x+5 yp+0 cBlack BackgroundTrans, % "or"
 	Gui, PredictedPricing:Add, Link, x+5 yp+0 cBlue BackgroundTrans, <a href="https://www.patreon.com/bePatron?u=5966037">Patreon</a>
 	
-	If (StrLen(data.warning_msg)) {
-		Gui, PredictedPricing:Add, Text, x20 y+15 w380 cc14326 BackgroundTrans, % "poeprices warning message:`n`n" data.warning_msg
-	}
+	Gui, PredictedPricing:Add, Text, BackgroundTrans x15 y+10 w390, % "You can disable this GUI in favour of a simple result tooltip. Settings menu -> under 'Search' group. Or even disable this predicted search entirely."
 	
 	; invisible fields
 	Gui, PredictedPricing:Add, Edit, x+0 yp+0 w0 h0 ReadOnly vPredictedPricingEncodedData, % data.added.encodedData

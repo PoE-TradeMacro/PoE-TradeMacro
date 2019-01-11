@@ -16,7 +16,7 @@
 	}
 	
 	If (not valid) {
-		msg := "Executing PoE-TradeMacro from " msg " may cause script or permission errors, please choose a different directory."
+		msg := "Executing " project " from " msg " may cause script or permission errors, please choose a different directory."
 		msg .= "`n`n" "Current script directory: """ currentDir """"
 		
 		If (not critical) {			
