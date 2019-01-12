@@ -2502,9 +2502,9 @@ TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = "") {
 	Title := ""
 	error := 0
 
-	; loop over the first 99 results if possible, otherwise over as many as are available
+	; loop over the first 200 results if possible, otherwise over as many as are available
 	accounts := []
-	NoOfItemsToCount := 99
+	NoOfItemsToCount := 200
 	NoOfItemsSkipped := 0
 	While A_Index <= NoOfItemsToCount {
 		ItemBlock 	:= TradeUtils.HtmlParseItemData(html, "<tbody id=""item-container-" A_Index - 1 """(.*?)<\/tbody>", html)
@@ -2513,13 +2513,12 @@ TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = "") {
 		;ChaosValue 	:= TradeUtils.HtmlParseItemData(ItemBlock, "data-name=""price_in_chaos_new""(.*?)>")
 		Currency	 	:= TradeUtils.HtmlParseItemData(ItemBlock, "has-tip.*currency-(.*?)""", rest)
 		CurrencyV	 	:= TradeUtils.HtmlParseItemData(rest, ">(.*?)<", rest)
-		RegExMatch(CurrencyV, "i)\d+(\.|,?\d+)?", match)
-		CurrencyV		:= match
+		RegExMatch(CurrencyV, "i)(\d+((\.|,)\d{1,2})?|\d+)", match)
+		CurrencyV		:= match1
 
 		; skip multiple results from the same account
 		If (TradeOpts.RemoveMultipleListingsFromSameAccount) {
 			If (TradeUtils.IsInArray(AccountName, accounts)) {
-				NoOfItemsToShow := NoOfItemsToShow + 1
 				NoOfItemsSkipped := NoOfItemsSkipped + 1
 				continue
 			} Else {
@@ -2558,10 +2557,10 @@ TradeFunc_GetMeanMedianPrice(html, payload, ByRef errorMsg = "") {
 		errorMsg := "Couldn't find the chaos equiv. value for " error " item(s). Please report this."
 	}
 
-	; calculate average and median prices (truncated median, too)	
+	; calculate average and median prices (truncated median, too)
 	If (prices.MaxIndex() > 0) {
 		; average
-		average := average / (itemCount - 1)
+		average := average / (itemCount)
 		
 		; truncated mean
 		trimPercent := 20
@@ -2653,8 +2652,7 @@ TradeFunc_ParseHtmlToObj(html, payload, iLvl = "", ench = "", isItemAgeRequest =
 	; Target HTML Looks like the ff:
      ; <tbody id="item-container-97" class="item" data-seller="Jobo" data-sellerid="458008"
 	; data-buyout="15 chaos" data-ign="Lolipop_Slave" data-league="Essence" data-name="Tabula Rasa Simple Robe"
-	; data-tab="This is a buff" data-x="10" data-y="9"> <tr class="first-line">
-	
+	; data-tab="This is a buff" data-x="10" data-y="9"> <tr class="first-line">	
 
 	NoOfItemsToShow := TradeOpts.ShowItemResults
 	results := []
