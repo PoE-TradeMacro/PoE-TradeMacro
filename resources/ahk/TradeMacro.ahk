@@ -1957,10 +1957,13 @@ TradeFunc_DoPostRequest(payload, openSearchInBrowser = false) {
 	reqHeaders.push("Upgrade-Insecure-Requests: 1")
 	reqHeaders.push("Content-type: application/x-www-form-urlencoded; charset=UTF-8")
 	reqHeaders.push("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	reqHeaders.push("Referer: http://poe.trade/")
+	reqHeaders.push("Referer: http://poe.trade/")	
+	
 	If (StrLen(UserAgent)) {
 		reqHeaders.push("User-Agent: " UserAgent)
 		reqHeaders.push("Cookie: __cfduid=" cfduid "; cf_clearance=" cfClearance)
+	} Else {
+		reqHeaders.push("User-Agent:Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36")
 	}
 
 	html := PoEScripts_Download(url, postData, reqHeaders, options, false)
