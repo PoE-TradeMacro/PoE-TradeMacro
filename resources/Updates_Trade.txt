@@ -1,5 +1,13 @@
 The following is a list of what has been updated, starting with 1.1.0
 
+2.12.4
+================================================================================================
+* Fixed an issue that broke most requests to poe.trade (except currency).
+* Increased the timeout parameter for requests to poeprices.info.
+* Further improved feedback for failed request to poeprices.info.
+* Fixed an issue where corrupted jewels where searched as "not corrupted" when using advanced search.
+* Other small fixes and improvements.
+
 2.12.3
 ================================================================================================
 * Added more and more detailed error feedback for poeprices requests (price prediction).
