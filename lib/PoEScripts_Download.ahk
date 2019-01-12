@@ -165,7 +165,7 @@
 		handle any issues
 	*/	
 	; check if response has a good status code or is valid JSON (shouldn't be an erroneous response in that case)
-	goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
+	goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/(.*)((200|302)\s?(OK|Found)?)")
 	Try {
 		isJSON := isObject(JSON.Load(ioHdr))
 	} Catch er {
@@ -173,7 +173,7 @@
 	}
 
 	;goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
-	If (RegExMatch(ioHdr, "i)HTTP\/1.1 403 Forbidden") and not handleAccessForbidden) {
+	If (RegExMatch(ioHdr, "i)HTTP\/(.*)((403)\s?(Forbidden)?)") and not handleAccessForbidden) {
 		PreventErrorMsg		:= true
 		handleAccessForbidden	:= "403 Forbidden"
 	}
@@ -190,7 +190,7 @@
 		; check returned request headers
 		ioHdr := ParseReturnedHeaders(ioHdr)
 		
-		goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/1.1 (200 OK|302 Found)")
+		goodStatusCode := RegExMatch(ioHdr, "i)HTTP\/(.*)((200|302)\s?(OK|Found)?)")
 		If (not goodStatusCode) {
 			MsgBox, 16,, % "Error downloading file to " SavePath
 			Return "Error: Wrong Status"
@@ -233,9 +233,9 @@ ParseReturnedHeaders(output) {
 		LastPos := Pos
 		LastMatch := match
 	}
-	
+
 	If (not headerGroups.Length()) {
-		RegExMatch(output, "is).*(HTTP\/1.1.*)", dlStats)
+		RegExMatch(output, "is).*(HTTP\/(1.1|2).*)", dlStats)
 		dlStats := dlStats1
 		headerGroups.push(dlStats)
 	} Else {
@@ -276,7 +276,7 @@ ParseReturnedHeaders(output) {
 			}
 		}
 		
-		RegExMatch(output, "i)HTTP\/1.1 (200 OK|302 Found)", code)		
+		RegExMatch(output, "i)HTTP\/(.*)((200|302)\s?(OK|Found)?)", code)	
 		out := code "`n"
 		out .= "Content-Length: " fLength
 	}
@@ -312,7 +312,7 @@ ThrowError(e, critical = false, errorMsg = "", PreventErrorMsg = false) {
 	}
 	msg := StrLen(errorMsg) ? msg "`n`n" errorMsg : msg
 	
-	If (RegExMatch(errorMsg, "i)HTTP\/1.1 403 Forbidden")) {
+	If (RegExMatch(errorMsg, "i)HTTP\/(.*)((403)\s?(Forbidden)?)")) {
 		cookiesRequired := "Access forbidden, a likely reason for this is that necessary cookies are missing.`nYou may have to use"
 	}
 	msg := StrLen(cookiesRequired) ? msg "`n`n" cookiesRequired : msg
