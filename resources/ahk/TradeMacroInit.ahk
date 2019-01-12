@@ -129,12 +129,12 @@ global overwrittenUserFiles	:= argumentOverwrittenFiles
 ; 	CopyDefaultTradeConfig()
 ; }
 
-TradeFunc_CheckIfCloudFlareBypassNeeded()
-
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 Sleep, 200
 ReadTradeConfig("", "config_trade.ini", _updateConfigWrite)
 TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
+
+TradeFunc_CheckIfCloudFlareBypassNeeded()
 
 ; set this variable to skip the update check in "PoE-ItemInfo.ahk"
 SkipItemInfoUpdateCall := 1
@@ -538,7 +538,7 @@ CreateTradeSettingsUI()
 		General
 	*/
 
-	GuiAddGroupBox("[TradeMacro] General", "x7 y+7 w310 h380")
+	GuiAddGroupBox("[TradeMacro] General", "x7 y+7 w310 h410")
 
     ; Note: window handles (hwnd) are only needed if a UI tooltip should be attached.
 
@@ -580,6 +580,10 @@ CreateTradeSettingsUI()
 
 	GuiAddCheckbox("Use poedb.tw instead of the wiki.", "x17 yp+27 w260 h30 0x0100", TradeOpts.WikiAlternative, "WikiAlternative", "WikiAlternativeH")
 	AddToolTip(WikiAlternativeH, "Use poedb.tw to open a page with information`nabout your item/item base.")
+
+	GuiAddText("Curl/HTTP request timeout (s):", "x17 yp+33 w230 h20 0x0100", "LblCurlTimeout", "LblCurlTimeoutH")
+	AddToolTip(LblCurlTimeoutH, "This is the default timeout (seconds) used for HTTP requests to trade sites and APIs.`n`nRequests taking longer than this will be aborted.")
+	GuiAddEdit(TradeOpts.CurlTimeout, "x+10 yp-2 w50 h20 Number", "CurlTimeout", "CurlTimeoutH")
 
 	/* 
 		Search
@@ -1416,6 +1420,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	options		:= ""
 	options		.= "`n" PreventErrorMsg
 	options		.= "`n" "ReturnHeaders: append"
+	options		.= "`n" "TimeOut: " TradeOpts.CurlTimeout
 
 	reqHeaders	:= []
 	authHeaders	:= []
@@ -1438,19 +1443,22 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	html := PoEScripts_Download(Url, ioData := postData, ioHdr := reqHeaders, options, false, false, false, "", reqHeadersCurl, handleAccessForbidden := false)
 	logMsg := "Testing CloudFlare bypass, connecting to " url "...`n`n" "cURL command:`n" reqHeadersCurl "`n`nAnswer:`n" ioHdr
 	WriteToLogFile(logMsg, "StartupLog.txt", "PoE-TradeMacro")
-
+	
 	; pathofexile.com link in page footer (forum thread)
 	RegExMatch(html, "i)pathofexile", match)
-	RegExMatch(Trim(html), "i)'(\d){1,3}'$", appendedCode)
+	RegExMatch(Trim(html), "i)'(\d{1,3})'$", appendedCode)
 	If (match) {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_search_form_options.txt, utf-8
 		TradeFunc_ParseSearchFormOptions()
 		Return 1
 	}
-	Else If (appendedCode = "000") {
+	Else If (appendedCode1 = "000") {
 		SplashTextOff
-		Msgbox, 0x1010, PoE-TradeMacro, "Request to poe.trade timed out (was aborted by the client). You can continue the script but may experience issues when making any search request."
+		msg := "Test request to poe.trade timed out (was aborted by the client). You can continue the script but you may experience issues when making any search requests."
+		msg .= "`n`n" "This is most likely caused by poe.trade server issues."
+		msg .= "`n`n" "You can change the timout for these requests (currently " TradeOpts.CurlTimeout "s) in the settings menu -> ""TradeMacro"" tab -> ""General"" section."
+		Msgbox, 0x1030, PoE-TradeMacro, % msg
 		Return 1
 	}
 	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK") and not StrLen(PreventErrorMsg) and not InStr(handleAccessForbidden, "Forbidden")) {

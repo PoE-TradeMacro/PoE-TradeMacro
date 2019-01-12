@@ -74,8 +74,8 @@
 			}	
 		}			
 	}
-	If (not timeout) {
-		timeout := 20
+	If (not timeout or timeout < 5) {
+		timeout := 25
 	}
 	
 	e := {}
