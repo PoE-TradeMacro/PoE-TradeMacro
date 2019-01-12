@@ -2,9 +2,7 @@
 	valid := true
 	
 	SplitPath, currentDir, FileName, Dir, Extension, NameNoExt, Drive
-	
-	;msgbox % currentDir "`n" filename  "`n" dir  "`n" extension "`n" namenoext "`n" drive  "`n"  "`n" A_Desktop  "`n" A_ScriptDir "`n" A_ScriptName "`n" 
-	
+
 	msg := ""
 	If (InStr(currentDir, A_Desktop)) {
 		valid := false
@@ -28,7 +26,7 @@
 			msg .= "`n`n" "Do not report this, it is intended behaviour! Move your script folder to somewhere else!"
 			Msgbox, 0x1010, %project% Invalid Installation Path, % msg
 		}	
-		
+
 		If (critical) {
 			ExitApp
 		}
