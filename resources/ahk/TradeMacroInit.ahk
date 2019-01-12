@@ -1415,6 +1415,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 	postData		:= ""
 	options		:= ""
 	options		.= "`n" PreventErrorMsg
+	options		.= "`n" "ReturnHeaders: append"
 
 	reqHeaders	:= []
 	authHeaders	:= []
@@ -1440,14 +1441,21 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 
 	; pathofexile.com link in page footer (forum thread)
 	RegExMatch(html, "i)pathofexile", match)
+	RegExMatch(Trim(html), "i)'(\d){1,3}'$", appendedCode)
 	If (match) {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 		FileAppend, %html%, %A_ScriptDir%\temp\poe_trade_search_form_options.txt, utf-8
 		TradeFunc_ParseSearchFormOptions()
 		Return 1
 	}
+	Else If (appendedCode = "000") {
+		SplashTextOff
+		Msgbox, 0x1010, PoE-TradeMacro, "Request to poe.trade timed out (was aborted by the client). You can continue the script but may experience issues when making any search request."
+		Return 1
+	}
 	Else If (not RegExMatch(ioHdr, "i)HTTP\/1.1 200 OK") and not StrLen(PreventErrorMsg) and not InStr(handleAccessForbidden, "Forbidden")) {
 		TradeFunc_HandleConnectionFailure(authHeaders, ioHdr, url)
+		Return 0
 	}
 	Else {
 		FileDelete, %A_ScriptDir%\temp\poe_trade_gem_names.txt

@@ -98,23 +98,23 @@
 			
 			If (appendRetHeaders) {
 				commandData  .= " -w '%{http_code}' "
+				commandHdr  .= " -w '%{http_code}' "
 			}
 		}			
-		
-;		If (StrLen(headers)) {
-			If (not requestType = "GET") {
-				commandData .= headers
-				commandHdr  .= headers
-			}			
-			If (StrLen(cookies)) {
-				commandData .= cookies
-				commandHdr  .= cookies
-			}
-			If (StrLen(uAgent)) {
-				commandData .= uAgent
-				commandHdr  .= uAgent
-			}
-		;}
+
+		If (not requestType = "GET") {
+			commandData .= headers
+			commandHdr  .= headers
+		}			
+		If (StrLen(cookies)) {
+			commandData .= cookies
+			commandHdr  .= cookies
+		}
+		If (StrLen(uAgent)) {
+			commandData .= uAgent
+			commandHdr  .= uAgent
+		}
+
 		If (StrLen(ioData) and not requestType = "GET") {
 			If (requestType = "POST") {
 				commandData .= "-X POST "
@@ -155,7 +155,7 @@
 		} Else {
 			ioHdr := html
 		}
-	;	msgbox % curl """" url """" commandData "`n`n" commandHdr
+		;msgbox % curl """" url """" commandData "`n`n" commandHdr
 		reqHeadersCurl := commandHdr
 	} Catch e {
 
