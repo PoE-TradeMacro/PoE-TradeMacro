@@ -128,8 +128,8 @@
 			commandData	.= "--connect-timeout " timeout " "
 			commandData	.= "--connect-timeout " timeout " "
 		} Else {
-			commandData	.= "--max-time " timeout " "
-			commandHdr	.= "--max-time " timeout " "
+			commandData	.= "--connect-timeout " timeout " --max-time " timeout + 15 " "
+			commandHdr	.= "--connect-timeout " timeout " --max-time " timeout + 15 " "
 		}
 		; get data
 		html	:= StdOutStream(curl """" url """" commandData)

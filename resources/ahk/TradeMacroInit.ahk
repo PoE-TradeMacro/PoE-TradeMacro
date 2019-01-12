@@ -1556,11 +1556,11 @@ TradeFunc_StartSplashScreen() {
 		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle...", "Vendoring stat-sticks..."]
 	*/	
 		
-	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...",
-		, "Hunting some old friends...", "Setting up lab carries for the other 99%...", "Msg @ScourgeOfTheImmortals if you find new map hideouts."]
+	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""..."
+		, "Hunting some old friends...", "Setting up lab carries for the other 99%...", "Msg @ScourgeOfTheImmortals to share new map hideouts with me."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
-	SplashTextOn, 420, 20, PoE-TradeMacro, % initArray[randomNum]
+	SplashTextOn, 430, 20, PoE-TradeMacro, % initArray[randomNum]
 }
 
 TradeFunc_FinishTMInit(argumentMergeScriptPath) {	
