@@ -10,6 +10,8 @@
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_CreateTempFolder.ahk
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_HandleUserSettings.ahk
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_CheckInvalidScriptFolder.ahk
+#Include, %A_ScriptDir%\..\..\lib\Class_SplashUI.ahk
+#Include, %A_ScriptDir%\..\..\resources\VersionTrade.txt
 
 arguments := ""
 arg1 	= %1%
@@ -29,7 +31,7 @@ If (InStr(arguments, "-nosplash", 0)) {
 	skipSplash := 1
 } Else {
 	skipSplash := 0
-	StartSplashScreen()
+	StartSplashScreen(TradeReleaseVersion)
 }
 
 If (InStr(arguments, "-mergeonly", 0)) {
@@ -91,7 +93,7 @@ FileAppend, %trade%		, %scriptDir%\_TradeMacroMain.ahk
 FileSetAttrib, +H, %scriptDir%\_TradeMacroMain.ahk
 ; pass some parameters to TradeMacroInit
 If (not onlyMergeFiles) {
-	SplashTextOff
+	SplashUI.DestroyUI()
 	RunWait, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel
 	If (ErrorLevel) {
 		Menu, Tray, Icon, %scriptDir%\resources\images\poe-trade-bl.ico
@@ -143,8 +145,8 @@ RunAsAdmin(arguments)
     Return arguments
 }
 
-StartSplashScreen() {
-	SplashTextOn, , 20, PoE-TradeMacro, Merging and starting Scripts...	
+StartSplashScreen(version) {
+	global SplashUI := new SplashUI("on", "PoE-TradeMacro", "Merging and starting Scripts...", "", version)	
 }
 
 AppendCustomMacros(userDirectory)

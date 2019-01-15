@@ -24,7 +24,7 @@
 		;Destroy GUIs in case they still exist
 		Gui, SplashUI:Destroy
 
-		Gui, SplashUI:New, +Border -resize -SysMenu -Caption +HwndSplashHwnd +alwaysontop
+		Gui, SplashUI:New, +Border -resize -SysMenu -Caption +HwndSplashHwnd 
 		Gui, SplashUI:Margin, 10, 2
 		Gui, SplashUI:Color, FFFFFF, 000000
 
@@ -45,7 +45,7 @@
 		Gui, SplashUI:Add, Text, x10 y+5 h20 w450 +Right BackgroundTrans, % "AHK v" . A_AHKVersion
 
 		Gui, SplashUI:+LastFound
-		Gui, SplashUI:Show, x200 y200 w470 NA, % this.title
+		Gui, SplashUI:Show, Center w470 NA, % this.title
 
 		WinGetPos, _TTX, _TTY, _TTW, _TTH, ahk_id %SplashHwnd%
 		image := A_ScriptDir "\resources\images\greydot.png"
