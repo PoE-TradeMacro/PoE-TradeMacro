@@ -4,6 +4,10 @@
 #NoEnv ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Persistent ; Stay open in background
 
+;#Warn, ALL, OutputDebug
+;#Warn, UseUnsetGlobal, Off
+;#Warn, UseUnsetLocal, Off
+
 SetWorkingDir, %A_ScriptDir%
 
 ;#Include, %A_ScriptDir%\lib\JSON.ahk				; https://autohotkey.com/boards/viewtopic.php?f=6&t=53

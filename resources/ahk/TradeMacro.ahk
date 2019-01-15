@@ -734,6 +734,9 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Else If (Item.IsElderBase) {
 				RequestParams.Elder := 1
 			}
+		} Else {
+			RequestParams.Shaper := ""
+			RequestParams.Elder := ""
 		}
 
 		; abyssal sockets 
@@ -851,21 +854,26 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}
 		
-		If (Item.IsShaperBase) {
-			RequestParams.Shaper := 1
-			Item.UsedInSearch.specialBase := "Shaper"
-		}
-		Else {		
-			RequestParams.Shaper := 0
-		}
-		
-		If (Item.IsElderBase) {
-			RequestParams.Elder := 1
-			Item.UsedInSearch.specialBase := "Elder"
-		}
-		Else {			
-			RequestParams.Elder := 0
-		}
+		If (isAdvancedPriceCheckRedirect and not TradeGlobals.Get("AdvancedPriceCheckItem").useSpecialBase) {
+			RequestParams.Shaper := ""
+			RequestParams.Elder := ""
+		} Else {
+			If (Item.IsShaperBase) {
+				RequestParams.Shaper := 1
+				Item.UsedInSearch.specialBase := "Shaper"
+			}
+			Else {		
+				RequestParams.Shaper := 0
+			}
+			
+			If (Item.IsElderBase) {
+				RequestParams.Elder := 1
+				Item.UsedInSearch.specialBase := "Elder"
+			}
+			Else {			
+				RequestParams.Elder := 0
+			}	
+		}		
 	} 
 	Else {
 		RequestParams.xtype := (Item.xtype) ? Item.xtype : Item.SubType
