@@ -24,7 +24,7 @@
 		;Destroy GUIs in case they still exist
 		Gui, SplashUI:Destroy
 
-		Gui, SplashUI:New, +Border +alwaysontop -resize -SysMenu -Caption +HwndSplashHwnd
+		Gui, SplashUI:New, +Border -resize -SysMenu -Caption +HwndSplashHwnd +alwaysontop
 		Gui, SplashUI:Margin, 10, 2
 		Gui, SplashUI:Color, FFFFFF, 000000
 
@@ -39,13 +39,13 @@
 		Gui, SplashUI:Add, Text, x10 y+5 w450 +Center BackgroundTrans vSplashMessage, % this.message
 
 		Gui, SplashUI:Font, s8 c000000, Verdana
-		Gui, SplashUI:Add, Text, x10 y+10 w450 r2 +Left BackgroundTrans vSplashSubMessage, % "- " this.submessage
+		Gui, SplashUI:Add, Text, x10 y+10 w450 r4 +Left BackgroundTrans vSplashSubMessage, % "- " this.submessage
 
 		Gui, SplashUI:Font, s7 c000000, Verdana
 		Gui, SplashUI:Add, Text, x10 y+5 h20 w450 +Right BackgroundTrans, % "AHK v" . A_AHKVersion
 
 		Gui, SplashUI:+LastFound
-		Gui, SplashUI:Show, Center w470 NA, % this.title
+		Gui, SplashUI:Show, x200 y200 w470 NA, % this.title
 
 		WinGetPos, _TTX, _TTY, _TTW, _TTH, ahk_id %SplashHwnd%
 		image := A_ScriptDir "\resources\images\greydot.png"
@@ -97,10 +97,18 @@
 	}
 	SetSubMessage(message) {
 		If (StrLen(message)) {
-			this.submessage := "- " message	
+			this.submessage := StrLen(this.submessage) ? this.submessage "`n" : ""
+			this.submessage .= "- " message
 		} Else {
-			this.submessage := ""
-		}		
+			this.submessage := this.submessage "`n" ""
+		}
+		
+		arr := StrSplit(this.submessage, "`n") 
+		mI := arr.MaxIndex()		
+		If (mI > 3) {
+			this.submessage := Trim(arr[mI - 2] "`n" arr[mI - 1] "`n" arr[mI])
+		}
+		
 		GuiControl,,SplashSubMessage, % this.submessage
 	}
 }
