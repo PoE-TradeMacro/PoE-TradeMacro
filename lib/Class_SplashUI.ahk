@@ -39,7 +39,7 @@
 		Gui, SplashUI:Add, Text, x10 y+5 w450 +Center BackgroundTrans vSplashMessage, % this.message
 
 		Gui, SplashUI:Font, s8 c000000, Verdana
-		Gui, SplashUI:Add, Text, x10 y+10 w450 r4 +Left BackgroundTrans vSplashSubMessage, % "- " this.submessage
+		Gui, SplashUI:Add, Text, x10 y+10 w450 r4 +Left BackgroundTrans vSplashSubMessage, % StrLen(this.submessage) ? "- " this.submessage : this.submessage
 
 		Gui, SplashUI:Font, s7 c000000, Verdana
 		Gui, SplashUI:Add, Text, x10 y+5 h20 w450 +Right BackgroundTrans, % "AHK v" . A_AHKVersion
