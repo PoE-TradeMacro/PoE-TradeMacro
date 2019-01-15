@@ -23,6 +23,7 @@ GroupAdd, PoEWindowGrp, Path of Exile ahk_class POEWindowClass ahk_exe PathOfExi
 #Include, %A_ScriptDir%\lib\ConvertKeyToKeyCode.ahk
 #Include, %A_ScriptDir%\lib\Class_GdipTooltip.ahk
 #Include, %A_ScriptDir%\lib\Class_ColorPicker.ahk
+#Include, %A_ScriptDir%\lib\Class_SplashUI.ahk
 #Include, %A_ScriptDir%\lib\AdvancedHotkey.ahk
 IfNotExist, %A_ScriptDir%\temp
 FileCreateDir, %A_ScriptDir%\temp
@@ -478,6 +479,7 @@ Sleep, 100
 ; "SkipItemInfoUpdateCall" should be set outside by other scripts.
 global firstUpdateCheck := true
 If (!SkipItemInfoUpdateCall) {
+	global SplashUI := new SplashUI("on", "PoE-ItemInfo", "Initializing PoE-ItemInfo...", "", ReleaseVersion)
 	GoSub, CheckForUpdates
 }
 firstUpdateCheck := false
@@ -487,6 +489,7 @@ If (StrLen(overwrittenUserFiles)) {
 	ShowChangedUserFiles()
 }
 GoSub, AM_AssignHotkeys
+SplashUI.SetSubMessage("Fetching currency data from poe.ninja for all leagues...")
 GoSub, FetchCurrencyData
 GoSub, InitGDITooltip
 
@@ -498,6 +501,7 @@ GoSub, InitGDITooltip
 If (false) {
 	global currentLocale := ""
 	_Debug := true
+	SplashUI.SetSubMessage("Downloading language files...")
 	global translationData := PoEScripts_DownloadLanguageFiles(currentLocale, false, "PoE-ItemInfo", "Updating and parsing language files...", _Debug)
 }
 
@@ -541,7 +545,7 @@ If (Opts.Lutbot_CheckScript) {
 	SetTimer, StartLutbot, 2000
 }
 
-SplashTextOff	; init finished
+SplashUI.DestroyUI() ; init finished
 
 ; ----------------------------------------------------------- Functions and Labels ----------------------------------------------------------------
 
@@ -11833,9 +11837,9 @@ CheckForUpdates:
 
 	hasUpdate := PoEScripts_Update(globalUpdateInfo.user, globalUpdateInfo.repo, globalUpdateInfo.releaseVersion, globalUpdateInfo.skipUpdateCheck, userDirectory, isDevVersion, globalUpdateInfo.skipSelection, globalUpdateInfo.skipBackup)
 	If (hasUpdate = "no update" and not firstUpdateCheck) {
-		SplashTextOn, , , No update available
+		SplashUI.SetSubMessage("No update available")
 		Sleep 2000
-		SplashTextOff
+		SplashUI.DestroyUI()
 	}
 	return
 
@@ -12844,7 +12848,7 @@ AssignHotKey(Label, key, vkey, enabledState = "on") {
 }
 
 ShowHotKeyConflictUI(hkeyObj, hkey, hkeyLabel, oldLabel = "", preventedAssignment = false) {
-	SplashTextOff
+	SplashUI.DestroyUI()
 	
 	Gui, HotkeyConflict:Destroy
 	Gui, HotkeyConflict:Font,, Consolas

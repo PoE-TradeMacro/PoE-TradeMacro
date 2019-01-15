@@ -3,8 +3,6 @@
 ; Data is available via global variables
 ; json scraped with https://github.com/Eruyome/scrapeVariableUniqueItems/
 
-#Include, %A_ScriptDir%\lib\JSON.ahk
-
 ; when using the fallback exe we're missing the parameters passed by the merge script and missed clearing the temp folder
 argumentIsMergedScript = %5%
 If (argumentIsMergedScript != "isMergedScript") {
@@ -42,6 +40,7 @@ FileRead, JSONFile, %A_ScriptDir%\data_trade\currency_tags.json
 parsedJSON := JSON.Load(JSONFile)
 global TradeCurrencyTags := parsedJSON.tags
 
+SplashUI.SetSubMessage("Parsing leagues from GGGs API...")
 ; Download and parse the current leagues
 postData		:= ""
 reqHeaders	:= []

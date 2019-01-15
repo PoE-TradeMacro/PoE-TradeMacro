@@ -2177,6 +2177,7 @@ TradeFunc_DoCurrencyRequest(currencyName = "", openSearchInBrowser = false, init
 
 	If (init) {
 		Url := "http://currency.poe.trade/"
+		SplashUI.SetSubMessage("Looking up poe.trade currency IDs...")
 	}
 	Else {
 		LeagueName := TradeGlobals.Get("LeagueName")

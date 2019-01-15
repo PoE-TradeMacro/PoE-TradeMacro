@@ -6,13 +6,12 @@
 
 SetWorkingDir, %A_ScriptDir%
 
-#Include, %A_ScriptDir%\lib\JSON.ahk				; https://autohotkey.com/boards/viewtopic.php?f=6&t=53
+;#Include, %A_ScriptDir%\lib\JSON.ahk				; https://autohotkey.com/boards/viewtopic.php?f=6&t=53
 #Include, %A_ScriptDir%\lib\Class_Console.ahk		; Console https://autohotkey.com/boards/viewtopic.php?f=6&t=2116
-#Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
+;#Include, %A_ScriptDir%\lib\DebugPrintArray.ahk
 #Include, %A_ScriptDir%\lib\AssociatedProgram.ahk
-#Include, %A_ScriptDir%\lib\EasyIni.ahk
+;#Include, %A_ScriptDir%\lib\EasyIni.ahk
 #Include, %A_ScriptDir%\lib\ConvertKeyToKeyCode.ahk
-#Include, %A_ScriptDir%\resources\ahk\jsonData.ahk
 #Include, %A_ScriptDir%\resources\VersionTrade.txt
 
 TradeMsgWrongAHKVersion := "AutoHotkey v" . TradeAHKVersionRequired . " or later is needed to run this script. `n`nYou are using AutoHotkey v" . A_AhkVersion . " (installed at: " . A_AhkPath . ")`n`nPlease go to http://ahkscript.org to download the most recent version."
@@ -36,8 +35,10 @@ Menu, Tray, Add, Open Wiki/FAQ, OpenGithubWikiFromMenu
 
 argumentSkipSplash = %6%
 If (not argumentSkipSplash) {
-	TradeFunc_StartSplashScreen()
+	TradeFunc_StartSplashScreen(TradeReleaseVersion)
 }
+SplashUI.SetSubMessage("Parsing data files...")
+#Include, %A_ScriptDir%\resources\ahk\jsonData.ahk
 
 class TradeGlobals {
 	Set(name, value) {
@@ -65,6 +66,7 @@ global SavedTradeSettings := false
 ; 	TradeOpts_New := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\config_trade.ini")
 ; }
 
+SplashUI.SetSubMessage("Reading PoE-TradeMacro config...")
 TradeOpts_New := class_EasyIni(A_ScriptDir "\resources\default_UserFiles\config_trade.ini")
 MakeOldTradeOptsAndVars(TradeOpts_New)
 
@@ -99,7 +101,7 @@ If (!StrLen(argumentProjectName) > 0) {
 	fallbackExeMsg .= "`n`nThis version can possibly cause issues that you wouldn't have with the normal script though."
 	fallbackExeMsg .= "`n`nUse ""Run_TradeMacro.ahk"" if possible and try it before reporting any issues!"
 	fallbackExeMsg .= "`n`n(closes after 10s)..."
-	SplashTextOff
+	SplashUI.DestroyUI()
 	MsgBox, 0x1030, PoE-TradeMacro Fallback, % fallbackExeMsg, 10
 	
 	argumentProjectName		:= "PoE-TradeMacro"
@@ -506,6 +508,7 @@ TradeFunc_GetTempLeagueDates(ltype = "") {
 
 ;----------------------- Handle available script updates ---------------------------------------
 TradeFunc_ScriptUpdate() {
+	SplashUI.SetSubMessage("Checking for script updates...")
 	If (firstUpdateCheck) {
 		ShowUpdateNotification := TradeOpts.ShowUpdateNotifications
 	} Else {
@@ -1039,7 +1042,9 @@ TradeFunc_ParseSearchFormOptions() {
 	FileDelete, %A_ScriptDir%\temp\poe_trade_search_form_options.txt
 }
 
-TradeFunc_DownloadDataFiles() {
+TradeFunc_DownloadDataFiles() {	
+	SplashUI.SetSubMessage("Downloading newest data files from github...")
+	
 	; disabled while using debug mode
 	owner	:= TradeGlobals.Get("GithubUser", "POE-TradeMacro")
 	repo 	:= TradeGlobals.Get("GithubRepo", "POE-TradeMacro")
@@ -1077,6 +1082,7 @@ TradeFunc_DownloadDataFiles() {
 }
 
 TradeFunc_CheckIfCloudFlareBypassNeeded() {
+	SplashUI.SetSubMessage("Testing connection to poe.trade...")
 	; call this function without parameters to access poe.trade without cookies
 	; if it succeeds we don't need any cookies
 	If (!TradeFunc_TestCloudflareBypass("http://poe.trade", "", "", "", false, "PreventErrorMsg")) {
@@ -1086,7 +1092,7 @@ TradeFunc_CheckIfCloudFlareBypassNeeded() {
 
 TradeFunc_ReadCookieData() {
 	If (!TradeOpts.UseManualCookies) {
-		SplashTextOn, 500, 40, PoE-TradeMacro, Reading user-agent and cookies from poe.trade, this can take`na few seconds if your Internet Explorer doesn't have the cookies cached.
+		SplashUI.SetSubMessage("Reading user-agent and cookies from poe.trade, this can take`na few seconds if your Internet Explorer doesn't have the cookies cached.")
 
 		If (TradeOpts.DeleteCookies) {
 			TradeFunc_ClearWebHistory()
@@ -1207,7 +1213,7 @@ TradeFunc_ReadCookieData() {
 		}
 	}
 
-	SplashTextOff
+	SplashUI.DestroyUI()
 	If (CookieErrorLevel or BypassFailed or CompiledExeNotFound) {
 		; collect debug information
 		ScriptVersion	:= TradeGlobals.Get("ReleaseVersion")
@@ -1454,7 +1460,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 		Return 1
 	}
 	Else If (appendedCode1 = "000") {
-		SplashTextOff
+		SplashUI.DestroyUI()		
 		msg := "Test request to poe.trade timed out (was aborted by the client). You can continue the script but you may experience issues when making any search requests."
 		msg .= "`n`n" "This is most likely caused by poe.trade server issues."
 		msg .= "`n`n" "You can change the timout for these requests (currently " TradeOpts.CurlTimeout "s) in the settings menu -> ""TradeMacro"" tab -> ""General"" section."
@@ -1473,7 +1479,7 @@ TradeFunc_TestCloudflareBypass(Url, UserAgent="", cfduid="", cfClearance="", use
 }
 
 TradeFunc_HandleConnectionFailure(authHeaders, returnedHeaders, url = "") {
-	SplashTextOff
+	SplashUI.DestroyUI()
 	Gui, ConnectionFailure:Add, Text, x10 cRed, Request to %url% using cookies failed!
 	text := "You can continue to run PoE-TradeMacro with limited functionality.`nThe only searches that will work are the ones`ndirectly openend in your browser."
 	Gui, ConnectionFailure:Add, Text, , % text
@@ -1549,18 +1555,18 @@ TradeFunc_GetOSInfo() {
 }
 
 ;----------------------- SplashScreens ---------------------------------------
-TradeFunc_StartSplashScreen() {
+TradeFunc_StartSplashScreen(TradeReleaseVersion) {
 	/*
 	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""...", "Starting mobile app..."
 		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%..."
 		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle...", "Vendoring stat-sticks..."]
 	*/	
-		
+
 	initArray := ["Initializing script...", "Preparing Einhars welcoming party...", "Uninstalling Battle.net...", "Investigating the so-called ""Immortals""..."
 		, "Hunting some old friends...", "Setting up lab carries for the other 99%...", "Msg @ScourgeOfTheImmortals to share new map hideouts with me."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
-	SplashTextOn, 430, 20, PoE-TradeMacro, % initArray[randomNum]
+	global SplashUI := new SplashUI("on", "PoE-TradeMacro", initArray[randomNum], "", TradeReleaseVersion)
 }
 
 TradeFunc_FinishTMInit(argumentMergeScriptPath) {	
@@ -1570,7 +1576,7 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath) {
 	WinClose, %argumentMergeScriptPath% ahk_class AutoHotkey
 	WinKill, %argumentMergeScriptPath% ahk_class AutoHotkey
 	
-	; SplashText gets disabled by ItemInfo
+	; SplashScreen gets disabled by ItemInfo
 	If (TradeOpts.Debug) {
 		Menu, Tray, Add ; Separator
 		Menu, Tray, Add, Test Item Pricing, DebugTestItemPricing
@@ -1588,7 +1594,7 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath) {
 			console.log("Fetching gem names failed.")
 		}
 	}
-
+	
      ; Let timer run until ItemInfos global settings are set to overwrite them.
 	SetTimer, OverwriteSettingsWidthTimer, 250
 	SetTimer, OverwriteSettingsHeightTimer, 250
@@ -1596,6 +1602,8 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath) {
 	SetTimer, OverwriteSettingsNameTimer, 250
 	SetTimer, ChangeScriptListsTimer, 250
 	SetTimer, OverwriteUpdateOptionsTimer, 250
+	SplashUI.SetSubMessage("Fetching currency data for currently selected league...")
 	GoSub, ReadPoeNinjaCurrencyData
+	SplashUI.SetSubMessage("")
 	GoSub, TrackUserCount
 }
