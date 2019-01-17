@@ -102,8 +102,18 @@ FileAppend, %trade%		, %outputFile%
 
 ; set script hidden
 FileSetAttrib, +H, %outputFile%
-; pass some parameters to TradeMacroInit
+
+/*
+	Kill the merged script if it's running already. This prevents the error parser to read text from the wrong window which could be from the already running script.
+	Pass some parameters so the script.
+	Parse runtime errors and show a GUI to help players with handling and reporting issues.
+*/
 If (not onlyMergeFiles) {
+	DetectHiddenWindows, On
+	SetTitleMatchMode, 1
+	WinClose, %scriptDir%\_TradeMacroMain.ahk ahk_class AutoHotkey, , 0
+	WinKill, %scriptDir%\_TradeMacroMain.ahk ahk_class AutoHotkey, , 0
+	
 	SplashUI.DestroyUI()
 	Run, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel, OutputVarPID
 
@@ -119,14 +129,14 @@ If (not onlyMergeFiles) {
 		If (ErrorLevel = 0) {
 			scriptRunning := false
 		}
-		
+
 		DetectHiddenWindows, On
-		SetTitleMatchMode, 2		
-		IfWinNotExist, %outputFile%
+		SetTitleMatchMode, 1
+		IfWinNotExist, %outputFile% ahk_class AutoHotkey
 		{
 			scriptRunning := false
 		}
-	} Until (not scriptRunning)	
+	} Until (not scriptRunning)
 	
 	SetTitleMatchMode, 1
 	DetectHiddenText, On
@@ -279,10 +289,10 @@ ShowErrorUI:
 		Gui, Add, Text, x15 y+15 BackgroundTrans, % "Original runtime error:"
 		Gui, Font, bold norm
 		originalMsg := Trim(RegExReplace(errorWindowText, "i)^Ok(\r\n)?"))
-		originalMsg := Trim(RegExReplace(originalMsg, "i)(\r\n)?The program will exit\.$"))
-		Gui, Add, Text, x20 y+7 BackgroundTrans, % SubStr(originalMsg, 1, 400)
+		originalMsg := Trim(RegExReplace(originalMsg, "i)(\r\n)?The program will exit\.$"))		
+		Gui, Add, Edit, x16 y+7 w600 r6 ReadOnly BackgroundTrans, % originalMsg
 		
-		Gui, Add, Button, x15 y+1 gCopyError, Copy error to clipboard
+		Gui, Add, Button, x15 y+10 gCopyError, Copy error to clipboard
 	}
 
 	Gui, Add, Text, x0 y0 w0 h0, % "dummycontrol"
