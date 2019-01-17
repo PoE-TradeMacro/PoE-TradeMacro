@@ -70,6 +70,8 @@ PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, scriptDir, projectNa
 /*
 	merge all scripts into `_TradeMacroMain.ahk` and execute it.
 */
+SplashUI.SetSubMessage("Merging and starting Scripts...")
+
 info		:= ReadFileToMerge(scriptDir "\resources\ahk\POE-ItemInfo.ahk")
 tradeInit := ReadFileToMerge(scriptDir "\resources\ahk\TradeMacroInit.ahk")
 trade	:= ReadFileToMerge(scriptDir "\resources\ahk\TradeMacro.ahk")
@@ -146,7 +148,7 @@ RunAsAdmin(arguments)
 }
 
 StartSplashScreen(version) {
-	global SplashUI := new SplashUI("on", "PoE-TradeMacro", "Merging and starting Scripts...", "", version)	
+	global SplashUI := new SplashUI("on", "PoE-TradeMacro", "Initializing PoE-TradeMacro...", "- Checking permission and access to some folders...", version)
 }
 
 AppendCustomMacros(userDirectory)
