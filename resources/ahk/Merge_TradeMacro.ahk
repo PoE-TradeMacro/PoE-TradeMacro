@@ -72,10 +72,10 @@ PoEScripts_CompareUserFolderWithScriptFolder(userDirectory, scriptDir, projectNa
 */
 SplashUI.SetSubMessage("Merging and starting Scripts...")
 
-info		:= ReadFileToMerge(scriptDir "\resources\ahk\POE-ItemInfo.ahk")
-tradeInit := ReadFileToMerge(scriptDir "\resources\ahk\TradeMacroInit.ahk")
-trade	:= ReadFileToMerge(scriptDir "\resources\ahk\TradeMacro.ahk")
-addMacros := ReadFileToMerge(scriptDir "\resources\ahk\AdditionalMacros.ahk")
+tradeInit := ReadFileToMerge(file01 := scriptDir "\resources\ahk\TradeMacroInit.ahk")
+info		:= ReadFileToMerge(file02 := scriptDir "\resources\ahk\POE-ItemInfo.ahk")
+addMacros := ReadFileToMerge(file03 := scriptDir "\resources\ahk\AdditionalMacros.ahk")
+trade	:= ReadFileToMerge(file04 := scriptDir "\resources\ahk\TradeMacro.ahk")
 
 info		:= "`n`r`n`r" . info . "`n`r`n`r"
 addMacros	:= "`n`r#IfWinActive ahk_group PoEWindowGrp" . "`n`r`n`r" . addMacros . "`n`r`n`r"
@@ -85,10 +85,17 @@ CloseScript("_TradeMacroMain.ahk")
 CloseScript("_ItemInfoMain.ahk")
 FileDelete, %scriptDir%\_TradeMacroMain.ahk
 FileDelete, %scriptDir%\_ItemInfoMain.ahk
+; trademacro init
 FileCopy,   %scriptDir%\resources\ahk\TradeMacroInit.ahk, %scriptDir%\_TradeMacroMain.ahk
 
+; iteminfo
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file02 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
 FileAppend, %info%		, %scriptDir%\_TradeMacroMain.ahk
+; additional macros
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file03 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
 FileAppend, %addMacros%	, %scriptDir%\_TradeMacroMain.ahk
+; trademacro
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file04 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
 FileAppend, %trade%		, %scriptDir%\_TradeMacroMain.ahk
 
 ; set script hidden
@@ -163,8 +170,8 @@ AppendCustomMacros(userDirectory)
 	{
 		If A_LoopFileExt in %extensions%
 		{
-			FileRead, tmp, %A_LoopFileFullPath%
-			appendedMacros .= "; appended custom macro file: " A_LoopFileName " ---------------------------------------------------"
+			FileRead, tmp, %A_LoopFileFullPath%			
+			appendedMacros .= "`r`n`r`n/* ###--- Merged File: " A_LoopFileFullPath " ---###  `r`n*/`r`n"
 			appendedMacros .= "`n" tmp "`n`n"
 		}
 	}
