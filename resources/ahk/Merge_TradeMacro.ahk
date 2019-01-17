@@ -11,6 +11,7 @@
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_HandleUserSettings.ahk
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_CheckInvalidScriptFolder.ahk
 #Include, %A_ScriptDir%\..\..\lib\Class_SplashUI.ahk
+#Include, %A_ScriptDir%\..\..\lib\DebugPrintArray.ahk
 #Include, %A_ScriptDir%\..\..\resources\VersionTrade.txt
 
 arguments := ""
@@ -83,34 +84,56 @@ addMacros	.= AppendCustomMacros(userDirectory)
 
 CloseScript("_TradeMacroMain.ahk")
 CloseScript("_ItemInfoMain.ahk")
-FileDelete, %scriptDir%\_TradeMacroMain.ahk
+
+global outputFile := scriptDir "\_TradeMacroMain.ahk"
+FileDelete, %outputFile%
 FileDelete, %scriptDir%\_ItemInfoMain.ahk
 ; trademacro init
-FileCopy,   %scriptDir%\resources\ahk\TradeMacroInit.ahk, %scriptDir%\_TradeMacroMain.ahk
-
+FileCopy,   %scriptDir%\resources\ahk\TradeMacroInit.ahk, %outputFile%
 ; iteminfo
-FileAppend, % "`r`n`r`n/* ###--- Merged File: " file02 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
-FileAppend, %info%		, %scriptDir%\_TradeMacroMain.ahk
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file02 " ---~~~  `r`n*/`r`n", %outputFile%
+FileAppend, %info%		, %outputFile%
 ; additional macros
-FileAppend, % "`r`n`r`n/* ###--- Merged File: " file03 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
-FileAppend, %addMacros%	, %scriptDir%\_TradeMacroMain.ahk
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file03 " ---~~~  `r`n*/`r`n", %outputFile%
+FileAppend, %addMacros%	, %outputFile%
 ; trademacro
-FileAppend, % "`r`n`r`n/* ###--- Merged File: " file04 " ---###  `r`n*/`r`n", %scriptDir%\_TradeMacroMain.ahk
-FileAppend, %trade%		, %scriptDir%\_TradeMacroMain.ahk
+FileAppend, % "`r`n`r`n/* ###--- Merged File: " file04 " ---~~~  `r`n*/`r`n", %outputFile%
+FileAppend, %trade%		, %outputFile%
 
 ; set script hidden
-FileSetAttrib, +H, %scriptDir%\_TradeMacroMain.ahk
+FileSetAttrib, +H, %outputFile%
 ; pass some parameters to TradeMacroInit
 If (not onlyMergeFiles) {
 	SplashUI.DestroyUI()
-	RunWait, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel
-	If (ErrorLevel) {
-		Menu, Tray, Icon, %scriptDir%\resources\images\poe-trade-bl.ico
-		GoSub, ShowErrorUI
-	}
-	Else {
-		ExitApp
-	}
+	Run, "%A_AhkPath%" "%scriptDir%\_TradeMacroMain.ahk" "%projectName%" "%userDirectory%" "%isDevelopmentVersion%" "%overwrittenFiles%" "isMergedScript" "%skipSplash%" "%A_ScriptFullPath%", , UseErrorLevel, OutputVarPID
+
+	; Check whether the called script is still running to detect script crashes, in favour of using runwait + errorlevel
+	; The advantage here is that we can read the text from the crash error window.
+	; This requires the merge script being closed by the called script though.
+	scriptRunning := true
+	global errorWindowText := ""
+
+	Loop {
+		Sleep, 100
+		Process, Exist, %OutputVarPID%
+		If (ErrorLevel = 0) {
+			scriptRunning := false
+		}
+		
+		DetectHiddenWindows, On
+		SetTitleMatchMode, 2		
+		IfWinNotExist, %outputFile%
+		{
+			scriptRunning := false
+		}
+	} Until (not scriptRunning)	
+	
+	SetTitleMatchMode, 1
+	DetectHiddenText, On
+	WinGetText, errorWindowText, % "_TradeMacroMain.ahk"
+
+	Menu, Tray, Icon, %scriptDir%\resources\images\poe-trade-bl.ico
+	GoSub, ShowErrorUI
 } Else {
 	ExitApp	
 }
@@ -171,7 +194,7 @@ AppendCustomMacros(userDirectory)
 		If A_LoopFileExt in %extensions%
 		{
 			FileRead, tmp, %A_LoopFileFullPath%			
-			appendedMacros .= "`r`n`r`n/* ###--- Merged File: " A_LoopFileFullPath " ---###  `r`n*/`r`n"
+			appendedMacros .= "`r`n`r`n/* ###--- Merged File: " A_LoopFileFullPath " ---~~~  `r`n*/`r`n"
 			appendedMacros .= "`n" tmp "`n`n"
 		}
 	}
@@ -237,10 +260,104 @@ ShowErrorUI:
 	Gui, Add, Link, x25 y+5 cBlue BackgroundTrans, <a href="https://discord.gg/taKZqWw">- Discord</a>
 	Gui, Add, Link, x25 y+5 cBlue BackgroundTrans, <a href="https://www.pathofexile.com/forum/view-thread/1757730">- Forum</a>
 
+	If (StrLen(errorWindowText)) {
+		Gui, Font, bold s8 c000000, Verdana
+		Gui, Add, Text, x15 y+15 BackgroundTrans, % "Parsed runtime error:"
+		errorMsg := ParseRuntimeError(errorWindowText, outputFile, errorFile)
+		Gui, Font, bold norm
+		Gui, Add, Text, x15 y+7 BackgroundTrans, % errorMsg
+		
+		solution := GetSolution(errorMsg, errorFile)
+		If (solution) {
+			Gui, Font, bold s8 c000000, Verdana
+			Gui, Add, Text, x15 y+15 BackgroundTrans, % "Possible solution:"
+			Gui, Font, bold norm
+			Gui, Add, Text, x15 y+7 BackgroundTrans, % solution
+		}		
+		
+		Gui, Font, bold s8 c000000, Verdana
+		Gui, Add, Text, x15 y+15 BackgroundTrans, % "Original runtime error:"
+		Gui, Font, bold norm
+		originalMsg := Trim(RegExReplace(errorWindowText, "i)^Ok(\r\n)?"))
+		originalMsg := Trim(RegExReplace(originalMsg, "i)(\r\n)?The program will exit\.$"))
+		Gui, Add, Text, x20 y+7 BackgroundTrans, % SubStr(originalMsg, 1, 400)
+		
+		Gui, Add, Button, x15 y+1 gCopyError, Copy error to clipboard
+	}
+
 	Gui, Add, Text, x0 y0 w0 h0, % "dummycontrol"
 	Gui, Show, AutoSize, PoE-TradeMacro run error
 	ControlFocus, dummycontrol, PoE-TradeMacro run error
 Return
+
+CopyError:
+	ClipBoard := errorWindowText
+	ToolTip, Copied
+	SetTimer, RemoveToolTip, 1500
+Return
+
+RemoveToolTip:
+	SetTimer, RemoveToolTip, Off
+	ToolTip
+Return
+
+ParseRuntimeError(e, mergedFile, ByRef errorFile) {
+	errorLine := 
+	If (RegExMatch(e, "i)Error at line (\d+)\.", lineNr)) {
+		errorLine := lineNr1	
+	}
+	
+	FileRead, rF, %mergedFile%	
+	files:= []
+	
+	lines := []
+	Loop, Parse, rF, `n, `r
+	{
+		lines.push(A_LoopField)
+	}
+	
+	For key, val in lines {
+		If (RegExMatch(val, "i)###---\sMerged File:\s(.*)\s---\~\~\~", mf)) {
+			If (mf) {		
+				f := {}
+				;f.name := RegExReplace(mf1, "i)(.*)(CustomMacros\\.*)$|(.*)(resources\\ahk\\.*)$", "$2$4")
+				f.name := mf1
+				f.start := A_Index				
+				files.push(f)
+			}
+		}
+	}
+
+	errorFile := ""	
+	Loop, % files.MaxIndex() {
+		If (A_Index = 1 and errorLine < files[A_Index].start) {
+			errorFile := scriptDir "\resources\ahk\TradeMacroInit.ahk"
+			Break
+		}
+		If (errorLine > files[A_Index].start) {
+			If (A_Index = files.MaxIndex()) {
+				errorFile := files[A_Index].name
+			}
+			Else If (errorLine < files[A_Index + 1].start) {
+				errorFile := files[A_Index].name
+			}
+			Else {
+				errorFile := files[A_Index + 1].name
+			}			
+		}
+	}
+
+	errorMsg := "Error at line " errorLine ". This should be caused by the source file: `n" errorFile
+	Return errorMsg
+}
+
+GetSolution(msg, file) {
+	solution := ""
+	If (RegExMatch(file, "i)customMacros_example\.txt$")) {
+		solution := "Try deleting the source file:`n" file
+		Return solution
+	}
+}
 
 GuiClose:
 	ExitApp
