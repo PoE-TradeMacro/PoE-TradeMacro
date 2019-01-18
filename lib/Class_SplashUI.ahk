@@ -98,6 +98,7 @@
 	SetMessage(message) {
 		this.message := message
 		GuiControl,,SplashMessage, % this.message
+		Sleep, 1	; add a small sleep to prevent text field overlapping caused by too fast updates
 	}
 	SetSubMessage(message) {
 		If (StrLen(message)) {
@@ -112,7 +113,8 @@
 		If (mI > 3) {
 			this.submessage := Trim(arr[mI - 2] "`n" arr[mI - 1] "`n" arr[mI])
 		}
-		
+
 		GuiControl,,SplashSubMessage, % this.submessage
+		Sleep, 1	; add a small sleep to prevent text field overlapping caused by too fast updates
 	}
 }
