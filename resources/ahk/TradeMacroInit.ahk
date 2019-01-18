@@ -1570,7 +1570,7 @@ TradeFunc_StartSplashScreen(TradeReleaseVersion) {
 		, "Hunting some old friends...", "Setting up lab carries for the other 99%...", "Msg @ScourgeOfTheImmortals to share new map hideouts with me."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
-	global SplashUI := new SplashUI("on", "PoE-TradeMacro", initArray[randomNum], "", TradeReleaseVersion)
+	global SplashUI := new SplashUI("on", "PoE-TradeMacro", initArray[randomNum], "", TradeReleaseVersion, A_ScriptDir "\resources\images\greydot.png")
 }
 
 TradeFunc_FinishTMInit(argumentMergeScriptPath) {	

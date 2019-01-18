@@ -3,7 +3,7 @@
 	__New(params*)
 	{
 		c := params.MaxIndex()
-		If (c > 5) {
+		If (c > 6) {
 			throw "Too many parameters passed to SplashUI.New()"
 		}
 		
@@ -13,6 +13,7 @@
 		this.message	:= (params[3] = "" or not params[3]) ? "Initializing script" : params[3]		
 		this.submessage := (params[4] = "" or not params[4]) ? "" : params[4]		
 		this.scriptVersion := (params[5] = "" or not params[5]) ? "" : params[5]		
+		this.borderImage := (params[6] = "" or not params[6]) ? "" : params[6]		
 		
 		; initialize
 		this.CreateUI()
@@ -48,7 +49,7 @@
 		Gui, SplashUI:Show, Center w470 NA, % this.title
 
 		WinGetPos, _TTX, _TTY, _TTW, _TTH, ahk_id %SplashHwnd%
-		image := A_ScriptDir "\resources\images\greydot.png"
+		image := this.borderImage
 		If (FileExist(image)) {
 			WinGetPos, _TTX, _TTY, _TTW, _TTH, ahk_id %SplashHwnd%
 
@@ -65,6 +66,9 @@
 			
 			Gui, SplashUI:Add, Picture, w1 h1000 x%_TTW% y1, %image%	
 			Gui, SplashUI:Add, Picture, w1 h1000 x%_TTW% y1, %image%
+		}
+		Else {
+			msgbox meh
 		}
 		
 		If (state = "off") {

@@ -479,7 +479,7 @@ Sleep, 100
 ; "SkipItemInfoUpdateCall" should be set outside by other scripts.
 global firstUpdateCheck := true
 If (!SkipItemInfoUpdateCall) {
-	global SplashUI := new SplashUI("on", "PoE-ItemInfo", "Initializing PoE-ItemInfo...", "", ReleaseVersion)
+	global SplashUI := new SplashUI("on", "PoE-ItemInfo", "Initializing PoE-ItemInfo...", "", ReleaseVersion, A_ScriptDir "\resources\images\greydot.png")
 	GoSub, CheckForUpdates
 }
 firstUpdateCheck := false

@@ -11,12 +11,11 @@
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_HandleUserSettings.ahk
 #Include, %A_ScriptDir%\..\..\lib\PoEScripts_CheckInvalidScriptFolder.ahk
 #Include, %A_ScriptDir%\..\..\lib\Class_SplashUI.ahk
-#Include, %A_ScriptDir%\..\..\lib\DebugPrintArray.ahk
 #Include, %A_ScriptDir%\..\..\resources\VersionTrade.txt
 
 arguments := ""
 arg1 	= %1%
-scriptDir := FileExist(arg1) ? arg1 : RegExReplace(A_ScriptDir, "(.*)\\[^\\]+\\.*", "$1")
+global scriptDir := FileExist(arg1) ? arg1 : RegExReplace(A_ScriptDir, "(.*)\\[^\\]+\\.*", "$1")
 Loop, %0%  ; For each parameter
 {
 	If (not FileExist(%A_Index%)) {	; we don't want the first argument which is the project scriptdir here
@@ -134,7 +133,7 @@ If (not onlyMergeFiles) {
 		SetTitleMatchMode, 1
 		IfWinNotExist, %outputFile% ahk_class AutoHotkey
 		{
-			scriptRunning := false
+			;scriptRunning := false
 		}
 	} Until (not scriptRunning)
 	
@@ -188,7 +187,7 @@ RunAsAdmin(arguments)
 }
 
 StartSplashScreen(version) {
-	global SplashUI := new SplashUI("on", "PoE-TradeMacro", "Initializing PoE-TradeMacro...", "- Checking permission and access to some folders...", version)
+	global SplashUI := new SplashUI("on", "PoE-TradeMacro", "Initializing PoE-TradeMacro...", "- Checking permission and access to some folders...", version, scriptDir "\resources\images\greydot.png")
 }
 
 AppendCustomMacros(userDirectory)
