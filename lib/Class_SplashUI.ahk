@@ -67,9 +67,6 @@
 			Gui, SplashUI:Add, Picture, w1 h1000 x%_TTW% y1, %image%	
 			Gui, SplashUI:Add, Picture, w1 h1000 x%_TTW% y1, %image%
 		}
-		Else {
-			msgbox meh
-		}
 		
 		If (state = "off") {
 			Gui, SplashUI:Show, Hide
