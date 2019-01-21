@@ -10541,8 +10541,8 @@ ShowAssignedHotkeys(returnList = false) {
 	Gui, ShowHotkeys:Color, ffffff, ffffff
 	Gui, ShowHotkeys:Add, Text, , List of this scripts assigned hotkeys.
 	Gui, ShowHotkeys:Default
-	Gui, Font, , Courier New
-	Gui, Font, , Consolas
+	Gui, ShowHotkeys:Font, , Courier New
+	Gui, ShowHotkeys:Font, , Consolas
 	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination (Code) | Key combination (ENG name)
 	For key, val in hotkeys {
 		If (key != 1) {
@@ -10570,7 +10570,7 @@ ShowAssignedHotkeys(returnList = false) {
 	Gui, ShowHotkeys:Add, Text, , % text
 
 	Gui, ShowHotkeys:Show, w820 xCenter yCenter, Assigned Hotkeys
-	Gui, 1:Default
+	Gui, SettingsUI:Default
 	Gui, Font
 }
 
@@ -11456,7 +11456,7 @@ ShowSettingsUI:
 
 SettingsUI_BtnOK:
 	Global Opts
-	Gui, Submit
+	Gui, SettingsUI:Submit
 	Sleep, 50
 	WriteConfig()
 	AM_WriteConfig()
@@ -11465,11 +11465,11 @@ SettingsUI_BtnOK:
 	return
 
 SettingsUI_BtnCancel:
-	Gui, Cancel
+	Gui, SettingsUI:Cancel
 	return
 
 SettingsUI_BtnDefaults:
-	Gui, Cancel
+	Gui, SettingsUI:Cancel
 	RemoveConfig()
 	Sleep, 75
 	CopyDefaultConfig()
@@ -11481,7 +11481,7 @@ SettingsUI_BtnDefaults:
 	return
 	
 SettingsUI_AM_BtnDefaults:
-	Gui, Cancel
+	Gui, SettingsUI:Cancel
 	RemoveConfig("AdditionalMacros.ini")
 	Sleep, 75
 	CopyDefaultConfig("AdditionalMacros.ini")
@@ -11795,7 +11795,7 @@ ShowAssignedHotkeys:
 
 GuiEscape: 
 	; settings 
-	Gui, Cancel
+	Gui, SettingsUI:Cancel
 Return
 
 AboutGuiEscape:
@@ -12702,7 +12702,9 @@ StartLutbot:
 Return
 
 OpenLutbotDocumentsFolder:
-	OpenUserSettingsFolder("Lutbot", A_MyDocuments "\AutoHotKey\LutTools")
+	;OpenUserSettingsFolder("Lutbot", A_MyDocuments "\AutoHotKey\LutTools")
+	LutBotSettings.launcherPath
+	OpenUserSettingsFolder("Lutbot", LutBotSettings.launcherPath)
 Return
 
 CheckForLutBotHotkeyConflicts(hotkeys, config) {
