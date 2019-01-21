@@ -14,7 +14,7 @@ If (FileExist(userFolderPath "\IEComObjectCall.txt")) {
 url := "https://poe-trademacro.github.io/userCount/index.html"
 killIElowutil := false
 Try {
-	killIElowutil := CheckForRunningIElowutil()
+	;killIElowutil := CheckForRunningIElowutil()
 	wb1 := ComObjCreate("InternetExplorer.Application")
 	wb1.Visible := False
 	wb1.Navigate(url)	
