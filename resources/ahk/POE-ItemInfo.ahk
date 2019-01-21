@@ -229,11 +229,11 @@ class Fonts {
 		{
 			Options .= "s" FontSize_
 		}		
-		Gui Font, %Options%, Arial
-		Gui Font, %Options%, Tahoma
-		Gui Font, %Options%, Segoe UI
-		Gui Font, %Options%, Verdana
-		Gui Add, Text, HwndHidden h0 w0 x0 y0,
+		Gui, SettingsUI:Font, %Options%, Arial
+		Gui, SettingsUI:Font, %Options%, Tahoma
+		Gui, SettingsUI: Font, %Options%, Segoe UI
+		Gui, SettingsUI: Font, %Options%, Verdana
+		Gui, SettingsUI: Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
 		return ErrorLevel
 	}
@@ -9704,7 +9704,7 @@ CreateSettingsUI()
 	; Note: window handles (hwnd) are only needed if a UI tooltip should be attached.
 	
 	generalHeight := SkipItemInfoUpdateCall ? "150" : "240"		; "180" : "270" with ParseItemHotKey
-	topGroupBoxYPos := SkipItemInfoUpdateCall ? "y33" : "y30"
+	topGroupBoxYPos := SkipItemInfoUpdateCall ? "y51" : "y30"
 	
 	; General
 	GuiAddGroupBox("General", "x7 " topGroupBoxYPos " w310 h" generalHeight " Section", "", "", "", "", "SettingsUI")

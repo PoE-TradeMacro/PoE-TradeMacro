@@ -540,7 +540,7 @@ CreateTradeSettingsUI()
 	Gui, SettingsUI:Add, Tab3, Choose1 h660 x0, %TabNames%
 	Gui, SettingsUI:Default
 	
-	topGroupBoxYPos := "y33"
+	topGroupBoxYPos := "y51"
 	
 	/* 
 		General
@@ -859,7 +859,7 @@ TradeFunc_GetDelimitedCurrencyListString() {
 	CurrencyList := ""
 	CurrencyTemp := TradeGlobals.Get("CurrencyIDs")
 	CurrencyTemp := TradeCurrencyNames.eng
-
+	
 	For currName, currID in CurrencyTemp {
 		name := RegExReplace(currName,  "i)_", " ")
 		; only use real currency items here

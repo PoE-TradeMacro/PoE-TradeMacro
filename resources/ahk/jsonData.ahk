@@ -11,22 +11,22 @@ If (argumentIsMergedScript != "isMergedScript") {
 }
 
 ; Parse the unique items data
-global TradeUniqueData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\uniques.json")
+global TradeUniqueData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\uniques.json", "uniques")
 
 ; Parse the unique relic items data
-global TradeRelicData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\relics.json")
+global TradeRelicData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\relics.json", "relics")
 
 ; Parse the poe.trade mods
-global TradeModsData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\mods.json")
+global TradeModsData := ReadJSONDataFromFile(A_ScriptDir "\data_trade\mods.json", "mods")
 
 ; Parse currency names (in-game names mapped to poe.trade names)
-global TradeCurrencyNames := ReadJSONDataFromFile(A_ScriptDir "\data_trade\currencyNames.json")
+global TradeCurrencyNames := ReadJSONDataFromFile(A_ScriptDir "\data_trade\currencyNames.json", "currencyNames")
 
 ; Parse fallback currency IDs
 global TradeCurrencyIDsFallback := ReadJSONDataFromFile(A_ScriptDir "\data_trade\currencyIDs_Fallback.json")
 
 ; Parse the unique items data
-global TradeCurrencyTags := ReadJSONDataFromFile(A_ScriptDir "\data_trade\currency_tags.json")
+global TradeCurrencyTags := ReadJSONDataFromFile(A_ScriptDir "\data_trade\currency_tags.json", "tags")
 
 SplashUI.SetSubMessage("Parsing leagues from GGGs API...")
 ; Download and parse the current leagues
@@ -67,7 +67,7 @@ Try {
 	ExitApp
 }
 
-ReadJSONDataFromFile(filepath, critical = false) {
+ReadJSONDataFromFile(filepath, key = "", critical = false) {
 	data := 
 	
 	failed := false
@@ -79,7 +79,11 @@ ReadJSONDataFromFile(filepath, critical = false) {
 		If (test) {
 			FileRead, JSONFile, %filepath%
 			parsedJSON := JSON.Load(JSONFile)
-			data := parsedJSON
+			If (StrLen(key)) {
+				data := parsedJSON[key]
+			} Else {
+				data := parsedJSON
+			}
 		}
 		Else {
 			errorMsg .= "`n" "The file doesn't exist."
