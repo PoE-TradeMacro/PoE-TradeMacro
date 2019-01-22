@@ -9994,6 +9994,11 @@ CreateSettingsUI()
 	
 	; close tabs
 	Gui, SettingsUI:Tab
+	
+	GoSub, SettingsUI_ChkUseCompactDoubleRanges
+	GoSub, SettingsUI_ChkDisplayToolTipAtFixedCoords
+	GoSub, SettingsUI_ChkUseTooltipTimeout
+	GoSub, SettingsUI_ChkUseGDI
 }
 
 UpdateSettingsUI()
@@ -11793,7 +11798,7 @@ ShowAssignedHotkeys:
 	Gui, 3:Cancel
 	return
 
-GuiEscape: 
+SettingsUIGuiEscape: 
 	; settings 
 	Gui, SettingsUI:Cancel
 Return
