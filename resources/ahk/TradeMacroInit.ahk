@@ -1048,7 +1048,7 @@ TradeFunc_ParseSearchFormOptions() {
 }
 
 TradeFunc_DownloadDataFiles() {	
-	SplashUI.SetSubMessage("Downloading newest data files from github...")
+	SplashUI.SetSubMessage("Downloading latest data files from github...")
 	
 	; disabled while using debug mode
 	owner	:= TradeGlobals.Get("GithubUser", "POE-TradeMacro")
