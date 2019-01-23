@@ -214,9 +214,9 @@ class Fonts {
 		{
 			Options .= "s" FontSize_
 		}
-		Gui Font, %Options%, Courier New
-		Gui Font, %Options%, Consolas
-		Gui Add, Text, HwndHidden h0 w0 x0 y0,
+		Gui SettingsUI:Font, %Options%, Courier New
+		Gui SettingsUI:Font, %Options%, Consolas
+		Gui SettingsUI:Add, Text, HwndHidden h0 w0 x0 y0,
 		SendMessage, 0x31,,,, ahk_id %Hidden%
 		return ErrorLevel
 	}
