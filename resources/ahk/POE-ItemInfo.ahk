@@ -9382,14 +9382,15 @@ ChangeTooltipColorByItem(conditionalColors = false) {
 }
 
 ; Show tooltip, with fixed width font
-ShowToolTip(String, Centered = false, conditionalColors = false) {
+ShowToolTip(String, Centered = false, conditionalColors = false)
+{
 	Global X, Y, ToolTipTimeout, Opts, gdipTooltip, Item
 	
 	; Get position of mouse cursor
 	MouseGetPos, X, Y
 	WinGet, PoEWindowHwnd, ID, ahk_group PoEWindowGrp
 	RelativeToActiveWindow := true	; default tooltip behaviour 
-	msgbox showtooltip
+	
 	If (not RelativeToActiveWindow) {
 		OldCoordMode := A_CoordModeToolTip
 		CoordMode, Tooltip, Screen
