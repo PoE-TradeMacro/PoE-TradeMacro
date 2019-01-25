@@ -2021,7 +2021,7 @@ TradeFunc_DoPoePricesRequest(RawItemData, ByRef retCurl) {
 	ShowToolTip("Getting price prediction... ")
 	retCurl := true
 	response := PoEScripts_Download(url, postData, reqHeaders, options, false, false, false, "", "", true, retCurl)
-	
+	msgbox %  RegExReplace(A_ScriptDir "\lib\" retCurl, "curl", "curl.exe")
 	If (TradeOpts.Debug) {
 		FileDelete, %A_ScriptDir%\temp\DebugSearchOutput.html
 		FileAppend, %response%, %A_ScriptDir%\temp\DebugSearchOutput.html
