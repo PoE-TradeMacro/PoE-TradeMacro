@@ -1472,7 +1472,7 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 	
 	; filters
 	url_params := "?"
-	url_param_1 := "filter="
+	url_param_1 := "name="
 	url_param_2 := "&tier="
 	
 	If (item.IsMap) {
