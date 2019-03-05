@@ -452,8 +452,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Enchantment := false
 	Corruption  := false
 
-	If (Item.hasImplicit) {
+	If (Item.hasImplicit or Item.hasEnchantment) {
 		Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
+		If (StrLen(Enchantment) and Item.hasImplicit and not Item.hasEnchantment) {
+			Item.hasImplicit := false	; implicit was assumed but is actually an enchantment
+		}
 		Corruption  := Item.IsCorrupted ? TradeFunc_GetCorruption(Item) : false
 	}
 
@@ -1362,6 +1365,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}	
 	}
 	Else If (Item.isCurrency and !Item.IsEssence and TradeFunc_CurrencyFoundOnCurrencySearch(Item.Name)) {
+		TradeFunc_AprilFools()
+		
 		; Default currency search
 		If (!TradeOpts.AlternativeCurrencySearch or Item.IsFossil) {
 			ParsedData := TradeFunc_ParseCurrencyHtml(Html, Payload, ParsingError)
@@ -1376,6 +1381,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		ShowToolTip(ParsedData)
 	}
 	Else If (TradeOpts.UsePredictedItemPricing and itemEligibleForPredictedPricing and not isAdvancedPriceCheckRedirect and not isItemAgeRequest) {		
+		TradeFunc_AprilFools()
 		SetClipboardContents("")
 	
 		If (TradeFunc_ParsePoePricesInfoErrorCode(Html, requestCurl)) {
@@ -1389,6 +1395,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		}
 	}
 	Else {
+		TradeFunc_AprilFools()
 		; Check item age
 		If (isItemAgeRequest) {
 			Item.UsedInSearch.SearchType := "Item Age Search"
@@ -1409,7 +1416,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Else {
 			ParsedData := TradeFunc_ParseHtml(Html, Payload, iLvl, Enchantment, isItemAgeRequest, isAdvancedPriceCheckRedirect)	
 		}		
-
+		
 		SetClipboardContents("")
 		ShowToolTip("")
 		ShowToolTip(ParsedData)
@@ -1435,7 +1442,7 @@ TradeFunc_GetPoENinjaItemUrl(league, item) {
 		url .= "event/"
 	}
 	
-	If (Item.hasImplicit) {
+	If (Item.hasImplicit or item.hasEnchantment) {
 		Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
 	}
 	
@@ -3784,6 +3791,14 @@ TradeFunc_GetEnchantment(_item, type) {
 	enchants := TradeGlobals.Get("EnchantmentData")
 	enchImplicits := []
 
+	; currently a missing implicit causes the enchantment to take the "implicit slot"
+	; we can only say for sure whether we have an implicit or enchantment if both are present and we know don't have a magic/rare item with completely annulled explicit mods
+	; or by matching against all possible enchantments	
+	searchKey := "implicit"
+	If (Item.hasEnchantment) {
+		searchKeyKey := "enchantment"
+	}
+
 	group :=
 	If (type = "Boots") {
 		group := enchants.boots
@@ -3795,9 +3810,9 @@ TradeFunc_GetEnchantment(_item, type) {
 		group := enchants.helmet
 	}
 
-	For key, val in _item.Implicit {
-		RegExMatch(_item.implicit[key], "i)([.0-9]+)(%? to ([.0-9]+))?", values)
-		imp      := RegExReplace(_item.implicit[key], "i)([.0-9]+)", "#")
+	For key, val in _item[searchKey] {
+		RegExMatch(_item[searchKey][key], "i)([.0-9]+)(%? to ([.0-9]+))?", values)
+		imp      := RegExReplace(_item[searchKey][key], "i)([.0-9]+)", "#")
 
 		enchantment := {}
 		If (group.length()) {
@@ -3807,7 +3822,7 @@ TradeFunc_GetEnchantment(_item, type) {
 						match := Trim(RegExReplace(mod, "i)\(enchant\)", ""))
 						If (match = enchant) {
 							enchantment.param := mod
-							enchantment.name  := _item.implicit[key]
+							enchantment.name  := _item[searchKey][key]
 						}
 					}
 				}
@@ -5883,5 +5898,39 @@ TradeFunc_PredictedPricingSendFeedback(selector, comment, encodedData, league, p
 TradeFunc_ActivatePoeWindow() {
 	If (not WinActive("ahk_group PoEWindowGrp")) {
 		WinActivate, ahk_group PoEWindowGrp
+	}
+}
+
+TradeFunc_CheckAprilFools() {
+	FormatTime, Date_now, A_Now, MMdd	
+	Date_until := 0401
+
+	If (Date_now = Date_Until) {
+		Return 1
+	} Else {
+		Return 0
+	}
+}
+
+TradeFunc_AprilFools() {
+	global ItsApriFoolsTime
+	
+	Random, chance, 1, 100
+	
+	If (not ItsApriFoolsTime) {
+		Return
+	}
+	
+	If (chance != 1) {
+		Return
+	}
+	
+	text := "Memory Access Violation`n"
+	text .= "Cavas error at 000000 in "
+	text .= "C:\Program Files\Synthesis\3.6\modules\bin\readFragment.exe"
+	MsgBox, 0x12, Error, %text%, 
+	IfMsgBox, Retry 
+	{
+		TradeFunc_AprilFools()
 	}
 }

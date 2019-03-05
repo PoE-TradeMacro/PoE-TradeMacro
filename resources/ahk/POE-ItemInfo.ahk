@@ -339,6 +339,7 @@ class Item_ {
 		This.SubType		:= ""		
 		This.DifficultyRestriction := ""
 		This.Implicit		:= []
+		This.Enchantment	:= []
 		This.Charges		:= []
 		This.AreaMonsterLevelReq := []
 		This.BeastData 	:= {}
@@ -347,6 +348,7 @@ class Item_ {
 		This.veiledSuffixCount	:= ""
 		
 		This.HasImplicit	:= False
+		This.HasEnchantment	:= False
 		This.HasEffect		:= False
 		This.IsWeapon		:= False
 		This.IsArmour 		:= False
@@ -8106,13 +8108,26 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		}
 		
 		; Check that there is no ":" in the retrieved text = can only be an implicit mod
-		If (!InStr(ItemDataParts%ItemDataIndexImplicit%, ":")) {
+		_implicitFound := !InStr(ItemDataParts%ItemDataIndexImplicit%, ":")
+		If (_implicitFound) {
 			tempImplicit	:= ItemDataParts%ItemDataIndexImplicit%
 			Loop, Parse, tempImplicit, `n, `r
 			{
 				Item.Implicit.push(A_LoopField)
 			}
 			Item.hasImplicit := True
+		}
+
+		; Check if there is a second "possible implicit" which means the first one is actually an enchantmet
+		_ItemDataIndexImplicit := ItemDataIndexImplicit - 1
+		If (_implicitFound and !InStr(ItemDataParts%_ItemDataIndexImplicit%, ":")) {			
+			tempImplicit	:= ItemDataParts%_ItemDataIndexImplicit%
+			Loop, Parse, tempImplicit, `n, `r
+			{
+				Item.Enchantment.push(A_LoopField)
+			}
+			Item.hasImplicit := True
+			Item.hasEnchantment := True
 		}
 	}
 	
@@ -12708,8 +12723,7 @@ Return
 
 OpenLutbotDocumentsFolder:
 	;OpenUserSettingsFolder("Lutbot", A_MyDocuments "\AutoHotKey\LutTools")
-	LutBotSettings.launcherPath
-	OpenUserSettingsFolder("Lutbot", LutBotSettings.launcherPath)
+	OpenUserSettingsFolder("Lutbot", LutBotSettings.variables.launcherPath)
 Return
 
 CheckForLutBotHotkeyConflicts(hotkeys, config) {
