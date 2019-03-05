@@ -382,6 +382,8 @@ class Item_ {
 		This.IsRelic		:= False
 		This.IsElderBase	:= False
 		This.IsShaperBase	:= False
+		This.IsSynthesisedBase:= False
+		This.IsFracturedBase:= False
 		This.IsAbyssJewel	:= False
 		This.IsBeast		:= False
 		This.IsHideoutObject:= False
@@ -7849,7 +7851,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		If (corrMatch) {
 			Item.IsCorrupted := True
 		}
-		RegExMatch(Trim(A_LoopField), "i)^(Elder|Shaper) Item$", match)
+		RegExMatch(Trim(A_LoopField), "i)^(Elder|Shaper|Synthesised|Fractured) Item$", match)
 		If (match) {
 			Item["Is" match1 "Base"] := True
 		}

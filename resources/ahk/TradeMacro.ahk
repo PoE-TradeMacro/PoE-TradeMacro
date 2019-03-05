@@ -493,6 +493,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		preparedItem.IsJewel	:= Item.IsJewel
 		preparedItem.veiledPrefixCount := Item.veiledPrefixCount
 		preparedItem.veiledSuffixCount := Item.veiledSuffixCount
+		preparedItem.Enchantment := Enchantment
 		
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
@@ -502,11 +503,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
 
 		If (isAdvancedPriceCheck and hasAdvancedSearch) {
-			If (Enchantment.Length()) {
+			/*
+			If (Enchantment.Length()) {				
 				TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, "", Enchantment)
 			}
-			Else If (Corruption.Length()) {
+			*/
+			If (Corruption.Length()) {
 				TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, "", Corruption)
+			}
+			Else If (Item.IsSynthesisedBase) {
+				TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, "", Item.Implicit)
 			}
 			Else {
 				TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links)
@@ -551,6 +557,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem.BaseName	:= Item.BaseName
 			preparedItem.veiledPrefixCount := Item.veiledPrefixCount
 			preparedItem.veiledSuffixCount := Item.veiledSuffixCount
+			preparedItem.Enchantment := Enchantment
 		
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
@@ -558,12 +565,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			; open TradeFunc_AdvancedPriceCheckGui to select mods and their min/max values
 			If (isAdvancedPriceCheck) {
 				UniqueStats := TradeFunc_GetUniqueStats(Name)
-
+				/*
 				If (Enchantment.Length()) {
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Enchantment)
 				}
-				Else If (Corruption.Length()) {
+				*/
+				If (Corruption.Length()) {
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Corruption)
+				}
+				Else If (Item.IsSynthesisedBase) {
+					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Item.Implicit)
 				}
 				Else {
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats)
@@ -733,9 +744,13 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Else If (Item.IsElderBase) {
 				RequestParams.Elder := 1
 			}
+			Else If (Item.IsFracturedBase) {
+				RequestParams.Fractured := 1
+			}
 		} Else {
 			RequestParams.Shaper := ""
 			RequestParams.Elder := ""
+			RequestParams.Fractured := ""
 		}
 
 		; abyssal sockets 
@@ -856,6 +871,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (isAdvancedPriceCheckRedirect and not TradeGlobals.Get("AdvancedPriceCheckItem").useSpecialBase) {
 			RequestParams.Shaper := ""
 			RequestParams.Elder := ""
+			RequestParams.Fractured := ""
 		} Else {
 			If (Item.IsShaperBase) {
 				RequestParams.Shaper := 1
@@ -871,7 +887,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 			Else {			
 				RequestParams.Elder := 0
-			}	
+			}
+			
+			If (Item.IsFracturedBase) {
+				RequestParams.Fractured := 1
+				Item.UsedInSearch.specialBase := "Fractured"
+			}
+			Else {			
+				RequestParams.Fractured := 0
+			}
 		}		
 	} 
 	Else {
@@ -3252,6 +3276,8 @@ class RequestParams_ {
 	sockets_a_max	:= ""
 	shaper		:= ""
 	elder		:= ""
+	synthesised	:= ""
+	fractured		:= ""
 	map_series 	:= ""
 	veiled		:= ""
 
@@ -3615,6 +3641,9 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["elder"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
+			}
+			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["abyss jewels"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
@@ -3796,7 +3825,7 @@ TradeFunc_GetEnchantment(_item, type) {
 	; or by matching against all possible enchantments	
 	searchKey := "implicit"
 	If (Item.hasEnchantment) {
-		searchKeyKey := "enchantment"
+		searchKey := "enchantment"
 	}
 
 	group :=
@@ -3849,7 +3878,7 @@ TradeFunc_GetEnchantment(_item, type) {
 			enchImplicits.push(enchantment)
 		}
 	}
-	
+
 	If (enchImplicits.Length()) {
 		Return enchImplicits
 	}
@@ -4259,8 +4288,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 
 	;prevent advanced gui in certain cases
 	If (not advItem.mods.Length() and not (ChangedImplicit or ChangedImplicit.Length())) {
-		ShowTooltip("Advanced search not available for this item.")
-		Return
+		;ShowTooltip("Advanced search not available for this item.")
+		;Return
 	}
 
 	TradeFunc_ResetGUI()
@@ -4529,11 +4558,46 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}
 
 	/*
-		Enchantment or Corrupted Implicit
+		Enchantment
 		*/
 		
+	en := 0
+	If (advItem.Enchantment.Length()) {	
+		xPosMin := modGroupBox + 25
+		yPosFirst := 20 ; ( j > 1 ) ? 20 : 30
+		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 ; edit/text field widths and offsets
+		
+		For key, val in advItem.Enchantment {
+			en++
+			modValueMin := val.min
+			modValueMax := val.max
+			displayName := val.name			
+			
+			If (key > 1) {
+				yPosFirst := 20
+			}
+			
+			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%, % displayName
+			Gui, SelectModsGui:Add, CheckBox, x%xPosMin% yp+1 vTradeAdvancedSelected%en%
+
+			TradeAdvancedModMin%en% 		:= val.min
+			TradeAdvancedModMax%en% 		:= val.max
+			TradeAdvancedParam%en%  		:= val.param
+			TradeAdvancedIsImplicit%en%	:= false
+			TradeAdvancedIsEnchantment%en%:= true	
+		}		
+	}
+	TradeAdvancedEnchantmentCount := en
+
+	If (advItem.Enchantment.Length()) {
+		Gui, SelectModsGui:Add, Text, x0 w700 yp+18 cc9cacd, %line%
+	}
+
+	/*
+		Synthesis or Corrupted Implicit
+		*/	
 	e := 0
-	If (ChangedImplicit.Length()) {		
+	If (ChangedImplicit.Length()) {
 		xPosMin := modGroupBox + 25
 		yPosFirst := 20 ; ( j > 1 ) ? 20 : 30
 		xPosMin := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 ; edit/text field widths and offsets
@@ -4547,14 +4611,14 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			If (key > 1) {
 				yPosFirst := 20
 			}
-			
+			index := e + en
 			Gui, SelectModsGui:Add, Text, x15 yp+%yPosFirst%, % displayName
-			Gui, SelectModsGui:Add, CheckBox, x%xPosMin% yp+1 vTradeAdvancedSelected%e%
+			Gui, SelectModsGui:Add, CheckBox, x%xPosMin% yp+1 vTradeAdvancedSelected%index%
 
-			TradeAdvancedModMin%e% 		:= val.min
-			TradeAdvancedModMax%e% 		:= val.max
-			TradeAdvancedParam%e%  		:= val.param
-			TradeAdvancedIsImplicit%e%	:= true	
+			TradeAdvancedModMin%index% 		:= val.min
+			TradeAdvancedModMax%index% 		:= val.max
+			TradeAdvancedParam%index%  		:= val.param
+			TradeAdvancedIsImplicit%index%	:= true	
 		}		
 	}
 	TradeAdvancedImplicitCount := e
@@ -4706,8 +4770,8 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		}
 
 		yPosFirst := ( l > 1 ) ? 25 : 20
-		; increment index if the item has an enchantment
-		index := A_Index + e
+		; increment index if the item has an enchantment or implicit
+		index := A_Index + e + en
 
 		isPseudo := advItem.mods[A_Index].type = "pseudo" ? true : false
 		If (isPseudo) {
