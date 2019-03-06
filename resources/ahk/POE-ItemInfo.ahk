@@ -8574,7 +8574,7 @@ GetNegativeAffixOffset(Item)
 	{
 		NegativeAffixOffset += 1
 	}
-	If (Item.IsElderBase or Item.IsShaperBase)
+	If (Item.IsElderBase or Item.IsShaperBase or Item.IsSynthesisedBase or Item.IsFracturedBase)
 	{
 		NegativeAffixOffset += 1
 	}
@@ -8632,6 +8632,11 @@ ModStringToObject(string, isImplicit) {
 	StringReplace, val, string, `r,, All
 	StringReplace, val, val, `n,, All
 	values := []
+
+	RegExMatch(val, "i) \((fractured)\)$", sType)
+	spawnType := sType1
+	
+	val := RegExReplace(val, "i) \((fractured)\)$")
 
 	; Collect all numeric values in the mod-string
 	Pos        := 0
@@ -8706,7 +8711,7 @@ ModStringToObject(string, isImplicit) {
 	;
 	arr := []
 	Loop % (Matches.Length() ? Matches.Length() : 1) {
-		temp := {}
+		temp := {}		
 		temp.name_orig := Matches[A_Index]
 		Loop {
 			temp.name_orig := RegExReplace(temp.name_orig, "-?#", values[A_Index], Count, 1)
@@ -8738,6 +8743,9 @@ ModStringToObject(string, isImplicit) {
 		
 		temp.name		:= RegExReplace(s, "i)# ?to ? #", "#", isRange)
 		temp.isVariable:= false
+		If (StrLen(spawnType)) {
+			temp.spawnType := spawnType	
+		}
 		temp.type		:= (isImplicit and Matches.Length() <= 1) ? "implicit" : "explicit"
 		arr.push(temp)
 	}
@@ -8808,6 +8816,13 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; Note that at this point combined mods/attributes have already been separated into two mods
 	; like '+ x % to fire and lightning resist' would be '+ x % to fire resist' AND '+ x % to lightning resist' as 2 different mods
 	For key, mod in mods {
+		RegExMatch(mod.name, "i) \((fractured)\)$", spawnType)
+		If (StrLen(spawnType1)) {
+			mod.spawnType := spawnType1	
+		}		
+		
+		mod.name := RegExReplace(mod.name, "i) \((fractured)\)$")
+		
 		; ### Base stats
 		; life and mana
 		If (RegExMatch(mod.name, "i)to maximum (Life|Mana)$", stat)) {
@@ -9615,7 +9630,7 @@ GuiUpdateDropdownList(Contents="", Selected="", AssocVar="", Options="", GuiName
 	}
 }
 
-AddToolTip(con, text, Modify=0){
+AddToolTip(con, text, Modify=0) {
 	Static TThwnd, GuiHwnd
 	TInfo =
 	UInt := "UInt"
@@ -12158,6 +12173,8 @@ ShowItemFilterFormatting(Item, advanced = false) {
 	search.LinkedSockets := Item.Links
 	search.ShaperItem := Item.IsShaperBase
 	search.ElderItem := Item.IsElderBase
+	search.FracturedItem := Item.IsFracturedBase
+	search.SynthesisedItem := Item.IsSynthesisedBase
 	search.ItemLevel := Item.Level
 	search.BaseType := [Item.BaseName]
 	search.HasExplicitMod :=					; HasExplicitMod "of Crafting" "of Spellcraft" "of Weaponcraft"
@@ -12498,7 +12515,7 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					rules[rules.MaxIndex()].conditions.push(condition)
 				}
 				
-				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap|ElderMap)\s")) {
+				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|ElderMap)\s")) {
 					RegExMatch(line, "i)(.*?)\s(.*)", match)		
 					
 					condition := {}
@@ -12549,7 +12566,7 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					}	
 				}				
 			}
-			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|ShaperItem|ShapedMap)", match1)) {
+			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap)", match1)) {
 				If (item[match1] == condition.value) {
 					matchingConditions++
 					matching_rules.push(condition.name)

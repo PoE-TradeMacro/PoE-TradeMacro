@@ -498,7 +498,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
-		}		
+		}
+		If (Item.isFracturedBase) {
+			preparedItem.isFracturedBase	:= true
+		}
 		Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 		Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
 
@@ -3408,12 +3411,11 @@ TradeFunc_FindModInRequestParams(RequestParams, name) {
 }
 
 ; Return unique item with its variable mods and mod ranges if it has any
-TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false)
-{
+TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false) {
 	data := isRelic ? TradeGlobals.Get("VariableRelicData") : TradeGlobals.Get("VariableUniqueData")
 	For index, uitem in data {
 		If (uitem.name = name) {
-			Loop % uitem.mods.Length() {
+			Loop % uitem.mods.Length() {				
 				If (uitem.mods[A_Index].isVariable) {
 					uitem.IsUnique := true
 					Return uitem
@@ -3433,7 +3435,7 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 	i 		:= 0
 	tempMods	:= []
 	tempMods2 := []
-
+	
 	For k, v in Item.mods {
 		negativeToPositiveRange := false
 		; Mod can be 0 or negative since the range goes from negative to positive, example: ventors gamble.
@@ -3444,9 +3446,10 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		
 		modFound := false 
 		negativeValue := false
-		For key, val in Affixes {
-			; remove negative sign also
+		For key, val in Affixes {			
+			; remove negative sign also			
 			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
+			
 			n := TradeUtils.CleanUp(RegExReplace(v.name_orig, "i)-?[\d\.]+|-?\(.+?\)", "#"))
 			n := TradeUtils.CleanUp(n)
 			
@@ -3516,7 +3519,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 
 	If (Implicit.maxIndex() and not Enchantment.Length() and not Corruption.Length()) {
 		modStrings := Implicit
-		For i, modString in modStrings {
+		For i, modString in modStrings {			
 			tempMods := ModStringToObject(modString, true)
 			For i, tempMod in tempMods {
 				mods.push(tempMod)
@@ -3717,7 +3720,7 @@ TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 TradeFunc_FindInModGroup(modgroup, needle, simpleRange = true, recurse = true) {
 	matches := []
 	editedNeedle := ""
-	
+
 	For j, mod in modgroup {
 		s  := Trim(RegExReplace(mod, "i)\(pseudo\)|\(total\)|\(crafted\)|\(implicit\)|\(explicit\)|\(enchant\)|\(prophecy\)|\(leaguestone\)|\(beastiary\)", ""))
 		If (simpleRange) {
@@ -4390,6 +4393,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		}
 	}
 	modGroupBox := modGroupBox + 10
+	
 	modCount := advItem.mods.Length()
 
 	/*
@@ -4630,9 +4634,9 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	/*
 		add mods
 		*/
-		
 	l := 1
 	p := 1
+	fracturedImageShift := 7
 	TradeAdvancedNormalModCount := 0
 	ModNotFound := false
 	PreCheckNormalMods := TradeOpts.AdvancedSearchCheckMods ? "Checked" : ""
@@ -4803,10 +4807,15 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		; pre-select mods according to the options in the settings menu
 		If (checkEnabled) {
 			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods or (not advItem.mods[A_Index].isVariable and not advItem.mods[A_Index].isUnknown and advItem.IsUnique)) ? "Checked" : ""
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index%
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index% BackgroundTrans, % " "
 		}
 		Else {
 			Gui, SelectModsGui:Add, Picture, x+10 yp+1 hwndErrorPic 0x0100, %A_ScriptDir%\resources\images\error.png
+		}
+
+		If (advItem.isFracturedBase and advItem.mods[A_Index].spawnType = "fractured") {
+			GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+25 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+			Gui, SelectModsGui:Add, Text, xp+0 h27 w1 yp+%fracturedImageShift%, % ""	; dummy to fix positions
 		}
 
 		color := "cBlack"
@@ -4968,9 +4977,20 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 
 	; add some widths and margins to align the checkox with the others on the right side
 	RightPos := xPosMin + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10
-	RightPosText := RightPos - 100
-	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+0, Check normal mods
+	RightPosText := RightPos - 140
+	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+0 right w130, Check normal mods
 	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 %PreCheckNormalMods% vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
+	If (advItem.isFracturedBase) {
+		GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
+		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured, % " "	
+		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+25 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+	
+		GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 190 " yp+" fracturedImageShift " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
+		AddToolTip(LblFracturedInfoH, "Includes selected fractured mods with their ""fractured"" porperty`n instead of as normal mods.")
+		
+
+		;Gui, SelectModsGui:Add, Text, xp+0 h27 w1 yp+%fracturedImageShift%, % ""	; dummy to fix positions
+	}
 
 	If (ModNotFound) {
 		Gui, SelectModsGui:Add, Picture, x10 y+16, %A_ScriptDir%\resources\images\error.png
@@ -4982,6 +5002,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, Link, x10 yp+18 cBlue, <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=4ZVTWJNH6GSME">Support PoE-TradeMacro</a>
 
 	windowWidth := modGroupBox + 40 + 5 + 45 + 10 + 45 + 10 + 40 + 5 + 45 + 10 + 65
+	windowWidth := advItem.isFracturedBase ? windowWidth + 20 : windowWidth
 	windowWidth := (windowWidth > 510) ? windowWidth : 510
 	AdvancedSearchLeagueDisplay := TradeGlobals.Get("LeagueName")
 	Gui, SelectModsGui:Show, w%windowWidth% , Select Mods to include in Search - %AdvancedSearchLeagueDisplay%
@@ -5064,6 +5085,10 @@ AdvancedCheckAllMods:
 			}
 		}
 	}
+Return
+
+AdvancedIncludeFractured:
+
 Return
 
 AdvancedPriceCheckSearch:
