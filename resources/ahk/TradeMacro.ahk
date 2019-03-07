@@ -563,7 +563,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		If (uniqueWithVariableMods or Corruption.Length() or Enchantment.Length()) {
 			Gui, SelectModsGui:Destroy
 
-			preparedItem :=
+			preparedItem := {}
 			preparedItem := TradeFunc_GetItemsPoeTradeUniqueMods(uniqueWithVariableMods)
 			preparedItem := TradeFunc_RemoveAlternativeVersionsMods(preparedItem, ItemData.Affixes)
 			If (not preparedItem.Name and not preparedItem.mods.length()) {
@@ -581,7 +581,20 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			preparedItem.veiledPrefixCount := Item.veiledPrefixCount
 			preparedItem.veiledSuffixCount := Item.veiledSuffixCount
 			preparedItem.Enchantment := Enchantment
-		
+			preparedItem.isFracturedBase := false
+			preparedItem.isSynthesisedBase := false
+			preparedItem.specialBase := ""
+
+			If (Item.isFracturedBase or Item.isSynthesisedBase) {
+				If (Item.isFracturedBase) {
+					preparedItem.specialBase	:= "Fractured Base"
+					preparedItem.isFracturedBase	:= true
+				} Else If (Item.isSynthesisedBase) {
+					preparedItem.specialBase	:= "Synthesised Base"					
+					preparedItem.IsSynthesisedBase:= true
+				}
+			}
+			
 			Stats.Defense := TradeFunc_ParseItemDefenseStats(ItemData.Stats, preparedItem)
 			Stats.Offense := TradeFunc_ParseItemOffenseStats(DamageDetails, preparedItem)
 
@@ -593,10 +606,17 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Enchantment)
 				}
 				*/
+
 				If (Corruption.Length()) {
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Corruption)
 				}
 				Else If (Item.IsSynthesisedBase) {
+					Item.Implicit := []
+					For key, val in preparedItem.mods {
+						If (val.type = "implicit") {
+							Item.Implicit.push(val)
+						} 
+					}		
 					TradeFunc_AdvancedPriceCheckGui(preparedItem, Stats, ItemData.Sockets, ItemData.Links, UniqueStats, Item.Implicit)
 				}
 				Else {
@@ -3477,13 +3497,13 @@ TradeFunc_FindUniqueItemIfItHasVariableRolls(name, isRelic = false) {
 	Return 0
 }
 
-TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
+TradeFunc_RemoveAlternativeVersionsMods(_item, Affixes) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	i 		:= 0
 	tempMods	:= []
 	tempMods2 := []
 	
-	For k, v in Item.mods {
+	For k, v in _item.mods {
 		negativeToPositiveRange := false
 		; Mod can be 0 or negative since the range goes from negative to positive, example: ventors gamble.
 		; This means the mod can be missing from the item or change it's description from "increased" to reduced.
@@ -3493,7 +3513,11 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		
 		modFound := false 
 		negativeValue := false
-		For key, val in Affixes {			
+		spawnType := ""
+		For key, val in Affixes {
+			RegExMatch(Trim(val), "i)\((fractured)\)", sType)
+			val := RegExReplace(Trim(val), "i)\((fractured)\)")
+
 			; remove negative sign also			
 			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
 			
@@ -3509,7 +3533,8 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 			}			
 
 			If (match) {
-				negativeValue := RegExMatch(t, "i)#%? reduced")
+				negativeValue := RegExMatch(t, "i)#%? reduced")				
+				spawnType := sType1	
 				modFound := true
 			}
 		}
@@ -3526,12 +3551,15 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 				v.ranges[1][1] := (v.ranges[1][2] > 2) ? 1 : 0.1
 			}
 			v.IsUnknown := false
+			v.spawnType := spawnType
 			tempMods.push(v)
 			tempMods2.push(v)
 		}
 	}
 
 	For key, val in Affixes {
+		val := RegExReplace(Trim(val), "i)\((fractured)\)")
+		
 		t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))		
 		modFound := false
 		
@@ -3554,8 +3582,8 @@ TradeFunc_RemoveAlternativeVersionsMods(Item, Affixes) {
 		}
 	}		
 
-	Item.mods := tempMods2
-	return Item
+	_item.mods := tempMods2
+	return _item
 }
 
 ; Return items mods and ranges
@@ -3974,11 +4002,12 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 		{
 			Continue ; Not interested in blank lines
 		}		
+		LoopField := Trim(RegExReplace(A_LoopField, "i)\((fractured)\)"))
 		
 		ModStr := ""
 		CurrValues := []
-		CurrLine_ValueTypes := TradeFunc_CountValuesAndReplacedValues(A_LoopField)		
-		CurrValue := TradeFunc_GetActualValue(A_LoopField, poeTradeMod_ValueTypes)
+		CurrLine_ValueTypes := TradeFunc_CountValuesAndReplacedValues(LoopField)		
+		CurrValue := TradeFunc_GetActualValue(LoopField, poeTradeMod_ValueTypes)
 		
 		If (CurrValue ~= "\d+") {
 			; handle value range
@@ -3987,12 +4016,12 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 				CurrValues.Push(values1)
 				CurrValues.Push(values3)
 				CurrValue := values1 " to " values3
-				ModStr := StrReplace(A_LoopField, CurrValue, "# to #")
+				ModStr := StrReplace(LoopField, CurrValue, "# to #")
 			}
 			; handle single value
 			Else {
 				CurrValues.Push(CurrValue)
-				ModStr := StrReplace(A_LoopField, CurrValue, "#")
+				ModStr := StrReplace(LoopField, CurrValue, "#")
 			}
 			
 			; remove negative sign since poe.trade mods are always positive
@@ -4754,7 +4783,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		SetFormat, FloatFast, 5.2
 		ErrorMsg :=
 		If (advItem.IsUnique) {
-			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)			
+			modValues := TradeFunc_GetModValueGivenPoeTradeMod(ItemData.Affixes, advItem.mods[A_Index].param)
 		}
 		Else {
 			useOriginalModName := false
@@ -5020,7 +5049,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.specialBase) {
 		If (not RegExMatch(advItem.specialBase,"i)fractured")) {
 			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 	
-		} Else {
+		} Else If (advItem.isFracturedBase) {
 			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 		}		
 	}
