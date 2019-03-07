@@ -5064,7 +5064,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 %PreCheckNormalMods% vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
 	If (advItem.isFracturedBase) {
 		GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
-		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured, % " "	
+		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured Checked, % " "	
 		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
 	
 		GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 193 " yp+" fracturedImageShift - 1 " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")

@@ -8889,6 +8889,13 @@ CreatePseudoMods(mods, returnAllMods := False) {
 			%resistType1%Resist := %resistType1%Resist + mod.values[1]
 			mod.simplifiedName := "xTo" resistType1 "Resistance"
 		}
+		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning) and (Chaos) Resistances$") and not RegExMatch(mod.name, "i)Minion|Totem")) {
+			%resistType1%Resist := %resistType1%Resist + mod.values[1]
+			mod.simplifiedName := "xTo" resistType1 "Resistance"
+			
+			chaosResist := chaosResist + mod.values[1]
+			mod.simplifiedName := "xToChaosResistance"
+		}
 
 		; ### Percent damages
 		; % increased elemental damage
