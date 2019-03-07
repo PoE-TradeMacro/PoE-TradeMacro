@@ -5049,7 +5049,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.specialBase) {
 		If (not RegExMatch(advItem.specialBase,"i)fractured")) {
 			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 	
-		} Else If (advItem.isFracturedBase) {
+		} Else If (advItem.isFracturedBase and false) { ; todo enable this
 			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 		}		
 	}
@@ -5091,7 +5091,9 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	RightPosText := RightPos - 140
 	Gui, SelectModsGui:Add, Text, x%RightPosText% yp+0 right w130, Check normal mods
 	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 %PreCheckNormalMods% vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
-	If (advItem.isFracturedBase) {
+	
+	; fractured mods
+	If (advItem.isFracturedBase and false) { ; todo enable this
 		GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
 		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured Checked, % " "	
 		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
