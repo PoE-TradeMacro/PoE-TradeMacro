@@ -495,9 +495,20 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		preparedItem.veiledSuffixCount := Item.veiledSuffixCount
 		preparedItem.Enchantment := Enchantment
 		
-		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel) {
+		If (Item.isShaperBase or Item.isElderBase or Item.IsAbyssJewel or Item.isFracturedBase or Item.isSynthesisedBase) {
+			If (Item.isShaperBase) {
+				preparedItem.specialBase	:= "Shaper Base"
+			} Else If (Item.isElderBase) {
+				preparedItem.specialBase	:= "Elder Base"
+			} Else If (Item.isFracturedBase) {
+				preparedItem.specialBase	:= "Fractured Base"
+			} Else If (Item.isSynthesisedBase) {
+				preparedItem.specialBase	:= "Synthesised Base"
+			}
+			/*
 			preparedItem.specialBase	:= Item.isShaperBase ? "Shaper Base" : ""
 			preparedItem.specialBase	:= Item.isElderBase ? "Elder Base" : preparedItem.specialBase
+			*/
 		}
 		If (Item.isFracturedBase) {
 			preparedItem.isFracturedBase	:= true
@@ -626,7 +637,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		}
 		
-		; special bases (elder/shaper)
+		; special bases (elder/shaper/fractured/synthesised)
 		If (Item.IsShaperBase or Item.IsElderBase) {
 			If (Item.IsShaperBase) {
 				RequestParams.Shaper := 1
@@ -635,6 +646,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Else If (Item.IsElderBase) {
 				RequestParams.Elder := 1
 				Item.UsedInSearch.specialBase := "Elder"
+			}
+			Else If (Item.IsFracturedBase) {
+				RequestParams.Fractured := 1
+				Item.UsedInSearch.specialBase := "Fractured"
+			}
+			Else If (Item.IsSynthesisedBase) {
+				RequestParams.Synthesised := 1
+				Item.UsedInSearch.specialBase := "Synthesised"
 			}
 		}
 	}
@@ -649,9 +668,16 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		Loop % s.mods.Length() {
 			If (s.mods[A_Index].selected > 0) {
 				modParam := new _ParamMod()
-				modParam.mod_name := s.mods[A_Index].param
+				
+				If (s.mods[A_Index].spawntype = "fragmented" and s.inlcudeFractured) {
+					modParam.mod_name := TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["fragmented"], s.mods[A_Index])
+				}
+				If (not StrLen(modParam.mod_name)) {
+					modParam.mod_name := s.mods[A_Index].param	
+				}
+				
 				modParam.mod_min := s.mods[A_Index].min
-				modParam.mod_max := s.mods[A_Index].max
+				modParam.mod_max := s.mods[A_Index].max	
 				RequestParams.modGroups[1].AddMod(modParam)
 			}
 		}
@@ -748,7 +774,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			RequestParams.corrupted := "0"
 		}
 		
-		; special bases (elder/shaper)
+		; special bases (elder/shaper/synthesised/fragmented)
 		If (s.useSpecialBase) {
 			If (Item.IsShaperBase) {
 				RequestParams.Shaper := 1
@@ -759,10 +785,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Else If (Item.IsFracturedBase) {
 				RequestParams.Fractured := 1
 			}
+			Else If (Item.IsSynthesisedBase) {
+				RequestParams.Synthesised := 1
+			}
 		} Else {
 			RequestParams.Shaper := ""
 			RequestParams.Elder := ""
 			RequestParams.Fractured := ""
+			RequestParams.Synthesised := ""
 		}
 
 		; abyssal sockets 
@@ -907,6 +937,14 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 			Else {			
 				RequestParams.Fractured := 0
+			}
+			
+			If (Item.IsSynthesisedBase) {
+				RequestParams.Synthesised := 1
+				Item.UsedInSearch.specialBase := "Synthesised"
+			}
+			Else {			
+				RequestParams.Synthesised := 0
 			}
 		}		
 	} 
@@ -3637,13 +3675,13 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 		}
 		Else {
 			; always search implicits first when mod is implicit and item is a synthesised base
-			If (_item.isSynthesisedBase and _item.mods[k].type == "implicit" and not isMap) {
+			If (_item.isSynthesisedBase and _item.mods[k].type = "implicit" and not isMap) {
 				If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 					_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
 				}
 			}
 			; check total and then implicits first if mod is implicit, otherwise check later
-			If (StrLen(_item.mods[k]["param"]) < 1 and _item.mods[k].type == "implicit" and not isMap) {
+			If (StrLen(_item.mods[k]["param"]) < 1 and _item.mods[k].type = "implicit" and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["[total] mods"], _item.mods[k])
 				If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 					_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
@@ -3691,6 +3729,12 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
 			}
+			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["fragmented"], _item.mods[k])
+			}
+			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
+			}
 			
 			; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.
 			; It's also not available on poe.trade as a mod but as a seperate form option.		
@@ -3725,6 +3769,12 @@ TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["leaguestone"], _item.mods[k])
+		}
+		If (StrLen(_item.mods[k]["param"]) < 1) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["fragmented"], _item.mods[k])
+		}
+		If (StrLen(_item.mods[k]["param"]) < 1) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
 		}
 		
 		; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.
@@ -4831,16 +4881,20 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 		; pre-select mods according to the options in the settings menu
 		If (checkEnabled) {
 			checkedState := (advItem.mods[A_Index].PreSelected or TradeOpts.AdvancedSearchCheckMods or (not advItem.mods[A_Index].isVariable and not advItem.mods[A_Index].isUnknown and advItem.IsUnique)) ? "Checked" : ""
-			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index% BackgroundTrans, % " "
+			Gui, SelectModsGui:Add, CheckBox, x+10 yp+1 %checkedState% vTradeAdvancedSelected%index% BackgroundTrans, % ""
 		}
 		Else {
 			Gui, SelectModsGui:Add, Picture, x+10 yp+1 hwndErrorPic 0x0100, %A_ScriptDir%\resources\images\error.png
 		}
 
 		If (advItem.isFracturedBase and advItem.mods[A_Index].spawnType = "fractured") {
-			GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+25 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
-			Gui, SelectModsGui:Add, Text, xp+0 h27 w1 yp+%fracturedImageShift%, % ""	; dummy to fix positions
+			GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+			Gui, SelectModsGui:Add, Edit, xp+0 h27 w1 yp+%fracturedImageShift% vTradeAdvancedIsFragmented%index% Disabled1, % "1" 	; fix positions and set the hidden "fragmented" parameter
 		}
+		
+		; hidden fields to pass the raw/original mod names also
+		Gui, SelectModsGui:Add, Edit, xp+100 yp+0 w1 vTradeAdvancedModNameRaw%index% r1 Disabled1, % advItem.mods[A_Index].name
+		Gui, SelectModsGui:Add, Edit, xp+1 yp+0 w1 vTradeAdvancedModNameRawOrig%index% r1 Disabled1, % advItem.mods[A_Index].name_orig
 
 		color := "cBlack"
 
@@ -4964,7 +5018,11 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	}	
 
 	If (advItem.specialBase) {
-		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
+		If (not RegExMatch(advItem.specialBase,"i)fractured")) {
+			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 	
+		} Else {
+			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
+		}		
 	}
 
 	/*
@@ -5007,9 +5065,9 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	If (advItem.isFracturedBase) {
 		GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
 		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured, % " "	
-		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+25 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
 	
-		GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 190 " yp+" fracturedImageShift " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
+		GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 193 " yp+" fracturedImageShift - 1 " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
 		AddToolTip(LblFracturedInfoH, "Includes selected fractured mods with their ""fractured"" porperty`n instead of as normal mods.")
 	}
 
@@ -5131,6 +5189,9 @@ TradeFunc_ResetGUI() {
 			TradeAdvancedModMin%A_Index%	:=
 			TradeAdvancedModMax%A_Index%	:=
 			TradeAdvancedModName%A_Index%	:=
+			TradeAdvancedIsFragmented%A_Index% :=
+			TradeAdvancedModNameRaw%A_index% :=
+			TradeAdvancedModNameRawOrig%A_index% :=
 		}
 		Else If (A_Index >= 20) {
 			TradeAdvancedStatCount :=
@@ -5171,7 +5232,8 @@ TradeFunc_ResetGUI() {
 	TradeAdvancedSelectedVeiledPrefix	:=
 	TradeAdvancedVeiledPrefixCount	:=
 	TradeAdvancedSelectedVeiledSuffix	:=
-	TradeAdvancedVeiledSuffixCount	:=
+	TradeAdvancedVeiledSuffixCount	:=	
+	TradeAdvancedSelectedIncludeFractured	:=	
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", {})
 }
@@ -5187,10 +5249,12 @@ TradeFunc_HandleGuiSubmit() {
 	Loop {
 		mod := {param:"",selected:"",min:"",max:""}
 		If (TradeAdvancedSelected%A_Index%) {
-			mod.param    := TradeAdvancedParam%A_Index%
-			mod.selected := TradeAdvancedSelected%A_Index%
-			mod.min      := TradeAdvancedModMin%A_Index%
-			mod.max      := TradeAdvancedModMax%A_Index%
+			mod.param		:= TradeAdvancedParam%A_Index%
+			mod.selected	:= TradeAdvancedSelected%A_Index%
+			mod.min		:= TradeAdvancedModMin%A_Index%
+			mod.max		:= TradeAdvancedModMax%A_Index%
+			mod.name		:= TradeAdvancedModNameRaw%A_Index%
+			mod.name_orig	:= TradeAdvancedModNameRawOrig%A_Index%
 			; has Enchantment
 			If (RegExMatch(TradeAdvancedParam%A_Index%, "i)enchant") and mod.selected) {
 				newItem.UsedInSearch.Enchantment := true
@@ -5198,6 +5262,10 @@ TradeFunc_HandleGuiSubmit() {
 			; has Corrupted Implicit
 			Else If (TradeAdvancedIsImplicit%A_Index% and mod.selected) {
 				newItem.UsedInSearch.CorruptedMod := true
+			}
+			; fragmented mod
+			If (TradeAdvancedIsFragmented%A_Index% = "1" or TradeAdvancedIsFragmented%A_Index% = 1) {
+				mod.spawntype := "fragmented"
 			}
 
 			mods.Push(mod)
@@ -5242,6 +5310,7 @@ TradeFunc_HandleGuiSubmit() {
 	newItem.veiledPrefixCount	:= TradeAdvancedVeiledPrefixCount
 	newItem.useVeiledSuffix		:= TradeAdvancedSelectedVeiledSuffix
 	newItem.veiledSuffixCount	:= TradeAdvancedVeiledSuffixCount
+	newItem.inlcudeFractured		:= TradeAdvancedSelectedIncludeFractured
 
 	TradeGlobals.Set("AdvancedPriceCheckItem", newItem)
 	Gui, SelectModsGui:Destroy
@@ -6025,7 +6094,7 @@ TradeFunc_CheckAprilFools() {
 TradeFunc_AprilFools() {
 	global ItsApriFoolsTime
 	
-	Random, chance, 1, 100
+	Random, chance, 1, 200
 	
 	If (not ItsApriFoolsTime) {
 		Return
@@ -6037,7 +6106,7 @@ TradeFunc_AprilFools() {
 	
 	text := "Memory Access Violation`n"
 	text .= "Cavas error at 000000 in "
-	text .= "C:\Program Files\Synthesis\3.6\modules\bin\readFragment.exe"
+	text .= "C:\Program Files\Synthesis\3.6\modules\april\fools\bin\readFragment.exe"
 	MsgBox, 0x12, Error, %text%, 
 	IfMsgBox, Retry 
 	{
