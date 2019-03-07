@@ -8668,6 +8668,22 @@ ModStringToObject(string, isImplicit) {
 			Matches.push("Lightning")
 		}
 	}
+	; Matching "x% fire/cold/lgitning and chaos resistance"
+	If (RegExMatch(val, "i)to (cold|fire|lightning) and (chaos) resistance") and not RegExMatch(val, "i)Minion|Totem")) {
+		type := "Resistance"
+		If (RegExMatch(val, "i)fire")) {
+			Matches.push("Fire")
+		}
+		If (RegExMatch(val, "i)cold")) {
+			Matches.push("Cold")
+		}
+		If (RegExMatch(val, "i)lightning")) {
+			Matches.push("Lightning")
+		}
+		If (RegExMatch(val, "i)chaos")) {
+			Matches.push("Chaos")
+		}
+	}
 
 	; Vanguard Belt implicit for example (flat AR + EV)
 	If (RegExMatch(val, "i)([.0-9]+) to (Armour|Evasion Rating|Energy Shield) and (Armour|Evasion Rating|Energy Shield)")) {
