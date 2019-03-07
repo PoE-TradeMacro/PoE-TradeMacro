@@ -5093,13 +5093,22 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 	Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 %PreCheckNormalMods% vTradeAdvancedSelectedCheckAllMods gAdvancedCheckAllMods, % ""
 	
 	; fractured mods
-	If (advItem.isFracturedBase and false) { ; todo enable this
-		GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
-		Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured Checked, % " "	
-		GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
-	
-		GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 193 " yp+" fracturedImageShift - 1 " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
-		AddToolTip(LblFracturedInfoH, "Includes selected fractured mods with their ""fractured"" porperty`n instead of as normal mods.")
+	If (advItem.isFracturedBase) {
+		If (false) {  ; todo enable this
+			GuiAddText("Include fractured states", "x" RightPosText " y+10 right w130 0x0100", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
+			Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured Checked, % " "	
+			GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+		
+			GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 193 " yp+" fracturedImageShift - 1 " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
+			AddToolTip(LblFracturedInfoH, "Includes selected fractured mods with their ""fractured"" porperty`n instead of as normal mods.")
+		} Else {
+			GuiAddText("Fractured mods not working", "x" RightPosText - 30 " y+10 right w160 0x0100 cRed", "LblFracturedInfo", "LblFracturedInfoH", "", "", "SelectModsGui")
+			Gui, SelectModsGui:Add, CheckBox, x%RightPos% yp+0 vTradeAdvancedSelectedIncludeFractured gAdvancedIncludeFractured Disabled, % " "	
+			GuiAddPicture(A_ScriptDir "\resources\images\fractured-symbol.png", "xp+28 yp-" fracturedImageShift " w27 h-1 0x0100", "", "", "", "", "SelectModsGui")
+		
+			GuiAddPicture(A_ScriptDir "\resources\images\info-blue.png", "x+-" 223 " yp+" fracturedImageShift - 1 " w15 h-1 0x0100", "FracturedInfo", "FracturedInfoH", "", "", "SelectModsGui")
+			AddToolTip(LblFracturedInfoH, "The option to search fractured mods with their ""fractured"" property`ninstead of as a normal mod is disabled until poe.trades implementation is known.")
+		}
 	}
 
 	If (ModNotFound) {
