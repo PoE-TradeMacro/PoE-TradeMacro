@@ -5902,30 +5902,14 @@ TradeFunc_ChangeLeague() {
 		Return
 	}
 
-	leagues := TradeGlobals.Get("Leagues")
-
-	index:= 0
-	i	:= 0
-	For key, val in leagues {
-		i++
-		If (SearchLeague == key) {
-			index := i
-		}
-	}
-	j	:= 0
-	first:= ""
-	next := ""
-	For key, val in leagues {
-		j++
-		If (j = i) {
-			first:= key
-		}
-		If ((index - 1) = j) {
-			next	:= key
-		}
+	; Select previous league in the list, except on first iteration -- in that case, select the last league (wrap-around).
+	Local NewSearchLeague := ""
+	For key, val in TradeGlobals.Get("Leagues") {
+		If (SearchLeague == key and NewSearchLeague != "")
+			Break
+		NewSearchLeague := key
 	}
 
-	NewSearchLeague := (next) ? next : first
 	; Call Submit for the settings UI, otherwise we can't set the new league if the UI was last closed via close button or "x"
 	Gui, SettingsUI:Submit
 	SearchLeague := TradeFunc_CheckIfLeagueIsActive(NewSearchLeague)
