@@ -868,8 +868,8 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Item.UsedInSearch.Rarity := "Relic"
 		} Else If (Item.IsUnique) {
 			RequestParams.rarity := "unique"
-			; Harbinger fragments/maps are unique but don't have a selectable base type on poe.trade
-			If (!RegExMatch(Item.Name, "i)(First|Second|Third|Fourth) Piece of.*|The Beachhead.*")) {
+			; Harbinger fragments are unique but don't have a selectable base type on poe.trade
+			If (!RegExMatch(Item.Name, "i)(First|Second|Third|Fourth) Piece of.*")) {
 				RequestParams.xbase  := Item.BaseName
 			}
 		}
