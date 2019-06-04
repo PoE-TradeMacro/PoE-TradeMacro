@@ -138,11 +138,11 @@ global overwrittenUserFiles	:= argumentOverwrittenFiles
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
 Sleep, 200
 ReadTradeConfig("", "config_trade.ini", _updateConfigWrite)
-TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
 
 TradeFunc_CheckIfCloudFlareBypassNeeded()
 ; call it again (TradeFunc_CheckIfCloudFlareBypassNeeded reads poetrades available leagues but can't be called before the first TradeFunc_GetLeagues call at the moment (bad coding))
 TradeGlobals.Set("Leagues", TradeFunc_GetLeagues())
+TradeGlobals.Set("LeagueName", TradeGlobals.Get("Leagues")[TradeOpts.SearchLeague])
 
 ; set this variable to skip the update check in "PoE-ItemInfo.ahk"
 SkipItemInfoUpdateCall := 1

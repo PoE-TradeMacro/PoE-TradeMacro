@@ -2486,7 +2486,7 @@ ParseMapAffixes(ItemDataAffixes)
 			SetMapInfoLine("Prefix", MapAffixCount)
 			Continue
 		}
-		If (RegExMatch(A_LoopField, "Slaying Enemies close together can attract monsters from Beyond"))
+		If (RegExMatch(A_LoopField, "Slaying Enemies close together has a \d+% chance to attract monsters from Beyond"))
 		{
 			MapModWarnings .= MapModWarn.Beyond ? "`nBeyond" : ""
 			SetMapInfoLine("Prefix", MapAffixCount)
