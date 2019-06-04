@@ -465,11 +465,6 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 		hasAdvancedSearch := true
 	}
 
-	; Harbinger fragments/maps are unique but not flagged as such on poe.trade
-	If (RegExMatch(Item.Name, "i)(First|Second|Third|Fourth) Piece of.*|The Beachhead.*")) {
-		Item.IsUnique 	:= false
-	}
-
 	/*
 		further item parsing and preparation
 		*/	
@@ -886,7 +881,10 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Item.UsedInSearch.Rarity := "Relic"
 		} Else If (Item.IsUnique) {
 			RequestParams.rarity := "unique"
-			RequestParams.xbase  := Item.BaseName
+			; Harbinger fragments are unique but don't have a selectable base type on poe.trade
+			If (!RegExMatch(Item.Name, "i)(First|Second|Third|Fourth) Piece of.*")) {
+				RequestParams.xbase  := Item.BaseName
+			}
 		}
 		Item.UsedInSearch.FullName := true
 	}
