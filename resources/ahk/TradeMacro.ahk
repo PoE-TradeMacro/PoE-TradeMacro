@@ -856,13 +856,25 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	/*
 		prepend the item.subtype to match the options used on poe.trade
 		*/	
-	If (RegExMatch(Item.SubType, "i)Mace|Axe|Sword")) {
+	If (RegExMatch(Item.SubType, "i)Mace|Axe|Sword|Sceptre")) {
 		If (Item.IsThreeSocket) {
-			If (RegExMatch(Item.BaseName, "i)Sceptre")) {
-				Item.xtype := "Sceptre"
+			If (TradeItemBasesWeapons[Item.BaseName]["Item Class"]) {
+				Item.ItemClass := TradeItemBasesWeapons[Item.BaseName]["Item Class"]
+			}
+			
+			If (Item.ItemClass) {
+				If (RegExMatch(Item.ItemClass, "i)Sceptres")) {
+					Item.xtype := "Sceptre"
+				}
 			} Else {
-				Item.xtype := "One Hand " . Item.SubType	
-			}			
+				If (RegExMatch(Item.BaseName, "i)Sceptre")) {
+					Item.xtype := "Sceptre"
+				}
+			}
+			
+			If (not Item.xtype) {
+				Item.xtype := "One Hand " . Item.SubType				
+			}
 		}
 		Else {
 			Item.xtype := "Two Hand " . Item.SubType
