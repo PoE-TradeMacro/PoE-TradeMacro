@@ -5644,6 +5644,10 @@ OverwriteUpdateOptionsTimer:
 	}
 Return
 
+CheckForUpdatesTimer:
+	PoEScripts_Update(globalUpdateInfo.user, globalUpdateInfo.repo, globalUpdateInfo.releaseVersion, ShowUpdateNotification, userDirectory, isDevVersion, globalUpdateInfo.skipSelection, globalUpdateInfo.skipBackup, SplashScreenTitle, TradeOpts.Debug, true)
+Return
+
 BringPoEWindowToFrontAfterInit:
 	TradeFunc_ActivatePoeWindow()
 	SetTimer, BringPoEWindowToFrontAfterInit, OFF

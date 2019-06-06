@@ -1642,4 +1642,6 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath) {
 	SplashUI.SetSubMessage("Fetching currency data for currently selected league...")
 	GoSub, ReadPoeNinjaCurrencyData
 	GoSub, TrackUserCount
+	
+	SetTimer, CheckForUpdatesTimer, 120000
 }
