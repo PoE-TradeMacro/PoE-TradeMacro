@@ -1578,9 +1578,27 @@ TradeFunc_StartSplashScreen(TradeReleaseVersion) {
 		, "Hunting some old friends...", "Interrogating Master Krillson about fishing secrets...", "Trying to open Voricis chest...", "Setting up lab carries for the other 99%..."
 		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle...", "Vendoring stat-sticks..."]
 	*/
-
-	initArray := ["Hand initializing script...", "Searching for synthesis targets...", "Restoring memory dumps...", "Clearing memory dumps...", "Hand casting search queries..."
-		, "Applying melee focused loot filter...", "Stabilizing memories...", "Hand drawing the user interface..."]
+	
+	initArray := ["Loading Carnage league data..."
+		,"Taking the element out of elementalist..."
+		,"Grinding Artifact Power to fight the legion..."
+		,"Moving all map drops to the Memory Nexus..."
+		,"Corrupting passives..."
+		,"Deleting elementalist for performance reasons..."
+		,"Compiling angry reddit threads..."
+		,"Lowering prices of Energy Shield gear..."
+		,"Reenacting the Battle of the Five Armies..."
+		,"Unlocking the fifth sloth..."
+		,"Welcoming our new Korean top-racers..."
+		,"Updating price fixing algorithms..."
+		,"Booting up second life..."
+		,"Interfacing with the better legion expansion..."
+		,"Preparing funeral for Occultist..."
+		,"Hiding Mirrors of Kalandra in the currently selected lootfilter..."
+		,"Searching for the crying woman in Crossroads..."
+		,"Forcing Soul of Steel allocation..."
+		,"Replacing toucan copypasta with the new sloth overlord..."
+		,"Blocking access to the auction house..."]
 
 	Random, randomNum, 1, initArray.MaxIndex()
 	
