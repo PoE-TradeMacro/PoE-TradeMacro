@@ -5608,7 +5608,11 @@ OverwriteSettingsNameTimer:
 
 	If (o) {
 		RelVer := TradeGlobals.Get("ReleaseVersion")
-		Menu, Tray, Tip, Path of Exile TradeMacro %RelVer%
+		TradeFunc_SetMenuTrayTip("Path of Exile TradeMacro - " RelVer)
+		If (TradeOpts.SearchLeague) {			
+			TradeFunc_SetMenuTrayTip("`nSelected league: """ TradeOpts.SearchLeague """", true)
+		}
+
 		OldMenuTrayName := Globals.Get("SettingsUITitle")
 		NewMenuTrayName := TradeGlobals.Get("SettingsUITitle")
 		Menu, Tray, UseErrorLevel
@@ -5621,6 +5625,18 @@ OverwriteSettingsNameTimer:
 		Menu, Tray, UseErrorLevel, off
 	}
 Return
+
+TradeFunc_SetMenuTrayTip(msg, append := false) {
+	_TrayTip := ""
+	If (not append) {
+		TradeGlobals.Set("TrayTip", msg)
+		_TrayTip := TradeGlobals.Get("TrayTip")
+	} Else {
+		_TrayTip := TradeGlobals.Get("TrayTip") . msg
+		TradeGlobals.Set("TrayTip", _TrayTip)
+	}	
+	Menu, Tray, Tip, %_TrayTip%
+}
 
 OverwriteUpdateOptionsTimer:
 	If (InititalizedItemInfoUserOptions) {
