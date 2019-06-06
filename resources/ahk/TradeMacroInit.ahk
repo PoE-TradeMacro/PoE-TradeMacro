@@ -1643,5 +1643,5 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath) {
 	GoSub, ReadPoeNinjaCurrencyData
 	GoSub, TrackUserCount
 	
-	SetTimer, CheckForUpdatesTimer, 120000
+	SetTimer, CheckForUpdatesTimer, 7200000
 }
