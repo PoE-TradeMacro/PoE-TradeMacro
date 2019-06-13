@@ -11327,7 +11327,7 @@ LookUpAffixes() {
 				prefix	:= boots . chest . gloves . helmet . shield . gripType . ac . jw
 				StringLower, prefix, prefix
 
-				url		.= prefix "-" suffix ; ".html"
+				url		.= prefix "-" suffix ".html" ; ".html"
 			}
 			openWith := AssociatedProgram("html")
 			OpenWebPageWith(openWith, Url)
