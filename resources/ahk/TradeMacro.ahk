@@ -5765,6 +5765,10 @@ TradeSettingsUI_ChkCorruptedOverride:
 Return
 
 ReadPoeNinjaCurrencyData:
+	/*
+		https://poe.ninja/swagger/
+	*/
+
 	; Disable hotkey until currency data was parsed
 	key := TradeOpts.ChangeLeagueHotKey
 	loggedCurrencyRequestAtStartup := loggedCurrencyRequestAtStartup ? loggedCurrencyRequestAtStartup : false
