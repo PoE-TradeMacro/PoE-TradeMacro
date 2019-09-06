@@ -5784,13 +5784,14 @@ ReadPoeNinjaCurrencyData:
 	isFallback	:= false
 	file			:= A_ScriptDir . "\temp\currencyData.json"
 	fallBackDir	:= A_ScriptDir . "\data_trade"
-	url			:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Currency"
+	url			:= "https://poe.ninja/api/data/CurrencyOverview?league=" . league . "&type=Currency"
+
 	parsedJSON	:= CurrencyDataDownloadURLtoJSON(url, sampleValue, false, isFallback, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, loggedCurrencyRequestAtStartup, loggedTempLeagueCurrencyRequest, TradeOpts.CurlTimeout)
 
-	mapUrl		:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Map"
+	mapUrl		:= "https://poe.ninja/api/data/ItemOverview?league=" . league . "&type=Map"
 	parsedMapJSON	:= PoENinjaPriceDataDownloadURLtoJSON(mapUrl, "map", true, false, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, TradeOpts.CurlTimeout)
 	
-	fossilUrl		:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Fossil"
+	fossilUrl		:= "https://poe.ninja/api/data/ItemOverview?league=" . league . "&type=Fossil"
 	parsedFossilJSON	:= PoENinjaPriceDataDownloadURLtoJSON(fossilUrl, "fossil", true, false, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, TradeOpts.CurlTimeout)
 	
 	/*
@@ -5816,15 +5817,15 @@ ReadPoeNinjaCurrencyData:
 		}
 		
 		If (not parsedJSON.currencyDetails.length()) {
-			url			:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Currency"
+			url			:= "https://poe.ninja/api/data/CurrencyOverview?league=" . league . "&type=Currency"
 			parsedJSON	:= CurrencyDataDownloadURLtoJSON(url, sampleValue, true, isFallback, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, loggedCurrencyRequestAtStartup, loggedTempLeagueCurrencyRequest, TradeOpts.CurlTimeout)	
 		}
 		If (not parsedMapJSON.lines.length()) {
-			mapUrl		:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Map"
+			mapUrl		:= "https://poe.ninja/api/data/ItemOverview?league=" . league . "&type=Map"
 			parsedMapJSON	:= PoENinjaPriceDataDownloadURLtoJSON(mapUrl, "map", true, false, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, TradeOpts.CurlTimeout)
 		}
 		If (not parsedFossilJSON.lines.length()) {
-			fossilUrl		:= "https://poe.ninja/api/data/itemoverview?=" . league . "&type=Fossil"
+			fossilUrl		:= "https://poe.ninja/api/data/ItemOverview?league=" . league . "&type=Fossil"
 			parsedFossilJSON	:= PoENinjaPriceDataDownloadURLtoJSON(fossilUrl, "fossil", true, false, league, "PoE-TradeMacro", file, fallBackDir, usedFallback, TradeOpts.CurlTimeout)
 		}
 	}
