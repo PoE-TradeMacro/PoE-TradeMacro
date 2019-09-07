@@ -190,8 +190,7 @@ TradeFunc_FinishTMInit(argumentMergeScriptPath)
 ; ----------------------------------------------------------- Functions ----------------------------------------------------------------
 
 ; TODO: rewrite/remove after refactoring UI
-ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef updateWriteConfig = false)
-{
+ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef updateWriteConfig = false) {
 	Global
 
 	If (StrLen(TradeConfigDir) < 1) {
@@ -385,7 +384,6 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
 TradeFunc_AssignHotkey(Key, Label, state) {
 	VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
-	
 	AssignHotKey(Label, key, vkey, state)
 }
 
@@ -1584,24 +1582,10 @@ TradeFunc_StartSplashScreen(TradeReleaseVersion) {
 		, "Helping Alva discover the Jungle Hideout...", "Conning EngineeringEternity with the Atlas City Shuffle...", "Vendoring stat-sticks..."]
 	*/
 	
-	initArray := ["Loading Carnage league data..."
-		,"Taking the element out of elementalist..."
-		,"Grinding Artifact Power to fight the legion..."
-		,"Moving all map drops to the Memory Nexus..."
-		,"Corrupting passives..."
-		,"Deleting elementalist for performance reasons..."
-		,"Compiling angry reddit threads..."
-		,"Lowering prices of Energy Shield gear..."
-		,"Reenacting the Battle of the Five Armies..."
-		,"Unlocking the fifth sloth..."
-		,"Welcoming our new Korean top-racers..."
+	initArray := ["Compiling angry reddit threads..."
 		,"Updating price fixing algorithms..."
-		,"Booting up second life..."
-		,"Interfacing with the better legion expansion..."
-		,"Preparing funeral for Occultist..."
 		,"Hiding Mirrors of Kalandra in the currently selected lootfilter..."
 		,"Searching for the crying woman in Crossroads..."
-		,"Forcing Soul of Steel allocation..."
 		,"Replacing toucan copypasta with the new sloth overlord..."
 		,"Blocking access to the auction house..."]
 
