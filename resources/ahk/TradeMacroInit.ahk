@@ -225,8 +225,7 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef
 	Return
 }
 
-TradeFunc_AssignAllHotkeys()
-{
+TradeFunc_AssignAllHotkeys() {
 	Global
 	For keyName, keyVal in TradeOpts_New.Hotkeys {
 		state := TradeOpts_New.HotkeyStates[keyName] ? "on" : "off"
@@ -277,22 +276,11 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 }
 
 ; NB: this is temporary hack
-MakeOldTradeOptsAndVars(ConfigObject)
+UpdateOldTradeOptsFromVars()
 {
 	Global
-	TradeOpts := {}
-	for sectionName, sectionKeys in ConfigObject {
-		for keyName, keyVal in sectionKeys {
-			if (sectionName == "Hotkeys") {
-				keyName := keyName "HotKey"
-				keyVal := KeyNameToKeyCode(keyVal, ConfigObject.General.KeyToSCState)
-			}
-			if (sectionName == "HotkeyStates") {
-				keyName := keyName "Enabled"
-			}
-			%keyName% := keyVal
-			TradeOpts.Insert(keyName, keyVal)
-		}
+	for key, val in TradeOpts {
+		TradeOpts[key] := %key%
 	}
 	return
 }
@@ -318,15 +306,27 @@ UpdateNewTradeOptsFromOld(ConfigObject)
 			ConfigObject[sectionName, keyName] := keyValTemp
 		}
 	}
+
 	return ConfigObject
 }
 
 ; NB: this is temporary hack
-UpdateOldTradeOptsFromVars()
+MakeOldTradeOptsAndVars(ConfigObject)
 {
 	Global
-	for key, val in TradeOpts {
-		TradeOpts[key] := %key%
+	TradeOpts := {}
+	for sectionName, sectionKeys in ConfigObject {
+		for keyName, keyVal in sectionKeys {
+			if (sectionName == "Hotkeys") {
+				keyName := keyName "HotKey"
+				keyVal := KeyNameToKeyCode(keyVal, ConfigObject.General.KeyToSCState)
+			}
+			if (sectionName == "HotkeyStates") {
+				keyName := keyName "Enabled"
+			}
+			%keyName% := keyVal
+			TradeOpts.Insert(keyName, keyVal)
+		}
 	}
 	return
 }
@@ -809,7 +809,7 @@ CreateTradeSettingsUI()
 	GuiAddHotkey(TradeOpts.ChangeLeagueHotkey, "x+1 yp-2 w124 h20", "ChangeLeagueHotkey", "ChangeLeagueHotkeyH", "", "", "SettingsUI")
 	AddToolTip(ChangeLeagueHotkeyH, "Press key/key combination.`nDefault: ctrl + l")
 	
-	GuiAddCheckbox("Get currency ratio note:", "x657 yp+32 w165 h20 0x0100", TradeOpts.SetCurrencyRatio, "SetCurrencyRatio", "SetCurrencyRatioH", "", "", "SettingsUI")
+	GuiAddCheckbox("Get currency ratio note:", "x657 yp+32 w165 h20 0x0100", TradeOpts.SetCurrencyRatioEnabled, "SetCurrencyRatioEnabled", "SetCurrencyRatioEnabledH", "", "", "SettingsUI")
 	AddToolTip(SetCurrencyRatioH, "Copies an item note for premium tabs to your clipboard`nthat creates a valid currency ratio on all trade sites.")
 	GuiAddHotkey(TradeOpts.SetCurrencyRatioHotkey, "x+1 yp-2 w124 h20", "SetCurrencyRatioHotkey", "SetCurrencyRatioHotkeyH", "", "", "SettingsUI")
 	AddToolTip(SetCurrencyRatioHotkeyH, "Press key/key combination.`nDefault: alt + r")
@@ -909,7 +909,7 @@ UpdateTradeSettingsUI()
 	return
 }
 
-TradeFunc_SyncUpdateSettings(){
+TradeFunc_SyncUpdateSettings() {
 	globalUpdateInfo.skipSelection 	:= TradeOpts.UpdateSkipSelection
 	globalUpdateInfo.skipBackup 		:= TradeOpts.UpdateSkipBackup
 	globalUpdateInfo.skipUpdateCheck 	:= TradeOpts.ShowUpdateNotification
