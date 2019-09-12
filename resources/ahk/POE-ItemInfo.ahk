@@ -10608,7 +10608,17 @@ ShowAssignedHotkeys(returnList = false) {
 			val.Push(KeyCodeToKeyName(val[5]))
 		}
 	}
-	
+	/*
+	For key, val in hotkeys {
+		If (key = 1) {
+			val.Push("NameCurrentLocale")
+		}
+		Else {
+			val.Push(KeyCodeToKeyName(val[5], false))
+		}
+	}
+	*/
+
 	If (returnList) {
 		Return hotkeys
 	}
@@ -10618,7 +10628,7 @@ ShowAssignedHotkeys(returnList = false) {
 	Gui, ShowHotkeys:Default
 	Gui, ShowHotkeys:Font, , Courier New
 	Gui, ShowHotkeys:Font, , Consolas
-	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination (Code) | Key combination (ENG name)
+	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination (Code) | Key combination (ENG name) ;| Key combination (name)
 	For key, val in hotkeys {
 		If (key != 1) {
 			LV_Add("", val*)
@@ -12919,7 +12929,7 @@ FHex( int, pad=0 ) {
 	Return h
 }
 
-CheckForGameHotkeyConflicts() {	
+CheckForGameHotkeyConflicts() {
 	iniPath		:= A_MyDocuments . "\My Games\Path of Exile\"
 	configs 		:= []
 	productionIni	:= iniPath . "production_Config.ini"
@@ -12956,55 +12966,41 @@ CheckForGameHotkeyConflicts() {
 		} 
 	}
 	
-	If (conflicts.MaxIndex() > 10) {
-		project := Globals.Get("ProjectName")		
-		msg := project " detected a hotkey conflict with the Path of Exile keybindings, "
-		msg .= "which should be resolved before playing the game."
-		msg .= "`n`n" "Conflicting hotkey(s):"
-		For key, val in conflicts {
-			msg .= "`n"   "- Path of Exile function: """ val.game_label """ (Virtual Key: " val.vk ", ENG name: " val.name ")"
-		}
-		
-		MsgBox, 16, Path of Exile - %project% hotkey conflict, %msg%
-	}
-	
 	If (conflicts.MaxIndex()) {
 		project := Globals.Get("ProjectName")
 		
 		Gui, ShowGameHotkeyConflicts:Color, ffffff, ffffff
 		msg := project " detected a hotkey conflict with the Path of Exile keybindings, "
-		msg .= "which should be resolved before playing the game."
+		msg .= "which should be resolved before playing the game. "
 		msg .= "Otherwise " project " may block some of the games functions."
 		Gui, ShowGameHotkeyConflicts:Add, Text, w600, % msg
 		
 		Gui, ShowGameHotkeyConflicts:Default
 		Gui, ShowGameHotkeyConflicts:Font, , Courier New		
 		Gui, ShowGameHotkeyConflicts:Font, , Consolas
-		Gui, ShowGameHotkeyConflicts:Add, ListView, r15 w600 NoSortHdr Grid ReadOnly, Game function name | Key combination (Code) | Key combination (ENG name)
-		For key, val in conflicts {
-			eng_name := val.name
-			eng_name := RegExReplace(eng_name, "i)\^", " control ")
-			eng_name := RegExReplace(eng_name, "i)\!", " alt ")
-			eng_name := RegExReplace(eng_name, "i)\+", " shift ")
-			eng_name := RegExReplace(eng_name, "i)(shift|control|alt)", "$1 +")
-			LV_Add("", val.game_label, val.vk, eng_name)
-			LV_ModifyCol()		
-		}
-
-		i := 0
-		Loop % LV_GetCount("Column")
-		{
-			i++
-			LV_ModifyCol(a_index,"AutoHdr")
-		}
 		
+		Gui, ShowGameHotkeyConflicts:Font, bold
+		Gui, ShowGameHotkeyConflicts:Add, Text, x20  y55 h20 w200, Game function name
+		Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w150, Key combination (Code)
+		Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w200, Key combination (ENG name)
+		Gui, ShowGameHotkeyConflicts:Font, norm
+		
+		_height := 25
+		For key, val in conflicts {
+			_height := _height + 25
+			Gui, ShowGameHotkeyConflicts:Add, Text, x20  y+2 h20 w200, % val.game_label
+			Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w150, % val.vk
+			Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w200, % val.name
+		}
+		Gui, ShowGameHotkeyConflicts:Add, GroupBox, w600 h%_height% y40 x10, Conflicts
+	
 		text := " ^ : ctrl key modifier" . "`n"
 		text .= " ! : alt key modifier" . "`n"
 		text .= " + : shift key modifier" . "`n"
 		text .= "`n" . "VK : Virtual Key Code"
-		Gui, ShowGameHotkeyConflicts:Add, Text, , % text
-	
-		Gui, ShowGameHotkeyConflicts:Show, w620 xCenter yCenter, Path of Exile - %project% keybinding conflicts
+		Gui, ShowGameHotkeyConflicts:Add, Text, x10 y+15, % text
+		Gui, ShowGameHotkeyConflicts:Add, Button, x520 y+-25 h25 gShowSettingsUI, Open Settings
+		Gui, ShowGameHotkeyConflicts:Show, w620 xCenter yCenter, Path of Exile - %project% keybinding conflicts		
 		Gui, SettingsUI:Default
 		Gui, Font
 	}
@@ -13087,7 +13083,7 @@ AssignHotKey(Label, key, vkey, enabledState = "on") {
 
 	If (ErrorLevel) {
 		If (errorlevel = 1)
-			str := str . "`nASCII " . VKey . " - 1) The Label parameter specifies a nonexistent label name."
+			str := str . "`nASCII " . VKey . " - 1) The Label parameter (" Label ") specifies a nonexistent label name."
 		Else If (errorlevel = 2)
 			str := str . "`nASCII " . VKey . " - 2) The KeyName parameter specifies one or more keys that are either not recognized or not supported by the current keyboard layout/language. Switching to the english layout should solve this for now."
 		Else If (errorlevel = 3)

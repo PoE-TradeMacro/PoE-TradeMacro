@@ -382,9 +382,11 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 }
 
 ; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
-TradeFunc_AssignHotkey(Key, Label, state) {
-	VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)
-	AssignHotKey(Label, key, vkey, state)
+TradeFunc_AssignHotkey(Key, Label, state) {	
+	If (not RegExMatch(Label, "i).*_alt$")) {				; we don't touch the ini keys/settings for the alternative default keys
+		VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)	
+		AssignHotKey(Label, key, vkey, state)
+	}
 }
 
 ; ------------------ GET LEAGUES ------------------
@@ -813,7 +815,8 @@ CreateTradeSettingsUI()
 	AddToolTip(SetCurrencyRatioHotkeyH, "Press key/key combination.`nDefault: alt + r")
 
 	Gui, SettingsUI:Add, Link, x657 yp+35 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
-
+	GuiAddButton("Switch", "x759 yp+-15 w90 h23", "TradeSettingsUI_BtnSwitchSets", "", "", "", "SettingsUI")
+	
 	/* 
 		Cookies
 	*/
@@ -846,7 +849,7 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("Debug Output", "x657 yp+13 w100 h25", TradeOpts.Debug, "Debug", "DebugH", "", "", "SettingsUI")
 	AddToolTip(DebugH, "Don't use this unless you're developing!")
 
-	GuiAddButton("Defaults", "x659 y+10 w90 h23", "TradeSettingsUI_BtnDefaults", "", "", "", "SettingsUI")
+	GuiAddButton("Defaults", "x659 y+10 w90 h23", "TradeSettingsUI_BtnDefaults", "", "", "", "SettingsUI")	
 	GuiAddButton("Ok", "Default x+5 yp+0 w90 h23", "TradeSettingsUI_BtnOK", "", "", "", "SettingsUI")
 	GuiAddButton("Cancel", "x+5 yp+0 w90 h23", "TradeSettingsUI_BtnCancel", "", "", "", "SettingsUI")
 
@@ -887,8 +890,7 @@ TradeFunc_GetDelimitedCurrencyListString() {
 }
 
 ; NB: temporary hack
-UpdateTradeSettingsUI()
-{
+UpdateTradeSettingsUI() {
 	Global
 	for keyName, keyVal in TradeOpts {
 		if (keyName == "CookieSelect") {
@@ -900,10 +902,24 @@ UpdateTradeSettingsUI()
 		else if (keyName == "CurrencySearchHave" || keyName == "CurrencySearchHave2") {
 			GuiUpdateDropdownList(TradeFunc_GetDelimitedCurrencyListString(), keyVal, keyName)
 		}
-		else {
+		else if (not RegExMatch(keyName, "i).*_altHotkey$")) {
 			GuiControl,, %keyName%, %keyVal%
 		}
 	}
+	return
+}
+SwitchHotkeySets() {
+	Global	
+	_hotkeySet := TradeOpts.HotKeySet
+
+	for keyName, keyVal in TradeOpts {
+		if (RegExMatch(keyName, "i).*_altHotkey$") and _hotkeySet = 1) {
+			_newKeyName := RegExReplace(keyName, "i)_alt")
+			GuiControl,, %_newKeyName%, %keyVal%		
+		} else if (RegExMatch(keyName, "i).*Hotkey$") and not RegExMatch(keyName, "i).*_altHotkey$") and _hotkeySet = 2) {
+			GuiControl,, %keyName%, %keyVal%		
+		}	
+	}	
 	return
 }
 

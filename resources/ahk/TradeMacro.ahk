@@ -5754,6 +5754,15 @@ TradeSettingsUI_BtnDefaults:
 	ShowSettingsUI()
 Return
 
+TradeSettingsUI_BtnSwitchSets:
+	Gui, SettingsUI:Cancel
+	Sleep, 75
+	ReadTradeConfig(A_ScriptDir "\resources\default_UserFiles")
+	Sleep, 75
+	SwitchHotkeySets()
+	ShowSettingsUI()
+Return
+
 TradeSettingsUI_ChkCorruptedOverride:
 	GuiControlGet, IsChecked,, CorruptedOverride
 	If (Not IsChecked) {
