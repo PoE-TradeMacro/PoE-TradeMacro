@@ -1233,37 +1233,41 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	/*
 		maps
 		*/
-	If (Item.IsMap) {		
+	If (Item.IsMap) {	
 		; add Item.subtype to make sure to only find maps
 		RegExMatch(Item.Name, "i)The Beachhead.*", isHarbingerMap)
 		RegExMatch(Item.SubType, "i)Unknown Map", isUnknownMap)
 		isElderMap := RegExMatch(Item.Name, ".*?Elder .*") and Item.MapTier = 16
-		
+		isBlightedMap := RegExMatch(Item.SubType, "\bBlighted .*")
+
 		mapTypes := TradeGlobals.Get("ItemTypeList")["Map"]
 		typeFound := TradeUtils.IsInArray(Item.SubType, mapTypes)
-		
+
 		If (not isHarbingerMap and not isUnknownMap and typeFound) {
 			RequestParams.xbase := Item.SubType
 			RequestParams.xtype := ""		
 			If (isElderMap) {
 				RequestParams.name := "Elder"
-			}
+			} Else If (isBlightedMap) {
+				RequestParams.name := "Blighted"
+			}			
 		} Else {
 			RequestParams.xbase := ""
 			RequestParams.xtype := "Map"
 		}		
 
 		If (not Item.IsUnique) {
-			If (StrLen(isHarbingerMap)) {
-				; Beachhead Map workaround (unique but not flagged as such on poe.trade)
-				RequestParams.name := Item.Name			
-			} Else If (not typeFound) {
-				RequestParams.name := Item.Name
+			If (not typeFound) {			
+				RequestParams.name := Item.BaseName
 				RequestParams.level_min := Item.MapTier
 				RequestParams.level_max := Item.MapTier
 			} Else If (not isElderMap) {
 				RequestParams.name := ""
 			}
+		} Else If (Item.IsUnique and isHarbingerMap) {
+			RequestParams.corrupted := "1"
+			RequestParams.level_min := Item.MapTier
+			RequestParams.level_max := Item.MapTier
 		}
 	
 		If (StrLen(isUnknownMap)) {

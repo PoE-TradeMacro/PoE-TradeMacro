@@ -768,12 +768,10 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 				mapMatch := mapMatchList[A_Index]
 				IfInString, LoopField, %mapMatch%
 				{
-					If (RegExMatch(LoopField, "\bShaped " . mapMatch))
-					{
-						SubType = Shaped %mapMatch%
+					If (RegExMatch(LoopField, "\b(Shaped|Blighted|Elder) " . mapMatch, subTypeMatch)) {
+						SubType = %subTypeMatch1% %mapMatch%
 					}
-					Else
-					{
+					Else {
 						SubType = %mapMatch%
 					}
 					return
@@ -12600,7 +12598,7 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					rules[rules.MaxIndex()].conditions.push(condition)
 				}
 				
-				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|ElderMap)\s")) {
+				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|ElderMap|BlightedMap)\s")) {
 					RegExMatch(line, "i)(.*?)\s(.*)", match)		
 					
 					condition := {}
@@ -12648,10 +12646,10 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					If (CompareNumValues(item[match1], condition.value, condition.operator)) {
 						matchingConditions++
 						matching_rules.push(condition.name)
-					}	
-				}				
+					}
+				}
 			}
-			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap)", match1)) {
+			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|BlightedMap|ElderMap)", match1)) {
 				If (item[match1] == condition.value) {
 					matchingConditions++
 					matching_rules.push(condition.name)
