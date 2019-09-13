@@ -3623,7 +3623,7 @@ TradeFunc_RemoveAlternativeVersionsMods(_item, Affixes) {
 		negativeValue := false
 		spawnType := ""
 		For key, val in Affixes {
-			RegExMatch(Trim(val), "i)\((fractured)\)", sType)
+			RegExMatch(Trim(val), "i)\((fractured|crafted)\)", sType)
 			val := RegExReplace(Trim(val), "i)\((fractured|crafted)\)")
 
 			; remove negative sign also			
@@ -3839,17 +3839,25 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["elder"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
-				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
-			}
-			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["abyss jewels"], _item.mods[k])
+			}			
+			
+			
+			; check crafted before unique explicit and synthesised if spawntype is crafted, otherwise check afte	
+			If (StrLen(_item.mods[k]["param"]) < 1 and _item.mods[k].spawnType = "crafted") {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["crafted"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["unique explicit"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
+			}
+			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["crafted"], _item.mods[k])
-			}		
+			}
+			
+			
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
 			}
@@ -3873,7 +3881,7 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			}
 			
 			; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.
-			; It's also not available on poe.trade as a mod but as a seperate form option.		
+			; It's also not available on poe.trade as a mod but as a seperate form option.	
 			If (RegExMatch(_item.mods[k].name, "i)Has # Abyssal (Socket|Sockets)")) {
 				_item.mods[k].showModAsSeperateOption := true
 			}

@@ -8642,7 +8642,7 @@ ModStringToObject(string, isImplicit) {
 	StringReplace, val, val, `n,, All
 	values := []
 
-	RegExMatch(val, "i) \((fractured)\)$", sType)
+	RegExMatch(val, "i) \((fractured|crafted)\)$", sType)
 	spawnType := sType1
 	
 	val := RegExReplace(val, "i) \((fractured|crafted)\)$")
@@ -8678,7 +8678,7 @@ ModStringToObject(string, isImplicit) {
 		}
 	}
 	; Matching "x% fire/cold/lgitning and chaos resistance"
-	If (RegExMatch(val, "i)to (cold|fire|lightning) and (chaos) resistance") and not RegExMatch(val, "i)Minion|Totem")) {
+	If (RegExMatch(val, "i)to (cold|fire|lightning) and (chaos) resistance") and not RegExMatch(val, "i)Minion|Totem|Enemies")) {
 		type := "Resistance"
 		If (RegExMatch(val, "i)fire")) {
 			Matches.push("Fire")
@@ -8723,7 +8723,7 @@ ModStringToObject(string, isImplicit) {
 		Matches[A_Index] := match1 ? sign . "#% to " . Matches[A_Index] . " " . match1 : sign . "#" . type . "" . Matches[A_Index]
 	}
 
-	If (RegExMatch(val, "i)to all attributes|to all elemental (Resistances)", match) and not RegExMatch(val, "i)Minion|Totem")) {
+	If (RegExMatch(val, "i)to all attributes|to all elemental (Resistances)", match) and not RegExMatch(val, "i)Minion|Totem|Enemies")) {
 		resist := match1 ? true : false
 		Matches[1] := resist ? "+#% to Fire Resistance" : "+# to Strength"
 		Matches[2] := resist ? "+#% to Lightning Resistance" : "+# to Intelligence"
@@ -8841,7 +8841,7 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; Note that at this point combined mods/attributes have already been separated into two mods
 	; like '+ x % to fire and lightning resist' would be '+ x % to fire resist' AND '+ x % to lightning resist' as 2 different mods
 	For key, mod in mods {
-		RegExMatch(mod.name, "i) \((fractured)\)$", spawnType)
+		RegExMatch(mod.name, "i) \((fractured|crafted)\)$", spawnType)
 		If (StrLen(spawnType1)) {
 			mod.spawnType := spawnType1	
 		}		
