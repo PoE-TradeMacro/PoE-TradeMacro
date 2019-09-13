@@ -1250,7 +1250,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 				RequestParams.name := "Elder"
 			} Else If (isBlightedMap) {
 				RequestParams.name := "Blighted"
-			}			
+			}
 		} Else {
 			RequestParams.xbase := ""
 			RequestParams.xtype := "Map"
@@ -3694,7 +3694,7 @@ TradeFunc_RemoveAlternativeVersionsMods(_item, Affixes) {
 	return _item
 }
 
-; Return items mods and ranges
+; Return an items mods and ranges
 TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = false, Corruption = false, isMap = false, isBeast = false, isSynthesisedBase = false) {
 	Affixes	:= StrSplit(Affixes, "`n")
 	mods		:= []
@@ -3785,7 +3785,7 @@ TradeFunc_PrepareNonUniqueItemMods(Affixes, Implicit, Rarity, Enchantment = fals
 	temp			:= TradeFunc_GetItemsPoeTradeMods(tempItem, isMap)
 	tempItem.mods	:= temp.mods
 	tempItem.IsUnique := false
-	
+
 	Return tempItem
 }
 

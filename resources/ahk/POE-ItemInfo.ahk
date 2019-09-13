@@ -8665,7 +8665,7 @@ ModStringToObject(string, isImplicit) {
 
 	type := ""
 	; Matching "x% fire and cold resistance" or "x% to cold resist", excluding "to maximum cold resistance" and "damage penetrates x% cold resistance" and minion/totem related mods
-	If (RegExMatch(val, "i)to ((cold|fire|lightning)( and (cold|fire|lightning))?) resistance") and not RegExMatch(val, "i)Minion|Totem")) {
+	If (RegExMatch(val, "i)to ((cold|fire|lightning)( and (cold|fire|lightning))?) resistance") and not RegExMatch(val, "i)Minion|Totem|Enemies")) {
 		type := "Resistance"
 		If (RegExMatch(val, "i)fire")) {
 			Matches.push("Fire")
@@ -8905,16 +8905,16 @@ CreatePseudoMods(mods, returnAllMods := False) {
 
 		; ### Resistances
 		; % to all resistances ( careful about 'max all resistances' )
-		Else If (RegExMatch(mod.name, "i)to all Elemental Resistances$") and not RegExMatch(mod.name, "i)Minion|Totem")) {
+		Else If (RegExMatch(mod.name, "i)to all Elemental Resistances$") and not RegExMatch(mod.name, "i)Minion|Totem|Enemies")) {
 			toAllElementalResist := toAllElementalResist + mod.values[1]
 			mod.simplifiedName := "xToAllElementalResistances"
 		}
 		; % to base resistances
-		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning|Chaos) Resistance$", resistType) and not RegExMatch(mod.name, "i)Minion|Totem")) {
+		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning|Chaos) Resistance$", resistType) and not RegExMatch(mod.name, "i)Minion|Totem|Enemies")) {
 			%resistType1%Resist := %resistType1%Resist + mod.values[1]
 			mod.simplifiedName := "xTo" resistType1 "Resistance"
 		}
-		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning) and (Chaos) Resistances$") and not RegExMatch(mod.name, "i)Minion|Totem")) {
+		Else If (RegExMatch(mod.name, "i)to (Cold|Fire|Lightning) and (Chaos) Resistances$") and not RegExMatch(mod.name, "i)Minion|Totem|Enemies")) {
 			%resistType1%Resist := %resistType1%Resist + mod.values[1]
 			mod.simplifiedName := "xTo" resistType1 "Resistance"
 			
