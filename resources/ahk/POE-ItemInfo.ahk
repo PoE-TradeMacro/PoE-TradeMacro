@@ -10601,32 +10601,26 @@ ShowAssignedHotkeys(returnList = false) {
 	For key, val in hotkeys {
 		If (key = 1) {
 			val.Push("NameENG")
+			val.Push("NameENGPretty")
 		}
 		Else {
-			val.Push(KeyCodeToKeyName(val[5]))
+			_keyName := KeyCodeToKeyName(val[5])
+			val.Push(_keyName)
+			val.Push(PrettyKeyName(_keyName))
 		}
 	}
-	/*
-	For key, val in hotkeys {
-		If (key = 1) {
-			val.Push("NameCurrentLocale")
-		}
-		Else {
-			val.Push(KeyCodeToKeyName(val[5], false))
-		}
-	}
-	*/
+
 
 	If (returnList) {
 		Return hotkeys
 	}
-	
+
 	Gui, ShowHotkeys:Color, ffffff, ffffff
 	Gui, ShowHotkeys:Add, Text, , List of this scripts assigned hotkeys.
 	Gui, ShowHotkeys:Default
 	Gui, ShowHotkeys:Font, , Courier New
 	Gui, ShowHotkeys:Font, , Consolas
-	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination (Code) | Key combination (ENG name) ;| Key combination (name)
+	Gui, ShowHotkeys:Add, ListView, r25 w800 NoSortHdr Grid ReadOnly, Type | Enabled | Level | Running | Key combination (Code) | Key combination (ENG name) | Key combination (ENG pretty name)
 	For key, val in hotkeys {
 		If (key != 1) {
 			LV_Add("", val*)
@@ -10651,7 +10645,8 @@ ShowAssignedHotkeys(returnList = false) {
 	text .= "Enabled: Hotkey is assigned but enabled/disabled [on/off] via the Hotkey command." . "`n"
 
 	Gui, ShowHotkeys:Add, Text, , % text
-
+	Gui, ShowHotkeys:Add, Link, x10 y+10 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>	
+	
 	Gui, ShowHotkeys:Show, w820 xCenter yCenter, Assigned Hotkeys
 	Gui, SettingsUI:Default
 	Gui, Font
@@ -12957,7 +12952,7 @@ CheckForGameHotkeyConflicts() {
 		For aKey, assignedKey in assignedKeyList {
 			For cKey, convertedKey in convertedKeys {
 				If (assignedKey[5] = convertedKey.value) {
-					obj := {"vk":assignedKey[5], "name": assignedKey[6], "game_label": convertedKey.label}
+					obj := {"vk":assignedKey[5], "name": assignedKey[6], "game_label": convertedKey.label, "pretty_name": assignedKey[7]}
 					conflicts.push(obj)
 				}
 			}
@@ -12981,24 +12976,26 @@ CheckForGameHotkeyConflicts() {
 		Gui, ShowGameHotkeyConflicts:Add, Text, x20  y55 h20 w200, Game function name
 		Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w150, Key combination (Code)
 		Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w200, Key combination (ENG name)
+		Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w250, Key combination (pretty name)
 		Gui, ShowGameHotkeyConflicts:Font, norm
 		
-		_height := 25
+		_height := 35
 		For key, val in conflicts {
 			_height := _height + 25
 			Gui, ShowGameHotkeyConflicts:Add, Text, x20  y+2 h20 w200, % val.game_label
 			Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w150, % val.vk
 			Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w200, % val.name
+			Gui, ShowGameHotkeyConflicts:Add, Text, x+20 yp+0 h20 w250, % val.pretty_name
 		}
-		Gui, ShowGameHotkeyConflicts:Add, GroupBox, w600 h%_height% y40 x10, Conflicts
+		Gui, ShowGameHotkeyConflicts:Add, GroupBox, w850 h%_height% y40 x10, Conflicts
 	
 		text := " ^ : ctrl key modifier" . "`n"
 		text .= " ! : alt key modifier" . "`n"
 		text .= " + : shift key modifier" . "`n"
 		text .= "`n" . "VK : Virtual Key Code"
 		Gui, ShowGameHotkeyConflicts:Add, Text, x10 y+15, % text
-		Gui, ShowGameHotkeyConflicts:Add, Button, x520 y+-25 h25 gShowSettingsUI, Open Settings
-		Gui, ShowGameHotkeyConflicts:Show, w620 xCenter yCenter, Path of Exile - %project% keybinding conflicts		
+		Gui, ShowGameHotkeyConflicts:Add, Button, x770 y+-25 h25 w90 gShowSettingsUI, Open Settings
+		Gui, ShowGameHotkeyConflicts:Show, w870 xCenter yCenter, Path of Exile - %project% keybinding conflicts		
 		Gui, SettingsUI:Default
 		Gui, Font
 	}
