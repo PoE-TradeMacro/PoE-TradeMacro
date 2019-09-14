@@ -13076,7 +13076,7 @@ AssignHotKey(Label, key, vkey, enabledState = "on") {
 			; only assign it when it's enabled
 			Hotkey, %VKey%, %Label%, UseErrorLevel %stateValue%
 			SaveAssignedHotkey(Label, key, vkey, enabledState)
-		}		
+		}
 	}
 
 	If (ErrorLevel) {

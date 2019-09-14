@@ -3881,7 +3881,7 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 			}
 			
 			; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.
-			; It's also not available on poe.trade as a mod but as a seperate form option.	
+			; It's also not available on poe.trade as a mod but as a seperate form option.
 			If (RegExMatch(_item.mods[k].name, "i)Has # Abyssal (Socket|Sockets)")) {
 				_item.mods[k].showModAsSeperateOption := true
 			}
@@ -5766,12 +5766,12 @@ TradeSettingsUI_BtnDefaults:
 	ShowSettingsUI()
 Return
 
-TradeSettingsUI_BtnSwitchSets:
+TradeSettingsUI_BtnRestoreAlternativeHotkeys:
 	Gui, SettingsUI:Cancel
 	Sleep, 75
 	ReadTradeConfig(A_ScriptDir "\resources\default_UserFiles")
 	Sleep, 75
-	SwitchHotkeySets()
+	RestoreAlternativeHotkeys()
 	ShowSettingsUI()
 Return
 

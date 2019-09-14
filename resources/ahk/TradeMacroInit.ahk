@@ -211,7 +211,6 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef
 	Else {
 		TradeOpts_New.Search.SearchLeague := TradeFunc_CheckIfLeagueIsActive(Format("{:L}", TradeOpts_New.Search.SearchLeague))
 	}
-
 	TradeOpts_New.Search.Corrupted := Format("{:T}", TradeOpts_New.Search.Corrupted)
 
 	MakeOldTradeOptsAndVars(TradeOpts_New)
@@ -220,22 +219,35 @@ ReadTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini", ByRef
 	If (_temp_SearchLeague != TradeOpts_New.Search.SearchLeague) {
 		updateWriteConfig := true
 	}
-	
+
 	Return
 }
 
 TradeFunc_AssignAllHotkeys() {
 	Global
-	For keyName, keyVal in TradeOpts_New.Hotkeys {
+
+	For keyName, keyVal in TradeOpts_New.Hotkeys {	
 		state := TradeOpts_New.HotkeyStates[keyName] ? "on" : "off"
-		TradeFunc_AssignHotkey(keyVal, keyName, state)
+	
+		If (not RegExMatch(keyName, "i).*_alt$")) {
+			TradeFunc_AssignHotkey(keyVal, keyName, state)
+		}
 	}
 	Return
+}
+
+; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
+TradeFunc_AssignHotkey(Key, Label, state) {	
+	If (not RegExMatch(Label, "i).*_alt$")) {				; we don't touch the ini keys/settings for the alternative default keys
+		VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)	
+		AssignHotKey(Label, key, vkey, state)
+	}
 }
 
 ; TODO: rewrite/remove after refactoring UI
 WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	Global
+
 	If (StrLen(TradeConfigDir) < 1) {
 		TradeConfigDir := userDirectory
 	}
@@ -248,7 +260,7 @@ WriteTradeConfig(TradeConfigDir = "", TradeConfigFile = "config_trade.ini") {
 	oldLeague := TradeOpts.SearchLeague
 	oldAltCurrencySearch := TradeOpts.AlternativeCurrencySearch
 
-	UpdateOldTradeOptsFromVars()	
+	UpdateOldTradeOptsFromVars()
 	TradeOpts.ShowItemResults := RegExReplace(TradeOpts.ShowItemResults, "\D")
 	TradeOpts.ShowItemResults := (not StrLen(TradeOpts.ShowItemResults)) ? 15 : TradeOpts.ShowItemResults
 	
@@ -279,19 +291,23 @@ UpdateOldTradeOptsFromVars()
 {
 	Global
 	for key, val in TradeOpts {
-		TradeOpts[key] := %key%
+		TradeOpts[key] := %key%	
 	}
 	return
 }
 
 ; NB: this is temporary hack
-UpdateNewTradeOptsFromOld(ConfigObject)
-{
+UpdateNewTradeOptsFromOld(ConfigObject) {
 	Global
+
 	for sectionName, sectionKeys in ConfigObject {
 		for keyName, keyVal in sectionKeys {
 			keyNameTemp := keyName
 			if (sectionName == "Hotkeys") {
+				; skip saving/changing the alternative keybinds, which are "readonly" and only available in debug-mode				
+				if (RegExMatch(keyName, "i).*_alt$")) {
+					continue					
+				}
 				keyNameTemp := keyName "HotKey"
 				keyValTemp := KeyNameToKeyCode(TradeOpts[keyNameTemp], TradeOpts.KeyToSCState)
 			}
@@ -379,14 +395,6 @@ TradeFunc_CheckIfLeagueIsActive(LeagueName, debug = "") {
 	}
 	
 	return LeagueName
-}
-
-; ------------------ ASSIGN HOTKEY AND HANDLE ERRORS ------------------
-TradeFunc_AssignHotkey(Key, Label, state) {	
-	If (not RegExMatch(Label, "i).*_alt$")) {				; we don't touch the ini keys/settings for the alternative default keys
-		VKey := KeyNameToKeyCode(Key, TradeOpts.KeyToSCState)	
-		AssignHotKey(Label, key, vkey, state)
-	}
 }
 
 ; ------------------ GET LEAGUES ------------------
@@ -540,8 +548,7 @@ TradeFunc_ScriptUpdate() {
 }
 
 ;----------------------- Trade Settings UI (added onto ItemInfos Settings UI) ---------------------------------------
-CreateTradeSettingsUI()
-{
+CreateTradeSettingsUI() {
 	Global
 
 	Fonts.SetUIFont()
@@ -772,51 +779,53 @@ CreateTradeSettingsUI()
 	GuiAddCheckbox("Price Check:", "x657 yp+26 w165 h20 0x0100", TradeOpts.PriceCheckEnabled, "PriceCheckEnabled", "PriceCheckEnabledH", "", "", "SettingsUI")
 	AddToolTip(PriceCheckEnabledH, "Check item prices.")
 	GuiAddHotkey(TradeOpts.PriceCheckHotKey, "x+1 yp-2 w124 h20", "PriceCheckHotKey", "PriceCheckHotKeyH", "", "", "SettingsUI")
-	AddToolTip(PriceCheckHotKeyH, "Press key/key combination.`nDefault: ctrl + d")
+	AddToolTip(PriceCheckHotKeyH, "Press key/key combination.`nDefault: alt + d")
 
 	GuiAddCheckbox("Advanced Price Check:", "x657 yp+32 w165 h20 0x010", TradeOpts.AdvancedPriceCheckEnabled, "AdvancedPriceCheckEnabled", "AdvancedPriceCheckEnabledH", "", "", "SettingsUI")
 	AddToolTip(AdvancedPriceCheckEnabledH, "Select mods to include in your search`nbefore checking prices.")
 	GuiAddHotkey(TradeOpts.AdvancedPriceCheckHotKey, "x+1 yp-2 w124 h20", "AdvancedPriceCheckHotKey", "AdvancedPriceCheckHotKeyH", "", "", "SettingsUI")
-	AddToolTip(AdvancedPriceCheckHotKeyH, "Press key/key combination.`nDefault: ctrl + alt + d")
+	AddToolTip(AdvancedPriceCheckHotKeyH, "Press key/key combination.`nDefault: alt + shift + d")
 
 	GuiAddCheckbox("Custom Search:", "x657 yp+32 w165 h20 0x0100", TradeOpts.CustomInputSearchEnabled, "CustomInputSearchEnabled", "CustomInputSearchEnabledH", "", "", "SettingsUI")
 	AddToolTip(CustomInputSearchEnabledH, "Custom text input search.")	
 	GuiAddHotkey(TradeOpts.CustomInputSearchHotKey, "x+1 yp-2 w124 h20", "CustomInputSearchHotKey", "CustomInputSearchHotKeyH", "", "", "SettingsUI")
-	AddToolTip(CustomInputSearchHotKeyH, "Press key/key combination.`nDefault: ctrl + i")
+	AddToolTip(CustomInputSearchHotKeyH, "Press key/key combination.`nDefault: alt + i")
 
 	GuiAddCheckbox("Search (poe.trade):", "x657 yp+32 w165 h20 0x0100", TradeOpts.OpenSearchOnPoeTradeEnabled, "OpenSearchOnPoeTradeEnabled", "OpenSearchOnPoeTradeEnabledH", "", "", "SettingsUI")
 	AddToolTip(OpenSearchOnPoeTradeEnabledH, "Open your search on poe.trade instead of showing`na tooltip with results.")
 	GuiAddHotkey(TradeOpts.OpenSearchOnPoeTradeHotKey, "x+1 yp-2 w124 h20", "OpenSearchOnPoeTradeHotKey", "OpenSearchOnPoeTradeHotKeyH", "", "", "SettingsUI")
-	AddToolTip(OpenSearchOnPoeTradeHotKeyH, "Press key/key combination.`nDefault: ctrl + q")
+	AddToolTip(OpenSearchOnPoeTradeHotKeyH, "Press key/key combination.`nDefault: alt + q")
 
 	GuiAddCheckbox("Search (poeapp.com):", "x657 yp+32 w165 h20 0x0100", TradeOpts.OpenSearchOnPoEAppEnabled, "OpenSearchOnPoEAppEnabled", "OpenSearchOnPoEAppEnabledH", "", "", "SettingsUI")
 	AddToolTip(OpenSearchOnPoEAppEnabledH, "Open your search on poeapp.com instead of showing`na tooltip with results.")
 	GuiAddHotkey(TradeOpts.OpenSearchOnPoEAppHotKey, "x+1 yp-2 w124 h20", "OpenSearchOnPoEAppHotKey", "OpenSearchOnPoEAppHotKeyH", "", "", "SettingsUI")
-	AddToolTip(OpenSearchOnPoEAppHotKeyH, "Press key/key combination.`nDefault: ctrl + shift + q")
+	AddToolTip(OpenSearchOnPoEAppHotKeyH, "Press key/key combination.`nDefault: alt + shift + q")
 
 	GuiAddCheckbox("Open Item (Wiki):", "x657 yp+32 w165 h20 0x0100", TradeOpts.OpenWikiEnabled, "OpenWikiEnabled", "OpenWikiEnabledH", "", "", "SettingsUI")
 	AddToolTip(OpenWikiEnabledH, "Open your items page on the PoE-Wiki.")
 	GuiAddHotkey(TradeOpts.OpenWikiHotKey, "x+1 yp-2 w124 h20", "OpenWikiHotKey", "OpenWikiHotKeyH", "", "", "SettingsUI")
-	AddToolTip(OpenWikiHotKeyH, "Press key/key combination.`nDefault: ctrl + w")
+	AddToolTip(OpenWikiHotKeyH, "Press key/key combination.`nDefault: alt + w")
 
 	GuiAddCheckbox("Show Item Age:", "x657 yp+32 w165 h20 0x010", TradeOpts.ShowItemAgeEnabled, "ShowItemAgeEnabled", "ShowItemAgeEnabledH", "", "", "SettingsUI")
 	AddToolTip(ShowItemAgeEnabledH, "Checks your item's age.")
 	GuiAddHotkey(TradeOpts.ShowItemAgeHotkey, "x+1 yp-2 w124 h20", "ShowItemAgeHotkey", "ShowItemAgeHotkeyH", "", "", "SettingsUI")
-	AddToolTip(ShowItemAgeHotkeyH, "Press key/key combination.`nDefault: ctrl + e")
+	AddToolTip(ShowItemAgeHotkeyH, "Press key/key combination.`nDefault: alt + e")
 	
 	GuiAddCheckbox("Change League:", "x657 yp+32 w165 h20 0x0100", TradeOpts.ChangeLeagueEnabled, "ChangeLeagueEnabled", "ChangeLeagueEnabledH", "", "", "SettingsUI")
 	AddToolTip(ChangeLeagueEnabledH, "Changes the league you're searching for the item in.")
 	GuiAddHotkey(TradeOpts.ChangeLeagueHotkey, "x+1 yp-2 w124 h20", "ChangeLeagueHotkey", "ChangeLeagueHotkeyH", "", "", "SettingsUI")
-	AddToolTip(ChangeLeagueHotkeyH, "Press key/key combination.`nDefault: ctrl + l")
+	AddToolTip(ChangeLeagueHotkeyH, "Press key/key combination.`nDefault: alt + l")
 	
 	GuiAddCheckbox("Get currency ratio note:", "x657 yp+32 w165 h20 0x0100", TradeOpts.SetCurrencyRatioEnabled, "SetCurrencyRatioEnabled", "SetCurrencyRatioEnabledH", "", "", "SettingsUI")
 	AddToolTip(SetCurrencyRatioH, "Copies an item note for premium tabs to your clipboard`nthat creates a valid currency ratio on all trade sites.")
 	GuiAddHotkey(TradeOpts.SetCurrencyRatioHotkey, "x+1 yp-2 w124 h20", "SetCurrencyRatioHotkey", "SetCurrencyRatioHotkeyH", "", "", "SettingsUI")
 	AddToolTip(SetCurrencyRatioHotkeyH, "Press key/key combination.`nDefault: alt + r")
-
-	Gui, SettingsUI:Add, Link, x657 yp+35 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
-	GuiAddButton("Switch", "x759 yp+-15 w90 h23", "TradeSettingsUI_BtnSwitchSets", "", "", "", "SettingsUI")
 	
+	Gui, SettingsUI:Add, Link, x657 yp+35 w210 h20 cBlue BackgroundTrans, <a href="http://www.autohotkey.com/docs/Hotkeys.htm">Hotkey Options</a>
+	If (TradeOpts.Debug) {
+		GuiAddButton("Restore Alternative Keys", "x787 yp+-15 w170 h23", "TradeSettingsUI_BtnRestoreAlternativeHotkeys", "", "", "", "SettingsUI")
+	}
+
 	/* 
 		Cookies
 	*/
@@ -908,18 +917,18 @@ UpdateTradeSettingsUI() {
 	}
 	return
 }
-SwitchHotkeySets() {
-	Global	
-	_hotkeySet := TradeOpts.HotKeySet
+
+RestoreAlternativeHotkeys() {
+	; not available in non-debug mode
+	Global TradeOpts
 
 	for keyName, keyVal in TradeOpts {
-		if (RegExMatch(keyName, "i).*_altHotkey$") and _hotkeySet = 1) {
+		if (RegExMatch(keyName, "i).*_altHotkey$")) {
 			_newKeyName := RegExReplace(keyName, "i)_alt")
-			GuiControl,, %_newKeyName%, %keyVal%		
-		} else if (RegExMatch(keyName, "i).*Hotkey$") and not RegExMatch(keyName, "i).*_altHotkey$") and _hotkeySet = 2) {
-			GuiControl,, %keyName%, %keyVal%		
-		}	
-	}	
+			GuiControl,, %_newKeyName%, %keyVal%
+		}
+	}
+
 	return
 }
 
