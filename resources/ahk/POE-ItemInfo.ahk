@@ -712,7 +712,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 	; Check stats section first as weapons usually have their sub type as first line
 	Loop, Parse, ItemDataStats, `n, `r
 	{
-		If (RegExMatch(A_LoopField, "i)\b((One Handed|Two Handed) (Axe|Sword|Mace)|Sceptre|Staff|Dagger|Claw|Bow|Wand)\b", match))
+		If (RegExMatch(A_LoopField, "i)\b((One Handed|Two Handed) (Axe|Sword|Mace)|Sceptre|Warstaff|Staff|Dagger|Claw|Bow|Wand)\b", match))
 		{
 			BaseType	:= "Weapon"
 			If (RegExMatch(match1, "i)(Sword|Axe|Mace)", subMatch)) {
@@ -720,7 +720,7 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 			} Else {
 				SubType	:= match1
 			}
-			GripType	:= (RegExMatch(match1, "i)\b(Two Handed|Staff|Bow)\b")) ? "2H" : "1H"
+			GripType	:= (RegExMatch(match1, "i)\b(Two Handed|Warstaff|Staff|Bow)\b")) ? "2H" : "1H"
 			return
 		}
 	}
