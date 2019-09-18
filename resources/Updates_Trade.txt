@@ -2,6 +2,7 @@ The following is a list of what has been updated, starting with 1.1.0
 
 2.15.3
 ================================================================================================
+* Changed the default (main) hotkeys from using "ctrl" to using "alt" to prevent conflicts with PoEs new second skillbar hotkeys. This will not change any settings of existing TradeMacro installations.
 * Fixed blighted maps not being parsed correctly.
 * Fixed Warstaves not being parsed correctly and therefore not working with the advanced search.
 * Fixed the "nearby enemies have -x% <element> Resistance" mod not working with the advanced search.
