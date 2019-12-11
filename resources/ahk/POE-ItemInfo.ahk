@@ -384,14 +384,22 @@ class Item_ {
 		This.IsMapFragment	:= False
 		This.IsEssence		:= False
 		This.IsRelic		:= False
+		
 		This.IsElderBase	:= False
 		This.IsShaperBase	:= False
+		This.IsCrusaderBase := False
+		This.IsHunterBase	:= False
+		This.IsWarlordBase	:= False
+		This.IsRedeemerBase	:= False
+		Item.HasInfluence	:= []
+		
 		This.IsSynthesisedBase:= False
 		This.IsFracturedBase:= False
+		
 		This.IsAbyssJewel	:= False
 		This.IsBeast		:= False
 		This.IsHideoutObject:= False
-		This.IsFossil		:= False
+		This.IsFossil		:= False		
 	}
 }
 Global Item := new Item_
@@ -7858,9 +7866,10 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		If (corrMatch) {
 			Item.IsCorrupted := True
 		}
-		RegExMatch(Trim(A_LoopField), "i)^(Elder|Shaper|Synthesised|Fractured) Item$", match)
+		RegExMatch(Trim(A_LoopField), "i)^(Elder|Shaper|Synthesised|Fractured|Crusader|Hunter|Warlord|Redeemer) Item$", match)
 		If (match) {
 			Item["Is" match1 "Base"] := True
+			Item.HasInfluence.push(match1)
 		}
 	}
 	
@@ -8586,7 +8595,7 @@ GetNegativeAffixOffset(Item)
 	{
 		NegativeAffixOffset += 1
 	}
-	If (Item.IsElderBase or Item.IsShaperBase or Item.IsSynthesisedBase or Item.IsFracturedBase)
+	If (Item.IsElderBase or Item.IsShaperBase or Item.IsSynthesisedBase or Item.IsFracturedBase or Item.IsCrusaderBase or Item.IsHunterBase or Item.IsWarlordBase or Item.IsRedeemerBase)
 	{
 		NegativeAffixOffset += 1
 	}
@@ -9867,7 +9876,7 @@ CreateSettingsUI()
 	
 	GuiAddEdit(Opts.AffixColumnSeparator, "xs260 y+7 w40 h20", "AffixColumnSeparator", "", "", "", "SettingsUI")
 	GuiAddText("Affix column separator:", "xs10 yp+3 w170 h20 0x0100", "LblAffixColumnSeparator", "AffixColumnSeparatorH", "", "", "SettingsUI")
-	AddToolTip(AffixColumnSeparatorH, "Select separator (default: 2 spaces) for the \\ spots:`n50% increased Spell�\\50-59 (46)\\75-79 (84)\\T4 P")
+	AddToolTip(AffixColumnSeparatorH, "Select separator (default: 2 spaces) for the \\ spots:`n50% increased Spell…\\50-59 (46)\\75-79 (84)\\T4 P")
 	
 	GuiAddEdit(Opts.DoubleRangeSeparator, "xs260 y+7 w40 h20", "DoubleRangeSeparator", "", "", "", "SettingsUI")
 	GuiAddText("Double range separator:", "xs10 yp+3 w170 h20 0x0100", "LblDoubleRangeSeparator", "DoubleRangeSeparatorH", "", "", "SettingsUI")
@@ -9881,7 +9890,7 @@ CreateSettingsUI()
 	
 	GuiAddEdit(Opts.MultiTierRangeSeparator, "xs260 y+6 w40 h20", "MultiTierRangeSeparator", "", "", "", "SettingsUI")
 	GuiAddText("Multi tier range separator:", "xs10 yp+3 w170 h20 0x0100", "LblMultiTierRangeSeparator", "MultiTierRangeSeparatorH", "", "", "SettingsUI")
-	AddToolTip(MultiTierRangeSeparatorH, "Select separator (default: � ) for a multi tier roll range with uncertainty:`n83% increased Light�   73-85�83-95   102-109 (84)  T1-4 P + T1-6 S`n	                     There--^")
+	AddToolTip(MultiTierRangeSeparatorH, "Select separator (default: … ) for a multi tier roll range with uncertainty:`n83% increased Light…   73-85…83-95   102-109 (84)  T1-4 P + T1-6 S`n	                     There--^")
 	
 	GuiAddEdit(Opts.FontSize, "xs260 y+6 w40 h20 Number", "FontSize", "", "", "", "SettingsUI")
 	GuiAddText("Font Size:", "xs10 yp+3 w180 h20 0x0100", "", "", "", "", "SettingsUI")
@@ -11757,10 +11766,10 @@ SettingsUI_BtnGDIPreviewTooltip:
 		Base Level:    55
 		Max Sockets:    4
 		--------
-		+1 to Level of Socketed Elem�          
-		Increased Critical Strike Ch� 125-150  
+		+1 to Level of Socketed Elem…          
+		Increased Critical Strike Ch… 125-150  
 		Increased Energy Shield       180-250  
-		Increased Mana Cost of Skill�   80-40  
+		Increased Mana Cost of Skill…   80-40  
 		Energy Shield gained on Kill    15-20
 	)
 	
@@ -12361,6 +12370,12 @@ ShowItemFilterFormatting(Item, advanced = false) {
 	search.LinkedSockets := Item.Links
 	search.ShaperItem := Item.IsShaperBase
 	search.ElderItem := Item.IsElderBase
+	
+	search.CrusaderItem := Item.IsCrusaderBase
+	search.HunterItem := Item.IsHunterBase
+	search.WarlordItem := Item.IsWarlordBase
+	search.RedeemerItem := Item.IsRedeemerBase
+	
 	search.FracturedItem := Item.IsFracturedBase
 	search.SynthesisedItem := Item.IsSynthesisedBase
 	search.ItemLevel := Item.Level
@@ -12703,8 +12718,8 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					rules[rules.MaxIndex()].conditions.push(condition)
 				}
 				
-				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|ElderMap|BlightedMap)\s")) {
-					RegExMatch(line, "i)(.*?)\s(.*)", match)		
+				Else If (RegExMatch(line, "i)^.*?(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|ElderMap|BlightedMap|CrusaderItem|HunterItem|WarlordItem|RedeemerItem)\s")) {
+					RegExMatch(line, "i)(.*?)\s(.*)", match)	
 					
 					condition := {}
 					condition.name := Trim(match1)
@@ -12754,7 +12769,7 @@ ParseItemLootFilter(filter, item, parsingNeeded, advanced = false) {
 					}
 				}
 			}
-			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|BlightedMap|ElderMap)", match1)) {
+			Else If (RegExMatch(condition.name, "i)(Identified|Corrupted|ElderItem|SynthesisedItem|FracturedItem|ShaperItem|ShapedMap|BlightedMap|ElderMap|CrusaderItem|HunterItem|WarlordItem|RedeemerItem)", match1)) {
 				If (item[match1] == condition.value) {
 					matchingConditions++
 					matching_rules.push(condition.name)
