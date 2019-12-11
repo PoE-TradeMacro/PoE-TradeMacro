@@ -1261,7 +1261,7 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	/*
 		maps
 		*/
-	If (Item.IsMap) {	
+	If (Item.IsMap) {
 		; add Item.subtype to make sure to only find maps
 		RegExMatch(Item.Name, "i)The Beachhead.*", isHarbingerMap)
 		RegExMatch(Item.SubType, "i)Unknown Map", isUnknownMap)
@@ -1294,14 +1294,15 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			}
 		} Else If (Item.IsUnique and isHarbingerMap) {
 			RequestParams.corrupted := "1"
-			RequestParams.level_min := Item.MapTier
-			RequestParams.level_max := Item.MapTier
 		}
 	
 		If (StrLen(isUnknownMap)) {
 			RequestParams.xbase := Item.BaseName
 			Item.UsedInSearch.type := Item.BaseName
-		}
+		}		
+		
+		RequestParams.level_min := Item.MapTier
+		RequestParams.level_max := Item.MapTier
 		
 		Item.priceHistory := TradeFunc_FindMapHistoryData(Item.SubType, Item.MapTier)
 	}
