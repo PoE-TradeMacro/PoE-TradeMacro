@@ -8129,14 +8129,16 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		Else {
 			ItemDataIndexImplicit := ItemData.IndexLast - GetNegativeAffixOffset(Item)
 		}
-		
+		/*
+			TODO: rework this after 3.9 hits, implicits are now flagged,  not sure about enchantments
+		*/
 		; Check that there is no ":" in the retrieved text = can only be an implicit mod
 		_implicitFound := !InStr(ItemDataParts%ItemDataIndexImplicit%, ":")
 		If (_implicitFound) {
 			tempImplicit	:= ItemDataParts%ItemDataIndexImplicit%
 			Loop, Parse, tempImplicit, `n, `r
 			{
-				Item.Implicit.push(A_LoopField)
+				Item.Implicit.push(RegExReplace(A_LoopField, "i)(.*)\(Implicit\)", "$1"))
 			}
 			Item.hasImplicit := True
 		}
@@ -8147,7 +8149,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			tempImplicit	:= ItemDataParts%_ItemDataIndexImplicit%
 			Loop, Parse, tempImplicit, `n, `r
 			{
-				Item.Enchantment.push(A_LoopField)
+				Item.Enchantment.push(RegExReplace(A_LoopField, "i)(.*)\(Implicit\)", "$1"))
 			}
 			Item.hasImplicit := True
 			Item.hasEnchantment := True
