@@ -5226,7 +5226,7 @@ TradeFunc_AdvancedPriceCheckGui(advItem, Stats, Sockets, Links, UniqueStats = ""
 			Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedSpecialBase Checked, % advItem.specialBase 
 		}		
 	}
-	
+
 	If (Stats.QualityType) {
 		Gui, SelectModsGui:Add, CheckBox, x+15 yp+0 vTradeAdvancedSelectedQualityType, % "Quality min % (" Stats.QualityType "): "
 		Gui, SelectModsGui:Add, Edit    , x+1 yp-3 w30 vTradeAdvancedMinQuality, % Stats.Quality
