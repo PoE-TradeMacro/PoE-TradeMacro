@@ -205,7 +205,6 @@ class Fonts {
 		this.FontSizeUI	:= FontSizeUI
 		this.FixedFont		:= this.CreateFixedFont(this.FontSizeFixed)
 		this.UIFont		:= this.CreateUIFont(this.FontSizeUI)
-		;debugprintarray(this)
 	}
 
 	CreateFixedFont(FontSize_, Options = "")
@@ -323,6 +322,7 @@ class Item_ {
 		This.Name			:= ""
 		This.BaseName		:= ""
 		This.Quality		:= ""
+		This.QualityType	:= ""
 		This.BaseLevel		:= ""
 		This.RarityLevel	:= ""
 		This.BaseType		:= ""
@@ -1321,7 +1321,7 @@ GetItemDataChunk(ItemDataText, MatchWord)
 	}
 }
 
-ParseQuality(ItemDataNamePlate)
+ParseQuality(ItemDataNamePlate, ByRef QualityType)
 {
 	ItemQuality := 0
 	Loop, Parse, ItemDataNamePlate, `n, `r
@@ -1334,9 +1334,10 @@ ParseQuality(ItemDataNamePlate)
 		{
 			Break
 		}
-		IfInString, A_LoopField, Quality:
-		{
-			ItemQuality := RegExReplace(A_LoopField, "Quality: \+(\d+)% .*", "$1")
+		RegExMatch(A_LoopField, "Quality(?: \((.*?)\))?: \+(\d+)% .*", qmatch)
+		If (qmatch)		{			
+			ItemQuality := qmatch2
+			QualityType := qmatch1
 			Break
 		}
 	}
@@ -7911,8 +7912,9 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			Item.IsUnidentified := True
 		}
 	}
-	
-	Item.Quality := ParseQuality(ItemData.Stats)
+
+	Item.Quality := ParseQuality(ItemData.Stats, QualityType)
+	Item.QualityType := QualityType
 	
 	; This function should return the second part of the "Rarity: ..." line
 	; in the case of "Rarity: Unique" it should return "Unique"
@@ -8559,6 +8561,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 		}
 	}
 
+	; parsing end
 	return TT
 }
 
