@@ -11434,7 +11434,7 @@ LookUpAffixes() {
 					url	.= StrLen(shield) ? ",dex_shield" : ""
 				} Else If (es) {
 					url	.= "&an=int_armour"
-					url	.= StrLen(shield) ? ",int_shield" : ""
+					url	.= StrLen(shield) ? ",focus" : ""
 				}
 			}
 			Else If (StrLen(accessory)) {
