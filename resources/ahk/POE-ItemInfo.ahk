@@ -716,7 +716,7 @@ CheckRarityLevel(RarityString)
 	return 0 ; unknown rarity. shouldn't happen!
 }
 
-ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, ByRef GripType,  RarityLevel)
+ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, ByRef GripType, RarityLevel, IsMetamorphSample)
 {
 	; Grip type only matters for weapons at this point. For all others it will be 'None'.
 	; Note that shields are armour and not weapons, they are not 1H.
@@ -805,6 +805,13 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 		If (RegExMatch(LoopField, "i)(Murderous|Hypnotic|Searching|Ghastly) Eye Jewel", match)) {
 			BaseType = Jewel
 			SubType := match1 " Eye Jewel"
+			return
+		}
+		
+		; Metamorph samples
+		If (IsMetamorphSample and RegExMatch(Loopfield, "i)(Eye|Liver|Heart|Lung|Brain)$", match)) {
+			BaseType := "Metamorph"
+			SubType := "Metamorph " match1
 			return
 		}
 		
@@ -8112,7 +8119,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 				ItemLevelWord	:= "Item Level:"	
 			}			
 			If (Not Item.IsBeast) {
-				ParseItemType(ItemData.Stats, ItemData.NamePlate, ItemBaseType, ItemSubType, ItemGripType, RarityLevel)
+				ParseItemType(ItemData.Stats, ItemData.NamePlate, ItemBaseType, ItemSubType, ItemGripType, RarityLevel, Item.IsMetamorphSample)
 				Item.BaseType	:= ItemBaseType
 				Item.SubType	:= ItemSubType
 				Item.GripType	:= ItemGripType
@@ -8230,7 +8237,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	}
 	
 	ItemData.Stats := ItemDataParts2
-	
+
 	If (Item.IsFlask)
 	{
 		ParseFlaskAffixes(ItemData.Affixes)
@@ -8646,7 +8653,6 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	}
 
 	; parsing end
-	;debugprintarray([item, itemdata])
 	return TT
 }
 
