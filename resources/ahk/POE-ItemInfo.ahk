@@ -95,6 +95,9 @@ Globals.Set("CurrentItemFilter", "")
 /*
 */
 
+; Parse metamorph data
+global MetamorphData := { "organToMap" : ReadJSONDataFromFile(A_ScriptDir "\data\metamorph_mapToOrgan.json", "mapToOrgan"), "mapToOrgan" : ReadJSONDataFromFile(A_ScriptDir "\data\metamorph_organToMap.json", "organToMap")}
+
 class UserOptions {	
 	ScanUI()
 	{
