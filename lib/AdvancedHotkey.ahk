@@ -58,28 +58,28 @@ return
 
 /*
 #############################################################################
-################################ Funtions ########################################
+################################ Functions ########################################
 #############################################################################
 
 
 ************************************************** Remarks: **************************************************
--It would have been to hard (and to messy) to compact everything into a single funtion, so we have a few globals.
+-It would have been to hard (and to messy) to compact everything into a single function, so we have a few globals.
 	All the globals (and all the subroutines) start with "Hotkey_" though, so this shouldn't be a problem
 -Both the keyboard and mouse hook will be installed 
--"Critical" has to be turned off for the thread that called the funtion, to allow the threads in the funtion to run.
- This could cause problems obviously, although turning Critical back on after calling the funtion should work okay in most cases
--When the user clicks "Submit", the funtion will create the hotkey (If non-blank) and check ErrorLevel (and If ErrorLevel <> 0 
+-"Critical" has to be turned off for the thread that called the function, to allow the threads in the function to run.
+ This could cause problems obviously, although turning Critical back on after calling the function should work okay in most cases
+-When the user clicks "Submit", the function will create the hotkey (If non-blank) and check ErrorLevel (and If ErrorLevel <> 0 
 	display a Msgbox saying the hotkey is invalid and asking to notify the author). This way you shouldn't have to worry about 
   invalid hotkeys yourself.
--You can easily change the default color and font by editing the default values right at the top of the funtion.
+-You can easily change the default color and font by editing the default values right at the top of the function.
 	Should be easy to spot.
--Also, You can easily change the default behavior by changing the Options param right at the top of the funtion
+-Also, You can easily change the default behavior by changing the Options param right at the top of the function
 	(for instance: Options = %Options% +Default1 -Mouse). You can also edit the keyList of course.
 
 
-########################## The main funtion ############################
+########################## The main function ############################
 
-Note: The following funtions must all be present (they are included here, but I thought 
+Note: The following functions must all be present (they are included here, but I thought 
         I had better mention it):
         
 Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
@@ -104,12 +104,12 @@ i.e. "-~-*+Default2" is valid. -/+ are NOT optional, though. I.e. "Owner3" is in
 +Owner*: Sets the owner. Default is A_Gui, or 1 If A_Gui is blank (or none If Gui1 doesn't exist)
 -Owner: No owner
 -Modal: The dialogue will be owned, but not modal
-+ReturnKeynames: Return "Control+Alt+c" instead of "^!c" etc. These can later be converted by calling the KeysToSymbols(s) funtion
++ReturnKeynames: Return "Control+Alt+c" instead of "^!c" etc. These can later be converted by calling the KeysToSymbols(s) function
 +Tooltips: Gives a little info about "~", "*" and "UP" (basically copied from the docs)
 */
  
 
-;this funtion will Return a (hopfully) valid key combination, either
+;this function will Return a (hopfully) valid key combination, either
 ;as symbols (^!+..) or as keynames (Control+Alt+Shift+Space...)
 Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 {
@@ -117,7 +117,7 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 				,Hotkey_ButtonSubmit,Hotkey_ButtonCancel,Hotkey_DefaultButton,Hotkey_keyList,Hotkey_modList_left_right
 				,Hotkey_modList_normal,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
 
-	;these are all cleared again before the funtion Returns, to be on the safe side
+	;these are all cleared again before the function Returns, to be on the safe side
 	HotKey_globals = Hotkey_LeftRightMods,Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_Hotkey1,Hotkey_Hotkey2
 				,Hotkey_ButtonSubmit,Hotkey_ButtonCancel,Hotkey_DefaultButton,Hotkey_keyList,Hotkey_modList_left_right
 				,Hotkey_modList_normal,Hotkey_JoystickButtons,Hotkey_OptionsGlobal,Hotkey_numGui
@@ -225,7 +225,7 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 		Hotkey_modList_left_right = Control,Alt,LWin,RWin,Shift
 	Hotkey_modList_normal = Control,Alt,LWin,RWin,Shift
 
-	;these will be turned into hotkeys to override their native funtion
+	;these will be turned into hotkeys to override their native function
 	;(we don't want calculator to launch when the user presses Launch_App1 etc...)
 	turnIntoHotkeyList =
 	(Join
@@ -339,7 +339,7 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 		title = %defTitle%
 
 	;turn these keys into a hotkeys to try
-	;and override their native funtion 
+	;and override their native function 
 	Hotkey, IfWinActive, ahk_id%GuiID%
 	Loop, Parse, turnIntoHotkeyList, |
 				Hotkey, %a_loopfield%, Return, UseErrorLevel
@@ -636,9 +636,9 @@ Hotkey(Options="",Prompt="",BottomInfo="",Title="",GuiNumber=77)
 	Return
 }
 
-;###################### Other funtions ######################
+;###################### Other functions ######################
 
-;this has to bee done in three different places, so it's a seperate funtion
+;this has to bee done in three different places, so it's a seperate function
 ;it checks which checkboxes are checked ... ugh ... and adds the symbols in the right places
 ;note that we can't have any of the symbols with Joystick buttons, and that " * " and "&"
 ;can't be present in the same hotkey
@@ -679,9 +679,9 @@ AddPrefixSymbols(keys)
 
 ;________________________________________________________
 
-;this funtion turns, say, "Control+Alt+Win+Space" into "^!#Space" etc.
+;this function turns, say, "Control+Alt+Win+Space" into "^!#Space" etc.
 ;this is handy since when you use the "+ReturnKeynames" option, you can 
-;convert to hotkey symbols later using this funtion
+;convert to hotkey symbols later using this function
 KeysToSymbols(s)
 {
 	global Hotkey_modList_left_right,Hotkey_modList_normal,Hotkey_LeftRightMods,Hotkey_numGui
@@ -801,7 +801,7 @@ Keys()
 
 ;_______________________________________________________________
 
-;this funtion gets called everytime the user clicks one of the checkboxes
+;this function gets called everytime the user clicks one of the checkboxes
 ToggleOperator(p)
 {
 	global Hotkey_Tilde,Hotkey_Wildcard,Hotkey_UP,Hotkey_JoystickButtons,Hotkey_numGui
@@ -892,9 +892,9 @@ ToggleOperator(p)
 
 ;_____________________________________________________
 
-;this funtion checks If a) it's some kind of a sensible hotkey,
+;this function checks If a) it's some kind of a sensible hotkey,
 ;i.e not Ctrl+Alt+, ~ UP, etc., and b) that it's a valid hotkey
-;If it's not, the funtion Returns -1, Else it Returns 1
+;If it's not, the function Returns -1, Else it Returns 1
 IsHotkeyValid(k)
 {
 	If k =
