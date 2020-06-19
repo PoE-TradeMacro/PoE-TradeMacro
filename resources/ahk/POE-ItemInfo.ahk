@@ -8057,7 +8057,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsFossil	:= (RegExMatch(ItemData.NamePlate, "i)Fossil$")) ? true : false
 	Item.IsScarab	:= (RegExMatch(ItemData.NamePlate, "i)Scarab$")) ? true : false
 	
-	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key", "Breachstone", "Divine Vessel"]
+	regex := ["^Sacrifice At", "^Fragment of", "^Mortal ", "^Offering to ", "'s Key$", "Ancient Reliquary Key", "Timeworn Reliquary Key", "Breachstone", "Divine Vessel", "^Simulacrum"]
 	For key, val in regex {
 		If (RegExMatch(Item.Name, "i)" val "")) {
 			Item.IsMapFragment := True
@@ -10994,9 +10994,9 @@ HighlightItems(broadTerms = false, leaveSearchField = true, focusHideoutFilter =
 				}
 			}
 			; offerings / sacrifice and mortal fragments / guardian fragments / council keys / breachstones / reliquary keys
-			Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone") or RegExMatch(Item.Name, "i)Reliquary Key")) {
+			Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone") or RegExMatch(Item.Name, "i)Reliquary Key") or RegExMatch(Item.Name, "i)Simulacrum")) {
 				If (broadTerms) {
-					tmpName := RegExReplace(Item.Name, "i)(Sacrifice At).*|(Fragment of).*|(Mortal).*|.*('s Key)|.*(Breachstone)|(Reliquary Key)", "$1$2$3$4$5$6")
+					tmpName := RegExReplace(Item.Name, "i)(Sacrifice At).*|(Fragment of).*|(Mortal).*|.*('s Key)|.*(Breachstone)|(Reliquary Key)|(Simulacrum)", "$1$2$3$4$5$6$7")
 					terms.push(tmpName)
 				} Else {
 					terms.push(Item.Name)
@@ -11282,7 +11282,7 @@ AntiquaryGetType(Item) {
 			return "Map"	
 		}		
 	}
-	If (RegExMatch(Item.Name, "(Sacrifice|Mortal|Fragment).*|Offering to the Goddess|Divine Vesse|.*(Breachstone|s Key)")) {
+	If (RegExMatch(Item.Name, "(Sacrifice|Mortal|Fragment).*|Offering to the Goddess|Divine Vessel|Simulacrum|.*(Breachstone|s Key)")) {
 		return "Fragment"
 	}
 	If (Item.IsCurrency) {

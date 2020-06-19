@@ -181,8 +181,8 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 				UrlAffix := Item.SubType
 			} Else If (Item.IsMap) {
 				UrlPage := "area.php?n="				
-				UrlAffix := RegExMatch(Item.SubType, "i)Unknown Map") ? Item.BaseName : Item.SubType
-			} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
+				UrlAffix := RegExMatch(Item.SubType, "i)Unknown Map") ? Item.BaseName : Item.SubType			
+			} Else If (RegExMatch(Item.Name, "i)Sacrifice At|Fragment of|Mortal |Offering to |'s Key|Breachstone|Simulacrum")) {
 				UrlAffix := Item.Name
 			} Else {
 				UrlAffix := Item.BaseName
@@ -195,7 +195,7 @@ TradeFunc_OpenWikiHotkey(priceCheckTest = false, itemData = "") {
 				UrlAffix := Item.Name
 			} Else If (Item.IsFlask or Item.IsMap) {
 				UrlAffix := Item.SubType
-			} Else If (RegExMatch(Item.Name, "i)Sacrifice At") or RegExMatch(Item.Name, "i)Fragment of") or RegExMatch(Item.Name, "i)Mortal ") or RegExMatch(Item.Name, "i)Offering to ") or RegExMatch(Item.Name, "i)'s Key") or RegExMatch(Item.Name, "i)Breachstone")) {
+			} Else If (RegExMatch(Item.Name, "i)Sacrifice At|Fragment of|Mortal |Offering to |'s Key|Breachstone|Simulacrum")) {
 				UrlAffix := Item.Name
 			} Else {
 				UrlAffix := Item.BaseName
