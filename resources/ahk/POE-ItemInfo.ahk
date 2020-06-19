@@ -4043,7 +4043,7 @@ ParseAffixes(ItemDataAffixes, Item)
 		; --- PRE-PASS ---
 		Loop, Parse, ItemDataChunk, `n, `r
 		{			
-			LoopField := RegExReplace(Trim(A_LoopField), "i) \(fractured|crafted\)$")
+			LoopField := RegExReplace(Trim(A_LoopField), "i) \(fractured|crafted|enchant\)$")
 			If StrLen(LoopField) = 0
 			{
 				Continue ; Not interested in blank lines
@@ -4298,7 +4298,7 @@ ParseAffixes(ItemDataAffixes, Item)
 		; --- PRE-PASS ---
 		Loop, Parse, ItemDataChunk, `n, `r
 		{
-			LoopField := RegExReplace(Trim(A_LoopField), "i) \(fractured|crafted\)$")
+			LoopField := RegExReplace(Trim(A_LoopField), "i) \(fractured|crafted|enchant\)$")
 			If StrLen(LoopField) = 0
 			{
 				Continue ; Not interested in blank lines
@@ -8748,10 +8748,10 @@ ModStringToObject(string, isImplicit) {
 	StringReplace, val, val, `n,, All
 	values := []
 
-	RegExMatch(val, "i) \((fractured|crafted)\)$", sType)
+	RegExMatch(val, "i) \((fractured|crafted|enchant)\)$", sType)
 	spawnType := sType1
 	
-	val := RegExReplace(val, "i) \((fractured|crafted)\)$")
+	val := RegExReplace(val, "i) \((fractured|crafted|enchant)\)$")
 
 	; Collect all numeric values in the mod-string
 	Pos        := 0
@@ -8947,12 +8947,12 @@ CreatePseudoMods(mods, returnAllMods := False) {
 	; Note that at this point combined mods/attributes have already been separated into two mods
 	; like '+ x % to fire and lightning resist' would be '+ x % to fire resist' AND '+ x % to lightning resist' as 2 different mods
 	For key, mod in mods {
-		RegExMatch(mod.name, "i) \((fractured|crafted)\)$", spawnType)
+		RegExMatch(mod.name, "i) \((fractured|crafted|enchant)\)$", spawnType)
 		If (StrLen(spawnType1)) {
 			mod.spawnType := spawnType1	
 		}		
 		
-		mod.name := RegExReplace(mod.name, "i) \((fractured|crafted)\)$")
+		mod.name := RegExReplace(mod.name, "i) \((fractured|crafted|enchant)\)$")
 		
 		; ### Base stats
 		; life and mana

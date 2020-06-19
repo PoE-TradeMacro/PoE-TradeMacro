@@ -3654,8 +3654,8 @@ TradeFunc_RemoveAlternativeVersionsMods(_item, Affixes) {
 		negativeValue := false
 		spawnType := ""
 		For key, val in Affixes {
-			RegExMatch(Trim(val), "i)\((fractured|crafted)\)", sType)
-			val := RegExReplace(Trim(val), "i)\((fractured|crafted)\)")
+			RegExMatch(Trim(val), "i)\((fractured|crafted|enchant)\)", sType)
+			val := RegExReplace(Trim(val), "i)\((fractured|crafted|enchant)\)")
 
 			; remove negative sign also			
 			t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))
@@ -3697,7 +3697,7 @@ TradeFunc_RemoveAlternativeVersionsMods(_item, Affixes) {
 	}
 
 	For key, val in Affixes {
-		val := RegExReplace(Trim(val), "i)\((fractured|crafted)\)")
+		val := RegExReplace(Trim(val), "i)\((fractured|crafted|enchant)\)")
 		
 		t := TradeUtils.CleanUp(RegExReplace(val, "i)-?[\d\.]+", "#"))		
 		modFound := false
@@ -4169,7 +4169,7 @@ TradeFunc_GetModValueGivenPoeTradeMod(itemModifiers, poeTradeMod) {
 		{
 			Continue ; Not interested in blank lines
 		}		
-		LoopField := Trim(RegExReplace(A_LoopField, "i)\((fractured|crafted)\)"))
+		LoopField := Trim(RegExReplace(A_LoopField, "i)\((fractured|crafted|enchant)\)"))
 		
 		ModStr := ""
 		CurrValues := []
