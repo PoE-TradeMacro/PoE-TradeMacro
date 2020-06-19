@@ -454,9 +454,11 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 	Corruption  := false
 
 	If (Item.hasImplicit or Item.hasEnchantment) {
-		Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
-		If (StrLen(Enchantment) and Item.hasImplicit and not Item.hasEnchantment) {
-			Item.hasImplicit := false	; implicit was assumed but is actually an enchantment
+		If (not Item.IsClusterJewel) {			
+			Enchantment := TradeFunc_GetEnchantment(Item, Item.SubType)
+			If (StrLen(Enchantment) and Item.hasImplicit and not Item.hasEnchantment) {
+				Item.hasImplicit := false	; implicit was assumed but is actually an enchantment
+			}		
 		}
 		Corruption  := Item.IsCorrupted ? TradeFunc_GetCorruption(Item) : false
 	}
@@ -477,6 +479,18 @@ TradeFunc_Main(openSearchInBrowser = false, isAdvancedPriceCheck = false, isAdva
 			Item.BeastData.GenusMod.name		:= RegExReplace(Item.BeastData.GenusMod.name_orig, "i)\d+", "#")
 			Item.BeastData.GenusMod.param		:= TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], Item.BeastData.GenusMod)
 		}
+		/*
+		If (Item.IsClusterJewel) {
+			For key, val in Item.Enchantments {
+				Item.BeastData.GenusMod 			:= {}
+				Item.BeastData.GenusMod.name_orig	:= "(beast) Genus: " Item.BeastData.Genus
+				Item.BeastData.GenusMod.name		:= RegExReplace(Item.BeastData.GenusMod.name_orig, "i)\d+", "#")
+				Item.BeastData.GenusMod.param		:= TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], Item.BeastData.GenusMod)
+				Item.BeastData.GenusMod.param		:= TradeFunc_FindInModGroup(TradeGlobals.Get("ModsData")["bestiary"], {"name_orig": Item[Enchantment][key], "name" : RegExReplace(Item[Enchantment][key], "i)\d+", "#") })	
+			} 
+			
+		}
+		*/
 		
 		preparedItem  := TradeFunc_PrepareNonUniqueItemMods(ItemData.Affixes, Item.Implicit, Item.RarityLevel, Enchantment, Corruption, Item.IsMap, Item.IsBeast, Item.IsSynthesisedBase)
 		preparedItem.maxSockets	:= Item.maxSockets
@@ -3913,6 +3927,9 @@ TradeFunc_GetItemsPoeTradeMods(_item, isMap = false) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["implicit"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
+				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["cluster jewels"], _item.mods[k])
+			}
+			If (StrLen(_item.mods[k]["param"]) < 1 and not isMap) {
 				_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["enchantments"], _item.mods[k])
 			}
 			If (StrLen(_item.mods[k]["param"]) < 1) {
@@ -3970,6 +3987,9 @@ TradeFunc_GetItemsPoeTradeUniqueMods(_item) {
 		}
 		If (StrLen(_item.mods[k]["param"]) < 1) {
 			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["synthesised"], _item.mods[k])
+		}
+		If (StrLen(_item.mods[k]["param"]) < 1) {
+			_item.mods[k]["param"] := TradeFunc_FindInModGroup(mods["cluster jewels"], _item.mods[k])
 		}
 		
 		; Handle special mods like "Has # Abyssal Sockets" which technically has no rolls but different mod variants.

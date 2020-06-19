@@ -401,6 +401,7 @@ class Item_ {
 		This.IsFracturedBase:= False
 		
 		This.IsAbyssJewel	:= False
+		This.IsClusterJewel	:= False
 		This.IsBeast		:= False
 		This.IsHideoutObject:= False
 		This.IsFossil		:= False		
@@ -805,6 +806,12 @@ ParseItemType(ItemDataStats, ItemDataNamePlate, ByRef BaseType, ByRef SubType, B
 		If (RegExMatch(LoopField, "i)(Murderous|Hypnotic|Searching|Ghastly) Eye Jewel", match)) {
 			BaseType = Jewel
 			SubType := match1 " Eye Jewel"
+			return
+		}
+		; Jewels
+		If (RegExMatch(LoopField, "i)(Small|Medium|Large) Cluster Jewel", match)) {
+			BaseType = Jewel
+			SubType := match1 " Cluster Jewel"
 			return
 		}
 		
@@ -1835,7 +1842,7 @@ MakeAffixDetailLine(AffixLine, AffixType, ValueRange, Tier, CountAffixTotals=Tru
 		}
 	}
 	
-	If (Item.IsJewel and not Item.IsAbyssJewel)
+	If (Item.IsJewel and not (Item.IsAbyssJewel or Item.IsClusterJewel))
 	{
 		TierAndType := AffixTypeShort(AffixType)	; Discard tier since it's always T1
 		
@@ -2002,7 +2009,7 @@ AssembleAffixDetails()
 			}
 		}
 		
-		If ( not ((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask) and Opts.ShowHeaderForAffixOverview)
+		If ( not ((Item.IsJewel and not (Item.IsAbyssJewel or Item.IsClusterJewel)) or Item.IsFlask) and Opts.ShowHeaderForAffixOverview)
 		{
 			; Add a header line above the affix infos.			
 			ProcessedLine := "`n"
@@ -2031,7 +2038,7 @@ AssembleAffixDetails()
 					AffixText := StrPad(AffixText, round( (TextLineWidth + StrLen(AffixText))/2 ), "left")	; align mid
 				}
 				
-				If ((Item.IsJewel and not Item.IsAbyssJewel) or Item.IsFlask)
+				If ((Item.IsJewel and (Item.IsAbyssJewel or Item.IsClusterJewel)) or Item.IsFlask)
 				{
 					If (StrLen(AffixText) > TextLineWidthJewel)
 					{
@@ -8147,6 +8154,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 	Item.IsLeaguestone	:= (Item.BaseType == "Leaguestone")
 	Item.IsJewel		:= (Item.BaseType == "Jewel")
 	Item.IsAbyssJewel	:= (Item.IsJewel and RegExMatch(Item.SubType, "i)(Murderous|Hypnotic|Searching|Ghastly) Eye"))
+	Item.IsClusterJewel	:= (Item.IsJewel and RegExMatch(Item.SubType, "i)(Small|Medium|Large|) Cluster"))
 	Item.IsMirrored	:= (ItemIsMirrored(ItemDataText) and Not Item.IsCurrency)
 	Item.IsEssence		:= Item.IsCurrency and RegExMatch(Item.Name, "i)Essence of |Remnant of Corruption")
 	Item.Note			:= Globals.Get("ItemNote")
@@ -8213,6 +8221,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			TODO: rework this after 3.9 hits, implicits are now flagged,  not sure about enchantments
 		*/
 		; Check that there is no ":" in the retrieved text = can only be an implicit mod
+/*
 		_implicitFound := !InStr(ItemDataParts%ItemDataIndexImplicit%, ":")
 		If (_implicitFound) {
 			tempImplicit	:= ItemDataParts%ItemDataIndexImplicit%
@@ -8223,7 +8232,7 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			Item.hasImplicit := True
 		}
 
-		; Check if there is a second "possible implicit" which means the first one is actually an enchantmet
+		; Check if there is a second "possible implicit" which means the first one is actually an enchantment
 		_ItemDataIndexImplicit := ItemDataIndexImplicit - 1
 		If (_implicitFound and !InStr(ItemDataParts%_ItemDataIndexImplicit%, ":")) {			
 			tempImplicit	:= ItemDataParts%_ItemDataIndexImplicit%
@@ -8234,6 +8243,28 @@ ParseItemData(ItemDataText, ByRef RarityLevel="")
 			Item.hasImplicit := True
 			Item.hasEnchantment := True
 		}
+		*/
+		
+		_ItemDataIndexImplicit := ItemDataIndexImplicit - 1
+		_implicitsArr := [ItemDataParts%ItemDataIndexImplicit%, ItemDataParts%_ItemDataIndexImplicit%]
+
+		For key, imp in _implicitsArr {
+			_implicitFound := RegExMatch(imp, "i)(.*)\(Implicit|Enchant\)")
+			If (_implicitFound) {
+				Loop, Parse, imp, `n, `r
+				{
+					If (RegExMatch(A_LoopField, "i)(.*)\(Enchant\)")) {
+						Item.Enchantment.push(RegExReplace(A_LoopField, "i)(.*)\(Enchant\)", "$1"))
+						Item.hasEnchantment := True
+					}
+					Else {
+						Item.Implicit.push(RegExReplace(A_LoopField, "i)(.*)\(Implicit\)", "$1"))
+						Item.hasImplicit := True
+					}
+				}
+			}
+		}
+		
 	}
 	
 	ItemData.Stats := ItemDataParts2
