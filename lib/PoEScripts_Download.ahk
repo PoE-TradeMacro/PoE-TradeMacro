@@ -132,7 +132,7 @@
 			commandHdr	.= "--connect-timeout " timeout " --max-time " timeout + 15 " "
 		}
 		; get data
-		html	:= StdOutStream(curl """" url """" commandData)
+		html	:= StdOutStream(curl """" url """" commandData,,"UTF-8")
 		
 		;html := ReadConsoleOutputFromFile(curl """" url """" commandData, "commandData") ; alternative function
 		
@@ -147,7 +147,7 @@
 			} Else {
 				commandHdr := curl """" url """" commandHdr
 			}
-			ioHdr := StdOutStream(commandHdr)
+			ioHdr := StdOutStream(commandHdr,,"UTF-8")
 			;ioHrd := ReadConsoleOutputFromFile(commandHdr, "commandHdr") ; alternative function
 		} Else If (skipRetHeaders) {
 			commandHdr := curl """" url """" commandHdr

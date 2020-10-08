@@ -10552,7 +10552,7 @@ RemoveConfig(config = "config.ini")
 	FileDelete, %userDirectory%\%config%
 }
 
-StdOutStream(sCmd, Callback = "") {
+StdOutStream(sCmd, Callback = "", encoding = "CP850") {
 	/*
 		Runs commands in a hidden cmdlet window and returns the output.
 	*/
@@ -10605,7 +10605,7 @@ StdOutStream(sCmd, Callback = "") {
 
 	While DllCall( "ReadFile", UInt,hPipeRead, UInt,&Buffer, UInt,4094, UIntP,nSz, Int,0 ) {
 		tOutput := ( AIC && NumPut( 0, Buffer, nSz, "Char" ) && VarSetCapacity( Buffer,-1 ) )
-				? Buffer : %StrGet%( &Buffer, nSz, "CP850" )
+				? Buffer : %StrGet%( &Buffer, nSz, encoding )
 
 		Isfunc( Callback ) ? %Callback%( tOutput, A_Index ) : sOutput .= tOutput
 	}
