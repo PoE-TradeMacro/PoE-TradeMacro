@@ -7365,7 +7365,12 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 	
 	Loop, Parse, ItemDataChunk, `n, `r
 	{
-		If (A_Index == 1)
+		If (StrLen(A_LoopField) == 0 or A_LoopField == "--------" or A_Index > 4)
+		{
+			return
+		}
+		
+		If (A_Index = 2)
 		{
 			IfNotInString, A_LoopField, Rarity:
 			{
@@ -7376,13 +7381,7 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 				Continue
 			}
 		}
-		
-		If (StrLen(A_LoopField) == 0 or A_LoopField == "--------" or A_Index > 3)
-		{
-			return
-		}
-		
-		If (A_Index = 2)
+		If (A_Index = 3)
 		{
 			If InStr(A_LoopField, ">>")
 			{
@@ -7433,7 +7432,7 @@ ParseItemName(ItemDataChunk, ByRef ItemName, ByRef ItemBaseName, AffixCount = ""
 				}
 			}
 		}
-		If (A_Index = 3)
+		If (A_Index = 4)
 		{
 			ItemBaseName := A_LoopField
 		}
